@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  dw_db:
+    image: postgres:latest
+    restart: always
+    ports:
+      - 5434:5434
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    command: -p 5434
+volumes:
+  pgdata:
