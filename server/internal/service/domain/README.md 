@@ -1,0 +1,5 @@
+This directory is meant for manipulation of struct of models. 
+
+Any changes to a struct, e.g. inputting a user struct value can be found here
+
+NOTE: All functions will be called, there won't be a need to create an interface

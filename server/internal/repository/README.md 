@@ -1,0 +1,5 @@
+This directory is meant to contain changes to the database. 
+
+Anything related to insert, update, delete, read, of the database can be found here. 
+
+NOTE: All functions will be called, there won't be a need to create an interface
