@@ -1,5 +1,13 @@
 version: "3.9"
 services:
+  dw_web: 
+    build:
+      context: ./web
+      dockerfile: ../build/web.dockerfile
+    ports: 
+      - 3000:3000
+    volumes: 
+      - ./web:/app
   dw_db:
     image: postgres:latest
     restart: always
