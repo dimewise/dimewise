@@ -2,6 +2,7 @@ default: help
 
 BINARY_NAME=dimewise
 DATABASE_URL ?= postgresql://postgres@localhost:5434/dimewise?sslmode=disable
+ENV_FILE=.env
 
 .PHONY: build run clean help
 deps: 
@@ -56,8 +57,3 @@ docker/down: docker-deps
 docker/rebuild: docker-deps  
 	@docker compose down 
 	@docker compose up -d --build 
-
-
-	
-
-
