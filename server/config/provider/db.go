@@ -6,7 +6,7 @@ import (
 )
 
 func NewDBProvider(env *EnvProvider) *sql.DB {
-	db, err := sql.Open("postgres", env.DatabaseURL)
+	db, err := sql.Open("postgres", env.DB_URL)
 	if err != nil {
 		log.Fatal("Unable to connect to database")
 	}
