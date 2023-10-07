@@ -1,8 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
 import "./index.css";
 import { Auth0Provider } from "@auth0/auth0-react";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { HomePage } from "./routes/home/index.tsx";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <HomePage />,
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Auth0Provider
@@ -14,7 +22,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     }}
   >
     <React.StrictMode>
-      <App />
+      <RouterProvider router={router} />
     </React.StrictMode>
   </Auth0Provider>
 );
