@@ -18,8 +18,7 @@ function App() {
   console.log("Authenticated?: ", isAuthenticated);
 
   return (
-    <div className="flex flex-col items-center justify-center text-black ">
-      We testing out the login
+    <div className="w-full h-screen flex flex-col items-center justify-center bg-background font-go text-secondary">
       <div>
         {isAuthenticated ? (
           <>
@@ -33,8 +32,11 @@ function App() {
             <button onClick={() => showApiCall()}>show api call</button>
           </>
         ) : (
-          <button className="bg-blue-500" onClick={() => loginWithRedirect()}>
-            login
+          <button
+            className="bg-foreground px-7 py-3 rounded-lg"
+            onClick={() => loginWithRedirect()}
+          >
+            Login
           </button>
         )}
       </div>
