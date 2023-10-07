@@ -2,22 +2,23 @@ package config
 
 import (
 	"database/sql"
-	"path"
-	"runtime"
+	"log"
 
 	"github.com/teoyi/dimewise/config/provider"
 )
 
 type App struct {
-	env     *provider.EnvProvider
-	db      *sql.DB
-	rootDir string
+	env *provider.EnvProvider
+	db  *sql.DB
 }
 
 func NewApp() *App {
 	a := &App{}
-	a.env = provider.NewEnvProvider()
-	a.setRootDir()
+	env, err := provider.NewEnvProvider()
+	if err != nil {
+		log.Fatalf("error setting environment variables: %v", err)
+	}
+	a.env = env
 
 	return a
 
@@ -25,7 +26,11 @@ func NewApp() *App {
 
 func (a *App) EnvVars() *provider.EnvProvider {
 	if a.env == nil {
-		a.env = provider.NewEnvProvider()
+		env, err := provider.NewEnvProvider()
+		if err != nil {
+			log.Fatalf("error setting environment variables: %v", err)
+		}
+		a.env = env
 	}
 	return a.env
 }
@@ -35,9 +40,4 @@ func (a *App) DB() *sql.DB {
 		a.db = provider.NewDBProvider(a.env)
 	}
 	return a.db
-}
-
-func (a *App) setRootDir() {
-	_, b, _, _ := runtime.Caller(0)
-	a.rootDir = path.Join(path.Dir(b), "..")
 }
