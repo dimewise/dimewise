@@ -1,8 +1,15 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { AppButton } from "../../components/AppButton";
+import AppButton from "../../components/AppButton";
+import { Navigate } from "react-router-dom";
 
-export function LoginPage() {
-  const { loginWithRedirect } = useAuth0();
+const LoginPage: React.FC = () => {
+  const { loginWithRedirect, isAuthenticated } = useAuth0();
+
+  console.log("login", isAuthenticated);
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace={true} />;
+  }
+
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center font-go bg-background text-secondary">
       <h1 className="text-6xl pb-4">Dimewise</h1>
@@ -10,4 +17,6 @@ export function LoginPage() {
       <AppButton label="Login" onClick={() => loginWithRedirect()} />
     </div>
   );
-}
+};
+
+export default LoginPage;

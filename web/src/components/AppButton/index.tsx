@@ -3,10 +3,15 @@ interface AppButtonProps {
   onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export function AppButton({ label, onClick }: AppButtonProps) {
+const AppButton: React.FC<AppButtonProps> = ({
+  label,
+  onClick,
+}: AppButtonProps) => {
   return (
     <button className="bg-foreground px-7 py-3 rounded-lg" onClick={onClick}>
       {label}
     </button>
   );
-}
+};
+
+export default AppButton;
