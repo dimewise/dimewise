@@ -8,7 +8,7 @@ const AppButton: React.FC<AppButtonProps> = ({
   onClick,
 }: AppButtonProps) => {
   return (
-    <button className="bg-foreground px-7 py-3 rounded-lg" onClick={onClick}>
+    <button className="btn btn-primary" onClick={onClick}>
       {label}
     </button>
   );
