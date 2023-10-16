@@ -1,8 +1,8 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { IconContext } from "react-icons";
-import { BiLogOut, BiSolidHome } from "react-icons/bi";
-import { MdBarChart, MdCategory, MdHistory, MdHome, MdSettings } from "react-icons/md";
+import { MdAdd, MdBarChart, MdCategory, MdHistory, MdHome, MdSettings } from "react-icons/md";
 import LinkButton from "./components/LinkButton";
+import CreateTransactionModal from "./components/CreateTransactionModal";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -26,6 +26,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }: AppLayoutProps) => {
             <MdBarChart />
           </IconContext.Provider>
         </LinkButton>
+        <div
+          onClick={() => {
+            if (document) {
+              (document.getElementById("create_transaction_modal") as HTMLFormElement).showModal();
+            }
+          }}
+        >
+          <IconContext.Provider value={{ size: "25" }}>
+            <MdAdd />
+          </IconContext.Provider>
+          <CreateTransactionModal />
+        </div>
         <LinkButton to={"/history"}>
           <IconContext.Provider value={{ size: "25" }}>
             <MdHistory />
