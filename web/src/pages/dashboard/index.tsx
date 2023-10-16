@@ -14,25 +14,14 @@ const Dashboard: React.FC = () => {
       <div className="w-full flex flex-col gap-5 justify-center items-center">
         <div className="w-full flex flex-row justify-between items-center text-sm mt-5 mb-10">
           <p>October 2023</p>
-          <div className="flex gap-5">
+          <div className="flex gap-2">
             <div>
               <span className="countdown font-mono ">
                 <span style={{ "--value": 15 }}></span>
               </span>
               days
             </div>
-            <div>
-              <span className="countdown font-mono ">
-                <span style={{ "--value": 10 }}></span>
-              </span>
-              hours
-            </div>
-            <div>
-              <span className="countdown font-mono ">
-                <span style={{ "--value": 24 }}></span>
-              </span>
-              min
-            </div>
+            <div>remaining</div>
           </div>
         </div>
         <div className="radial-progress text-accent mb-10" style={{ "--value": "70", "--size": "12rem", "--thickness": "5px" }}>
