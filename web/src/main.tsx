@@ -9,6 +9,7 @@ import AuthWrapper from "./components/AuthWrapper/index.tsx";
 import Categories from "./pages/settings/index.tsx";
 import History from "./pages/history/index.tsx";
 import Settings from "./pages/settings/index.tsx";
+import Statistics from "./pages/statistics/index.tsx";
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,14 @@ const router = createBrowserRouter([
       </AuthWrapper>
     ),
   },
+  {
+    path: "/statistics",
+    element: (
+      <AuthWrapper>
+        <Statistics />
+      </AuthWrapper>
+    )
+  }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

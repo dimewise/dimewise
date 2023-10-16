@@ -1,7 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { IconContext } from "react-icons";
 import { BiLogOut, BiSolidHome } from "react-icons/bi";
-import { MdCategory, MdHistory, MdSettings } from "react-icons/md";
+import { MdBarChart, MdCategory, MdHistory, MdHome, MdSettings } from "react-icons/md";
 import LinkButton from "./components/LinkButton";
 
 interface AppLayoutProps {
@@ -18,7 +18,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }: AppLayoutProps) => {
       <div className="btm-nav">
         <LinkButton to={"/dashboard"}>
           <IconContext.Provider value={{ size: "25" }}>
-            <BiSolidHome />
+            <MdHome />
+          </IconContext.Provider>
+        </LinkButton>
+        <LinkButton to={"/statistics"}>
+          <IconContext.Provider value={{ size: "25" }}>
+            <MdBarChart />
           </IconContext.Provider>
         </LinkButton>
         <LinkButton to={"/history"}>
