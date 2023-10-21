@@ -1,5 +1,4 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import AppButton from "../../components/AppButton";
 import { Navigate } from "react-router-dom";
 import AppLayout from "../../components/AppLayout";
 

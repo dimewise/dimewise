@@ -47,9 +47,15 @@ const CreateTransactionModal: React.FC = () => {
             {errors.amount && <span className="text-error">This field is required</span>}
           </div>
           <div className="modal-action flex items-center justify-center gap-5">
-            <form method="dialog">
+            <div
+              onClick={() => {
+                if (document) {
+                  (document.getElementById("create_transaction_modal") as HTMLFormElement).showModal();
+                }
+              }}
+            >
               <button className="btn">Close</button>
-            </form>
+            </div>
             <input className="btn btn-primary" type="submit" value="submit" />
           </div>
         </form>
