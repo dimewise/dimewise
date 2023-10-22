@@ -1,4 +1,3 @@
-import { NavigationMenuLink, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import React from "react";
 import { Link, Path, useMatch, useResolvedPath } from "react-router-dom";
 
@@ -15,10 +14,8 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({
   const isActive = useMatch({ path: resolvedPath.pathname, end: true });
 
   return (
-    <Link to={to} className={isActive ? "active" : ""}>
-      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-        {children}
-      </NavigationMenuLink>
+    <Link to={to} className={`text-sm transition-colors hover:text-primary ${isActive ? "font-bold" : "text-muted-foreground font-medium"}`}>
+      {children}
     </Link>
   );
 };

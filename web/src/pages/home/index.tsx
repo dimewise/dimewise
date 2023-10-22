@@ -6,7 +6,6 @@ const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth0();
 
   if (isAuthenticated) {
-    console.log(isAuthenticated);
     return <Navigate to="/dashboard" replace={true} />;
   }
 

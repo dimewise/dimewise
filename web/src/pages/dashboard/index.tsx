@@ -1,96 +1,166 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Navigate } from "react-router-dom";
 import AppLayout from "../../components/AppLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import RecentExpenses from "./components/RecentExpenses";
 
 const Dashboard: React.FC = () => {
-  const { user, logout, isAuthenticated } = useAuth0();
+  const { isAuthenticated } = useAuth0();
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace={true} />;
+    return <Navigate to="/" replace={true} />;
   }
 
   return (
     <AppLayout>
-      <div className="w-full flex flex-col gap-5 justify-center items-center">
-        <div className="w-full flex flex-row justify-between items-center text-sm mt-5 mb-10">
-          <p>October 2023</p>
-          <div className="flex gap-2">
-            <div>
-              <span className="countdown font-mono ">
-                <span style={{ "--value": 15 }}></span>
-              </span>
-              days
-            </div>
-            <div>remaining</div>
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <div className="flex items-center space-x-2">
+            {/* <CalendarDateRangePicker /> */}
+            <Button>Download</Button>
           </div>
         </div>
-        <div className="radial-progress text-accent mb-10" style={{ "--value": "70", "--size": "12rem", "--thickness": "5px" }}>
-          <div className="text-center text-neutral-content">
-            <p>Total</p>
-            <p className="font-bold text-2xl">¥130,000</p>
-          </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Expenses
+              </CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">$45,231.89</div>
+              <p className="text-xs text-muted-foreground">
+                +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Category 1
+              </CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+2350</div>
+              <p className="text-xs text-muted-foreground">
+                +180.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Category 2</CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <rect width="20" height="14" x="2" y="5" rx="2" />
+                <path d="M2 10h20" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+12,234</div>
+              <p className="text-xs text-muted-foreground">
+                +19% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Category 3
+              </CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+573</div>
+              <p className="text-xs text-muted-foreground">
+                +201 since last hour
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Category 3
+              </CardTitle>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                className="h-4 w-4 text-muted-foreground"
+              >
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">+573</div>
+              <p className="text-xs text-muted-foreground">
+                +201 since last hour
+              </p>
+            </CardContent>
+          </Card>
         </div>
-        <div className="collapse bg-base-200 ">
-          <input type="radio" name="my-accordion-1" defaultChecked />
-          <div className="collapse-title text-lg font-bold">
-            Summary
-          </div>
-          <div className="collapse-content">
-            <div className="flex flex-col mb-5">
-              <div className="flex justify-between items-center mb-5">
-                <p>Category 1</p>
-                <p>¥1,500/¥50,000</p>
-              </div>
-              <progress className="progress progress-success w-full" value="10" max="100"></progress>
-            </div>
-            <div className="flex flex-col mb-5">
-              <div className="flex justify-between items-center mb-5">
-                <p>Category 2</p>
-                <p>¥1,500/¥50,000</p>
-              </div>
-              <progress className="progress progress-warning w-full" value="45" max="100"></progress>
-            </div>
-            <div className="flex flex-col mb-2">
-              <div className="flex justify-between items-center mb-5">
-                <p>Category 3</p>
-                <p>¥1,500/¥50,000</p>
-              </div>
-              <progress className="progress progress-error w-full" value="70" max="100"></progress>
-            </div>
-          </div>
-        </div>
-        <div className="collapse bg-base-200">
-          <input type="radio" name="my-accordion-1" />
-          <div className="collapse-title text-lg font-medium">
-            Recent Transactions
-          </div>
-          <div className="collapse-content w-full items-center flex flex-col">
-            <div className="overflow-x-auto w-full mb-5">
-              <table className="table">
-                {/* head */}
-                <tbody>
-                  {/* row 1 */}
-                  <tr>
-                    <th>3</th>
-                    <td>Coco Curry</td>
-                    <td>¥1,500</td>
-                  </tr>
-                  {/* row 2 */}
-                  <tr>
-                    <th>2</th>
-                    <td>Uniqlo</td>
-                    <td>¥3,200</td>
-                  </tr>
-                  {/* row 3 */}
-                  <tr>
-                    <th>1</th>
-                    <td>Goemon</td>
-                    <td>¥4,500</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <button className="btn btn-md btn-secondary btn-wide ">View More</button>
-          </div>
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-7">
+          <Card className="col-span-7">
+            <CardHeader>
+              <CardTitle>Recent Expenses</CardTitle>
+              <CardDescription>
+                You have spent on 200 expenses this month.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecentExpenses />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>
