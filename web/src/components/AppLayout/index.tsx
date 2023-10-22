@@ -1,54 +1,65 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { IconContext } from "react-icons";
-import { MdAdd, MdBarChart, MdCategory, MdHistory, MdHome, MdSettings } from "react-icons/md";
-import LinkButton from "./components/LinkButton";
-import CreateTransactionModal from "./components/CreateTransactionModal";
-
+import {
+  NavigationMenuTrigger, NavigationMenu, NavigationMenuItem, NavigationMenuContent, NavigationMenuLink, NavigationMenuList
+} from "@/components/ui/navigation-menu";
+import NavigationLink from "./components/NavigationLink";
+import { Button } from "@/components/ui/button";
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }: AppLayoutProps) => {
-  const { logout } = useAuth0();
+  const { loginWithRedirect, isAuthenticated } = useAuth0();
 
   return (
-    <div className="w-full">
-      <div className="w-full px-5 py-3">{children}</div>
-      {/* for mobile/tablet */}
-      <div className="btm-nav">
-        <LinkButton to={"/dashboard"}>
-          <IconContext.Provider value={{ size: "25" }}>
-            <MdHome />
-          </IconContext.Provider>
-        </LinkButton>
-        <LinkButton to={"/statistics"}>
-          <IconContext.Provider value={{ size: "25" }}>
-            <MdBarChart />
-          </IconContext.Provider>
-        </LinkButton>
-        <div
-          onClick={() => {
-            if (document) {
-              (document.getElementById("create_transaction_modal") as HTMLFormElement).showModal();
-            }
-          }}
-        >
-          <IconContext.Provider value={{ size: "25" }}>
-            <MdAdd />
-          </IconContext.Provider>
-          <CreateTransactionModal />
+    <div className="w-full h-screen px-5 py-3 flex flex-col">
+      {isAuthenticated ?
+        <div className="flex flex-row w-full max-w-full justify-between items-center">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationLink to="/dashboard">
+                  Dashboard
+                </NavigationLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationLink to="/history">
+                  History
+                </NavigationLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationLink to="/settings">
+                  Settings
+                </NavigationLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </div>
-        <LinkButton to={"/history"}>
-          <IconContext.Provider value={{ size: "25" }}>
-            <MdHistory />
-          </IconContext.Provider>
-        </LinkButton>
-        <LinkButton to={"/settings"}>
-          <IconContext.Provider value={{ size: "25" }}>
-            <MdSettings />
-          </IconContext.Provider>
-        </LinkButton>
-      </div>
+        :
+        <div className="flex flex-row w-full max-w-full justify-between items-center">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationLink to="/">
+                  About
+                </NavigationLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationLink to="/">
+                  Features
+                </NavigationLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationLink to="/">
+                  Support/Help
+                </NavigationLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+          <Button onClick={() => loginWithRedirect()}>Login</Button>
+        </div>
+      }
+      <div className="w-full flex-1">{children}</div>
     </div>
   );
 };

@@ -6,7 +6,6 @@ import HomePage from "./pages/home/index.tsx";
 import LoginPage from "./pages/login/index.tsx";
 import Dashboard from "./pages/dashboard/index.tsx";
 import AuthWrapper from "./components/AuthWrapper/index.tsx";
-import Categories from "./pages/settings/index.tsx";
 import History from "./pages/history/index.tsx";
 import Settings from "./pages/settings/index.tsx";
 import Statistics from "./pages/statistics/index.tsx";

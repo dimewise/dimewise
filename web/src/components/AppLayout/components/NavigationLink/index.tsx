@@ -1,23 +1,26 @@
+import { NavigationMenuLink, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import React from "react";
 import { Link, Path, useMatch, useResolvedPath } from "react-router-dom";
 
-interface LinkButtonProps {
+interface NavigationLinkProps {
   to: string | Partial<Path>;
   children: React.ReactNode;
 }
 
-const LinkButton: React.FC<LinkButtonProps> = ({
+const NavigationLink: React.FC<NavigationLinkProps> = ({
   to,
   children,
-}: LinkButtonProps) => {
+}) => {
   const resolvedPath = useResolvedPath(to);
   const isActive = useMatch({ path: resolvedPath.pathname, end: true });
 
   return (
     <Link to={to} className={isActive ? "active" : ""}>
-      {children}
+      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+        {children}
+      </NavigationMenuLink>
     </Link>
   );
 };
 
-export default LinkButton;
+export default NavigationLink;
