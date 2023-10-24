@@ -10,8 +10,9 @@ const History: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="w-full h-screen flex flex-col justify-center items-center font-go">
-        History
+      <div className="w-full flex flex-col gap-5 justify-center items-center">
+        history
+
       </div>
     </AppLayout>
   );
