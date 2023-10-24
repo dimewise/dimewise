@@ -13,7 +13,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <div className="flex flex-row h-16 w-full max-w-full justify-between items-center px-5 border-b">
+      <div className="flex flex-row h-16 w-full max-w-full justify-between items-center px-5 border-b shrink-0">
         {isAuthenticated ?
           <>
             <NavigationMenu>
@@ -26,6 +26,11 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }: AppLayoutProps) => {
                 <NavigationMenuItem>
                   <NavigationLink to="/history">
                     History
+                  </NavigationLink>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationLink to="/settings">
+                    Wishlist
                   </NavigationLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
