@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Navigate } from "react-router-dom";
-import AppLayout from "../../components/AppLayout";
+import AppLayout from "../../common/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import RecentExpenses from "./components/RecentExpenses";
 import Overview from "./components/Overview";

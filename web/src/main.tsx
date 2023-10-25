@@ -4,10 +4,10 @@ import "./index.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import HomePage from "./pages/home/index.tsx";
 import Dashboard from "./pages/dashboard/index.tsx";
-import AuthWrapper from "./components/AuthWrapper/index.tsx";
+import AuthWrapper from "./common/AuthWrapper/index.tsx";
 import History from "./pages/history/index.tsx";
 import Settings from "./pages/settings/index.tsx";
-import Statistics from "./pages/statistics/index.tsx";
+import Wishlist from "./pages/wishlist/index.tsx";
 
 const router = createBrowserRouter([
   {
@@ -43,10 +43,10 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/statistics",
+    path: "/wishlist",
     element: (
       <AuthWrapper>
-        <Statistics />
+        <Wishlist />
       </AuthWrapper>
     )
   }

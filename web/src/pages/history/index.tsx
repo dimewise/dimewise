@@ -1,11 +1,11 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Navigate } from "react-router-dom";
-import AppLayout from "../../components/AppLayout";
+import AppLayout from "../../common/AppLayout";
 
 const History: React.FC = () => {
   const { isAuthenticated } = useAuth0();
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace={true} />;
+    return <Navigate to="/" replace={true} />;
   }
 
   return (
