@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Navigate } from "react-router-dom";
-import AppLayout from "../../components/AppLayout";
+import AppLayout from "../../common/AppLayout";
 
 const HomePage: React.FC = () => {
   const { isAuthenticated } = useAuth0();

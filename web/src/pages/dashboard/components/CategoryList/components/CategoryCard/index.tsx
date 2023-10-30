@@ -15,7 +15,8 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ id, name, currentAmount, bu
   const isPositiveDelta = delta >= 0;
   const deltaArrow = isPositiveDelta ? "↑" : "↓";
   const deltaColor = isPositiveDelta ? "text-green-500" : "text-red-500";
-  const currentPercentage = (currentAmount / budgetAmount) * 100
+  const currentPercentage = (currentAmount / budgetAmount) * 100;
+  const displayPercentage = Math.round(currentPercentage * 10) / 10;
   console.log(currentPercentage)
 
   return (
@@ -26,9 +27,12 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ id, name, currentAmount, bu
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold mb-2">
-          {`¥ ${formattedCurrentAmount}/`}
-          <span className="text-base">{formattedBudgetAmount}</span>
+        <div className="flex flex-row items-center justify-between">
+          <div className="text-2xl font-bold mb-2">
+            {`¥ ${formattedCurrentAmount}/`}
+            <span className="text-base">{formattedBudgetAmount}</span>
+          </div>
+          <div className="text-lg ml-5 text-slate-400">{`${displayPercentage}%`}</div>
         </div>
         <Progress value={currentPercentage} className="w-full" />
         <p className={`text-xs ${deltaColor} mt-5`}>

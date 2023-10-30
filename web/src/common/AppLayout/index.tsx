@@ -29,7 +29,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }: AppLayoutProps) => {
                   </NavigationLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationLink to="/settings">
+                  <NavigationLink to="/wishlist">
                     Wishlist
                   </NavigationLink>
                 </NavigationMenuItem>
