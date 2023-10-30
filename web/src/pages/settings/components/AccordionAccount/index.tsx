@@ -26,7 +26,7 @@ const AccordionAccount: React.FC = () => {
                 <Button type="button" variant={"outline"}>Cancel</Button>
               </SheetClose>
               <SheetClose asChild>
-                <Button type="submit" onClick={() => logout({ logoutParams: { returnTo: "/" } })}>Confirm</Button>
+                <Button type="submit" onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}>Confirm</Button>
               </SheetClose>
             </SheetFooter>
           </SheetContent>
