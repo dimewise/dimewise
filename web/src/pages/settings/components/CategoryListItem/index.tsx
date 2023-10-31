@@ -14,7 +14,7 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({ id, name }) => {
         <p className="text-sm font-semibold leading-none col-span-5 flex items-center">{name}</p>
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="col-span-2">Delete</Button>
+            <Button className="col-span-2" variant="destructive">Delete</Button>
           </SheetTrigger>
           <SheetContent side={"bottom"}>
             <SheetHeader className="mb-5">
