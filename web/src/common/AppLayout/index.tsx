@@ -4,6 +4,10 @@ import {
 } from "@/components/ui/navigation-menu";
 import NavigationLink from "./components/NavigationLink";
 import { Button } from "@/components/ui/button";
+import { MdAdd } from "react-icons/md";
+import { IconContext } from "react-icons";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import QuickAccess from "./components/QuickAccess";
 interface AppLayoutProps {
   children: React.ReactNode;
 }
@@ -67,6 +71,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }: AppLayoutProps) => {
         }
       </div>
       <div className="w-full flex-1 px-5 py-3">{children}</div>
+      {isAuthenticated &&
+        <>
+          <div className="h-20 w-full shrink-0">&nbsp;</div>
+          <QuickAccess />
+        </>
+      }
     </div>
   );
 };
