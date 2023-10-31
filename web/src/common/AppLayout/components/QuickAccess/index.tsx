@@ -36,10 +36,10 @@ import React from "react";
 
 const createExpenseSchema = z.object({
   title: z.string().min(1, {
-    message: "Title must have at least 1 character.",
+    message: "Expense title must have at least 1 character.",
   }),
   description: z.string(),
-  amount: z.coerce.number().min(0, "Amount must be a value larger than 0."),
+  amount: z.coerce.number().min(1, "Expense amount must be a value larger than 0."),
   category: z.string().uuid(),
 });
 
@@ -47,13 +47,16 @@ const QuickAccess: React.FC = () => {
   const [open, setOpen] = React.useState<boolean>(false);
   const form = useForm<z.infer<typeof createExpenseSchema>>({
     resolver: zodResolver(createExpenseSchema),
+    defaultValues: {
+      amount: 0,
+    }
   });
 
   function onSubmit(values: z.infer<typeof createExpenseSchema>) {
     console.log(values);
     setOpen(false);
-
   }
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -63,7 +66,7 @@ const QuickAccess: React.FC = () => {
           </IconContext.Provider>
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="max-h-[85%] overflow-x-auto">
+      <SheetContent side="bottom" className="max-h-[90%] overflow-x-auto">
         <SheetHeader>
           <SheetTitle>Create Expense</SheetTitle>
           <SheetDescription>
@@ -72,7 +75,7 @@ const QuickAccess: React.FC = () => {
         </SheetHeader>
         <div className="pt-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
                 name="category"
