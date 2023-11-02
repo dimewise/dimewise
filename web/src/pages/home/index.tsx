@@ -12,8 +12,8 @@ const HomePage: React.FC = () => {
   return (
     <AppLayout>
       <div className="w-full h-full flex flex-col items-center justify-center">
-        <h1 className="scroll-m-20 text-9xl font-extrabold tracking-tight lg:text-9xl">Dimewise</h1>
-        <p>Start taking control of your budget in a systematic manner</p>
+        <h1 className="scroll-m-20 text-7xl font-extrabold tracking-tight lg:text-9xl">Dimewise</h1>
+        <p className="text-center px-10 lg:px-0">Start taking control of your budget in a systematic manner</p>
       </div>
     </AppLayout>
   );
