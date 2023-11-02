@@ -53,7 +53,6 @@ const QuickAccess: React.FC = () => {
   });
 
   function onSubmit(values: z.infer<typeof createExpenseSchema>) {
-    console.log(values);
     setOpen(false);
   }
 

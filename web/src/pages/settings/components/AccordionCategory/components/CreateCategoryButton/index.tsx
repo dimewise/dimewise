@@ -32,7 +32,6 @@ const CreateCategoryButton: React.FC = () => {
   });
 
   function onSubmit(values: z.infer<typeof createCategorySchema>) {
-    console.log(values);
     setOpen(false);
   }
   return (

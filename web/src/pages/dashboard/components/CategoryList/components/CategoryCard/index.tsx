@@ -17,7 +17,6 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ id, name, currentAmount, bu
   const deltaColor = isPositiveDelta ? "text-green-500" : "text-red-500";
   const currentPercentage = (currentAmount / budgetAmount) * 100;
   const displayPercentage = Math.round(currentPercentage * 10) / 10;
-  console.log(currentPercentage)
 
   return (
     <Card id={id}>
