@@ -27,17 +27,17 @@ const UnauthenticatedNavigation: React.FC = () => {
               </NavigationLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationLink to="/">
+              <NavigationLink to="/about">
                 About
               </NavigationLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationLink to="/">
+              <NavigationLink to="/features">
                 Features
               </NavigationLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationLink to="/">
+              <NavigationLink to="/support">
                 Support/Help
               </NavigationLink>
             </NavigationMenuItem>
@@ -45,7 +45,7 @@ const UnauthenticatedNavigation: React.FC = () => {
         </NavigationMenu>
         <Button onClick={() => loginWithRedirect()}>Login</Button>
       </div>
-      <div className="block lg:hidden">
+      <div className="block lg:hidden w-full flex flex-row items-center justify-between">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button
@@ -74,19 +74,19 @@ const UnauthenticatedNavigation: React.FC = () => {
                 Home
               </NavigationLink>
               <NavigationLink
-                to="/"
+                to="/about"
                 onOpenChange={setOpen}
               >
                 About
               </NavigationLink>
               <NavigationLink
-                to="/"
+                to="/features"
                 onOpenChange={setOpen}
               >
                 Features
               </NavigationLink>
               <NavigationLink
-                to="/"
+                to="/support"
                 onOpenChange={setOpen}
               >
                 Support/Help
@@ -94,6 +94,7 @@ const UnauthenticatedNavigation: React.FC = () => {
             </div>
           </SheetContent>
         </Sheet>
+        <Button onClick={() => loginWithRedirect()}>Login</Button>
       </div>
     </>
   )
