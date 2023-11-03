@@ -6,12 +6,15 @@ require (
 	github.com/auth0/go-jwt-middleware/v2 v2.1.0
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-chi/cors v1.2.1
+	github.com/oapi-codegen/runtime v1.0.0
 	github.com/spf13/viper v1.17.0
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
 )
 
 require (
+	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/google/uuid v1.3.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

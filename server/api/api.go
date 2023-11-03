@@ -12,6 +12,7 @@ import (
 	"github.com/teoyi/dimewise/api/middleware"
 	"github.com/teoyi/dimewise/config"
 	"github.com/teoyi/dimewise/internal/handler"
+	"github.com/teoyi/dimewise/oapi"
 	"golang.org/x/exp/slog"
 )
 
@@ -45,17 +46,11 @@ func NewApi(app *config.App) *Api {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	// configuration for auth endpoints
-	rAuth := chi.NewRouter()
-	r.Use(middleware.EnsureValidToken(app))
-	/* rAuth.Get("/callback", h.AuthCallback)
-	rAuth.Get("/logout", h.AuthLogout)
-	rAuth.Get("/user", h.User)
-	*/
+	// OpenAPI defined routes
 	r.Route("/api/v1", func(r chi.Router) {
-		r.Get("/", h.GetFunny)
-		r.Get("/test", h.Test)
-		r.Mount("/auth", rAuth)
+		r.Use(middleware.EnsureValidToken(app))
+		strictHandler := oapi.NewStrictHandler(h, []oapi.StrictMiddlewareFunc{})
+		oapi.HandlerFromMuxWithBaseURL(strictHandler, r, "")
 	})
 
 	return &Api{
