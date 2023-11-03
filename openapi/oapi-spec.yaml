@@ -12,7 +12,7 @@ info:
     url: www.example.com
   termsOfService: www.dimewise.org/terms-of-service
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'http://localhost:3000/api/v1'
 paths:
   /categories:
     get:
@@ -32,6 +32,8 @@ paths:
                       $ref: '#/components/schemas/BaseCategoryDto'
       operationId: get-categories
       description: Get a list of categories
+      tags:
+        - client
     post:
       summary: Create
       operationId: post-category
@@ -45,6 +47,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ModifyCategoryDto'
         description: Form submission fields
+      tags:
+        - client
     parameters: []
   '/categories/{categoryID}':
     parameters:
@@ -62,6 +66,8 @@ paths:
         '404':
           description: Not Found
       description: Get information about a category
+      tags:
+        - client
     patch:
       summary: Update
       operationId: patch-category
@@ -77,6 +83,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ModifyCategoryDto'
         description: Form submission fields
+      tags:
+        - client
     delete:
       summary: Delete
       operationId: delete-category
@@ -86,6 +94,8 @@ paths:
         '404':
           description: Not Found
       description: Delete a category based on the ID
+      tags:
+        - client
   /expenses:
     get:
       summary: Get List
@@ -127,6 +137,8 @@ paths:
           in: query
           name: end
           description: End date for querying transactions
+      tags:
+        - client
     post:
       summary: Create
       operationId: post-expense
@@ -141,6 +153,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ModifyExpenseDto'
         description: Form submission fields
+      tags:
+        - client
     parameters: []
   '/expenses/{expenseID}':
     parameters:
@@ -158,6 +172,8 @@ paths:
           description: Not Found
       operationId: get-expense
       description: Get expense details based on ID
+      tags:
+        - client
     patch:
       summary: Update
       operationId: patch-expense
@@ -174,6 +190,8 @@ paths:
             schema:
               $ref: '#/components/schemas/ModifyCategoryDto'
         description: Form submission fields
+      tags:
+        - client
     delete:
       summary: ''
       operationId: delete-expense
@@ -183,6 +201,8 @@ paths:
         '404':
           description: Not Found
       description: Delete expense based on ID
+      tags:
+        - client
   /expenses/overview:
     get:
       summary: Get
@@ -200,6 +220,8 @@ paths:
                       $ref: '#/components/schemas/MonthOverviewDto'
       operationId: get-expenses-overview
       description: Get current year expense overview
+      tags:
+        - client
 components:
   schemas:
     FullCategoryDto:
