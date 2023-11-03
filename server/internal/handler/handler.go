@@ -1,12 +1,12 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/teoyi/dimewise/config"
+	"github.com/teoyi/dimewise/oapi"
 )
 
 type Handler struct {
+	oapi.StrictServerInterface
 	App *config.App
 }
 
@@ -14,9 +14,4 @@ func NewHandler(app *config.App) *Handler {
 	return &Handler{
 		App: app,
 	}
-}
-
-func (h *Handler) GetFunny(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("OK"))
 }
