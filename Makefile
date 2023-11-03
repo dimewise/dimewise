@@ -4,7 +4,7 @@ BINARY_NAME=dimewise
 DATABASE_URL ?= postgresql://postgres@localhost:5434/dimewise?sslmode=disable
 ENV_FILE=.env
 OPENAPI_SERVER_SPEC=../openapi/oapi-spec.yaml
-OPENAPI_SERVER_GEN_CONFIG=../openapi/server-gen.yaml
+OPENAPI_SERVER_GEN_CONFIG=./oapi/codegen.yaml
 
 .PHONY: build run clean help
 deps: 
@@ -62,24 +62,26 @@ docker/rebuild: docker-deps
 
 .PHONY: init/deps 
 init/deps:
-	cd server && \
+	@cd server && \
 	if [ ! -d bin ]; then \
+		echo "Directory bin/ does not exist, creating bin/"; \
 		mkdir bin; \
-    fi; \
-    export GOBIN=${PWD}/server/bin; \
-    while read -r line; do \
-    	exec=$$(basename $$line); \
-    	exec=$${exec%%@*}; \
-    	if [ ! -f $${GOBIN}/$$exec ]; then \
-			echo "Installing tool $$exec"; \
-			go install $$line; \
-		fi; \
+  fi; \
+	export GOBIN=${PWD}/server/bin; \
+	while read -r line; do \
+		exec=$$(basename $$line); \
+		exec=$${exec%%@*}; \
+		if [ ! -f $${GOBIN}/$$exec ]; then \
+		echo "Installing tool $$exec"; \
+		go install $$line; \
+	fi; \
 	done < tools.txt
 
 .PHONY: gen/oapi
 gen/oapi:
-	cd server && \
-	if [ ! -d oapi ]; then \
-		mkdir oapi; \
-    fi; \
-	./bin/oapi-codegen -config ${OPENAPI_SERVER_GEN_CONFIG} ${OPENAPI_SERVER_SPEC}
+	@cd server && \
+	echo "Generating for server..."; \
+	./bin/oapi-codegen -config ${OPENAPI_SERVER_GEN_CONFIG} ${OPENAPI_SERVER_SPEC}; \
+	cd ../web && \
+	echo "Generating for web..."; \
+	yarn gen:oapi
