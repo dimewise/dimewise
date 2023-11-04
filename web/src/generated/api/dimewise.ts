@@ -5,8 +5,6 @@
  * Backend API for dimewise application
  * OpenAPI spec version: 1.0
  */
-import * as axios from "axios";
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import useSwr from "swr";
 import type { Key, SWRConfiguration } from "swr";
 import type {
@@ -19,15 +17,17 @@ import type {
   ModifyCategoryDto,
   ModifyExpenseDto,
 } from "../dto";
+import { DimewiseCustomFetcher } from "../../api/custom-fetch";
 
 /**
  * Get a list of categories
  * @summary Get List
  */
-export const getCategories = (
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<GetCategories200>> => {
-  return axios.default.get(`/categories`, options);
+export const getCategories = () => {
+  return DimewiseCustomFetcher<GetCategories200>({
+    url: `/categories`,
+    method: "get",
+  });
 };
 
 export const getGetCategoriesKey = () => [`/categories`] as const;
@@ -35,24 +35,23 @@ export const getGetCategoriesKey = () => [`/categories`] as const;
 export type GetCategoriesQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCategories>>
 >;
-export type GetCategoriesQueryError = AxiosError<unknown>;
+export type GetCategoriesQueryError = unknown;
 
 /**
  * @summary Get List
  */
-export const useGetCategories = <TError = AxiosError<unknown>>(options?: {
+export const useGetCategories = <TError = unknown>(options?: {
   swr?: SWRConfiguration<Awaited<ReturnType<typeof getCategories>>, TError> & {
     swrKey?: Key;
     enabled?: boolean;
   };
-  axios?: AxiosRequestConfig;
 }) => {
-  const { swr: swrOptions, axios: axiosOptions } = options ?? {};
+  const { swr: swrOptions } = options ?? {};
 
   const isEnabled = swrOptions?.enabled !== false;
   const swrKey =
     swrOptions?.swrKey ?? (() => (isEnabled ? getGetCategoriesKey() : null));
-  const swrFn = () => getCategories(axiosOptions);
+  const swrFn = () => getCategories();
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
     swrKey,
@@ -70,22 +69,24 @@ export const useGetCategories = <TError = AxiosError<unknown>>(options?: {
  * Create a category based on form submission
  * @summary Create
  */
-export const postCategory = (
-  modifyCategoryDto: ModifyCategoryDto,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<void>> => {
-  return axios.default.post(`/categories`, modifyCategoryDto, options);
+export const postCategory = (modifyCategoryDto: ModifyCategoryDto) => {
+  return DimewiseCustomFetcher<void>({
+    url: `/categories`,
+    method: "post",
+    headers: { "Content-Type": "application/json" },
+    data: modifyCategoryDto,
+  });
 };
 
 /**
  * Get information about a category
  * @summary Get
  */
-export const getCategory = (
-  categoryID: string,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<FullCategoryDto>> => {
-  return axios.default.get(`/categories/${categoryID}`, options);
+export const getCategory = (categoryID: string) => {
+  return DimewiseCustomFetcher<FullCategoryDto>({
+    url: `/categories/${categoryID}`,
+    method: "get",
+  });
 };
 
 export const getGetCategoryKey = (categoryID: string) =>
@@ -94,28 +95,27 @@ export const getGetCategoryKey = (categoryID: string) =>
 export type GetCategoryQueryResult = NonNullable<
   Awaited<ReturnType<typeof getCategory>>
 >;
-export type GetCategoryQueryError = AxiosError<void>;
+export type GetCategoryQueryError = void;
 
 /**
  * @summary Get
  */
-export const useGetCategory = <TError = AxiosError<void>>(
+export const useGetCategory = <TError = void>(
   categoryID: string,
   options?: {
     swr?: SWRConfiguration<Awaited<ReturnType<typeof getCategory>>, TError> & {
       swrKey?: Key;
       enabled?: boolean;
     };
-    axios?: AxiosRequestConfig;
   }
 ) => {
-  const { swr: swrOptions, axios: axiosOptions } = options ?? {};
+  const { swr: swrOptions } = options ?? {};
 
   const isEnabled = swrOptions?.enabled !== false && !!categoryID;
   const swrKey =
     swrOptions?.swrKey ??
     (() => (isEnabled ? getGetCategoryKey(categoryID) : null));
-  const swrFn = () => getCategory(categoryID, axiosOptions);
+  const swrFn = () => getCategory(categoryID);
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
     swrKey,
@@ -135,38 +135,36 @@ export const useGetCategory = <TError = AxiosError<void>>(
  */
 export const patchCategory = (
   categoryID: string,
-  modifyCategoryDto: ModifyCategoryDto,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<void>> => {
-  return axios.default.patch(
-    `/categories/${categoryID}`,
-    modifyCategoryDto,
-    options
-  );
+  modifyCategoryDto: ModifyCategoryDto
+) => {
+  return DimewiseCustomFetcher<void>({
+    url: `/categories/${categoryID}`,
+    method: "patch",
+    headers: { "Content-Type": "application/json" },
+    data: modifyCategoryDto,
+  });
 };
 
 /**
  * Delete a category based on the ID
  * @summary Delete
  */
-export const deleteCategory = (
-  categoryID: string,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<void>> => {
-  return axios.default.delete(`/categories/${categoryID}`, options);
+export const deleteCategory = (categoryID: string) => {
+  return DimewiseCustomFetcher<void>({
+    url: `/categories/${categoryID}`,
+    method: "delete",
+  });
 };
 
 /**
  * Get a list of expenses
  * @summary Get List
  */
-export const getExpenses = (
-  params: GetExpensesParams,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<GetExpenses200>> => {
-  return axios.default.get(`/expenses`, {
-    ...options,
-    params: { ...params, ...options?.params },
+export const getExpenses = (params: GetExpensesParams) => {
+  return DimewiseCustomFetcher<GetExpenses200>({
+    url: `/expenses`,
+    method: "get",
+    params,
   });
 };
 
@@ -176,28 +174,27 @@ export const getGetExpensesKey = (params: GetExpensesParams) =>
 export type GetExpensesQueryResult = NonNullable<
   Awaited<ReturnType<typeof getExpenses>>
 >;
-export type GetExpensesQueryError = AxiosError<unknown>;
+export type GetExpensesQueryError = unknown;
 
 /**
  * @summary Get List
  */
-export const useGetExpenses = <TError = AxiosError<unknown>>(
+export const useGetExpenses = <TError = unknown>(
   params: GetExpensesParams,
   options?: {
     swr?: SWRConfiguration<Awaited<ReturnType<typeof getExpenses>>, TError> & {
       swrKey?: Key;
       enabled?: boolean;
     };
-    axios?: AxiosRequestConfig;
   }
 ) => {
-  const { swr: swrOptions, axios: axiosOptions } = options ?? {};
+  const { swr: swrOptions } = options ?? {};
 
   const isEnabled = swrOptions?.enabled !== false;
   const swrKey =
     swrOptions?.swrKey ??
     (() => (isEnabled ? getGetExpensesKey(params) : null));
-  const swrFn = () => getExpenses(params, axiosOptions);
+  const swrFn = () => getExpenses(params);
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
     swrKey,
@@ -215,22 +212,24 @@ export const useGetExpenses = <TError = AxiosError<unknown>>(
  * Create an expense through form submission
  * @summary Create
  */
-export const postExpense = (
-  modifyExpenseDto: ModifyExpenseDto,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<unknown>> => {
-  return axios.default.post(`/expenses`, modifyExpenseDto, options);
+export const postExpense = (modifyExpenseDto: ModifyExpenseDto) => {
+  return DimewiseCustomFetcher<unknown>({
+    url: `/expenses`,
+    method: "post",
+    headers: { "Content-Type": "application/json" },
+    data: modifyExpenseDto,
+  });
 };
 
 /**
  * Get expense details based on ID
  * @summary Get
  */
-export const getExpense = (
-  expenseID: string,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<FullExpenseDto>> => {
-  return axios.default.get(`/expenses/${expenseID}`, options);
+export const getExpense = (expenseID: string) => {
+  return DimewiseCustomFetcher<FullExpenseDto>({
+    url: `/expenses/${expenseID}`,
+    method: "get",
+  });
 };
 
 export const getGetExpenseKey = (expenseID: string) =>
@@ -239,28 +238,27 @@ export const getGetExpenseKey = (expenseID: string) =>
 export type GetExpenseQueryResult = NonNullable<
   Awaited<ReturnType<typeof getExpense>>
 >;
-export type GetExpenseQueryError = AxiosError<void>;
+export type GetExpenseQueryError = void;
 
 /**
  * @summary Get
  */
-export const useGetExpense = <TError = AxiosError<void>>(
+export const useGetExpense = <TError = void>(
   expenseID: string,
   options?: {
     swr?: SWRConfiguration<Awaited<ReturnType<typeof getExpense>>, TError> & {
       swrKey?: Key;
       enabled?: boolean;
     };
-    axios?: AxiosRequestConfig;
   }
 ) => {
-  const { swr: swrOptions, axios: axiosOptions } = options ?? {};
+  const { swr: swrOptions } = options ?? {};
 
   const isEnabled = swrOptions?.enabled !== false && !!expenseID;
   const swrKey =
     swrOptions?.swrKey ??
     (() => (isEnabled ? getGetExpenseKey(expenseID) : null));
-  const swrFn = () => getExpense(expenseID, axiosOptions);
+  const swrFn = () => getExpense(expenseID);
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
     swrKey,
@@ -280,34 +278,35 @@ export const useGetExpense = <TError = AxiosError<void>>(
  */
 export const patchExpense = (
   expenseID: string,
-  modifyCategoryDto: ModifyCategoryDto,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<unknown>> => {
-  return axios.default.patch(
-    `/expenses/${expenseID}`,
-    modifyCategoryDto,
-    options
-  );
+  modifyCategoryDto: ModifyCategoryDto
+) => {
+  return DimewiseCustomFetcher<unknown>({
+    url: `/expenses/${expenseID}`,
+    method: "patch",
+    headers: { "Content-Type": "application/json" },
+    data: modifyCategoryDto,
+  });
 };
 
 /**
  * Delete expense based on ID
  */
-export const deleteExpense = (
-  expenseID: string,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<void>> => {
-  return axios.default.delete(`/expenses/${expenseID}`, options);
+export const deleteExpense = (expenseID: string) => {
+  return DimewiseCustomFetcher<void>({
+    url: `/expenses/${expenseID}`,
+    method: "delete",
+  });
 };
 
 /**
  * Get current year expense overview
  * @summary Get
  */
-export const getExpensesOverview = (
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<GetExpensesOverview200>> => {
-  return axios.default.get(`/expenses/overview`, options);
+export const getExpensesOverview = () => {
+  return DimewiseCustomFetcher<GetExpensesOverview200>({
+    url: `/expenses/overview`,
+    method: "get",
+  });
 };
 
 export const getGetExpensesOverviewKey = () => [`/expenses/overview`] as const;
@@ -315,25 +314,24 @@ export const getGetExpensesOverviewKey = () => [`/expenses/overview`] as const;
 export type GetExpensesOverviewQueryResult = NonNullable<
   Awaited<ReturnType<typeof getExpensesOverview>>
 >;
-export type GetExpensesOverviewQueryError = AxiosError<unknown>;
+export type GetExpensesOverviewQueryError = unknown;
 
 /**
  * @summary Get
  */
-export const useGetExpensesOverview = <TError = AxiosError<unknown>>(options?: {
+export const useGetExpensesOverview = <TError = unknown>(options?: {
   swr?: SWRConfiguration<
     Awaited<ReturnType<typeof getExpensesOverview>>,
     TError
   > & { swrKey?: Key; enabled?: boolean };
-  axios?: AxiosRequestConfig;
 }) => {
-  const { swr: swrOptions, axios: axiosOptions } = options ?? {};
+  const { swr: swrOptions } = options ?? {};
 
   const isEnabled = swrOptions?.enabled !== false;
   const swrKey =
     swrOptions?.swrKey ??
     (() => (isEnabled ? getGetExpensesOverviewKey() : null));
-  const swrFn = () => getExpensesOverview(axiosOptions);
+  const swrFn = () => getExpensesOverview();
 
   const query = useSwr<Awaited<ReturnType<typeof swrFn>>, TError>(
     swrKey,

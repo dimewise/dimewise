@@ -4,56 +4,48 @@ import "./index.css";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import HomePage from "./pages/home/index.tsx";
 import Dashboard from "./pages/dashboard/index.tsx";
-import AuthWrapper from "./common/AuthWrapper/index.tsx";
 import History from "./pages/history/index.tsx";
 import Settings from "./pages/settings/index.tsx";
 import Wishlist from "./pages/wishlist/index.tsx";
+import AuthProvider from "./provider/AuthProvider/index.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <AuthWrapper>
-        <HomePage />
-      </AuthWrapper>
+      <HomePage />
     ),
   },
   {
     path: "/dashboard",
     element: (
-      <AuthWrapper>
-        <Dashboard />
-      </AuthWrapper>
+      <Dashboard />
     ),
   },
   {
     path: "/settings",
     element: (
-      <AuthWrapper>
-        <Settings />
-      </AuthWrapper>
+      <Settings />
     ),
   },
   {
     path: "/history",
     element: (
-      <AuthWrapper>
-        <History />
-      </AuthWrapper>
+      <History />
     ),
   },
   {
     path: "/wishlist",
     element: (
-      <AuthWrapper>
-        <Wishlist />
-      </AuthWrapper>
+      <Wishlist />
     )
   }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </React.StrictMode>
 );
