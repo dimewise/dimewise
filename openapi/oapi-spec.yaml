@@ -12,7 +12,7 @@ info:
     url: www.example.com
   termsOfService: www.dimewise.org/terms-of-service
 servers:
-  - url: 'http://localhost:3000/api/v1'
+  - url: 'http://localhost:3001/api/v1'
 paths:
   /categories:
     get:
@@ -355,3 +355,4 @@ components:
 tags:
   - name: client
     description: Tags representing API for frontend use
+

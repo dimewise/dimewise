@@ -11,21 +11,21 @@ export default defineConfig({
     },
     output: {
       mode: 'split',
-      target: './generated/api/',
-      schemas: './generated/dto/',
+      target: './src/generated/api/',
+      schemas: './src/generated/dto/',
       client: 'swr',
       mock: false,
       override: {
         useDates: true,
-        // mutator: {
-        //   path: '.api/custom-fetch.ts',
-        //   name: 'DimewiseCustomFetcher',
-        // }
+        mutator: {
+          path: './src/api/custom-fetch.ts',
+          name: 'DimewiseCustomFetcher',
+        }
       }
     },
     hooks: {
       afterAllFilesWrite:
-        'prettier --write ./generated --config ./.prettierrc.cjs'
+        'prettier --write ./src/generated --config ./.prettierrc.cjs'
     },
   },
 });
