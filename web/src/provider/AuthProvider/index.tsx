@@ -55,6 +55,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }: AuthProviderPro
         redirect_uri: window.location.origin,
       }}
       cacheLocation="localstorage"
+      useRefreshTokens={true}
     >
       <AuthContext.Provider value={{ accessToken }}>
         {children}
