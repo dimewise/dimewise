@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-
 	"github.com/teoyi/dimewise/oapi"
 )
 

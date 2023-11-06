@@ -49,6 +49,7 @@ func NewApi(app *config.App) *Api {
 	// OpenAPI defined routes
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Use(middleware.EnsureValidToken(app))
+		r.Use(middleware.UserCheck(app))
 		strictHandler := oapi.NewStrictHandler(h, []oapi.StrictMiddlewareFunc{})
 		oapi.HandlerFromMuxWithBaseURL(strictHandler, r, "")
 	})
