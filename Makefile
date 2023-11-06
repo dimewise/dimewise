@@ -59,24 +59,24 @@ docker/rebuild: docker-deps
 	@docker compose down 
 	@docker compose up -d --build 
 
-.PHONY: init/deps 
+.PHONY: init/deps
 ## Initialize golang dependencies
 init/deps:
-	@cd server && \
+	cd server && \
 	echo "Initializing server dependencies..."; \
 	if [ ! -d bin ]; then \
 		echo "Directory bin/ does not exist, creating bin/"; \
 		mkdir bin; \
-  fi; \
+	fi; \
 	export GOBIN=${PWD}/server/bin; \
 	while read -r line; do \
 		exec=$$(basename $$line); \
 		exec=$${exec%%@*}; \
 		if [ ! -f $${GOBIN}/$$exec ]; then \
-		echo "Installing tool $$exec"; \
-		go install $$line; \
-	fi; \
-	done < tools.txt \
+			echo "Installing tool $$exec"; \
+			go install $$line; \
+		fi; \
+	done < tools.txt; \
 	cd ../web && \
 	echo "Initializing web dependencies..."; \
 	yarn
