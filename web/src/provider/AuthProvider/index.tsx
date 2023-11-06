@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth0, Auth0Provider } from '@auth0/auth0-react';
+import { useAuth0 } from '@auth0/auth0-react';
 import { setDimewiseToken } from '../../api/custom-fetch';
 
 interface AuthProviderProps {
@@ -47,20 +47,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }: AuthProviderPro
   console.log(accessToken);
 
   return (
-    <Auth0Provider
-      domain={import.meta.env.VITE_AUTH0_DOMAIN}
-      clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
-      authorizationParams={{
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        redirect_uri: window.location.origin,
-      }}
-      cacheLocation="localstorage"
-      useRefreshTokens={true}
-    >
-      <AuthContext.Provider value={{ accessToken }}>
-        {children}
-      </AuthContext.Provider >
-    </Auth0Provider>
+    <AuthContext.Provider value={{ accessToken }}>
+      {children}
+    </AuthContext.Provider >
   );
 };
 
