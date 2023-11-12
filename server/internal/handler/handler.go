@@ -11,7 +11,7 @@ type Handler struct {
 }
 
 func NewHandler(app *config.App) *Handler {
-	return &Handler{
+	return &Handler{ //nolint: exhaustruct // oapi not needed for declaration
 		App: app,
 	}
 }

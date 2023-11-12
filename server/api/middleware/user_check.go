@@ -9,10 +9,10 @@ import (
 	"github.com/teoyi/dimewise/config"
 )
 
-func UserCheck(app *config.App) func(next http.Handler) http.Handler {
+func UserCheck(_ *config.App) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			claims := r.Context().Value(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
+			claims, _ := r.Context().Value(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
 
 			// add checks here for accounts, if missing craete a record in db
 			log.Println(claims.RegisteredClaims.Subject)

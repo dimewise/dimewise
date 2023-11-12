@@ -16,16 +16,20 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-type Api struct {
+const (
+	routerMaxAge = 300
+)
+
+type API struct {
 	router *chi.Mux
 	port   string
 }
 
-func NewApi(app *config.App) *Api {
+func NewAPI(app *config.App) *API {
 	h := handler.NewHandler(app)
-	p := ":" + app.EnvVars().APP_PORT
+	p := ":" + app.EnvVars().AppPort
 
-	auth0IssuerURL, err := url.Parse("https://" + app.EnvVars().AUTH0_DOMAIN + "/")
+	auth0IssuerURL, err := url.Parse("https://" + app.EnvVars().Auth0Domain + "/")
 	if err != nil {
 		log.Fatalf("Failed to parse the issuer url: %v", err)
 	}
@@ -35,7 +39,7 @@ func NewApi(app *config.App) *Api {
 	r.Use(chimiddleware.Logger)
 	r.Use(chimiddleware.Recoverer)
 	r.Use(chimiddleware.Heartbeat("/ping"))
-	r.Use(cors.Handler(cors.Options{
+	r.Use(cors.Handler(cors.Options{ //nolint: exhaustruct // temporary unused
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"http://localhost:3000", auth0IssuerURL.String()},
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
@@ -43,7 +47,7 @@ func NewApi(app *config.App) *Api {
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
+		MaxAge:           routerMaxAge, // Maximum value not ignored by any of major browsers
 	}))
 
 	// OpenAPI defined routes
@@ -54,13 +58,13 @@ func NewApi(app *config.App) *Api {
 		oapi.HandlerFromMuxWithBaseURL(strictHandler, r, "")
 	})
 
-	return &Api{
+	return &API{
 		router: r,
 		port:   p,
 	}
 }
 
-func (a *Api) Serve() {
+func (a *API) Serve() {
 	slog.Info("Dimewise API server listening on " + a.port)
 
 	const maxHeaderBytes = 1 << 20

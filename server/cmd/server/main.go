@@ -7,6 +7,6 @@ import (
 
 func main() {
 	a := config.NewApp()
-	s := api.NewApi(a)
+	s := api.NewAPI(a)
 	s.Serve()
 }

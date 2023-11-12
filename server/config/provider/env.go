@@ -3,12 +3,12 @@ package provider
 import "github.com/spf13/viper"
 
 type EnvProvider struct {
-	APP_ENV        string `mapstructure:"APP_ENV"`
-	APP_PORT       string `mapstructure:"APP_PORT"`
-	DB_URL         string `mapstructure:"DATABASE_URL"`
-	LOG_LEVEL      string `mapstructure:"LOG_LEVEL"`
-	AUTH0_DOMAIN   string `mapstructure:"AUTH0_DOMAIN"`
-	AUTH0_AUDIENCE string `mapstructure:"AUTH0_AUDIENCE"`
+	AppEnv        string `mapstructure:"APP_ENV"`
+	AppPort       string `mapstructure:"APP_PORT"`
+	DBUrl         string `mapstructure:"DATABASE_URL"`
+	LogLevel      string `mapstructure:"LOG_LEVEL"`
+	Auth0Domain   string `mapstructure:"AUTH0_DOMAIN"`
+	Auth0Audience string `mapstructure:"AUTH0_AUDIENCE"`
 }
 
 func NewEnvProvider() (*EnvProvider, error) {
