@@ -12,6 +12,7 @@ import (
 	"github.com/teoyi/dimewise/api/middleware"
 	"github.com/teoyi/dimewise/config"
 	"github.com/teoyi/dimewise/internal/handler"
+	"github.com/teoyi/dimewise/internal/repository"
 	"github.com/teoyi/dimewise/oapi"
 	"golang.org/x/exp/slog"
 )
@@ -27,6 +28,7 @@ type API struct {
 
 func NewAPI(app *config.App) *API {
 	h := handler.NewHandler(app)
+	re := repository.NewRepository(app.DB())
 	p := ":" + app.EnvVars().AppPort
 
 	auth0IssuerURL, err := url.Parse("https://" + app.EnvVars().Auth0Domain + "/")
@@ -53,7 +55,7 @@ func NewAPI(app *config.App) *API {
 	// OpenAPI defined routes
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Use(middleware.EnsureValidToken(app))
-		r.Use(middleware.UserCheck(app))
+		r.Use(middleware.UserCheck(re))
 		strictHandler := oapi.NewStrictHandler(h, []oapi.StrictMiddlewareFunc{})
 		oapi.HandlerFromMuxWithBaseURL(strictHandler, r, "")
 	})
