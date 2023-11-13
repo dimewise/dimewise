@@ -13,7 +13,6 @@ const History: React.FC = () => {
 
   console.log(data);
 
-
   return (
     <AppLayout>
       <div className="w-full flex flex-col gap-5 justify-center items-center">

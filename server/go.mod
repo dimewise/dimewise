@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/go-jet/jet/v2 v2.10.1
 	github.com/google/uuid v1.4.0
+	github.com/lib/pq v1.10.9
 	github.com/oapi-codegen/runtime v1.0.0
 	github.com/spf13/viper v1.17.0
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
