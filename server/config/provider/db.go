@@ -2,8 +2,9 @@ package provider
 
 import (
 	"database/sql"
-	_ "github.com/lib/pq" // Loading postgres driver
 	"log"
+
+	_ "github.com/lib/pq" // Loading postgres driver
 )
 
 func NewDBProvider(env *EnvProvider) *sql.DB {

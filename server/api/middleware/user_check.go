@@ -26,7 +26,11 @@ func UserCheck(re *repository.Repository) func(next http.Handler) http.Handler {
 					createdAccount, createErr := re.Account.CreateAccountByModel(model)
 					if createErr != nil {
 						slog.Error("Error creating account", slog.Any("err", createErr))
-						http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+						http.Error(
+							w,
+							http.StatusText(http.StatusUnauthorized),
+							http.StatusUnauthorized,
+						)
 						return
 					}
 

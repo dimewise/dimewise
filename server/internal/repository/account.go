@@ -25,7 +25,10 @@ func NewAccountRepository(db qrm.DB) *AccountRepository {
 
 func (r *AccountRepository) GetAccountByExternalID(externalID string) (*model.Account, error) {
 	tbl := table.Account
-	stmt := tbl.SELECT(tbl.AllColumns).FROM(tbl).WHERE(tbl.ExternalID.EQ(String(externalID))).LIMIT(1)
+	stmt := tbl.SELECT(tbl.AllColumns).
+		FROM(tbl).
+		WHERE(tbl.ExternalID.EQ(String(externalID))).
+		LIMIT(1)
 
 	rows := []model.Account{}
 	err := stmt.Query(*r.db, &rows)
