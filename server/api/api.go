@@ -2,6 +2,7 @@ package api
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -14,7 +15,6 @@ import (
 	"github.com/teoyi/dimewise/internal/handler"
 	"github.com/teoyi/dimewise/internal/repository"
 	"github.com/teoyi/dimewise/oapi"
-	"golang.org/x/exp/slog"
 )
 
 const (

@@ -158,7 +158,7 @@ tasks:
     desc: 'Run the server'
     silent: true
     cmds:
-      - go run ./server/cmd/server/main.go
+      - cd ./server && go run ./cmd/server/main.go
 
   run-fresh:
     desc: 'Run the server and worker with a fresh database'
