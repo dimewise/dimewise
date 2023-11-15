@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { setDimewiseToken } from '../../api/custom-fetch';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -26,12 +27,15 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }: AuthProviderPro
 
   useEffect(() => {
     const fetchAccessToken = async () => {
-      try {
-        const token = await getAccessTokenSilently();
-        setAccessToken(token);
-      } catch (error) {
-        // Handle error if unable to fetch access token
-        console.error('Error fetching access token:', error);
+      // Check if the current route is a protected route
+      if (!['/'].includes(window.location.pathname)) {
+        try {
+          const token = await getAccessTokenSilently();
+          setAccessToken(token);
+        } catch (error) {
+          // Handle error if unable to fetch access token
+          console.error('Error fetching access token:', error);
+        }
       }
     };
 
@@ -43,8 +47,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }: AuthProviderPro
       setDimewiseToken(accessToken);
     }
   }, [accessToken])
-
-  console.log(accessToken);
 
   return (
     <AuthContext.Provider value={{ accessToken }}>
