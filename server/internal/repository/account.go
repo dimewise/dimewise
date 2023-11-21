@@ -13,17 +13,17 @@ type IAccountRepository interface {
 	CreateAccountByModel(account *model.Account) (*model.Account, error)
 }
 
-type AccountRepository struct {
+type accountRepository struct {
 	db *qrm.DB
 }
 
-func NewAccountRepository(db qrm.DB) *AccountRepository {
-	return &AccountRepository{
+func NewAccountRepository(db qrm.DB) IAccountRepository {
+	return &accountRepository{
 		db: &db,
 	}
 }
 
-func (r *AccountRepository) GetAccountByExternalID(externalID string) (*model.Account, error) {
+func (r *accountRepository) GetAccountByExternalID(externalID string) (*model.Account, error) {
 	tbl := table.Account
 	stmt := tbl.SELECT(tbl.AllColumns).
 		FROM(tbl).
@@ -44,7 +44,7 @@ func (r *AccountRepository) GetAccountByExternalID(externalID string) (*model.Ac
 	return &row, nil
 }
 
-func (r *AccountRepository) CreateAccountByModel(account *model.Account) (*model.Account, error) {
+func (r *accountRepository) CreateAccountByModel(account *model.Account) (*model.Account, error) {
 	tbl := table.Account
 	stmt := tbl.INSERT(tbl.MutableColumns).MODEL(account).RETURNING(tbl.AllColumns)
 
