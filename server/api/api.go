@@ -27,8 +27,8 @@ type API struct {
 }
 
 func NewAPI(app *config.App) *API {
-	h := handler.NewHandler(app)
 	re := repository.NewRepository(app.DB())
+	h := handler.NewHandler(app, re)
 	p := ":" + app.EnvVars().AppPort
 
 	auth0IssuerURL, err := url.Parse("https://" + app.EnvVars().Auth0Domain + "/")
