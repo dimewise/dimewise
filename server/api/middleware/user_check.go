@@ -1,16 +1,23 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
+	"github.com/teoyi/dimewise/db/dimewise/public/model"
 	"github.com/teoyi/dimewise/internal/domain"
+	"github.com/teoyi/dimewise/internal/dto"
 	"github.com/teoyi/dimewise/internal/repository"
 	lerrors "github.com/teoyi/dimewise/internal/util/errors"
 )
+
+type authCtxKeyType int
+
+var authCtxKey authCtxKeyType //nolint: gochecknoglobals // non-exported but required for handling context
 
 func UserCheck(re *repository.Repository) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -35,7 +42,10 @@ func UserCheck(re *repository.Repository) func(next http.Handler) http.Handler {
 					}
 
 					slog.Debug("account created", slog.String("id", createdAccount.ID.String()))
-					next.ServeHTTP(w, r)
+
+					authInfoDto := parseAccountInfoToAuthInfoDto(createdAccount)
+					authCtx := context.WithValue(r.Context(), authCtxKey, authInfoDto)
+					next.ServeHTTP(w, r.WithContext(authCtx))
 				}
 
 				slog.Error("Error checking for account", slog.Any("err", err))
@@ -44,10 +54,29 @@ func UserCheck(re *repository.Repository) func(next http.Handler) http.Handler {
 			}
 
 			slog.Debug("account found", slog.String("id", account.ID.String()))
+			authInfoDto := parseAccountInfoToAuthInfoDto(account)
+			authCtx := context.WithValue(r.Context(), authCtxKey, authInfoDto)
 
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(authCtx))
 		}
 
 		return http.HandlerFunc(fn)
 	}
+}
+
+func AuthFromContext(ctx context.Context) *dto.AuthInfoDto {
+	a, ok := ctx.Value(authCtxKey).(*dto.AuthInfoDto)
+	if !ok {
+		panic(errors.New("authentication missing from context"))
+	}
+	return a
+}
+
+func parseAccountInfoToAuthInfoDto(account *model.Account) *dto.AuthInfoDto {
+	dto := dto.AuthInfoDto{
+		ID:         account.ID,
+		ExternalID: account.ExternalID,
+	}
+
+	return &dto
 }
