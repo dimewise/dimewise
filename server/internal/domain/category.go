@@ -20,3 +20,11 @@ func CreateCategory(accountID uuid.UUID, name string, budget int) *model.Categor
 
 	return &category
 }
+
+func UpdateCategoryNameAndBudget(category *model.Category, name string, budget int) *model.Category {
+	category.Name = name
+	category.Budget = int32(budget)
+	category.UpdatedAt = time.Now()
+
+	return category
+}
