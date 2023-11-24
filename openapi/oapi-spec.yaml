@@ -63,6 +63,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullCategoryDto'
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
       description: Get information about a category
@@ -74,6 +76,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
       description: Updates existing category through form submission
@@ -91,6 +95,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
       description: Delete a category based on the ID
@@ -168,6 +174,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullExpenseDto'
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
       operationId: get-expense
@@ -181,6 +189,8 @@ paths:
         '200':
           description: OK
           content: {}
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
       description: Update expense through form subsmission
@@ -198,6 +208,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Forbidden
         '404':
           description: Not Found
       description: Delete expense based on ID
@@ -355,4 +367,3 @@ components:
 tags:
   - name: client
     description: Tags representing API for frontend use
-

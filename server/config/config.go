@@ -13,7 +13,7 @@ type App struct {
 }
 
 func NewApp() *App {
-	a := &App{}
+	a := &App{} //nolint:exhaustruct // config added after
 	env, err := provider.NewEnvProvider()
 	if err != nil {
 		log.Fatalf("error setting environment variables: %v", err)
@@ -21,7 +21,6 @@ func NewApp() *App {
 	a.env = env
 
 	return a
-
 }
 
 func (a *App) EnvVars() *provider.EnvProvider {

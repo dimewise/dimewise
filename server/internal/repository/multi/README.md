@@ -1,1 +1,0 @@
-This directory is meant for functions that reads from multiple tables. Often complex queries.

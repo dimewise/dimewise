@@ -1,6 +1,8 @@
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import React from "react"
+import { deleteCategory, getGetCategoriesKey } from "../../../../generated/api/dimewise";
+import { mutate } from "swr";
 
 interface CategoryListItemProps {
   id: string;
@@ -8,6 +10,15 @@ interface CategoryListItemProps {
 }
 
 const CategoryListItem: React.FC<CategoryListItemProps> = ({ id, name }) => {
+  const onSubmit = () => {
+    deleteCategory(id)
+      .then((res) => {
+        console.log(res);
+        mutate(getGetCategoriesKey)
+      }).catch((error) => {
+        console.error(error)
+      })
+  }
   return (
     <div className="" id={id}>
       <div className="grid gap-5 grid-cols-7">
@@ -20,7 +31,7 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({ id, name }) => {
             <SheetHeader className="mb-5">
               <SheetTitle>Are you sure absolutely sure?</SheetTitle>
               <SheetDescription>
-                This action cannot be undone. This will permanently delete this category from your account.
+                This action cannot be undone. This will permanently delete <span className="font-extrabold">{name}</span> from your account.
               </SheetDescription>
             </SheetHeader>
             <SheetFooter className="flex flex-row w-full items-center justify-center gap-5">
@@ -28,7 +39,7 @@ const CategoryListItem: React.FC<CategoryListItemProps> = ({ id, name }) => {
                 <Button type="button" variant={"outline"}>Cancel</Button>
               </SheetClose>
               <SheetClose asChild>
-                <Button type="submit">Continue</Button>
+                <Button type="submit" onClick={onSubmit}>Continue</Button>
               </SheetClose>
             </SheetFooter>
           </SheetContent>

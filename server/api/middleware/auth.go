@@ -13,6 +13,10 @@ import (
 	"github.com/teoyi/dimewise/config"
 )
 
+const (
+	cacheTTL = 5 * time.Minute
+)
+
 // CustomClaims contains custom data we want from the token.
 type CustomClaims struct {
 	Scope string `json:"scope"`
@@ -20,27 +24,29 @@ type CustomClaims struct {
 
 // Validate does nothing for this example, but we need
 // it to satisfy validator.CustomClaims interface.
-func (c CustomClaims) Validate(ctx context.Context) error {
+func (c CustomClaims) Validate(_ context.Context) error {
 	return nil
 }
 
 // EnsureValidToken is a middleware that will check the validity of our JWT.
 func EnsureValidToken(app *config.App) func(next http.Handler) http.Handler {
-	issuerURL, err := url.Parse("https://" + app.EnvVars().AUTH0_DOMAIN + "/")
+	issuerURL, err := url.Parse("https://" + app.EnvVars().Auth0Domain + "/")
 	if err != nil {
 		log.Fatalf("Failed to parse the issuer url: %v", err)
 	}
 
-	provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
+	provider := jwks.NewCachingProvider(issuerURL, cacheTTL)
 
 	jwtValidator, err := validator.New(
 		provider.KeyFunc,
 		validator.RS256,
 		issuerURL.String(),
-		[]string{app.EnvVars().AUTH0_AUDIENCE},
+		[]string{app.EnvVars().Auth0Audience},
 		validator.WithCustomClaims(
 			func() validator.CustomClaims {
-				return &CustomClaims{}
+				return &CustomClaims{
+					Scope: "",
+				}
 			},
 		),
 		validator.WithAllowedClockSkew(time.Minute),

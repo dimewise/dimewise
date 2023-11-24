@@ -1,1 +1,0 @@
-This directory is meant for functions that are reading from singular tables

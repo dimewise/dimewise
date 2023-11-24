@@ -1,5 +1,3 @@
-import { useAuth0 } from "@auth0/auth0-react";
-import { Navigate } from "react-router-dom";
 import AppLayout from "../../common/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import RecentExpenses from "./components/RecentExpenses";
@@ -7,11 +5,6 @@ import Overview from "./components/Overview";
 import CategoryList from "./components/CategoryList";
 
 const Dashboard: React.FC = () => {
-  const { isAuthenticated } = useAuth0();
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace={true} />;
-  }
-
   return (
     <AppLayout>
       <div className="flex-1 space-y-4 md:p-8 md:pt-6">

@@ -1,0 +1,168 @@
+version: '3'
+
+env:
+  ENV: local
+
+dotenv: ['.env.{{.ENV}}']
+
+tasks:
+  default:
+    cmds:
+      - task -l
+  init:
+    desc: 'Runs all init tasks'
+    silent: true
+    cmds:
+      - task init-env
+      - task init-tools
+      - task refresh
+
+  refresh:
+    desc: 'Refreshes the database and redis cache'
+    silent: true
+    cmds:
+      - task db-refresh
+      - task redis-refresh
+
+  init-env:
+    desc: 'Initialize .env for repo and sub directories'
+    silent: true
+    cmds:
+      - |
+        if [ ! -f .env.local ]; then
+          cp .env.example .env
+        fi
+      - |
+        if [ ! -f ./server/app.env ]; then 
+          cp ./server/app.env.example .app.env
+        fi
+      - |
+        if [ ! -f ./web/.env ]; then 
+          cp ./web/.env.example .env
+        fi
+
+  init-tools:
+    desc: 'Initialize the tools used by the project (from tools.txt)'
+    silent: true
+    cmds:
+      - |
+        if [ ! -d ./server/bin ]; then
+          mkdir ./server/bin
+        fi
+      - |
+        export GOBIN=${PWD}/server/bin
+        while read -r line; do
+          exec=$(basename $line)
+          exec=${exec%%@*}
+          if [ ! -f ${GOBIN}/$exec ]; then
+            echo "Installing tool $exec"
+            go install $line
+          fi
+        done < ./server/tools.txt
+      - |
+        cd ./web && yarn
+
+  update-tools:
+    desc: 'Update the tools used by the project (from tools.txt)'
+    silent: true
+    cmds:
+      - rm -rf ./server/bin
+      - task init-tools
+
+  db-init:
+    desc: 'Create a fresh database'
+    silent: false
+    cmds:
+      - psql "postgresql://"$(echo $DATABASE_URL | cut -d/ -f3) -c "DROP DATABASE IF EXISTS \"${DATABASE_NAME}\" WITH (FORCE);"
+      - psql "postgresql://"$(echo $DATABASE_URL | cut -d/ -f3) -c "CREATE DATABASE \"${DATABASE_NAME}\";"
+
+  db-refresh:
+    desc: 'Create a fresh database and run migrations'
+    silent: true
+    cmds:
+      - task db-init
+      - task db-migration-up
+
+  db-migration-up:
+    desc: 'Run database migrations'
+    silent: false
+    cmds:
+      - ./server/bin/goose -dir ./server/db/migrations postgres "${DATABASE_URL}" up
+
+  db-migration-down:
+    desc: 'Run database migrations'
+    silent: false
+    cmds:
+      - ./server/bin/goose -dir ./server/db/migrations postgres "${DATABASE_URL}" down
+
+  codegen-db-models:
+    desc: 'Generate database models'
+    silent: true
+    cmds:
+      - ./server/bin/jet -dsn="$DATABASE_URL" -schema=public -path=./server/db
+
+  codegen-openapi:
+    desc: 'Generate openapi spec'
+    silent: true
+    cmds:
+      - ./server/bin/oapi-codegen -config ./server/oapi/codegen.yaml ${OPENAPI_SPEC}
+      - cd ./web && yarn gen:oapi
+
+  codegen:
+    desc: 'Update database models'
+    silent: true
+    cmds:
+      - task codegen-openapi
+      - task codegen-db-models
+      - task format
+      - task lint-fix
+
+  update-dependencies:
+    desc: 'Update dependencies'
+    silent: true
+    cmds:
+      - cd ./server && go get -u ./...
+      - cd ./server && go mod tidy
+
+  format:
+    desc: 'Format all files'
+    silent: false
+    cmds:
+      - ./server/bin/goimports -w .
+      - cd ./server && gofmt -w .
+      - ./server/bin/golines -w .
+
+  lint:
+    desc: 'Lint all files'
+    silent: false
+    cmds:
+      - cd ./server && ./bin/golangci-lint run -c ./.golangci.yml
+
+  lint-fix:
+    desc: 'Lint all files and fix issues'
+    silent: false
+    cmds:
+      - cd ./server && ./bin/golangci-lint run --fix -c ./.golangci.yml
+
+  run:
+    desc: 'Run the server'
+    silent: true
+    cmds:
+      - |
+        echo "Starting server and worker, press Ctrl+C to stop..."
+        trap 'kill 0' EXIT 
+        task run-server
+        wait
+
+  run-server:
+    desc: 'Run the server'
+    silent: true
+    cmds:
+      - cd ./server && go run ./cmd/server/main.go
+
+  run-fresh:
+    desc: 'Run the server and worker with a fresh database'
+    silent: true
+    cmds:
+      - task refresh
+      - task run

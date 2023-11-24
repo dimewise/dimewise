@@ -2137,6 +2137,14 @@ func (response DeleteCategory200Response) VisitDeleteCategoryResponse(w http.Res
 	return nil
 }
 
+type DeleteCategory403Response struct {
+}
+
+func (response DeleteCategory403Response) VisitDeleteCategoryResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
 type DeleteCategory404Response struct {
 }
 
@@ -2162,6 +2170,14 @@ func (response GetCategory200JSONResponse) VisitGetCategoryResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetCategory403Response struct {
+}
+
+func (response GetCategory403Response) VisitGetCategoryResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
 type GetCategory404Response struct {
 }
 
@@ -2184,6 +2200,14 @@ type PatchCategory200Response struct {
 
 func (response PatchCategory200Response) VisitPatchCategoryResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
+	return nil
+}
+
+type PatchCategory403Response struct {
+}
+
+func (response PatchCategory403Response) VisitPatchCategoryResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
 	return nil
 }
 
@@ -2265,6 +2289,14 @@ func (response DeleteExpense200Response) VisitDeleteExpenseResponse(w http.Respo
 	return nil
 }
 
+type DeleteExpense403Response struct {
+}
+
+func (response DeleteExpense403Response) VisitDeleteExpenseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
 type DeleteExpense404Response struct {
 }
 
@@ -2290,6 +2322,14 @@ func (response GetExpense200JSONResponse) VisitGetExpenseResponse(w http.Respons
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetExpense403Response struct {
+}
+
+func (response GetExpense403Response) VisitGetExpenseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
 type GetExpense404Response struct {
 }
 
@@ -2312,6 +2352,14 @@ type PatchExpense200Response struct {
 
 func (response PatchExpense200Response) VisitPatchExpenseResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
+	return nil
+}
+
+type PatchExpense403Response struct {
+}
+
+func (response PatchExpense403Response) VisitPatchExpenseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
 	return nil
 }
 
