@@ -14,6 +14,8 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import React from "react";
+import { getGetCategoriesKey, postCategory } from "../../../../../../generated/api/dimewise";
+import { mutate } from "swr";
 
 const createCategorySchema = z.object({
   name: z.string().min(1, {
@@ -27,12 +29,23 @@ const CreateCategoryButton: React.FC = () => {
   const form = useForm<z.infer<typeof createCategorySchema>>({
     resolver: zodResolver(createCategorySchema),
     defaultValues: {
+      name: "",
       amount: 0,
     }
   });
 
   function onSubmit(values: z.infer<typeof createCategorySchema>) {
-    setOpen(false);
+    postCategory({
+      budget: values.amount,
+      name: values.name,
+    }).then((res) => {
+      console.log(res);
+      form.reset({ name: "", amount: 0 })
+      mutate(getGetCategoriesKey);
+      setOpen(false);
+    }).catch((err) => {
+      console.log(err);
+    })
   }
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -87,7 +100,7 @@ const CreateCategoryButton: React.FC = () => {
                 )}
               />
               <Button type="submit" className="w-full">
-                Save Expense
+                Save Category
               </Button>
             </form>
           </Form>

@@ -1,37 +1,13 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import CategoryListItem from "../CategoryListItem";
-import { Button } from "@/components/ui/button";
 import CreateCategoryButton from "./components/CreateCategoryButton";
-
-const data = [
-  {
-    id: "1",
-    name: "Groceries",
-  },
-  {
-    id: "2",
-    name: "Entertainment",
-  },
-  {
-    id: "3",
-    name: "Utilities",
-  },
-  {
-    id: "4",
-    name: "Dining",
-  },
-  {
-    id: "5",
-    name: "Transportation",
-  },
-  {
-    id: "6",
-    name: "Healthcare",
-  },
-];
+import { useGetCategories } from "../../../../generated/api/dimewise";
+import { BaseCategoryDto } from "src/generated/dto";
 
 const AccordionCategory: React.FC = () => {
+  const { data, isLoading, error } = useGetCategories()
+  console.log(data);
+
   return (
     <AccordionItem value="category">
       <AccordionTrigger>Manage Category</AccordionTrigger>
@@ -41,13 +17,22 @@ const AccordionCategory: React.FC = () => {
             <p className="text-sm col-span-5 flex items-center">Name</p>
             <p className="col-span-2">Action</p>
           </div>
-          {data.map((category, index) => (
-            <CategoryListItem
-              key={index}
-              id={category.id}
-              name={category.name}
-            />
-          ))}
+          {error
+            ? <div>Error</div>
+            : isLoading
+              ? <div>Loading</div>
+              : !data
+                ? <div>No categories available</div>
+                : (data.categories && data.categories?.length > 0)
+                  ? (data.categories.map((category: BaseCategoryDto, index: number) => (
+                    <CategoryListItem
+                      key={index}
+                      id={category.id}
+                      name={category.name}
+                    />
+                  )))
+                  : <div>No category</div>
+          }
         </div>
         <CreateCategoryButton />
       </AccordionContent>
