@@ -159,7 +159,7 @@ const QuickAccess: React.FC = () => {
                       />
                     </FormControl>
                     <FormDescription>
-                      This is your public display name.
+                      This is how much your expense cost.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
