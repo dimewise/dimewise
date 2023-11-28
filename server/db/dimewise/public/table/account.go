@@ -19,6 +19,7 @@ type accountTable struct {
 	// Columns
 	ID         postgres.ColumnString
 	ExternalID postgres.ColumnString
+	Email      postgres.ColumnString
 	CreatedAt  postgres.ColumnTimestampz
 	UpdatedAt  postgres.ColumnTimestampz
 
@@ -63,10 +64,11 @@ func newAccountTableImpl(schemaName, tableName, alias string) accountTable {
 	var (
 		IDColumn         = postgres.StringColumn("id")
 		ExternalIDColumn = postgres.StringColumn("external_id")
+		EmailColumn      = postgres.StringColumn("email")
 		CreatedAtColumn  = postgres.TimestampzColumn("created_at")
 		UpdatedAtColumn  = postgres.TimestampzColumn("updated_at")
-		allColumns       = postgres.ColumnList{IDColumn, ExternalIDColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns   = postgres.ColumnList{ExternalIDColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns       = postgres.ColumnList{IDColumn, ExternalIDColumn, EmailColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns   = postgres.ColumnList{ExternalIDColumn, EmailColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return accountTable{
@@ -75,6 +77,7 @@ func newAccountTableImpl(schemaName, tableName, alias string) accountTable {
 		//Columns
 		ID:         IDColumn,
 		ExternalID: ExternalIDColumn,
+		Email:      EmailColumn,
 		CreatedAt:  CreatedAtColumn,
 		UpdatedAt:  UpdatedAtColumn,
 
