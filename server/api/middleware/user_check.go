@@ -23,13 +23,17 @@ func UserCheck(re *repository.Repository) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			claims, _ := r.Context().Value(jwtmiddleware.ContextKey{}).(*validator.ValidatedClaims)
-			subject := claims.RegisteredClaims.Subject
-			account, err := re.Account.GetAccountByExternalID(subject)
+			customClaims, _ := claims.CustomClaims.(*AuthClaims)
+
+			externalID := claims.RegisteredClaims.Subject
+			email := customClaims.Email
+
+			account, err := re.Account.GetAccountByExternalIDOrEmail(externalID, email)
 			if err != nil {
 				if errors.Is(err, lerrors.ErrResourceNotFound) {
 					slog.Debug("account not found, creating new one ")
 					// create new account
-					model := domain.CreateAccountByExternalID(subject)
+					model := domain.CreateAccountByExternalIDAndEmail(externalID, email)
 					createdAccount, createErr := re.Account.CreateAccountByModel(model)
 					if createErr != nil {
 						slog.Error("Error creating account", slog.Any("err", createErr))

@@ -17,14 +17,14 @@ const (
 	cacheTTL = 5 * time.Minute
 )
 
-// CustomClaims contains custom data we want from the token.
-type CustomClaims struct {
+type AuthClaims struct {
 	Scope string `json:"scope"`
+	Email string `json:"email"`
 }
 
 // Validate does nothing for this example, but we need
 // it to satisfy validator.CustomClaims interface.
-func (c CustomClaims) Validate(_ context.Context) error {
+func (c AuthClaims) Validate(_ context.Context) error {
 	return nil
 }
 
@@ -44,8 +44,9 @@ func EnsureValidToken(app *config.App) func(next http.Handler) http.Handler {
 		[]string{app.EnvVars().Auth0Audience},
 		validator.WithCustomClaims(
 			func() validator.CustomClaims {
-				return &CustomClaims{
+				return &AuthClaims{
 					Scope: "",
+					Email: "",
 				}
 			},
 		),

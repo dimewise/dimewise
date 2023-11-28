@@ -10,6 +10,7 @@ import (
 
 type IAccountRepository interface {
 	GetAccountByExternalID(externalID string) (*model.Account, error)
+	GetAccountByExternalIDOrEmail(externalID string, email string) (*model.Account, error)
 	CreateAccountByModel(account *model.Account) (*model.Account, error)
 }
 
@@ -28,6 +29,27 @@ func (r *accountRepository) GetAccountByExternalID(externalID string) (*model.Ac
 	stmt := tbl.SELECT(tbl.AllColumns).
 		FROM(tbl).
 		WHERE(tbl.ExternalID.EQ(String(externalID))).
+		LIMIT(1)
+
+	rows := []model.Account{}
+	err := stmt.Query(*r.db, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rows) != 1 {
+		return nil, lerrors.ErrResourceNotFound
+	}
+
+	row := rows[0]
+	return &row, nil
+}
+
+func (r *accountRepository) GetAccountByExternalIDOrEmail(externalID string, email string) (*model.Account, error) {
+	tbl := table.Account
+	stmt := tbl.SELECT(tbl.AllColumns).
+		FROM(tbl).
+		WHERE(tbl.ExternalID.EQ(String(externalID)).OR(tbl.Email.EQ(String(email)))).
 		LIMIT(1)
 
 	rows := []model.Account{}

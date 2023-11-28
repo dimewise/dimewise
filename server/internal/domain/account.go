@@ -7,11 +7,12 @@ import (
 	"github.com/teoyi/dimewise/db/dimewise/public/model"
 )
 
-func CreateAccountByExternalID(externalID string) *model.Account {
+func CreateAccountByExternalIDAndEmail(externalID string, email string) *model.Account {
 	now := time.Now()
 	account := model.Account{
 		ID:         uuid.New(),
 		ExternalID: externalID,
+		Email:      email,
 		CreatedAt:  now,
 		UpdatedAt:  now,
 	}
