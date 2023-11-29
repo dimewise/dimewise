@@ -278,13 +278,13 @@ export const useGetExpense = <TError = void>(
  */
 export const patchExpense = (
   expenseID: string,
-  modifyCategoryDto: ModifyCategoryDto
+  modifyExpenseDto: ModifyExpenseDto
 ) => {
   return DimewiseCustomFetcher<unknown>({
     url: `/expenses/${expenseID}`,
     method: "patch",
     headers: { "Content-Type": "application/json" },
-    data: modifyCategoryDto,
+    data: modifyExpenseDto,
   });
 };
 

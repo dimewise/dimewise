@@ -1,19 +1,18 @@
-import AppLayout from "../../common/AppLayout";
 import { Button } from "@/components/ui/button";
-import { useGetCategories } from "../../generated/api/dimewise";
+import { useGetCategories, useGetExpensesOverview } from "../../generated/api/dimewise";
 
 const History: React.FC = () => {
-  const { data } = useGetCategories()
+  const { data } = useGetExpensesOverview()
 
   console.log(data);
 
   return (
-    <AppLayout>
+    <>
       <div className="w-full flex flex-col gap-5 justify-center items-center">
         history
       </div>
       <Button>Test</Button>
-    </AppLayout>
+    </>
   );
 };
 

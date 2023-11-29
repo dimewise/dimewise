@@ -2,6 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import QuickAccess from "./components/QuickAccess";
 import AuthenticatedNavigation from "./components/AuthenticatedNavigation";
 import UnauthenticatedNavigation from "./components/UnauthenticatedNavigation";
+
 interface AppLayoutProps {
   children: React.ReactNode;
 }

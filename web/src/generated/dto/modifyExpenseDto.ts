@@ -11,7 +11,7 @@
  */
 export interface ModifyExpenseDto {
   /** Amount spent on the expense */
-  amount: string;
+  amount: number;
   /** ID of the category for the expense */
   category_id: string;
   /** Description of the expense */

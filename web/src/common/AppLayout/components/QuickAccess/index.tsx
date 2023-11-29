@@ -1,12 +1,11 @@
 import { MdAdd } from "react-icons/md";
+import { TbLoader2 } from "react-icons/tb";
 import { IconContext } from "react-icons";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -33,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import React from "react";
+import { useGetCategories } from "../../../../generated/api/dimewise";
 
 const createExpenseSchema = z.object({
   title: z.string().min(1, {
@@ -45,9 +45,12 @@ const createExpenseSchema = z.object({
 
 const QuickAccess: React.FC = () => {
   const [open, setOpen] = React.useState<boolean>(false);
+  const { data: categories, isLoading: categoriesIsLoading, error: categoriesErr } = useGetCategories()
   const form = useForm<z.infer<typeof createExpenseSchema>>({
     resolver: zodResolver(createExpenseSchema),
     defaultValues: {
+      title: "",
+      description: "",
       amount: 0,
     }
   });
@@ -56,13 +59,27 @@ const QuickAccess: React.FC = () => {
     setOpen(false);
   }
 
+  console.log("loading", categoriesIsLoading)
+  console.log("ca", categories)
+  console.log(categoriesErr)
+
+  if (categoriesErr) {
+    return <div>Error getting categories</div>
+  }
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button className="fixed bottom-4 right-4 w-16 h-16 rounded-full">
-          <IconContext.Provider value={{ className: "text-3xl" }}>
-            <MdAdd />
-          </IconContext.Provider>
+        <Button disabled={categoriesIsLoading || !categories} className="fixed bottom-4 right-4 w-16 h-16 rounded-full">
+          {categoriesIsLoading || !categories ?
+            <IconContext.Provider value={{ className: "text-3xl animate-spin" }}>
+              <TbLoader2 />
+            </IconContext.Provider>
+            :
+            <IconContext.Provider value={{ className: "text-3xl" }}>
+              <MdAdd />
+            </IconContext.Provider>
+          }
         </Button>
       </SheetTrigger>
       <SheetContent side="bottom" className="max-h-[90%] overflow-x-auto">
@@ -90,17 +107,27 @@ const QuickAccess: React.FC = () => {
                           <SelectValue placeholder="Select a category for this expense" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="abcdddd8-b0c5-4af5-b129-e9ff01c47f59">
-                          Category 1
-                        </SelectItem>
-                        <SelectItem value="c2a4d8c7-cd05-4c8b-9110-e0e6791d1ef4">
-                          Category 2
-                        </SelectItem>
-                        <SelectItem value="a1880890-a9e6-4017-85ba-64d3c215ede7">
-                          Category 3
-                        </SelectItem>
-                      </SelectContent>
+                      {categoriesErr
+                        ? <SelectContent>
+                          <SelectItem value="test">
+                            Error loading categories
+                          </SelectItem>
+                        </SelectContent>
+                        : !categoriesIsLoading || !categories
+                          ? <SelectContent>
+                            {categories?.categories &&
+                              categories.categories.map((category) => (
+                                <SelectItem key={category.id} value={category.id}>
+                                  {category.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                          : <SelectContent>
+                            <SelectItem value="test">
+                              No categories available
+                            </SelectItem>
+                          </SelectContent>
+                      }
                     </Select>
                     <FormDescription>
                       This will act as an identifier for this expense.
@@ -172,7 +199,7 @@ const QuickAccess: React.FC = () => {
           </Form>
         </div>
       </SheetContent>
-    </Sheet>
+    </Sheet >
   );
 };
 

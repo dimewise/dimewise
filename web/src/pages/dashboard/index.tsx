@@ -1,4 +1,3 @@
-import AppLayout from "../../common/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import RecentExpenses from "./components/RecentExpenses";
 import Overview from "./components/Overview";
@@ -6,7 +5,7 @@ import CategoryList from "./components/CategoryList";
 
 const Dashboard: React.FC = () => {
   return (
-    <AppLayout>
+    <>
       <div className="flex-1 space-y-4 md:p-8 md:pt-6">
         <div className="flex items-center justify-between space-y-2 mb-5">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -27,7 +26,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 };
 

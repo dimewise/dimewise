@@ -5,8 +5,10 @@ import { useGetCategories } from "../../../../generated/api/dimewise";
 import { BaseCategoryDto } from "src/generated/dto";
 
 const AccordionCategory: React.FC = () => {
-  const { data, isLoading, error } = useGetCategories()
-  console.log(data);
+  const { data, isLoading, error } = useGetCategories();
+
+  // Destructure data.categories here
+  const { categories } = data || {};
 
   return (
     <AccordionItem value="category">
@@ -17,27 +19,26 @@ const AccordionCategory: React.FC = () => {
             <p className="text-sm col-span-5 flex items-center">Name</p>
             <p className="col-span-2">Action</p>
           </div>
-          {error
-            ? <div>Error</div>
-            : isLoading
-              ? <div>Loading</div>
-              : !data
-                ? <div>No categories available</div>
-                : (data.categories && data.categories?.length > 0)
-                  ? (data.categories.map((category: BaseCategoryDto, index: number) => (
-                    <CategoryListItem
-                      key={index}
-                      id={category.id}
-                      name={category.name}
-                    />
-                  )))
-                  : <div>No category</div>
-          }
+          {error ? (
+            <div>Error</div>
+          ) : isLoading ? (
+            <div>Loading</div>
+          ) : !categories || categories.length === 0 ? (
+            <div>No categories available</div>
+          ) : (
+            categories.map((category: BaseCategoryDto, index: number) => (
+              <CategoryListItem
+                key={index}
+                id={category.id}
+                name={category.name}
+              />
+            ))
+          )}
         </div>
         <CreateCategoryButton />
       </AccordionContent>
-    </AccordionItem >
-  )
+    </AccordionItem>
+  );
 }
 
 export default AccordionCategory;

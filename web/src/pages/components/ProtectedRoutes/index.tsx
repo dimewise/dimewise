@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom"
 import { useAuth0 } from "@auth0/auth0-react";
 import { setDimewiseToken } from "../../../api/custom-fetch";
+import AppLayout from "../../../common/AppLayout";
 
 export const ProtectedRoutes: React.FC = () => {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
@@ -19,6 +20,10 @@ export const ProtectedRoutes: React.FC = () => {
   } else {
     setDimewiseToken("")
   }
-  return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
+  return isAuthenticated ? (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  ) : <Navigate to="/" replace />;
 }
 
