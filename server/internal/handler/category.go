@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/sagikazarmark/slog-shim"
 	"github.com/teoyi/dimewise/api/middleware"
@@ -19,10 +20,10 @@ func (h *Handler) GetCategory(
 	category, err := h.Repo.Category.GetCategoryByID(req.CategoryID)
 	if err != nil {
 		if errors.Is(err, lerrors.ErrResourceNotFound) {
-			slog.Error("error retrieving category", slog.Any("error", err))
 			return oapi.GetCategory404Response{}, nil
 		}
 
+		slog.Error("error retrieving category", slog.Any("error", err))
 		return nil, err
 	}
 
@@ -66,6 +67,9 @@ func (h *Handler) GetCategories(
 
 		dtos = append(dtos, dto)
 	}
+
+	log.Println("test categories here")
+	log.Println(dtos)
 
 	return oapi.GetCategories200JSONResponse{
 		Categories: &dtos,

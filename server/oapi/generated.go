@@ -70,10 +70,10 @@ type ModifyCategoryDto struct {
 // ModifyExpenseDto DTO for creating or updating an expense
 type ModifyExpenseDto struct {
 	// Amount Amount spent on the expense
-	Amount string `json:"amount"`
+	Amount int `json:"amount"`
 
 	// CategoryId ID of the category for the expense
-	CategoryId string `json:"category_id"`
+	CategoryId openapi_types.UUID `json:"category_id"`
 
 	// Description Description of the expense
 	Description string `json:"description"`
@@ -122,7 +122,7 @@ type PatchCategoryJSONRequestBody = ModifyCategoryDto
 type PostExpenseJSONRequestBody = ModifyExpenseDto
 
 // PatchExpenseJSONRequestBody defines body for PatchExpense for application/json ContentType.
-type PatchExpenseJSONRequestBody = ModifyCategoryDto
+type PatchExpenseJSONRequestBody = ModifyExpenseDto
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
