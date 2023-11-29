@@ -198,7 +198,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ModifyCategoryDto'
+              $ref: '#/components/schemas/ModifyExpenseDto'
         description: Form submission fields
       tags:
         - client
@@ -321,11 +321,12 @@ components:
           type: string
           description: Description of the expense
         amount:
-          type: string
+          type: integer
           description: Amount spent on the expense
         category_id:
           type: string
           description: ID of the category for the expense
+          format: uuid
       required:
         - title
         - description
