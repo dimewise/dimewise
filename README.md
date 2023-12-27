@@ -25,9 +25,8 @@ DimeWise leverages recent technologies:
 
 Experience the power of personalized budgeting with DimeWise. Take control of your financial journey, one category at a time.
 
-[Explore DimeWise](#) | [Documentation](#)
+[Explore DimeWise](#) | [Documentation](./docs/setup.md)
 
 ---
 
 _DimeWise - Where Every Dime Counts._
-
