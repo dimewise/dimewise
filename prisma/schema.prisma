@@ -38,6 +38,7 @@ model User {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   email           String     @unique
+  authId          String
   name            String?
   avatarUrl       String?
   defaultCurrency Currencies
