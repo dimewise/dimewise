@@ -90,5 +90,5 @@ Signature: [Your Signature]
 Date: 2023-12-29
 
 **Halvor Kvernes Meen**  
-Signature: [Signature]  
+Signature: Halvor Kvernes Meen  
 Date: 2023-12-29
