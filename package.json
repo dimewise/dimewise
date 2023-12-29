@@ -47,6 +47,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@prisma/client": "^5.7.1",
 		"@supabase/supabase-js": "^2.39.1"
 	}
 }
