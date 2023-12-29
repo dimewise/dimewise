@@ -86,7 +86,7 @@ The parties agree to collaborate on the development of the application "Dimewise
 Executed by:
 
 **Teo Yi Peng**  
-Signature: [Your Signature]  
+Signature: Teo Yi Peng  
 Date: 2023-12-29
 
 **Halvor Kvernes Meen**  
