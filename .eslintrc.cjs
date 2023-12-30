@@ -5,7 +5,7 @@ module.exports = {
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
 		'plugin:svelte/recommended',
-		'prettier'
+		'prettier',
 	],
 	rules: {
 		'arrow-body-style': ['error', 'as-needed'],
@@ -25,8 +25,8 @@ module.exports = {
 				detectObjects: false,
 				enforceConst: true,
 				ignore: [-1, 0, 1, 2, 10, 100],
-				ignoreArrayIndexes: true
-			}
+				ignoreArrayIndexes: true,
+			},
 		],
 		'arrow-parens': ['warn', 'as-needed'],
 		'block-spacing': ['warn', 'always'],
@@ -38,9 +38,9 @@ module.exports = {
 			{
 				accessibility: 'no-public',
 				overrides: {
-					parameterProperties: 'explicit'
-				}
-			}
+					parameterProperties: 'explicit',
+				},
+			},
 		],
 		'@typescript-eslint/explicit-function-return-type': 'warn',
 		'@typescript-eslint/no-unused-vars': 'warn',
@@ -54,8 +54,8 @@ module.exports = {
 			{
 				button: true,
 				submit: true,
-				reset: true
-			}
+				reset: true,
+			},
 		],
 		'svelte/no-ignored-unsubscribe': 'error',
 		'svelte/no-inline-styles': 'error',
@@ -65,28 +65,28 @@ module.exports = {
 		'svelte/valid-each-key': 'error',
 		'svelte/prefer-class-directive': 'error',
 		'svelte/shorthand-attribute': 'error',
-		'svelte/shorthand-directive': 'error'
+		'svelte/shorthand-directive': 'error',
 	},
 	parser: '@typescript-eslint/parser',
 	plugins: ['@typescript-eslint'],
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
-		extraFileExtensions: ['.svelte']
+		extraFileExtensions: ['.svelte'],
 	},
 	env: {
 		browser: true,
 		es2017: true,
-		node: true
+		node: true,
 	},
 	overrides: [
 		{
 			files: ['*.svelte'],
 			parser: 'svelte-eslint-parser',
 			parserOptions: {
-				parser: '@typescript-eslint/parser'
-			}
-		}
+				parser: '@typescript-eslint/parser',
+			},
+		},
 	],
-	ignorePatterns: ['supabase']
+	ignorePatterns: ['supabase'],
 };
