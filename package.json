@@ -11,7 +11,8 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
-		"test:unit": "vitest"
+		"test:unit": "vitest",
+		"setup:hooks": "cp scripts/* .git/hooks/ && chmod +x .git/hooks/pre-commit .git/hooks/pre-push"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
