@@ -1,20 +1,7 @@
 #!/bin/bash
 
-# Get the list of modified files
-modified_files=$(git diff --cached --name-only --diff-filter=ACM)
+# Run the format script before committing changes
+npm run format
 
-# Check if there are any modified files
-if [ -n "$modified_files" ]; then
-  # Run the format script only for modified files
-  echo "Formatting modified files..."
-  echo "$modified_files" | xargs npm run format
-
-  # Add the formatted files to the staging area
-  git add $modified_files
-
-  # Display a message indicating successful formatting
-  echo "Formatting completed for modified files."
-fi
-
-# Exit with success
-exit 0
+# Exit with the exit code of the npm run format command
+exit $?
