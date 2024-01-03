@@ -23,18 +23,13 @@ module.exports = {
 		},
 	],
 	ignorePatterns: ['supabase'],
-	extends: [
-		'eslint:recommended',
-		'plugin:@typescript-eslint/recommended',
-		'plugin:svelte/recommended',
-		'prettier',
-	],
+	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:svelte/recommended', 'prettier'],
 	rules: {
 		// Stylistic
 		'@stylistic/js/max-len': [
 			'warn',
 			{
-				code: 100,
+				code: 120,
 				tabWidth: 2,
 				ignoreUrls: true,
 				ignoreComments: true,
