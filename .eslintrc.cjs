@@ -1,6 +1,28 @@
 /** @type { import("eslint").Linter.Config } */
 module.exports = {
 	root: true,
+	env: {
+		browser: true,
+		es2017: true,
+		node: true,
+	},
+	parser: '@typescript-eslint/parser',
+	parserOptions: {
+		sourceType: 'module',
+		ecmaVersion: 2020,
+		extraFileExtensions: ['.svelte'],
+	},
+	plugins: ['@typescript-eslint', '@stylistic/js'],
+	overrides: [
+		{
+			files: ['*.svelte'],
+			parser: 'svelte-eslint-parser',
+			parserOptions: {
+				parser: '@typescript-eslint/parser',
+			},
+		},
+	],
+	ignorePatterns: ['supabase'],
 	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
@@ -8,15 +30,36 @@ module.exports = {
 		'prettier',
 	],
 	rules: {
+		// Stylistic
+		'@stylistic/js/max-len': [
+			'warn',
+			{
+				code: 80,
+				tabWidth: 2,
+				ignoreUrls: true,
+			},
+		],
+		'@stylistic/js/arrow-parens': ['warn', 'as-needed'],
+		'@stylistic/js/block-spacing': ['warn', 'always'],
+		'@stylistic/js/no-multiple-empty-lines': ['warn', { max: 1, maxEOF: 1 }],
+		'@stylistic/js/max-statements-per-line': ['warn', { max: 1 }],
+		'@stylistic/js/one-var-declaration-per-line': ['warn', 'always'],
+		'@stylistic/js/operator-linebreak': ['warn', 'none'],
+
+		// Typescript
 		'arrow-body-style': ['error', 'as-needed'],
-		'max-statements-per-line': ['warn', { max: 1 }],
 		'no-nested-ternary': 'warn',
 		'no-unneeded-ternary': 'warn',
-		'one-var-declaration-per-line': ['warn', 'always'],
 		'operator-assignment': ['warn', 'always'],
-		'operator-linebreak': ['warn', 'none'],
 		'max-depth': ['warn', 1],
-		'max-lines-per-function': ['warn', { max: 10, skipBlankLines: true, skipComments: true }],
+		'max-lines-per-function': [
+			'warn',
+			{
+				max: 10,
+				skipBlankLines: true,
+				skipComments: true,
+			},
+		],
 		'max-nested-callbacks': ['warn', 1],
 		'max-params': ['warn', 2],
 		'no-magic-numbers': [
@@ -28,11 +71,7 @@ module.exports = {
 				ignoreArrayIndexes: true,
 			},
 		],
-		'arrow-parens': ['warn', 'as-needed'],
-		'block-spacing': ['warn', 'always'],
 		curly: ['warn', 'all'],
-		'no-multiple-empty-lines': ['warn', { max: 1, maxEOF: 1 }],
-		'no-unused-vars': 'off',
 		'@typescript-eslint/explicit-member-accessibility': [
 			'warn',
 			{
@@ -67,26 +106,4 @@ module.exports = {
 		'svelte/shorthand-attribute': 'error',
 		'svelte/shorthand-directive': 'error',
 	},
-	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint'],
-	parserOptions: {
-		sourceType: 'module',
-		ecmaVersion: 2020,
-		extraFileExtensions: ['.svelte'],
-	},
-	env: {
-		browser: true,
-		es2017: true,
-		node: true,
-	},
-	overrides: [
-		{
-			files: ['*.svelte'],
-			parser: 'svelte-eslint-parser',
-			parserOptions: {
-				parser: '@typescript-eslint/parser',
-			},
-		},
-	],
-	ignorePatterns: ['supabase'],
 };
