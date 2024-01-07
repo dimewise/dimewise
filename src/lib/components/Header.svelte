@@ -48,6 +48,8 @@
 				<div class="p-4 w-80 min-h-full bg-base-100 flex flex-col">
 					<ul class="menu flex-1">
 						<li class="flex-none"><a href="/" on:click={toggleDrawer}>Home</a></li>
+						<li class="flex-none"><a href="/terms-of-service" on:click={toggleDrawer}>Terms of Service</a></li>
+						<li class="flex-none"><a href="/privacy-policy" on:click={toggleDrawer}>Privacy Policy</a></li>
 					</ul>
 					<div class="flex-none w-full flex flex-col justify-center items-center gap-3">
 						<a class="btn btn-wide btn-primary" href="/auth/login" on:click={toggleDrawer}>Login</a>
