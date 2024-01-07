@@ -1,53 +1,12 @@
 <script>
-	import Header from './Header.svelte';
+	import Header from '$lib/components/header.svelte';
 	import './styles.css';
 </script>
 
-<div class="app">
+<div class="flex flex-col min-h-screen">
 	<Header />
-
-	<main>
+	<main class="flex-1 flex flex-col p-4 w-full max-w-5xl mx-auto box-border">
 		<slot />
 	</main>
-
-	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
-	</footer>
+	<footer class="flex flex-col justify-center items-center p-3 md:p-0"></footer>
 </div>
-
-<style>
-	.app {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
-
-	main {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
-		box-sizing: border-box;
-	}
-
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
-	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
-</style>
