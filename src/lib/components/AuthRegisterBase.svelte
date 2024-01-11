@@ -5,37 +5,42 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import { fly } from 'svelte/transition';
 
+	// form submission
 	export let data: PageData;
-	export let toggleContinueWithEmail: () => void;
-	const { form, errors, enhance, message } = superForm(data.validateEmailForm, {
+	export let validatedEmail: string;
+	export let continueWithEmail: boolean;
+	const { form, errors, enhance } = superForm(data.validateEmailForm, {
 		resetForm: true,
 		autoFocusOnError: 'detect',
 		onUpdated: ({ form }) => {
 			const message = form.message;
 			if (message?.success && message?.status === HttpStatusCode.OK) {
-				toggleContinueWithEmail();
+				validatedEmail = form.data.email;
+				continueWithEmail = true;
 			} else if (!message?.success && message?.status === HttpStatusCode.InternalServerError) {
-				// TODO: Handle error with custom toast or third party library with daisy
-				console.error(message);
+				// TODO: message is available for use
+				const errorModal = document.getElementById('auth_register_500_error_modal') as HTMLDialogElement;
+				errorModal.showModal();
 			}
 		},
+		// TODO: consider setting onError as a catch all
 	});
 
+	// modal handling
+	function handleCloseModal() {
+		const errorModal = document.getElementById('auth_register_500_error_modal') as HTMLDialogElement;
+		errorModal.close();
+	}
+
+	// social login
 	let socialButtons = [
 		{ icon: 'bxl:facebook-circle', text: 'Facebook', variant: '' },
 		{ icon: 'bxl:google', text: 'Google', variant: '' },
 		{ icon: 'bxl:apple', text: 'Apple', variant: '' },
 	];
-
-	if ($errors) {
-		console.error($errors.email);
-	}
-
-	// TODO: add toast for message?
-	console.log($message);
 </script>
 
-<div in:fly={{ duration: 300 }} class="flex flex-col items-center justify-center gap-5">
+<div in:fly class="flex flex-col items-center justify-center gap-5">
 	<div class="flex flex-col items-center justify-center">
 		<h2 class="my-0">Create an account</h2>
 		<p>Enter your email below to create your account</p>
@@ -71,4 +76,13 @@
 		By clicking continue, you agree to our <a href="/terms-of-service">Terms of Service</a> and
 		<a href="/privacy-policy">Privacy Policy</a>
 	</p>
+	<dialog id="auth_register_500_error_modal" class="modal">
+		<div class="modal-box">
+			<p class="text-lg font-bold">Error</p>
+			<p class="text-sm">An error occurred while trying to register your account. Please try again later.</p>
+			<div class="modal-action">
+				<button class="btn btn-primary" on:click={handleCloseModal}>OK</button>
+			</div>
+		</div>
+	</dialog>
 </div>

@@ -51,12 +51,12 @@ export const actions: Actions = {
 
 			// if user exists, return true, else false
 			if (user) {
-				return setError(validateEmailForm, 'email', 'Email already exists');
+				return setError(validateEmailForm, 'email', 'err_email_exists');
 			} else {
 				return message(validateEmailForm, {
 					success: true,
 					status: HttpStatusCode.OK,
-					message: 'Email available',
+					message: '',
 				});
 			}
 		} catch (e) {
@@ -64,20 +64,20 @@ export const actions: Actions = {
 			return message(validateEmailForm, {
 				success: false,
 				status: HttpStatusCode.InternalServerError,
-				message: 'Error checking email existence',
+				message: 'err_internal_server_error',
 			});
 		}
 	},
-	// TODO: update register func once finish setting up register page
 	register: async ({ request, url, locals: { supabase } }) => {
-		const formData = await request.formData();
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
+		console.log('hello');
+		const validateMainForm = await superValidate(request, validateMainSchema);
 
-		// TODO: add validaiton checks for email and password?
-		// check if is valid email address
-		// check if email is already in use
-		// check if password is strong enough
+		console.log(validateMainForm);
+		if (!validateMainForm.valid) return fail(HttpStatusCode.BadRequest, { success: false, validateMainForm });
+
+		// TODO: possible add more layers of checks for password strength
+		const email = validateMainForm.data.email;
+		const password = validateMainForm.data.password;
 
 		const { data, error } = await supabase.auth.signUp({
 			email,
@@ -87,17 +87,17 @@ export const actions: Actions = {
 
 		if (error) {
 			if (error instanceof AuthError && error.status != undefined && error.status >= 400 && error.status < 500) {
-				return fail(HttpStatusCode.BadRequest, {
-					email,
-					message: error.message,
+				return message(validateMainForm, {
 					success: false,
+					status: HttpStatusCode.BadRequest,
+					message: error.message,
 				});
 			}
 
-			return fail(HttpStatusCode.InternalServerError, {
-				email,
-				message: error.message,
+			return message(validateMainForm, {
 				success: false,
+				status: HttpStatusCode.InternalServerError,
+				message: error.message,
 			});
 		}
 
@@ -111,11 +111,17 @@ export const actions: Actions = {
 			});
 		} catch (e) {
 			console.log(e);
+			return message(validateMainForm, {
+				success: false,
+				status: HttpStatusCode.InternalServerError,
+				message: 'err_internal_server_error',
+			});
 		}
 
-		return {
-			message: 'Should be good to go, please try signing in since email confirmation has been disabled',
+		return message(validateMainForm, {
 			success: true,
-		};
+			status: HttpStatusCode.OK,
+			message: '',
+		});
 	},
 };
