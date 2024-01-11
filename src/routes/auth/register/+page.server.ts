@@ -7,9 +7,9 @@ import { HttpStatusCode } from '$lib/utils/HttpStatusCodes';
 import { z } from 'zod';
 import { message, setError, superValidate } from 'sveltekit-superforms/server';
 
-const validateEmailSchema = z.object({
-	email: z.string().email(),
-});
+// const validateEmailSchema = z.object({
+// 	email: z.string().email(),
+// });
 
 const validateMainSchema = z
 	.object({
@@ -28,46 +28,47 @@ const validateMainSchema = z
 	});
 
 export const load = async () => {
-	const validateEmailForm = await superValidate(validateEmailSchema);
+	// const validateEmailForm = await superValidate(validateEmailSchema);
 	const validateMainForm = await superValidate(validateMainSchema);
 
-	return { validateEmailForm, validateMainForm };
+	// return { validateEmailForm, validateMainForm };
+	return { validateMainForm };
 };
 
 export const actions: Actions = {
-	validateEmail: async ({ request }) => {
-		const validateEmailForm = await superValidate(request, validateEmailSchema);
-
-		if (!validateEmailForm.valid) return fail(HttpStatusCode.BadRequest, { success: false, validateEmailForm });
-
-		// Check if email is already in use
-		const email = validateEmailForm.data.email;
-		try {
-			const user = await prisma.user.findUnique({
-				where: {
-					email,
-				},
-			});
-
-			// if user exists, return true, else false
-			if (user) {
-				return setError(validateEmailForm, 'email', 'err_email_exists');
-			} else {
-				return message(validateEmailForm, {
-					success: true,
-					status: HttpStatusCode.OK,
-					message: '',
-				});
-			}
-		} catch (e) {
-			console.error('Error checking email existence: ', e);
-			return message(validateEmailForm, {
-				success: false,
-				status: HttpStatusCode.InternalServerError,
-				message: 'err_internal_server_error',
-			});
-		}
-	},
+	// validateEmail: async ({ request }) => {
+	// 	const validateEmailForm = await superValidate(request, validateEmailSchema);
+	//
+	// 	if (!validateEmailForm.valid) return fail(HttpStatusCode.BadRequest, { success: false, validateEmailForm });
+	//
+	// 	// Check if email is already in use
+	// 	const email = validateEmailForm.data.email;
+	// 	try {
+	// 		const user = await prisma.user.findUnique({
+	// 			where: {
+	// 				email,
+	// 			},
+	// 		});
+	//
+	// 		// if user exists, return true, else false
+	// 		if (user) {
+	// 			return setError(validateEmailForm, 'email', 'err_email_exists');
+	// 		} else {
+	// 			return message(validateEmailForm, {
+	// 				success: true,
+	// 				status: HttpStatusCode.OK,
+	// 				message: '',
+	// 			});
+	// 		}
+	// 	} catch (e) {
+	// 		console.error('Error checking email existence: ', e);
+	// 		return message(validateEmailForm, {
+	// 			success: false,
+	// 			status: HttpStatusCode.InternalServerError,
+	// 			message: 'err_internal_server_error',
+	// 		});
+	// 	}
+	// },
 	register: async ({ request, url, locals: { supabase } }) => {
 		console.log('hello');
 		const validateMainForm = await superValidate(request, validateMainSchema);
@@ -75,9 +76,29 @@ export const actions: Actions = {
 		console.log(validateMainForm);
 		if (!validateMainForm.valid) return fail(HttpStatusCode.BadRequest, { success: false, validateMainForm });
 
-		// TODO: possible add more layers of checks for password strength
 		const email = validateMainForm.data.email;
 		const password = validateMainForm.data.password;
+
+		// check if email is already in use
+		try {
+			const user = await prisma.user.findUnique({
+				where: {
+					email,
+				},
+			});
+
+			// if user exists, return err
+			if (user) {
+				return setError(validateMainForm, 'email', 'err_email_exists');
+			}
+		} catch (e) {
+			console.error('Error checking email existence: ', e);
+			return message(validateMainForm, {
+				success: false,
+				status: HttpStatusCode.InternalServerError,
+				message: 'err_internal_server_error',
+			});
+		}
 
 		const { data, error } = await supabase.auth.signUp({
 			email,
