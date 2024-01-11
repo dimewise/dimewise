@@ -5,12 +5,8 @@
 	import AuthRegisterByEmail from '$lib/components/AuthRegisterByEmail.svelte';
 
 	export let data: PageData;
-
-	const continueWithEmail = writable(false);
-
-	function toggleContinueWithEmail(): void {
-		continueWithEmail.update((value) => !value);
-	}
+	let validatedEmail = '';
+	let continueWithEmail = false;
 </script>
 
 <svelte:head>
@@ -19,9 +15,9 @@
 </svelte:head>
 
 <section class="prose min-h-full m-auto">
-	{#if !$continueWithEmail}
-		<AuthRegisterBase {data} {toggleContinueWithEmail} />
+	{#if !continueWithEmail}
+		<AuthRegisterBase bind:validatedEmail bind:continueWithEmail bind:data />
 	{:else}
-		<AuthRegisterByEmail {data} {toggleContinueWithEmail} />
+		<AuthRegisterByEmail {validatedEmail} bind:continueWithEmail bind:data />
 	{/if}
 </section>
