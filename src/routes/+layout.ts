@@ -1,6 +1,9 @@
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import type { LayoutLoad } from './$types';
 import { createBrowserClient, isBrowser, parse } from '@supabase/ssr';
+import { browser } from '$app/environment';
+import '$lib/i18n'; // Import to initialize. Important :)
+import { locale, waitLocale } from 'svelte-i18n';
 
 export const load: LayoutLoad = async ({ fetch, data, depends }) => {
 	depends('supabase:auth');
@@ -20,6 +23,11 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
 			},
 		},
 	});
+
+	if (browser) {
+		locale.set(window.navigator.language);
+	}
+	await waitLocale();
 
 	const {
 		data: { session },

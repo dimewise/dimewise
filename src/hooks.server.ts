@@ -2,6 +2,7 @@ import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/publi
 import { createServerClient } from '@supabase/ssr';
 import type { Handle } from '@sveltejs/kit';
 import type { CookieSerializeOptions } from 'cookie';
+import { locale } from 'svelte-i18n';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
@@ -27,6 +28,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 		} = await event.locals.supabase.auth.getSession();
 		return session;
 	};
+
+	const lang = event.request.headers.get('accept-language')?.split(',')[0];
+	if (lang) {
+		locale.set(lang);
+	}
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {

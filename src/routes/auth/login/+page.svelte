@@ -1,5 +1,6 @@
 <script>
 	import Icon from '@iconify/svelte';
+	import { _ } from 'svelte-i18n';
 
 	let socialButtons = [
 		{ icon: 'bxl:facebook-circle', text: 'Facebook', variant: '' },
@@ -19,7 +20,7 @@
 			<h2 class="my-0">Create an account</h2>
 			<p>Enter your email below to create your account</p>
 			<input type="text" placeholder="name@example.com" class="input input-bordered w-full mb-5" />
-			<button class="btn btn-block">Continue</button>
+			<button class="btn btn-block">{$_('button.continue')}</button>
 		</div>
 
 		<div class="divider uppercase text-xs">or continue with</div>
