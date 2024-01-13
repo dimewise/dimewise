@@ -53,6 +53,7 @@
 	"dependencies": {
 		"@prisma/client": "^5.7.1",
 		"@supabase/ssr": "^0.0.10",
-		"@supabase/supabase-js": "^2.39.1"
+		"@supabase/supabase-js": "^2.39.1",
+		"svelte-i18n": "^4.0.0"
 	}
 }

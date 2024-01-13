@@ -4,6 +4,7 @@
 	import Icon from '@iconify/svelte';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { fly } from 'svelte/transition';
+	import { _ } from 'svelte-i18n';
 
 	// form submission
 	export let data: PageData;
@@ -111,7 +112,9 @@
 					<button type="button" class="btn btn-block" on:click={() => (continueWithEmail = false)}>Cancel</button>
 				{/if}
 				{#if !continueWithEmail}
-					<button type="button" on:click={handleContinueWithEmail} class="btn btn-block">Continue</button>
+					<button type="button" on:click={handleContinueWithEmail} class="btn btn-block">
+						{$_('button.continue')}
+					</button>
 				{/if}
 			</form>
 		</div>
@@ -135,7 +138,7 @@
 				<p class="text-lg font-bold">Error</p>
 				<p class="text-sm">An error occurred while trying to register your account. Please try again later.</p>
 				<div class="modal-action">
-					<button class="btn btn-primary" on:click={handleCloseModal}>OK</button>
+					<button class="btn btn-primary" on:click={handleCloseModal}>{$_('button.ok')}</button>
 				</div>
 			</div>
 		</dialog>

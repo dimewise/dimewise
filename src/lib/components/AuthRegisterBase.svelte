@@ -4,6 +4,7 @@
 	import Icon from '@iconify/svelte';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { fly } from 'svelte/transition';
+	import { _ } from 'svelte-i18n';
 
 	// form submission
 	export let data: PageData;
@@ -27,10 +28,10 @@
 	});
 
 	// modal handling
-	function handleCloseModal() {
+	const handleCloseModal = (): void => {
 		const errorModal = document.getElementById('auth_register_500_error_modal') as HTMLDialogElement;
 		errorModal.close();
-	}
+	};
 
 	// social login
 	let socialButtons = [
@@ -60,13 +61,13 @@
 					</div>
 				{/if}
 			</div>
-			<button type="submit" class="btn btn-block">Continue</button>
+			<button type="submit" class="btn btn-block">{$_('button.continue')}</button>
 		</form>
 	</div>
 	<div class="divider uppercase text-xs">or continue with</div>
 	<div class="w-full flex flex-col items-center justify-center gap-4">
-		{#each socialButtons as { icon, text, variant }}
-			<button class={`btn btn-block btn-outline max-w-xs ${variant}`}>
+		{#each socialButtons as { icon, text, variant } (text)}
+			<button class={`btn btn-block btn-outline max-w-xs ${variant}`} type="button">
 				<span><Icon {icon} class="text-xl" /></span>
 				{text}
 			</button>
@@ -81,7 +82,7 @@
 			<p class="text-lg font-bold">Error</p>
 			<p class="text-sm">An error occurred while trying to register your account. Please try again later.</p>
 			<div class="modal-action">
-				<button class="btn btn-primary" on:click={handleCloseModal}>OK</button>
+				<button class="btn btn-primary" on:click={handleCloseModal} type="button">{$_('button.ok')}</button>
 			</div>
 		</div>
 	</dialog>
