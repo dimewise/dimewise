@@ -22,7 +22,7 @@ module.exports = {
 			},
 		},
 	],
-	ignorePatterns: ['supabase', 'postcss.config.js'],
+	ignorePatterns: ['supabase'],
 	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:svelte/recommended', 'prettier'],
 	rules: {
 		// Stylistic
