@@ -7,7 +7,7 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
 
 	const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 		global: {
-			fetch
+			fetch,
 		},
 		cookies: {
 			get(key) {
@@ -17,12 +17,12 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
 
 				const cookie = parse(document.cookie);
 				return cookie[key];
-			}
-		}
+			},
+		},
 	});
 
 	const {
-		data: { session }
+		data: { session },
 	} = await supabase.auth.getSession();
 
 	return { supabase, session };
