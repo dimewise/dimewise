@@ -22,7 +22,7 @@ module.exports = {
 			},
 		},
 	],
-	ignorePatterns: ['supabase'],
+	ignorePatterns: ['supabase', 'postcss.config.js'],
 	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:svelte/recommended', 'prettier'],
 	rules: {
 		// Stylistic
@@ -56,13 +56,11 @@ module.exports = {
 			},
 		],
 		'max-nested-callbacks': ['warn', 1],
-		'max-params': ['warn', 2],
-		'no-magic-numbers': [
+		'@typescript-eslint/no-magic-numbers': [
 			'warn',
 			{
 				detectObjects: false,
 				enforceConst: true,
-				ignore: [-1, 0, 1, 2, 10, 100],
 				ignoreArrayIndexes: true,
 				ignoreEnums: true,
 			},

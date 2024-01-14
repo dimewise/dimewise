@@ -12,8 +12,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			},
 			remove: (key, options) => {
 				event.cookies.delete(key, options as CookieSerializeOptions & { path: string });
-			}
-		}
+			},
+		},
 	});
 
 	/**
@@ -23,7 +23,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	 */
 	event.locals.getSession = async () => {
 		const {
-			data: { session }
+			data: { session },
 		} = await event.locals.supabase.auth.getSession();
 		return session;
 	};
@@ -31,6 +31,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range';
-		}
+		},
 	});
 };
