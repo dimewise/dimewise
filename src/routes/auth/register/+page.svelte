@@ -13,7 +13,7 @@
 	<meta name="description" content="Dimewise account registration" />
 </svelte:head>
 
-<section class="prose min-h-full m-auto">
+<section class="prose m-auto min-h-full">
 	{#if !continueWithEmail}
 		<AuthRegisterBase bind:validatedEmail bind:continueWithEmail bind:data />
 	{:else}

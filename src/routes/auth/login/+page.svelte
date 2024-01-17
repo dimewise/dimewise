@@ -14,27 +14,27 @@
 	<meta name="login" content="Login page for Dimewise" />
 </svelte:head>
 
-<section class="prose min-h-full m-auto">
+<section class="prose m-auto min-h-full">
 	<div class="flex flex-col items-center justify-center gap-5">
 		<div class="flex flex-col items-center justify-center">
 			<h2 class="my-0">Create an account</h2>
 			<p>Enter your email below to create your account</p>
-			<input type="text" placeholder="name@example.com" class="input input-bordered w-full mb-5" />
+			<input type="text" placeholder="name@example.com" class="input input-bordered mb-5 w-full" />
 			<button class="btn btn-block">{$_('button.continue')}</button>
 		</div>
 
-		<div class="divider uppercase text-xs">or continue with</div>
+		<div class="divider text-xs uppercase">or continue with</div>
 
-		<div class="w-full flex flex-col items-center justify-center gap-4">
+		<div class="flex w-full flex-col items-center justify-center gap-4">
 			{#each socialButtons as { icon, text, variant }}
-				<button class={`btn btn-block btn-outline max-w-xs ${variant}`}>
+				<button class={`btn btn-outline btn-block max-w-xs ${variant}`}>
 					<span><Icon {icon} class="text-xl" /></span>
 					{text}
 				</button>
 			{/each}
 		</div>
 
-		<p class="text-center text-sm w-full max-w-xs">
+		<p class="w-full max-w-xs text-center text-sm">
 			By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
 		</p>
 	</div>
