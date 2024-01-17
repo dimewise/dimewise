@@ -22,7 +22,7 @@ module.exports = {
 			},
 		},
 	],
-	ignorePatterns: ['supabase'],
+	ignorePatterns: ['supabase', '.eslintrc.cjs'],
 	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:svelte/recommended', 'prettier'],
 	rules: {
 		// Stylistic
@@ -39,18 +39,17 @@ module.exports = {
 		'@stylistic/js/no-multiple-empty-lines': ['warn', { max: 1, maxEOF: 1 }],
 		'@stylistic/js/max-statements-per-line': ['warn', { max: 1 }],
 		'@stylistic/js/one-var-declaration-per-line': ['warn', 'always'],
-		'@stylistic/js/operator-linebreak': ['warn', 'none'],
 
 		// Typescript
 		'arrow-body-style': ['error', 'as-needed'],
 		'no-nested-ternary': 'warn',
 		'no-unneeded-ternary': 'warn',
 		'operator-assignment': ['warn', 'always'],
-		'max-depth': ['warn', 1],
+		'max-depth': ['warn', 2],
 		'max-lines-per-function': [
 			'warn',
 			{
-				max: 10,
+				max: 100,
 				skipBlankLines: true,
 				skipComments: true,
 			},
@@ -91,7 +90,6 @@ module.exports = {
 			},
 		],
 		'svelte/no-ignored-unsubscribe': 'error',
-		'svelte/no-inline-styles': 'error',
 		'svelte/require-each-key': 'error',
 		'svelte/require-event-dispatcher-types': 'error',
 		'svelte/require-stores-init': 'error',
