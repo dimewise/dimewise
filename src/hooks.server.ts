@@ -1,5 +1,6 @@
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import { createServerClient } from '@supabase/ssr';
+import type { Session } from '@supabase/supabase-js';
 import type { Handle } from '@sveltejs/kit';
 import type { CookieSerializeOptions } from 'cookie';
 import { locale } from 'svelte-i18n';
@@ -22,7 +23,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	 * of calling `const { data: { session } } = await supabase.auth.getSession()`
 	 * you just call this `await getSession()`
 	 */
-	event.locals.getSession = async () => {
+	event.locals.getSession = async (): Promise<Session | null> => {
 		const {
 			data: { session },
 		} = await event.locals.supabase.auth.getSession();

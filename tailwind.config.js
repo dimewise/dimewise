@@ -11,4 +11,7 @@ export default {
 		extend: {},
 	},
 	plugins: [typography, daisyui],
+	daisyui: {
+		logs: false,
+	},
 };

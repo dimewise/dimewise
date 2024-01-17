@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { AuthError } from '@supabase/supabase-js';
 import prisma from '$lib/server/prisma';
 import { Currencies } from '@prisma/client';
@@ -31,7 +31,7 @@ const validateMainSchema = z
 		}
 	});
 
-export const load = async () => {
+export const load: PageServerLoad = async () => {
 	const validateEmailForm = await superValidate(validateEmailSchema);
 	const validateMainForm = await superValidate(validateMainSchema);
 
