@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { HttpStatusCode } from '$lib/utils/HttpStatusCodes';
-	import type { PageData } from '../../routes/auth/register/$types';
 	import Icon from '@iconify/svelte';
 	import { superForm } from 'sveltekit-superforms/client';
 	import { fly } from 'svelte/transition';
 	import { _ } from 'svelte-i18n';
+	import type { PageData } from './$types';
 
 	// form submission
 	export let data: PageData;
@@ -66,8 +66,8 @@
 	</div>
 	<div class="divider uppercase text-xs">or continue with</div>
 	<div class="w-full flex flex-col items-center justify-center gap-4">
-		{#each socialButtons as { icon, text, variant } (text)}
-			<button class={`btn btn-block btn-outline max-w-xs ${variant}`} type="button">
+		{#each socialButtons as { icon, text, variant }, index (index)}
+			<button type="button" class={`btn btn-block btn-outline max-w-xs ${variant}`}>
 				<span><Icon {icon} class="text-xl" /></span>
 				{text}
 			</button>
