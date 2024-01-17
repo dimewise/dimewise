@@ -29,19 +29,19 @@
 	<div class="flex flex-col items-center justify-center">
 		<h2 class="my-0">Create an account</h2>
 		<p>Enter your email below to create your account</p>
-		<form method="POST" action="?/register" use:enhance class="flex flex-col w-full">
+		<form method="POST" action="?/register" use:enhance class="flex w-full flex-col">
 			<input
 				type="email"
 				placeholder="name@example.com"
 				name="email"
-				class="input input-bordered w-full mb-5 input-disabled"
+				class="input input-bordered input-disabled mb-5 w-full"
 				bind:value={$form.email}
 			/>
 			<input
 				type="password"
 				placeholder="Password"
 				name="password"
-				class={`input input-bordered w-full mb-5 ${$errors.password && 'input-error'}`}
+				class={`input input-bordered mb-5 w-full ${$errors.password && 'input-error'}`}
 				bind:value={$form.password}
 				aria-invalid={$errors.password ? 'true' : undefined}
 			/>
@@ -54,7 +54,7 @@
 				type="password"
 				placeholder="Confirm Password"
 				name="confirmPassword"
-				class={`input input-bordered w-full mb-5 ${$errors.confirmPassword && 'input-error'}`}
+				class={`input input-bordered mb-5 w-full ${$errors.confirmPassword && 'input-error'}`}
 				bind:value={$form.confirmPassword}
 				aria-invalid={$errors.confirmPassword ? 'true' : undefined}
 			/>
@@ -63,7 +63,7 @@
 					<span class="label-text-alt text-error">{$errors.confirmPassword}</span>
 				</div>
 			{/if}
-			<button type="submit" class="btn btn-block btn-primary mb-5">Register</button>
+			<button type="submit" class="btn btn-primary btn-block mb-5">Register</button>
 			<button type="button" class="btn btn-block" on:click={handleOnClickCancel}>Cancel</button>
 		</form>
 	</div>

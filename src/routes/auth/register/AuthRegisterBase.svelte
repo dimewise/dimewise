@@ -45,7 +45,7 @@
 	<div class="flex flex-col items-center justify-center">
 		<h2 class="my-0">Create an account</h2>
 		<p>Enter your email below to create your account</p>
-		<form method="POST" action="?/validateEmail" use:enhance class="flex flex-col w-full">
+		<form method="POST" action="?/validateEmail" use:enhance class="flex w-full flex-col">
 			<div class="mb-5">
 				<input
 					type="email"
@@ -64,16 +64,16 @@
 			<button type="submit" class="btn btn-block">{$_('button.continue')}</button>
 		</form>
 	</div>
-	<div class="divider uppercase text-xs">or continue with</div>
-	<div class="w-full flex flex-col items-center justify-center gap-4">
+	<div class="divider text-xs uppercase">or continue with</div>
+	<div class="flex w-full flex-col items-center justify-center gap-4">
 		{#each socialButtons as { icon, text, variant }, index (index)}
-			<button type="button" class={`btn btn-block btn-outline max-w-xs ${variant}`}>
+			<button type="button" class={`btn btn-outline btn-block max-w-xs ${variant}`}>
 				<span><Icon {icon} class="text-xl" /></span>
 				{text}
 			</button>
 		{/each}
 	</div>
-	<p class="text-center text-sm w-full max-w-xs">
+	<p class="w-full max-w-xs text-center text-sm">
 		By clicking continue, you agree to our <a href="/terms-of-service">Terms of Service</a> and
 		<a href="/privacy-policy">Privacy Policy</a>
 	</p>
