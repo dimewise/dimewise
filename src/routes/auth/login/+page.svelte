@@ -20,14 +20,14 @@
 			<h2 class="my-0">Create an account</h2>
 			<p>Enter your email below to create your account</p>
 			<input type="text" placeholder="name@example.com" class="input input-bordered mb-5 w-full" />
-			<button class="btn btn-block">{$_('button.continue')}</button>
+			<button type="button" class="btn btn-block">{$_('button.continue')}</button>
 		</div>
 
 		<div class="divider text-xs uppercase">or continue with</div>
 
 		<div class="flex w-full flex-col items-center justify-center gap-4">
-			{#each socialButtons as { icon, text, variant }}
-				<button class={`btn btn-outline btn-block max-w-xs ${variant}`}>
+			{#each socialButtons as { icon, text, variant }, index (index)}
+				<button type="button" class={`btn btn-outline btn-block max-w-xs ${variant}`}>
 					<span><Icon {icon} class="text-xl" /></span>
 					{text}
 				</button>
@@ -35,7 +35,8 @@
 		</div>
 
 		<p class="w-full max-w-xs text-center text-sm">
-			By clicking continue, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+			By clicking continue, you agree to our <a href="/terms-of-services">Terms of Service</a> and
+			<a href="/privacy-policy">Privacy Policy</a>
 		</p>
 	</div>
 </section>
