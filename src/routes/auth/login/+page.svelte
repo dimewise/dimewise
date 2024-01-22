@@ -15,12 +15,21 @@
 </svelte:head>
 
 <section class="prose m-auto min-h-full">
-	<div class="flex flex-col items-center justify-center gap-5">
+	<div class="flex max-w-xs flex-col items-center justify-center gap-5">
 		<div class="flex flex-col items-center justify-center">
-			<h2 class="my-0">Create an account</h2>
-			<p>Enter your email below to create your account</p>
-			<input type="text" placeholder="name@example.com" class="input input-bordered mb-5 w-full" />
-			<button type="button" class="btn btn-block">{$_('button.continue')}</button>
+			<h2 class="my-0">{$_('page.login.title')}</h2>
+			<p>{$_('page.login.choose-preferred-login-method')}</p>
+			<form>
+				<div class="label">
+					<span class="label-text">{$_('page.login.email')}</span>
+				</div>
+				<input type="text" placeholder="name@example.com" class="input input-bordered mb-5 w-full" />
+				<div class="label">
+					<span class="label-text">{$_('page.login.password')}</span>
+				</div>
+				<input type="password" placeholder="password" class="input input-bordered mb-5 w-full" />
+				<button type="submit" class="btn btn-block">{$_('button.login')}</button>
+			</form>
 		</div>
 
 		<div class="divider text-xs uppercase">or continue with</div>
@@ -34,9 +43,12 @@
 			{/each}
 		</div>
 
-		<p class="w-full max-w-xs text-center text-sm">
-			By clicking continue, you agree to our <a href="/terms-of-services">Terms of Service</a> and
-			<a href="/privacy-policy">Privacy Policy</a>
-		</p>
+		<div class="flex w-full flex-col items-start justify-center gap-1">
+			<p class="my-1">
+				{$_('page.login.register-prompt')} <a href="/register">{$_('page.register')}</a>
+			</p>
+			<a href="/reset-password">{$_('page.login.reset-password')}</a>
+			<p></p>
+		</div>
 	</div>
 </section>
