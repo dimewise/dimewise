@@ -1,4 +1,20 @@
 {
 	"button.ok": "OK",
-	"button.continue": "Continue"
+	"button.continue": "Continue",
+	"button.register": "Register",
+	"button.cancel": "Cancel",
+	"error.error": "Error",
+	"error.something-went-wrong": "Something went wrong, please try again later",
+	"page.terms-of-service": "Terms of Service",
+	"page.privacy-policy": "Privacy Policy",
+	"page.login": "Login",
+	"page.register": "Register",
+	"page.register.header": "Register",
+	"page.register.title": "Create an account",
+	"page.register.email-field-indicator": "Enter your email below to create your account",
+	"page.register.password-field-indicator": "Create a secure password for your account",
+	"page.register.continue-with": "or continue with",
+	"page.register.tos-pp-compliance-1": "By clicking continue, you agree to our",
+	"page.register.tos-pp-compliance-2": "and",
+	"page.register.success-message": "You've successfully registered an account with Dimewise"
 }

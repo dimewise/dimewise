@@ -40,13 +40,14 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	validateEmail: async ({ request }) => {
+		// form validation
 		const validateEmailForm = await superValidate(request, validateEmailSchema);
 
 		if (!validateEmailForm.valid) {
 			return fail(HttpStatusCode.BadRequest, { success: false, validateEmailForm });
 		}
 
-		// Check if email is already in use
+		// further check with database to see if the email is in use
 		const email = validateEmailForm.data.email;
 		try {
 			const user = await prisma.user.findUnique({
@@ -75,37 +76,16 @@ export const actions: Actions = {
 		}
 	},
 	register: async ({ request, url, locals: { supabase } }) => {
-		console.log('hello');
+		// form validation
 		const validateMainForm = await superValidate(request, validateMainSchema);
 
-		console.log(validateMainForm);
 		if (!validateMainForm.valid) {
 			return fail(HttpStatusCode.BadRequest, { success: false, validateMainForm });
 		}
 
+		// email has already been verified, proceed with supabase registration
 		const email = validateMainForm.data.email;
 		const password = validateMainForm.data.password;
-
-		// check if email is already in use
-		try {
-			const user = await prisma.user.findUnique({
-				where: {
-					email,
-				},
-			});
-
-			// if user exists, return err
-			if (user) {
-				return setError(validateMainForm, 'email', 'err_email_exists');
-			}
-		} catch (e) {
-			console.error('Error checking email existence: ', e);
-			return message(validateMainForm, {
-				success: false,
-				status: HttpStatusCode.InternalServerError,
-				message: 'err_internal_server_error',
-			});
-		}
 
 		const { data, error } = await supabase.auth.signUp({
 			email,
@@ -114,6 +94,8 @@ export const actions: Actions = {
 		});
 
 		if (error) {
+			// check bad request coming from supabase
+			console.error(error);
 			if (
 				error instanceof AuthError &&
 				error.status != undefined &&
@@ -134,6 +116,7 @@ export const actions: Actions = {
 			});
 		}
 
+		// registration with supabase auth complete, create user in database
 		try {
 			await prisma.user.create({
 				data: {
@@ -143,7 +126,7 @@ export const actions: Actions = {
 				},
 			});
 		} catch (e) {
-			console.log(e);
+			console.error('Error creating user in database: ', e);
 			return message(validateMainForm, {
 				success: false,
 				status: HttpStatusCode.InternalServerError,
