@@ -2,19 +2,31 @@
 	import { superForm } from 'sveltekit-superforms/client';
 	import { fly } from 'svelte/transition';
 	import type { PageData } from './$types';
+	import { HttpStatusCode } from '$lib/utils/HttpStatusCodes';
+	import { _ } from 'svelte-i18n';
 
 	export let data: PageData;
 	export let validatedEmail: string;
 	export let continueWithEmail: boolean;
+	export let registrationSuccess: boolean;
 	const {
 		form: form,
 		errors: errors,
 		enhance: enhance,
 	} = superForm(data.validateMainForm, {
-		resetForm: true,
+		resetForm: false,
 		autoFocusOnError: 'detect',
-		onSubmit: ({ action, formData }) => {
-			console.log(action, formData);
+		onUpdated: ({ form }) => {
+			const message = form.message;
+			if (message?.success && message?.status === HttpStatusCode.OK) {
+				registrationSuccess = true;
+			} else if (
+				(!message?.success && message?.status === HttpStatusCode.InternalServerError) ||
+				(!message?.success && message?.status === HttpStatusCode.BadRequest)
+			) {
+				const errorModal = document.getElementById('auth_register_error_modal') as HTMLDialogElement;
+				errorModal.showModal();
+			}
 		},
 	});
 
@@ -27,8 +39,8 @@
 
 <div in:fly class="flex flex-col items-center justify-center gap-5">
 	<div class="flex flex-col items-center justify-center">
-		<h2 class="my-0">Create an account</h2>
-		<p>Enter your email below to create your account</p>
+		<h2 class="my-0">{$_('page.register.title')}</h2>
+		<p>{$_('page.register.password-field-indicator')}</p>
 		<form method="POST" action="?/register" use:enhance class="flex w-full flex-col">
 			<input
 				type="email"
@@ -63,8 +75,8 @@
 					<span class="label-text-alt text-error">{$errors.confirmPassword}</span>
 				</div>
 			{/if}
-			<button type="submit" class="btn btn-primary btn-block mb-5">Register</button>
-			<button type="button" class="btn btn-block" on:click={handleOnClickCancel}>Cancel</button>
+			<button type="submit" class="btn btn-primary btn-block mb-5">{$_('button.register')}</button>
+			<button type="button" class="btn btn-block" on:click={handleOnClickCancel}>{$_('button.cancel')}</button>
 		</form>
 	</div>
 </div>

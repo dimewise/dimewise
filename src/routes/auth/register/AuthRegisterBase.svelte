@@ -11,7 +11,7 @@
 	export let validatedEmail: string;
 	export let continueWithEmail: boolean;
 	const { form, errors, enhance } = superForm(data.validateEmailForm, {
-		resetForm: true,
+		resetForm: false,
 		autoFocusOnError: 'detect',
 		onUpdated: ({ form }) => {
 			const message = form.message;
@@ -20,18 +20,12 @@
 				continueWithEmail = true;
 			} else if (!message?.success && message?.status === HttpStatusCode.InternalServerError) {
 				// TODO: message is available for use
-				const errorModal = document.getElementById('auth_register_500_error_modal') as HTMLDialogElement;
+				const errorModal = document.getElementById('auth_register_error_modal') as HTMLDialogElement;
 				errorModal.showModal();
 			}
 		},
 		// TODO: consider setting onError as a catch all
 	});
-
-	// modal handling
-	const handleCloseModal = (): void => {
-		const errorModal = document.getElementById('auth_register_500_error_modal') as HTMLDialogElement;
-		errorModal.close();
-	};
 
 	// social login
 	let socialButtons = [
@@ -43,8 +37,8 @@
 
 <div in:fly class="flex flex-col items-center justify-center gap-5">
 	<div class="flex flex-col items-center justify-center">
-		<h2 class="my-0">Create an account</h2>
-		<p>Enter your email below to create your account</p>
+		<h2 class="my-0">{$_('page.register.title')}</h2>
+		<p>{$_('page.register.email-field-indicator')}</p>
 		<form method="POST" action="?/validateEmail" use:enhance class="flex w-full flex-col">
 			<div class="mb-5">
 				<input
@@ -64,7 +58,7 @@
 			<button type="submit" class="btn btn-block">{$_('button.continue')}</button>
 		</form>
 	</div>
-	<div class="divider text-xs uppercase">or continue with</div>
+	<div class="divider text-xs uppercase">{$_('page.register.continue-with')}</div>
 	<div class="flex w-full flex-col items-center justify-center gap-4">
 		{#each socialButtons as { icon, text, variant }, index (index)}
 			<button type="button" class={`btn btn-outline btn-block max-w-xs ${variant}`}>
@@ -74,16 +68,10 @@
 		{/each}
 	</div>
 	<p class="w-full max-w-xs text-center text-sm">
-		By clicking continue, you agree to our <a href="/terms-of-service">Terms of Service</a> and
-		<a href="/privacy-policy">Privacy Policy</a>
+		<!-- TODO: search for a better way to localize text with links-->
+		{$_('page.register.tos-pp-compliance-1')}
+		<a href="/terms-of-service">{$_('page.terms-of-service')}</a>
+		{$_('page.register.tos-pp-compliance-2')}
+		<a href="/privacy-policy">{$_('page.privacy-policy')}</a>
 	</p>
-	<dialog id="auth_register_500_error_modal" class="modal">
-		<div class="modal-box">
-			<p class="text-lg font-bold">Error</p>
-			<p class="text-sm">An error occurred while trying to register your account. Please try again later.</p>
-			<div class="modal-action">
-				<button class="btn btn-primary" on:click={handleCloseModal} type="button">{$_('button.ok')}</button>
-			</div>
-		</div>
-	</dialog>
 </div>
