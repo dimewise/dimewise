@@ -54,7 +54,7 @@ module.exports = {
 				skipComments: true,
 			},
 		],
-		'max-nested-callbacks': ['warn', 1],
+		'max-nested-callbacks': ['warn', 10],
 		'@typescript-eslint/no-magic-numbers': [
 			'warn',
 			{
