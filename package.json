@@ -1,18 +1,27 @@
 {
 	"name": "dimewise",
 	"version": "0.0.1",
+	"description": "DimeWise is a personalized financial planning app that emphasizes meticulous, category-centric budgeting based on real-life experiences.",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/teoyi/dimewise"
+	},
+	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
 		"build": "vite build",
-		"preview": "vite preview",
-		"test": "npm run test:integration && npm run test:unit",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "prettier --check . && eslint .",
+		"db:migrate": "npx prisma migrate dev",
+		"db:reset": "npx prisma migrate reset",
+		"db:status": "npx supabase status",
+		"dev": "vite dev",
 		"format": "prettier --write .",
+		"lint": "prettier --check . && eslint .",
+		"preview": "vite preview",
+		"setup:hooks": "cp scripts/* .git/hooks/ && chmod +x .git/hooks/pre-commit .git/hooks/pre-push",
+		"test": "npm run test:integration && npm run test:unit",
 		"test:integration": "playwright test",
-		"test:unit": "vitest",
-		"setup:hooks": "cp scripts/* .git/hooks/ && chmod +x .git/hooks/pre-commit .git/hooks/pre-push"
+		"test:unit": "vitest"
 	},
 	"devDependencies": {
 		"@fontsource/fira-mono": "^4.5.10",
@@ -50,7 +59,6 @@
 		"vitest": "^1.0.0",
 		"zod": "^3.22.4"
 	},
-	"type": "module",
 	"dependencies": {
 		"@prisma/client": "^5.7.1",
 		"@supabase/ssr": "^0.0.10",
