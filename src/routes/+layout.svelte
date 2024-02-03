@@ -1,8 +1,9 @@
 <script>
-	import Header from '$lib/components/Header.svelte';
 	import { onMount } from 'svelte';
 	import './styles.css';
 	import { invalidate } from '$app/navigation';
+	import AuthNav from '$lib/nav/AuthNav.svelte';
+	import BaseNav from '$lib/nav/BaseNav.svelte';
 
 	export let data;
 
@@ -23,8 +24,12 @@
 </script>
 
 <div class="flex min-h-screen flex-col">
-	<Header />
-	<main class="mx-auto box-border flex w-full max-w-5xl flex-1 flex-col p-4">
+	{#if session}
+		<AuthNav />
+	{:else}
+		<BaseNav />
+	{/if}
+	<main class="container mx-auto box-border flex w-full max-w-5xl flex-1 flex-col p-4">
 		<slot />
 	</main>
 	<footer class="flex flex-col items-center justify-center p-3 md:p-0"></footer>

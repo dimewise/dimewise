@@ -51,9 +51,9 @@
 
 		<div class="prose-sm flex w-full flex-col items-start justify-center gap-1">
 			<p class="my-1">
-				{$_('page.login.register-prompt')} <a href="/register">{$_('page.register')}</a>
+				{$_('page.login.register-prompt')} <a href="/auth/register">{$_('page.register')}</a>
 			</p>
-			<a href="/reset-password">{$_('page.login.reset-password')}</a>
+			<a href="/auth/reset-password">{$_('page.login.reset-password')}</a>
 			<p></p>
 		</div>
 	</div>

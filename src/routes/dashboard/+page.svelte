@@ -1,3 +1,9 @@
+<script lang="ts">
+	export let data;
+
+	console.log(data);
+</script>
+
 <svelte:head>
 	<title>Dashboard</title>
 	<meta name="dashboard" content="User dashboard" />

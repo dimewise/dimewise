@@ -3,6 +3,7 @@ export enum HttpStatusCode {
 	Created = 201,
 	Accepted = 202,
 	NoContent = 204,
+	Found = 302,
 	SeeOther = 303,
 	BadRequest = 400,
 	Unauthorized = 401,

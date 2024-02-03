@@ -1,4 +1,4 @@
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { AuthError } from '@supabase/supabase-js';
 import prisma from '$lib/server/prisma';
@@ -31,7 +31,13 @@ const validateMainSchema = z
 		}
 	});
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ parent }) => {
+	// check if user is already logged in
+	const { session } = await parent();
+	if (session) {
+		throw redirect(HttpStatusCode.Found, '/dashboard');
+	}
+
 	const validateEmailForm = await superValidate(validateEmailSchema);
 	const validateMainForm = await superValidate(validateMainSchema);
 
