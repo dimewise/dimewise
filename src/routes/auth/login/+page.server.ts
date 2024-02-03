@@ -10,7 +10,13 @@ const validateLoginSchema = z.object({
 	password: z.string(),
 });
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ parent }) => {
+	// check if user is already logged in
+	const { session } = await parent();
+	if (session) {
+		throw redirect(HttpStatusCode.Found, '/dashboard');
+	}
+
 	const validateLoginForm = await superValidate(validateLoginSchema);
 	return { validateLoginForm };
 };
