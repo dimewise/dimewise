@@ -1,11 +1,12 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import './styles.css';
 	import { invalidate } from '$app/navigation';
 	import AuthNav from '$lib/nav/AuthNav.svelte';
 	import BaseNav from '$lib/nav/BaseNav.svelte';
+	import type { PageData } from './$types';
 
-	export let data;
+	export let data: PageData;
 
 	let { supabase, session } = data;
 	$: ({ supabase, session } = data);
@@ -25,7 +26,7 @@
 
 <div class="flex min-h-screen flex-col">
 	{#if session}
-		<AuthNav />
+		<AuthNav bind:data />
 	{:else}
 		<BaseNav />
 	{/if}
