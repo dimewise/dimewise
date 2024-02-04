@@ -1,11 +1,38 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
+	import { browser } from '$app/environment';
+	import { _ } from 'svelte-i18n';
+	import Icon from '@iconify/svelte';
+	import type { PageData } from '../../routes/$types';
+	import { invalidate } from '$app/navigation';
 
+	export let data: PageData;
+	$: ({ supabase } = data);
 	const drawerOpen = writable(false);
 
 	function toggleDrawer(): void {
 		drawerOpen.update((value) => !value);
 	}
+
+	// this is needed in order to close details on click outside of the tag
+	if (browser) {
+		const details = document.querySelector('details');
+		document.addEventListener('click', function (event) {
+			if (details !== null && !details.contains(event.target as Node)) {
+				details.removeAttribute('open');
+			}
+		});
+	}
+
+	const handleLogout = async (): Promise<void> => {
+		await supabase.auth.signOut();
+		invalidate('supabase:auth'); // needed to remove the session from the store
+		if (browser) {
+			const details = document.querySelector('details');
+			details?.removeAttribute('open');
+		}
+		toggleDrawer();
+	};
 </script>
 
 <header>
@@ -13,12 +40,35 @@
 		<!--Desktop Navbar-->
 		<div class="navbar hidden bg-base-100 px-4 lg:flex">
 			<div class="flex-1">
-				<a class="text-xl font-bold" href="/">Dimewise authenticated</a>
+				<a class="text-xl font-bold" href="/dashboard">Dimewise</a>
 			</div>
 			<div class="flex-none">
-				<ul class="menu menu-horizontal px-1">
-					<li><a href="/auth/login">Login</a></li>
-				</ul>
+				<details class="dropdown dropdown-end cursor-pointer">
+					<!--TODO: add conditional statement for avatar url checks-->
+					<summary class="avatar placeholder">
+						<div class="w-12 rounded-full bg-neutral text-neutral-content">
+							<span class="text-xl">PL</span>
+						</div>
+					</summary>
+					<ul class="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow">
+						<li>
+							<a href="/dashboard/profile">
+								<Icon icon="iconamoon:profile-fill" class="text-xl" />{$_('page.profile')}
+							</a>
+						</li>
+						<li>
+							<a href="/dashboard/accounts/switch">
+								<Icon icon="heroicons-outline:switch-horizontal" class="text-xl" />{$_('page.switch-accounts')}
+							</a>
+						</li>
+						<div class="divider my-0"></div>
+						<li>
+							<a on:click={handleLogout} href="/">
+								<Icon icon="material-symbols:logout" class="text-xl" />{$_('button.logout')}
+							</a>
+						</li>
+					</ul>
+				</details>
 			</div>
 		</div>
 		<!--Mobile/Tablet Navbar-->
@@ -27,17 +77,10 @@
 			<!-- Navbar -->
 			<div class="drawer-content flex flex-col">
 				<div class="navbar w-full bg-base-100 px-4">
-					<div class=" flex-1"><a class="text-xl font-bold" href="/">Dimewise</a></div>
+					<div class=" flex-1"><a class="text-xl font-bold" href="/dashboard">{$_('app.name')}</a></div>
 					<div class="flex-none">
 						<label for="dw-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								class="inline-block h-6 w-6 stroke-current"
-								><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"
-								></path></svg
-							>
+							<Icon icon="jam:menu" class="text-4xl" />
 						</label>
 					</div>
 				</div>
@@ -47,13 +90,14 @@
 				<label for="dw-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 				<div class="flex min-h-full w-80 flex-col bg-base-100 p-4">
 					<ul class="menu flex-1">
-						<li class="flex-none"><a href="/" on:click={toggleDrawer}>Home</a></li>
-						<li class="flex-none"><a href="/terms-of-service" on:click={toggleDrawer}>Terms of Service</a></li>
-						<li class="flex-none"><a href="/privacy-policy" on:click={toggleDrawer}>Privacy Policy</a></li>
+						<li class="flex-none"><a href="/dashboard" on:click={toggleDrawer}>{$_('page.dashboard')}</a></li>
+						<li class="flex-none"><a href="/dashboard/profile" on:click={toggleDrawer}>{$_('page.profile')}</a></li>
+						<li class="flex-none">
+							<a href="/dashboard/accounts/switch" on:click={toggleDrawer}>{$_('page.switch-accounts')}</a>
+						</li>
 					</ul>
 					<div class="flex w-full flex-none flex-col items-center justify-center gap-3">
-						<a class="btn btn-primary btn-wide" href="/auth/login" on:click={toggleDrawer}>Login</a>
-						<a class="btn btn-secondary btn-wide" href="/auth/register" on:click={toggleDrawer}>Register</a>
+						<a class="btn btn-primary btn-wide" href="/" on:click={handleLogout}>{$_('button.logout')}</a>
 					</div>
 				</div>
 			</div>

@@ -1,5 +1,7 @@
 <script lang="ts">
+	import Icon from '@iconify/svelte';
 	import { writable } from 'svelte/store';
+	import { _ } from 'svelte-i18n';
 
 	const drawerOpen = writable(false);
 
@@ -27,17 +29,10 @@
 			<!-- Navbar -->
 			<div class="drawer-content flex flex-col">
 				<div class="navbar w-full bg-base-100 px-4">
-					<div class=" flex-1"><a class="text-xl font-bold" href="/">Dimewise</a></div>
+					<div class=" flex-1"><a class="text-xl font-bold" href="/">{$_('app.name')}</a></div>
 					<div class="flex-none">
 						<label for="dw-drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								class="inline-block h-6 w-6 stroke-current"
-								><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"
-								></path></svg
-							>
+							<Icon icon="jam:menu" class="text-4xl" />
 						</label>
 					</div>
 				</div>
@@ -47,13 +42,17 @@
 				<label for="dw-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 				<div class="flex min-h-full w-80 flex-col bg-base-100 p-4">
 					<ul class="menu flex-1">
-						<li class="flex-none"><a href="/" on:click={toggleDrawer}>Home</a></li>
-						<li class="flex-none"><a href="/terms-of-service" on:click={toggleDrawer}>Terms of Service</a></li>
-						<li class="flex-none"><a href="/privacy-policy" on:click={toggleDrawer}>Privacy Policy</a></li>
+						<li class="flex-none"><a href="/" on:click={toggleDrawer}>{$_('page.home')}</a></li>
+						<li class="flex-none">
+							<a href="/terms-of-service" on:click={toggleDrawer}>{$_('page.terms-of-service')}</a>
+						</li>
+						<li class="flex-none"><a href="/privacy-policy" on:click={toggleDrawer}>{$_('page.privacy-policy')}</a></li>
 					</ul>
 					<div class="flex w-full flex-none flex-col items-center justify-center gap-3">
-						<a class="btn btn-primary btn-wide" href="/auth/login" on:click={toggleDrawer}>Login</a>
-						<a class="btn btn-secondary btn-wide" href="/auth/register" on:click={toggleDrawer}>Register</a>
+						<a class="btn btn-primary btn-wide" href="/auth/login" on:click={toggleDrawer}>{$_('button.login')}</a>
+						<a class="btn btn-secondary btn-wide" href="/auth/register" on:click={toggleDrawer}>
+							{$_('button.register')}
+						</a>
 					</div>
 				</div>
 			</div>
