@@ -43,14 +43,16 @@
 				<a class="text-xl font-bold" href="/dashboard">Dimewise</a>
 			</div>
 			<div class="flex-none">
-				<details class="dropdown dropdown-end cursor-pointer">
+				<div class="dropdown dropdown-end cursor-pointer">
 					<!--TODO: add conditional statement for avatar url checks-->
-					<summary class="avatar placeholder">
+					<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+					<div class="avatar placeholder" tabindex="0">
 						<div class="w-12 rounded-full bg-neutral text-neutral-content">
 							<span class="text-xl">PL</span>
 						</div>
-					</summary>
-					<ul class="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow">
+					</div>
+					<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+					<ul tabindex="0" class="menu dropdown-content z-[1] w-52 rounded-box bg-base-100 p-2 shadow">
 						<li>
 							<a href="/dashboard/profile">
 								<Icon icon="iconamoon:profile-fill" class="text-xl" />{$_('page.profile')}
@@ -68,7 +70,7 @@
 							</a>
 						</li>
 					</ul>
-				</details>
+				</div>
 			</div>
 		</div>
 		<!--Mobile/Tablet Navbar-->
