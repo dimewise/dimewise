@@ -44,7 +44,6 @@
 			</div>
 			<div class="flex-none">
 				<div class="dropdown dropdown-end cursor-pointer">
-					<!--TODO: add conditional statement for avatar url checks-->
 					<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 					<div class="avatar placeholder" tabindex="0">
 						<div class="w-12 rounded-full bg-neutral text-neutral-content">
@@ -59,8 +58,8 @@
 							</a>
 						</li>
 						<li>
-							<a href="/dashboard/accounts/switch">
-								<Icon icon="heroicons-outline:switch-horizontal" class="text-xl" />{$_('page.switch-accounts')}
+							<a href="/dashboard/settings">
+								<Icon icon="iconamoon:settings-fill" class="text-xl" />{$_('page.settings')}
 							</a>
 						</li>
 						<div class="divider my-0"></div>
@@ -95,7 +94,7 @@
 						<li class="flex-none"><a href="/dashboard" on:click={toggleDrawer}>{$_('page.dashboard')}</a></li>
 						<li class="flex-none"><a href="/dashboard/profile" on:click={toggleDrawer}>{$_('page.profile')}</a></li>
 						<li class="flex-none">
-							<a href="/dashboard/accounts/switch" on:click={toggleDrawer}>{$_('page.switch-accounts')}</a>
+							<a href="/dashboard/settings" on:click={toggleDrawer}>{$_('page.settings')}</a>
 						</li>
 					</ul>
 					<div class="flex w-full flex-none flex-col items-center justify-center gap-3">
