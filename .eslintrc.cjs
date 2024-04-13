@@ -1,30 +1,26 @@
-/** @type { import("eslint").Linter.Config } */
 module.exports = {
 	root: true,
-	env: {
-		browser: true,
-		es2017: true,
-		node: true,
-	},
+	env: { browser: true, es2020: true },
+	extends: [
+		'eslint:recommended',
+		'plugin:@typescript-eslint/strict-type-checked',
+		'plugin:@typescript-eslint/stylistic-type-checked',
+		'plugin:react/recommended',
+		'plugin:react/jsx-runtime',
+		'plugin:react-hooks/recommended',
+		'prettier',
+	],
+	ignorePatterns: ['dist', '.eslintrc.cjs'],
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
+		ecmaVersion: 'latest',
 		sourceType: 'module',
-		ecmaVersion: 2020,
-		extraFileExtensions: ['.svelte'],
+		project: ['./tsconfig.json', './tsconfig.node.json'],
+		tsconfigRootDir: __dirname,
 	},
-	plugins: ['@typescript-eslint', '@stylistic/js'],
-	overrides: [
-		{
-			files: ['*.svelte'],
-			parser: 'svelte-eslint-parser',
-			parserOptions: {
-				parser: '@typescript-eslint/parser',
-			},
-		},
-	],
-	ignorePatterns: ['supabase', '.eslintrc.cjs'],
-	extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:svelte/recommended', 'prettier'],
+	plugins: ['react-refresh', '@stylistic/js'],
 	rules: {
+		'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
 		// Stylistic
 		'@stylistic/js/max-len': [
 			'warn',
@@ -78,24 +74,5 @@ module.exports = {
 		'@typescript-eslint/no-unused-vars': 'warn',
 		'@typescript-eslint/no-useless-constructor': 'warn',
 		'@typescript-eslint/no-empty-function': 'warn',
-
-		// Svelte
-		'svelte/no-target-blank': 'error',
-		'svelte/button-has-type': [
-			'error',
-			{
-				button: true,
-				submit: true,
-				reset: true,
-			},
-		],
-		'svelte/no-ignored-unsubscribe': 'error',
-		'svelte/require-each-key': 'error',
-		'svelte/require-event-dispatcher-types': 'error',
-		'svelte/require-stores-init': 'error',
-		'svelte/valid-each-key': 'error',
-		'svelte/prefer-class-directive': 'error',
-		'svelte/shorthand-attribute': 'error',
-		'svelte/shorthand-directive': 'error',
 	},
 };

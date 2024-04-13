@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Run the format script before committing changes
-npm run format
+bun run format
 
 # Exit with the exit code of the npm run format command
 exit $?
