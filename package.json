@@ -6,32 +6,24 @@
 	"scripts": {
 		"dev": "bunx --bun vite",
 		"build": "tsc && vite build",
-		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint .",
+		"check": "bunx @biomejs/biome check --apply .",
 		"setup:hooks": "cp scripts/* .git/hooks/ && chmod +x .git/hooks/pre-commit .git/hooks/pre-push",
 		"preview": "vite preview"
 	},
 	"dependencies": {
 		"@prisma/client": "^5.12.1",
 		"@supabase/supabase-js": "^2.42.3",
-		"eslint-plugin-react": "^7.34.1",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "1.6.4",
 		"@types/react": "^18.2.15",
 		"@types/react-dom": "^18.2.7",
-		"@typescript-eslint/eslint-plugin": "^6.0.0",
-		"@typescript-eslint/parser": "^6.0.0",
 		"@vitejs/plugin-react-swc": "^3.3.2",
 		"autoprefixer": "^10.4.19",
 		"daisyui": "^4.10.1",
-		"eslint": "^9.0.0",
-		"eslint-plugin-react-hooks": "^4.6.0",
-		"eslint-plugin-react-refresh": "^0.4.3",
 		"postcss": "^8.4.38",
-		"prettier": "^3.2.5",
-		"prettier-plugin-tailwindcss": "^0.5.13",
 		"tailwindcss": "^3.4.3",
 		"typescript": "^5.0.2",
 		"vite": "^4.4.5"

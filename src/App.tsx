@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import { useState } from "react";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import reactLogo from "./assets/react.svg";
 
 function App() {
 	const [count, setCount] = useState(0);
@@ -10,16 +10,18 @@ function App() {
 		<div className="h-screen w-screen bg-white text-black">
 			<div className="badge">Hello</div>
 			<div className="bg-red-500">
-				<a href="https://vitejs.dev" target="_blank">
+				<a href="https://vitejs.dev" target="_blank" rel="noreferrer">
 					<img src={viteLogo} className="logo" alt="Vite logo" />
 				</a>
-				<a href="https://react.dev" target="_blank">
+				<a href='https://react.dev' target="_blank" rel="noreferrer">
 					<img src={reactLogo} className="logo react" alt="React logo" />
 				</a>
 			</div>
 			<h1>Vite + React</h1>
 			<div className="card">
-				<button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
+				<button type="button" onClick={() => setCount((count) => count + 1)}>
+					count is {count}
+				</button>
 				<p>
 					Edit <code>src/App.tsx</code> and save to test HMR
 				</p>
