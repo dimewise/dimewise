@@ -14,7 +14,7 @@ _Stay tuned for more exciting features..._
 
 DimeWise leverages cutting-edge technologies:
 
-- **Frontend:** Developed with SvelteKit for a responsive and dynamic interface, enhanced by the aesthetic appeal of TailwindCSS.
+- **Frontend:** Developed with React for a responsive and dynamic interface, enhanced by the aesthetic appeal of TailwindCSS and DaisyUI.
 
 - **Database:** Powered by the robust combination of Supabase and Prisma (ORM), ensuring efficient data management and retrieval.
 
@@ -35,20 +35,22 @@ Follow these steps to set up the local environment for the DimeWise project:
 
 2.  **Install Dependencies:**
 
+    - Ensure that [bun](https://bun.sh/docs/installation) is installed in your environment
+
     - Change into the root directory of the project:
       ```bash
       cd dimewise
       ```
-    - Run npm install to install project dependencies:
+    - Run bun install to install project dependencies:
       ```bash
-      npm install
+      bun install
       ```
 
 3.  **Setup pre-commit and pre-push hooks:**
 
-    - Run npm run setup:hooks to set up git hooks:
+    - Run bun run setup:hooks to set up git hooks:
       ```bash
-      npm run setup:hooks
+      bun run setup:hooks
       ```
 
 4.  **Copy Environment Variables:**
@@ -58,26 +60,26 @@ Follow these steps to set up the local environment for the DimeWise project:
 
 5.  **Start Supabase Local Server:**
 
-    - Ensure that Prisma and Supabase CLI are installed (**optional**: this should already be done with `npm install`):
+    - Ensure that Prisma and Supabase CLI are installed (**optional**: this should already be done with `bun install`):
       ```bash
-      npm install -g prisma
-      npm install -g supabase
+      bun add -g prisma
+      bun add -g supabase
       ```
     - Start the Supabase local server using the following command:
 
       ```bash
-      npx supabase start
+      bunx supabase start
       ```
 
       Upon running the above command, it should show your supabase status information. Copy the values of `API URL` and `anon key` into the `.env` file created in step 4.
 
-      **Note:** Ensure Docker is running, as this process requires it. If you lose the supabase status information, run `npm run db:status` or `npx supabase status` to display the information again.
+      **Note:** Ensure Docker is running, as this process requires it. If you lose the supabase status information, run `bunx supabase status` to display the information again.
 
 6.  **Execute database migrations**:
 
     - Run the following command to apply database migrations:
       ```bash
-      npx prisma migrate dev
+      bunx prisma migrate dev
       ```
 
 Now, your local environment is set up and ready for development with DimeWise!
