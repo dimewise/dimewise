@@ -7,7 +7,7 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-			"a11y": { 
+			"a11y": {
 				"useKeyWithClickEvents": "off",
 				"useKeyWithMouseEvents": "off"
 			}
