@@ -1,32 +1,32 @@
 {
-	"name": "dimewise",
-	"private": true,
-	"version": "0.0.1",
-	"type": "module",
-	"scripts": {
-		"dev": "bunx --bun vite",
-		"build": "tsc && vite build",
-		"check": "bunx @biomejs/biome check --apply .",
-		"setup:hooks": "cp scripts/* .git/hooks/ && chmod +x .git/hooks/pre-commit .git/hooks/pre-push",
-		"preview": "vite preview"
-	},
-	"dependencies": {
-		"@prisma/client": "^5.12.1",
-		"@supabase/supabase-js": "^2.42.3",
-		"react": "^18.2.0",
-		"react-dom": "^18.2.0",
-		"react-router-dom": "6.22.3"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.6.4",
-		"@types/react": "^18.2.15",
-		"@types/react-dom": "^18.2.7",
-		"@vitejs/plugin-react-swc": "^3.3.2",
-		"autoprefixer": "^10.4.19",
-		"daisyui": "^4.10.1",
-		"postcss": "^8.4.38",
-		"tailwindcss": "^3.4.3",
-		"typescript": "^5.0.2",
-		"vite": "^4.4.5"
-	}
+  "name": "dimewise",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "bunx --bun vite",
+    "build": "tsc && vite build",
+    "check": "bunx @biomejs/biome check --apply .",
+    "setup:hooks": "cp scripts/* .git/hooks/ && chmod +x .git/hooks/pre-commit .git/hooks/pre-push",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.12.1",
+    "@supabase/supabase-js": "^2.42.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "6.22.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.6.4",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react-swc": "^3.3.2",
+    "autoprefixer": "^10.4.19",
+    "daisyui": "^4.10.1",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  }
 }
