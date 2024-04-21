@@ -1,7 +1,10 @@
 import type { FC, ReactElement } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../auth/AuthProvider";
 
 export const Header: FC = (): ReactElement => {
+	const { user, logout } = useAuth();
+
 	const closeDrawer = () => {
 		document.getElementById("dw-drawer")?.click();
 	};
@@ -52,12 +55,20 @@ export const Header: FC = (): ReactElement => {
 						</ul>
 					</div>
 					<div className="flex-1 hidden lg:flex justify-end space-x-8 mr-2">
-						<button type="button" className="">
-							<Link to="/auth/login">Login</Link>
-						</button>
-						<button type="button" className="btn btn-primary">
-							<Link to="/auth/register">Get Started</Link>
-						</button>
+						{user ? (
+							<button type="button" className="" onClick={logout}>
+								<Link to="/">Logout</Link>
+							</button>
+						) : (
+							<>
+								<button type="button" className="">
+									<Link to="/auth/login">Login</Link>
+								</button>
+								<button type="button" className="btn btn-primary">
+									<Link to="/auth/register">Get Started</Link>
+								</button>
+							</>
+						)}
 					</div>
 				</div>
 			</div>
