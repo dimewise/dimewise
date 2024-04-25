@@ -1,5 +1,6 @@
 import { type User, createClient } from "@supabase/supabase-js";
 import { type PropsWithChildren, createContext, useContext, useEffect, useState } from "react";
+import { Loading } from "react-daisyui";
 import { useNavigate } from "react-router-dom";
 import { Paths } from "../routes/routes";
 
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 			setUser(user);
 			if (user) {
 				navigate(Paths.Dashboard);
+				// TODO: Add toast context and set her to "Login successfully"
 			}
 		});
 		return () => {
@@ -46,7 +48,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
 	return (
 		<AuthContext.Provider value={{ user: user ?? null, logout }}>
-			{user === undefined ? <div>{"Loading..."}</div> : children}
+			{user === undefined ? <Loading /> : children}
 		</AuthContext.Provider>
 	);
 };
