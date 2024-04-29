@@ -3,8 +3,9 @@ import { type PropsWithChildren, createContext, useContext, useEffect, useState 
 import { Loading } from "react-daisyui";
 import { useNavigate } from "react-router-dom";
 import { Paths } from "../routes/routes";
+import type { Database } from "../types/types";
 
-export const supabase = createClient(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_KEY);
+export const supabase = createClient<Database>(import.meta.env.VITE_SUPABASE_URL, import.meta.env.VITE_SUPABASE_KEY);
 
 const AuthContext = createContext<{ user: User | null; logout: () => void }>({
 	user: null,
@@ -24,10 +25,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 			setUser(session?.user ?? null);
 		});
 
-		const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-			const user = session?.user ?? null;
-			setUser(user);
-			if (user) {
+		const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+			setUser(session?.user ?? null);
+			if (event === "SIGNED_IN") {
 				navigate(Paths.Dashboard);
 				// TODO: Add toast context and set her to "Login successfully"
 			}

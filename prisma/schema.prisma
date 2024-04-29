@@ -40,7 +40,7 @@ enum Currencies {
 model User {
   id              Int        @id @default(autoincrement())
   createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  updatedAt       DateTime   @updatedAt @default(now())
   email           String     @unique
   authId          String
   name            String?
@@ -55,7 +55,7 @@ model User {
 model Account {
   id          Int        @id @default(autoincrement())
   createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  updatedAt   DateTime   @updatedAt @default(now())
   name        String
   description String?
   currency    Currencies
@@ -70,7 +70,7 @@ model Account {
 model Category {
   id        Int        @id @default(autoincrement())
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt   DateTime   @updatedAt @default(now())
   name      String
   budget    Int
   account   Account    @relation(fields: [accountId], references: [id])
@@ -86,7 +86,7 @@ model Category {
 model Expense {
   id          Int      @id @default(autoincrement())
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime   @updatedAt @default(now())
   title       String
   description String?
   amount      Int
