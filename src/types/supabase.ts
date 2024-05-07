@@ -28,205 +28,180 @@ export type Database = {
 	};
 	public: {
 		Tables: {
-			_prisma_migrations: {
+			account: {
 				Row: {
-					applied_steps_count: number;
-					checksum: string;
-					finished_at: string | null;
+					created_at: string;
+					currency: Database["public"]["Enums"]["currencies"];
+					description: string | null;
 					id: string;
-					logs: string | null;
-					migration_name: string;
-					rolled_back_at: string | null;
-					started_at: string;
+					name: string;
+					updated_at: string;
+					user_id: string;
 				};
 				Insert: {
-					applied_steps_count?: number;
-					checksum: string;
-					finished_at?: string | null;
-					id: string;
-					logs?: string | null;
-					migration_name: string;
-					rolled_back_at?: string | null;
-					started_at?: string;
-				};
-				Update: {
-					applied_steps_count?: number;
-					checksum?: string;
-					finished_at?: string | null;
+					created_at?: string;
+					currency: Database["public"]["Enums"]["currencies"];
+					description?: string | null;
 					id?: string;
-					logs?: string | null;
-					migration_name?: string;
-					rolled_back_at?: string | null;
-					started_at?: string;
-				};
-				Relationships: [];
-			};
-			Account: {
-				Row: {
-					createdAt: string;
-					currency: Database["public"]["Enums"]["Currencies"];
-					description: string | null;
-					id: number;
 					name: string;
-					updatedAt: string;
-					userId: number;
-				};
-				Insert: {
-					createdAt?: string;
-					currency: Database["public"]["Enums"]["Currencies"];
-					description?: string | null;
-					id?: number;
-					name: string;
-					updatedAt?: string;
-					userId: number;
+					updated_at?: string;
+					user_id: string;
 				};
 				Update: {
-					createdAt?: string;
-					currency?: Database["public"]["Enums"]["Currencies"];
+					created_at?: string;
+					currency?: Database["public"]["Enums"]["currencies"];
 					description?: string | null;
-					id?: number;
+					id?: string;
 					name?: string;
-					updatedAt?: string;
-					userId?: number;
+					updated_at?: string;
+					user_id?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "Account_userId_fkey";
-						columns: ["userId"];
+						foreignKeyName: "account_user_id_fkey";
+						columns: ["user_id"];
 						isOneToOne: false;
-						referencedRelation: "User";
+						referencedRelation: "user";
 						referencedColumns: ["id"];
 					},
 				];
 			};
-			Category: {
+			category: {
 				Row: {
-					accountId: number;
+					account_id: string;
 					budget: number;
-					createdAt: string;
-					id: number;
+					created_at: string;
+					id: string;
 					name: string;
-					supId: number | null;
-					updatedAt: string;
+					parent_id: string | null;
+					updated_at: string;
 				};
 				Insert: {
-					accountId: number;
+					account_id: string;
 					budget: number;
-					createdAt?: string;
-					id?: number;
+					created_at?: string;
+					id?: string;
 					name: string;
-					supId?: number | null;
-					updatedAt?: string;
+					parent_id?: string | null;
+					updated_at?: string;
 				};
 				Update: {
-					accountId?: number;
+					account_id?: string;
 					budget?: number;
-					createdAt?: string;
-					id?: number;
+					created_at?: string;
+					id?: string;
 					name?: string;
-					supId?: number | null;
-					updatedAt?: string;
+					parent_id?: string | null;
+					updated_at?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "Category_accountId_fkey";
-						columns: ["accountId"];
+						foreignKeyName: "category_account_id_fkey";
+						columns: ["account_id"];
 						isOneToOne: false;
-						referencedRelation: "Account";
+						referencedRelation: "account";
 						referencedColumns: ["id"];
 					},
 					{
-						foreignKeyName: "Category_supId_fkey";
-						columns: ["supId"];
+						foreignKeyName: "category_parent_id_fkey";
+						columns: ["parent_id"];
 						isOneToOne: false;
-						referencedRelation: "Category";
+						referencedRelation: "category";
 						referencedColumns: ["id"];
 					},
 				];
 			};
-			Expense: {
+			expense: {
 				Row: {
-					accountId: number;
+					account_id: string;
 					amount: number;
-					categoryId: number;
-					createdAt: string;
-					date: string;
-					description: string | null;
-					id: number;
+					category_id: string | null;
+					created_at: string;
+					description: string;
+					expense_date: string;
+					id: string;
 					title: string;
-					updatedAt: string;
+					updated_at: string;
 				};
 				Insert: {
-					accountId: number;
+					account_id: string;
 					amount: number;
-					categoryId: number;
-					createdAt?: string;
-					date: string;
-					description?: string | null;
-					id?: number;
+					category_id?: string | null;
+					created_at?: string;
+					description: string;
+					expense_date: string;
+					id?: string;
 					title: string;
-					updatedAt?: string;
+					updated_at?: string;
 				};
 				Update: {
-					accountId?: number;
+					account_id?: string;
 					amount?: number;
-					categoryId?: number;
-					createdAt?: string;
-					date?: string;
-					description?: string | null;
-					id?: number;
+					category_id?: string | null;
+					created_at?: string;
+					description?: string;
+					expense_date?: string;
+					id?: string;
 					title?: string;
-					updatedAt?: string;
+					updated_at?: string;
 				};
 				Relationships: [
 					{
-						foreignKeyName: "Expense_accountId_fkey";
-						columns: ["accountId"];
+						foreignKeyName: "expense_account_id_fkey";
+						columns: ["account_id"];
 						isOneToOne: false;
-						referencedRelation: "Account";
+						referencedRelation: "account";
 						referencedColumns: ["id"];
 					},
 					{
-						foreignKeyName: "Expense_categoryId_fkey";
-						columns: ["categoryId"];
+						foreignKeyName: "expense_category_id_fkey";
+						columns: ["category_id"];
 						isOneToOne: false;
-						referencedRelation: "Category";
+						referencedRelation: "category";
 						referencedColumns: ["id"];
 					},
 				];
 			};
-			User: {
+			user: {
 				Row: {
-					authId: string;
-					avatarUrl: string | null;
-					createdAt: string;
-					defaultCurrency: Database["public"]["Enums"]["Currencies"];
+					auth_id: string;
+					avatar_url: string | null;
+					created_at: string;
+					default_currency: Database["public"]["Enums"]["currencies"];
 					email: string;
-					id: number;
+					id: string;
 					name: string | null;
-					updatedAt: string;
+					updated_at: string;
 				};
 				Insert: {
-					authId: string;
-					avatarUrl?: string | null;
-					createdAt?: string;
-					defaultCurrency: Database["public"]["Enums"]["Currencies"];
+					auth_id: string;
+					avatar_url?: string | null;
+					created_at?: string;
+					default_currency: Database["public"]["Enums"]["currencies"];
 					email: string;
-					id?: number;
+					id?: string;
 					name?: string | null;
-					updatedAt?: string;
+					updated_at?: string;
 				};
 				Update: {
-					authId?: string;
-					avatarUrl?: string | null;
-					createdAt?: string;
-					defaultCurrency?: Database["public"]["Enums"]["Currencies"];
+					auth_id?: string;
+					avatar_url?: string | null;
+					created_at?: string;
+					default_currency?: Database["public"]["Enums"]["currencies"];
 					email?: string;
-					id?: number;
+					id?: string;
 					name?: string | null;
-					updatedAt?: string;
+					updated_at?: string;
 				};
-				Relationships: [];
+				Relationships: [
+					{
+						foreignKeyName: "user_auth_id_fkey";
+						columns: ["auth_id"];
+						isOneToOne: false;
+						referencedRelation: "users";
+						referencedColumns: ["id"];
+					},
+				];
 			};
 		};
 		Views: {
@@ -236,7 +211,7 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Enums: {
-			Currencies:
+			currencies:
 				| "USD"
 				| "EUR"
 				| "JPY"
