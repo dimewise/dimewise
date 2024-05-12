@@ -27,13 +27,4 @@
 
 ## Issue Type
 
-- [ ] Bug
-- [ ] Enhancement
-- [ ] Task
-- [ ] Question
-
-## Priority
-
-- [ ] High
-- [ ] Medium
-- [ ] Low
+[Choose from any of the following: Bug, Enhancement, Task, Question.]
