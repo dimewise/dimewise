@@ -1,22 +1,30 @@
 {
 	"name": "dimewise",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "bunx --bun vite",
 		"build": "tsc && vite build",
 		"check": "bunx @biomejs/biome check --apply .",
-		"setup:hooks": "cp scripts/* .git/hooks/ && chmod +x .git/hooks/pre-commit .git/hooks/pre-push",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"init:env": "chmod +x ./scripts/init.sh && ./scripts/init.sh",
+		"gen:db": "bunx supabase gen types typescript --local > src/types/supabase.ts",
+		"db:reset-local": "bunx supabase db reset",
+		"db:diff-local": "bunx supabase db diff --local",
+		"db:lint-local": "bunx supabase db lint --local",
+		"db:start": "bunx supabase start",
+		"db:stop": "bunx supabase stop",
+		"db:status": "bunx supabase status",
+		"db:migration-new": "bunx supabase migration new",
+		"db:migration-list-local": "bunx supabase migration list --local",
+		"db:migration-up-local": "bunx supabase migration up --local"
 	},
 	"dependencies": {
-		"@prisma/client": "^5.12.1",
 		"@supabase/auth-ui-react": "^0.4.7",
 		"@supabase/auth-ui-shared": "^0.1.8",
-		"@supabase/supabase-js": "^2.42.3",
+		"@supabase/supabase-js": "^2.43.1",
 		"bun": "^1.1.4",
-		"bunx": "^0.1.0",
 		"i18next": "^23.11.2",
 		"react": "^18.2.0",
 		"react-daisyui": "^5.0.0",
@@ -25,7 +33,7 @@
 		"react-router-dom": "6.23.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.7.1",
+		"@biomejs/biome": "1.7.3",
 		"@types/react": "^18.2.15",
 		"@types/react-dom": "^18.2.7",
 		"@vitejs/plugin-react-swc": "^3.3.2",
@@ -34,6 +42,7 @@
 		"postcss": "^8.4.38",
 		"tailwindcss": "^3.4.3",
 		"typescript": "^5.0.2",
-		"vite": "^5.2.10"
+		"vite": "^5.2.10",
+		"@types/bun": "latest"
 	}
 }
