@@ -25,6 +25,5 @@
 **Additional Information:**
 [Include any additional information that might be relevant to the issue.]
 
-## Issue Type
-
+Issue Type
 [Choose from any of the following: Bug, Enhancement, Task, Question.]
