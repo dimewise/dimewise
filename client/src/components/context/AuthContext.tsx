@@ -1,20 +1,18 @@
 import { type ReactNode, createContext, useContext, useMemo, useState } from "react";
 
-export interface FakedUser {
+interface AuthContextType {
 	user: string | null;
-	signin: () => void;
-	signout: () => void;
+	signin: (user: string, callback: VoidFunction) => void;
+	signout: (callback: VoidFunction) => void;
 }
 
-const initialContext: FakedUser = {
+const AuthContext = createContext<AuthContextType>({
 	user: null,
-	signin: async () => {},
-	signout: async () => {},
-};
+	signin: () => {},
+	signout: () => {},
+});
 
-const AuthContext = createContext<FakedUser>(initialContext);
-
-export const useAuth = (): FakedUser => {
+export const useAuth = (): AuthContextType => {
 	return useContext(AuthContext);
 };
 
@@ -25,19 +23,36 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
 	const [user, setUser] = useState<string | null>(null);
 
-	const signin = async () => {
-		console.log("Signing in...");
-		await new Promise((r) => setTimeout(r, 500));
-		setUser("username");
-		console.log("Signin complete");
+	const signin = (newUser: string, callback: VoidFunction) => {
+		return FakeAuthProvider.signin(() => {
+			setUser(newUser);
+			callback();
+		});
 	};
 
-	const signout = async () => {
-		await new Promise((r) => setTimeout(r, 500));
-		setUser(null);
+	const signout = (callback: VoidFunction) => {
+		return FakeAuthProvider.signout(() => {
+			setUser(null);
+			callback();
+		});
 	};
 
 	const value = useMemo(() => ({ user, signin, signout }), [user, signin, signout]);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+/**
+ * This represents some generic auth provider API, like Firebase.
+ */
+export const FakeAuthProvider = {
+	isAuthenticated: false,
+	signin(callback: VoidFunction) {
+		FakeAuthProvider.isAuthenticated = true;
+		setTimeout(callback, 100); // fake async
+	},
+	signout(callback: VoidFunction) {
+		FakeAuthProvider.isAuthenticated = false;
+		setTimeout(callback, 100);
+	},
 };
