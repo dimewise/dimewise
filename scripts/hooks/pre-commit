@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Run the format script before committing changes
+cd client
 bun run check
 
 # Exit with the exit code of the npm run format command
