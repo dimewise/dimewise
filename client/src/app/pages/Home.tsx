@@ -1,11 +1,12 @@
+import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../../components/context/AuthContext";
+import type { RootState } from "../../store/store";
 import { Routes } from "../Routes";
 
 export const Home = () => {
-	const auth = useAuth();
+	const user = useSelector((state: RootState) => state.user);
 
-	if (auth.user) {
+	if (user) {
 		return (
 			<Navigate
 				to={Routes.Dashboard}
