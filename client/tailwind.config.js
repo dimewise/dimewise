@@ -42,6 +42,9 @@ export default {
 					'"Noto Color Emoji"',
 				],
 			},
+			height: {
+				navbar: "64px",
+			},
 		},
 	},
 	plugins: [require("daisyui")],
