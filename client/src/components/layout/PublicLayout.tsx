@@ -27,13 +27,13 @@ export const PublicLayout = () => {
 							</label>
 						</div>
 						<div className="flex-none hidden lg:block">
-							<ul className="menu menu-horizontal">
+							<ul className="menu menu-horizontal gap-x-3">
 								{/* Navbar menu content here */}
 								<MenuList />
 							</ul>
 						</div>
 					</nav>
-					<main className="flex-1 w-full h-full">
+					<main className="flex-1 w-full h-full flex justify-center items-start">
 						<Outlet />
 					</main>
 				</div>
@@ -59,9 +59,17 @@ const MenuList = () => {
 			<li>
 				<Link
 					to={Routes.Login}
-					className="btn btn-primary "
+					className="btn btn-secondary btn-ghost"
 				>
-					Login
+					Sign In
+				</Link>
+			</li>
+			<li>
+				<Link
+					to={Routes.Login}
+					className="btn btn-primary"
+				>
+					Start budget
 				</Link>
 			</li>
 		</>
