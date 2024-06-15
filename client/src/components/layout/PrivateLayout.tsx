@@ -3,21 +3,21 @@ import { Routes } from "../../Routes";
 import { useAuth } from "../../hooks/useAuth";
 
 export const PrivateLayout = () => {
-  const { session: authSession } = useAuth();
-  const location = useLocation();
+	const { session: authSession } = useAuth();
+	const location = useLocation();
 
-  if (!authSession) {
-    return (
-      <Navigate
-        to={Routes.Login}
-        state={{ from: location }}
-        replace
-      />
-    );
-  }
-  return (
-    <div className="bg-green-500">
-      <Outlet />
-    </div>
-  );
+	if (!authSession) {
+		return (
+			<Navigate
+				to={Routes.Login}
+				state={{ from: location }}
+				replace
+			/>
+		);
+	}
+	return (
+		<div className="bg-green-500">
+			<Outlet />
+		</div>
+	);
 };

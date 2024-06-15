@@ -3,9 +3,9 @@ import { Router } from "./Router";
 import { AuthProvider } from "./components/context/AuthContext";
 
 export const App = () => {
-  return (
-    <AuthProvider>
-      <RouterProvider router={Router} />
-    </AuthProvider>
-  );
+	return (
+		<AuthProvider>
+			<RouterProvider router={Router} />
+		</AuthProvider>
+	);
 };

@@ -1,42 +1,42 @@
 import type { Session } from "@supabase/supabase-js";
-import { type ReactNode, createContext, useContext, useState, useEffect } from "react";
+import { type ReactNode, createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 interface AuthContextType {
-  session: Session | null;
+	session: Session | null;
 }
 
 export const AuthContext = createContext<AuthContextType>({
-  session: null,
+	session: null,
 });
 
 export const useAuth = (): AuthContextType => {
-  return useContext(AuthContext);
+	return useContext(AuthContext);
 };
 
 interface AuthProviderProps {
-  children: ReactNode;
+	children: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [session, setSession] = useState<Session | null>(null);
+	const [session, setSession] = useState<Session | null>(null);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+	useEffect(() => {
+		supabase.auth.getSession().then(({ data: { session } }) => {
+			setSession(session);
+		});
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+		const {
+			data: { subscription },
+		} = supabase.auth.onAuthStateChange((_event, session) => {
+			setSession(session);
+		});
 
-    return () => subscription.unsubscribe();
-  }, []);
-  // NOTE: redirection to login when session is null is handled in PrivateLayout
+		return () => subscription.unsubscribe();
+	}, []);
+	// NOTE: redirection to login when session is null is handled in PrivateLayout
 
-  const value = { session };
+	const value = { session };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
