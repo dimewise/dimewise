@@ -1,24 +1,23 @@
-import { useSelector } from "react-redux";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { Routes } from "../../app/Routes";
-import { isAuthenticatedSelector } from "../../store/auth/selector";
+import { Routes } from "../../Routes";
+import { useAuth } from "../../hooks/useAuth";
 
 export const PrivateLayout = () => {
-	const location = useLocation();
-	const isAuthenticated = useSelector(isAuthenticatedSelector);
+  const { session: authSession } = useAuth();
+  const location = useLocation();
 
-	if (!isAuthenticated) {
-		return (
-			<Navigate
-				to={Routes.Login}
-				state={{ from: location }}
-				replace
-			/>
-		);
-	}
-	return (
-		<div className="bg-green-500">
-			<Outlet />
-		</div>
-	);
+  if (!authSession) {
+    return (
+      <Navigate
+        to={Routes.Login}
+        state={{ from: location }}
+        replace
+      />
+    );
+  }
+  return (
+    <div className="bg-green-500">
+      <Outlet />
+    </div>
+  );
 };
