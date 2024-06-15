@@ -21,8 +21,7 @@
 
 		// Some stricter flags
 		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noPropertyAccessFromIndexSignature": true
+		"noUnusedParameters": true
 	},
 	"include": ["src"],
 	"references": [{ "path": "./tsconfig.node.json" }]

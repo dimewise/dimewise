@@ -4,9 +4,9 @@ import { Router } from "./app/Router";
 import { store } from "./store/store";
 
 export const App = () => {
-  return (
-    <Provider store={store}>
-      <RouterProvider router={Router} />
-    </Provider>
-  );
+	return (
+		<Provider store={store}>
+			<RouterProvider router={Router} />
+		</Provider>
+	);
 };

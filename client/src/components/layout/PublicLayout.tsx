@@ -69,7 +69,7 @@ const MenuList = () => {
 					to={Routes.Login}
 					className="btn btn-primary"
 				>
-					Start budget
+					Get Started
 				</Link>
 			</li>
 		</>
