@@ -1,11 +1,11 @@
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
-import { useAuth } from "../hooks/useAuth";
-import { useState } from "react";
-import type { AuthError } from "@supabase/supabase-js";
 import { XCircleIcon } from "@heroicons/react/24/outline";
+import { yupResolver } from "@hookform/resolvers/yup";
+import type { AuthError } from "@supabase/supabase-js";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
 
 export const Login = () => {
 	const navigate = useNavigate();

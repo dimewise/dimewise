@@ -4,9 +4,9 @@ import { AuthLayout } from "./components/layout/AuthLayout";
 import { PrivateLayout } from "./components/layout/PrivateLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { RootLayout } from "./components/layout/RootLayout";
+import { Dashboard } from "./pages/Dashboard";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
-import { Dashboard } from "./pages/Dashboard";
 
 export const Router = createBrowserRouter([
 	{
