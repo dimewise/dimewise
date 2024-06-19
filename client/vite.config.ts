@@ -5,4 +5,9 @@ import { defineConfig } from "vite";
 //biome-ignore lint/style/noDefaultExport: default export for vite
 export default defineConfig({
 	plugins: [react()],
+	server: {
+		watch: {
+			usePolling: true,
+		},
+	},
 });
