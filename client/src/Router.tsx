@@ -7,6 +7,8 @@ import { RootLayout } from "./components/layout/RootLayout";
 import { Dashboard } from "./pages/Dashboard";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
+import { SignUp } from "./pages/SignUp";
+import { ForgotPassword } from "./pages/ForgotPassword";
 
 export const Router = createBrowserRouter([
 	{
@@ -33,6 +35,14 @@ export const Router = createBrowserRouter([
 					{
 						path: Routes.Login,
 						element: <Login />,
+					},
+					{
+						path: Routes.SignUp,
+						element: <SignUp />,
+					},
+					{
+						path: Routes.ForgotPassword,
+						element: <ForgotPassword />,
 					},
 				],
 			},

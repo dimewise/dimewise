@@ -4,6 +4,8 @@ export enum Routes {
 	// auth
 	Auth = "/auth",
 	Login = "/auth/login",
+	SignUp = "/auth/signup",
+	ForgotPassword = "/auth/fogot-password",
 
 	// public
 	Root = "/",
