@@ -4,9 +4,9 @@ import type { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Routes } from "../Routes";
 import { useAuth } from "../hooks/useAuth";
 import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
-import { Routes } from "../Routes";
 
 export const Login = () => {
 	const navigate = useNavigate();

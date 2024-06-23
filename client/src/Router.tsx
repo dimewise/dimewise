@@ -5,10 +5,10 @@ import { PrivateLayout } from "./components/layout/PrivateLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { RootLayout } from "./components/layout/RootLayout";
 import { Dashboard } from "./pages/Dashboard";
+import { ForgotPassword } from "./pages/ForgotPassword";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { SignUp } from "./pages/SignUp";
-import { ForgotPassword } from "./pages/ForgotPassword";
 
 export const Router = createBrowserRouter([
 	{

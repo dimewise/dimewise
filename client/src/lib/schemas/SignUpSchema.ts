@@ -11,4 +11,4 @@ export const SignUpSchema = yup.object({
 		}),
 });
 
-export interface SignUpSchemaType extends yup.InferType<typeof SignUpSchema> { }
+export interface SignUpSchemaType extends yup.InferType<typeof SignUpSchema> {}
