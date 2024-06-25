@@ -35,91 +35,81 @@ export const Login = () => {
 
 	return (
 		<>
-			<div className="flex flex-col items-center justify-start w-full h-full">
-				<nav className="navbar w-full max-w-7xl h-navbar flex justify-between items-center px-5 flex-none fixed top-0 left-0">
-					<h1 className="font-black text-2xl">
-						Dimewise<span className="text-primary">.</span>
-					</h1>
-				</nav>
-				<div className="w-full flex-1 flex flex-col items-center justify-center">
-					<div className="text-center my-10">
-						<h1 className="text-3xl font-black">Welcome back</h1>
-						<h2>Sign in to continue to Dimewise</h2>
-					</div>
-					<form
-						className="w-full max-w-sm flex flex-col gap-3"
-						onSubmit={handleSubmit(onSubmit)}
+			<div className="text-center my-10">
+				<h1 className="text-3xl font-black">Welcome back</h1>
+				<h2>Sign in to continue to Dimewise</h2>
+			</div>
+			<form
+				className="w-full max-w-sm flex flex-col gap-3"
+				onSubmit={handleSubmit(onSubmit)}
+			>
+				{loginError && (
+					<div
+						role="alert"
+						className="alert alert-error"
 					>
-						{loginError && (
-							<div
-								role="alert"
-								className="alert alert-error"
-							>
-								<XCircleIcon className="size-6 text-base-100" />
-								<span>{loginError.status}</span>
+						<XCircleIcon className="size-6 text-base-100" />
+						<span>{loginError.status}</span>
+					</div>
+				)}
+				<label className="form-control w-full">
+					<div className="label">
+						<span className="label-text">Email</span>
+					</div>
+					<input
+						type="email"
+						placeholder="john.doe@email.com"
+						className="input input-bordered w-full"
+						{...register("email")}
+					/>
+					{errors?.email && (
+						<div className="label text-error text-sm">
+							<span>{errors.email.message}</span>
+						</div>
+					)}
+				</label>
+				<div>
+					<label className="form-control w-full">
+						<div className="label">
+							<span className="label-text">Password</span>
+						</div>
+						<input
+							type="password"
+							placeholder="******"
+							className="input input-bordered w-full"
+							{...register("password")}
+						/>
+						{errors?.password && (
+							<div className="label text-error text-sm">
+								<span>{errors.password.message}</span>
 							</div>
 						)}
-						<label className="form-control w-full">
-							<div className="label">
-								<span className="label-text">Email</span>
-							</div>
-							<input
-								type="email"
-								placeholder="john.doe@email.com"
-								className="input input-bordered w-full"
-								{...register("email")}
-							/>
-							{errors?.email && (
-								<div className="label text-error text-sm">
-									<span>{errors.email.message}</span>
-								</div>
-							)}
-						</label>
-						<div>
-							<label className="form-control w-full">
-								<div className="label">
-									<span className="label-text">Password</span>
-								</div>
-								<input
-									type="password"
-									placeholder="******"
-									className="input input-bordered w-full"
-									{...register("password")}
-								/>
-								{errors?.password && (
-									<div className="label text-error text-sm">
-										<span>{errors.password.message}</span>
-									</div>
-								)}
-							</label>
-							<div className="w-full flex items-center justify-end text-sm mt-2">
-								<Link
-									className="link link-primary"
-									to={Routes.ForgotPassword}
-								>
-									Forgot Password?
-								</Link>
-							</div>
-						</div>
-						<button
-							type="submit"
-							className="btn btn-primary w-full mt-3"
+					</label>
+					<div className="w-full flex items-center justify-end text-sm mt-2">
+						<Link
+							className="link link-primary"
+							to={Routes.ForgotPassword}
 						>
-							Login
-						</button>
-						<div className="w-full flex items-center justify-center text-sm gap-2">
-							<p>Don't have an account?</p>
-							<Link
-								className="link link-primary"
-								to={Routes.SignUp}
-							>
-								Sign Up Now
-							</Link>
-						</div>
-					</form>
+							Forgot Password?
+						</Link>
+					</div>
 				</div>
-			</div>
-			<div className="w-full h-full bg-primary hidden lg:flex" />
+				<button
+					type="submit"
+					className="btn btn-primary w-full mt-3"
+				>
+					Login
+				</button>
+				<div className="w-full flex items-center justify-center text-sm gap-2">
+					<p>Don't have an account?</p>
+					<Link
+						className="link link-primary"
+						to={Routes.SignUp}
+					>
+						Sign Up Now
+					</Link>
+				</div>
+			</form>
 		</>
 	);
 };
