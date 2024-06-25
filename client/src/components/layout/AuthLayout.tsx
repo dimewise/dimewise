@@ -1,6 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom";
-import { LogoButton } from "../LogoButton";
 import { Routes } from "../../Routes";
+import { LogoButton } from "../LogoButton";
 
 export const AuthLayout = () => {
 	const navigate = useNavigate();

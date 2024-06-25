@@ -1,8 +1,8 @@
-import { useForm } from "react-hook-form";
-import { ForgotPasswordSchema } from "../lib/schemas/ForgotPasswordSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { Routes } from "../Routes";
+import { ForgotPasswordSchema } from "../lib/schemas/ForgotPasswordSchema";
 
 // TODO: Complete the forgot password process with emails sent etc
 export const ForgotPassword = () => {
