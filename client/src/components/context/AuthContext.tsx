@@ -3,11 +3,13 @@ import type {
 	Session,
 	SignInWithPasswordCredentials,
 	SignUpWithPasswordCredentials,
+	User,
 } from "@supabase/supabase-js";
 import { type ReactNode, createContext, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase/supabase";
 
 interface AuthContextType {
+	user: User | null;
 	session: Session | null;
 	login: (form: SignInWithPasswordCredentials) => Promise<AuthError | null>;
 	logout: () => void;
@@ -15,9 +17,10 @@ interface AuthContextType {
 }
 
 export const AuthContext = createContext<AuthContextType>({
+	user: null,
 	session: null,
 	login: async () => null,
-	logout: () => {},
+	logout: () => { },
 	register: async () => null,
 });
 
@@ -26,22 +29,34 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+	const [user, setUser] = useState<User | null>(null);
 	const [session, setSession] = useState<Session | null>(null);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		supabase.auth.getSession().then(({ data: { session } }) => {
+		const setAuthData = async () => {
+			const {
+				data: { session },
+				error,
+			} = await supabase.auth.getSession();
+			if (error) throw error;
 			setSession(session);
-		});
+			setUser(session?.user ?? null);
+			setLoading(false);
+		};
 
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange((_event, session) => {
 			setSession(session);
+			setUser(session?.user ?? null);
+			setLoading(false);
 		});
+
+		setAuthData();
 
 		return () => subscription.unsubscribe();
 	}, []);
-	// NOTE: redirection to login when session is null is handled in PrivateLayout
 
 	// supabase auth methods
 	const login = async (form: SignInWithPasswordCredentials): Promise<AuthError | null> => {
@@ -56,7 +71,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 		return error;
 	};
 
-	const value = { session, login, logout, register };
+	const value = { user, session, login, logout, register };
 
-	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+	return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };

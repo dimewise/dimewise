@@ -1,19 +1,9 @@
-import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Routes } from "../../Routes";
-import { useAuth } from "../../hooks/useAuth";
 import { LogoButton } from "../LogoButton";
 
 export const AuthLayout = () => {
-	const { session: authSession } = useAuth();
 	const navigate = useNavigate();
-
-	// TODO: find a better way to handle automatic re-route
-	useEffect(() => {
-		if (authSession) {
-			return navigate(Routes.Dashboard, { replace: true });
-		}
-	}, [navigate, authSession]);
 
 	const handleOnClickLogo = () => {
 		navigate(Routes.Root);

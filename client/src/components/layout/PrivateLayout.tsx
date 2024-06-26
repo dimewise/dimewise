@@ -1,20 +1,23 @@
-import { useEffect } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Routes } from "../../Routes";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { Routes } from "../../Routes";
 
 export const PrivateLayout = () => {
-	const { session: authSession, logout } = useAuth();
+	const { user, logout } = useAuth();
 	const location = useLocation();
-	const navigate = useNavigate();
 
-	// TODO: find a better way to handle automatic re-route
-	useEffect(() => {
-		if (!authSession) {
-			console.log("redirecting");
-			return navigate(Routes.Login, { state: { from: location }, replace: true });
-		}
-	}, [navigate, location, authSession]);
+	if (!user) {
+		console.log("here");
+		return (
+			<Navigate
+				to={Routes.Login}
+				state={{
+					from: location,
+				}}
+				replace
+			/>
+		);
+	}
 
 	const handleLogout = () => {
 		logout();
