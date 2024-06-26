@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
 import { Routes } from "../../Routes";
+import { useAuth } from "../../hooks/useAuth";
 
 export const PrivateLayout = () => {
 	const { user, logout } = useAuth();

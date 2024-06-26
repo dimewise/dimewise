@@ -3,9 +3,9 @@ import { Routes } from "../Routes";
 import { useAuth } from "../hooks/useAuth";
 
 export const Home = () => {
-	const { session: authSession } = useAuth();
+	const { user } = useAuth();
 
-	if (authSession) {
+	if (user) {
 		return (
 			<Navigate
 				to={Routes.Dashboard}
