@@ -3,12 +3,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import type { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Routes } from "../Routes";
 import { useAuth } from "../hooks/useAuth";
 import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
 
 export const Login = () => {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { login } = useAuth();
@@ -36,8 +38,8 @@ export const Login = () => {
 	return (
 		<>
 			<div className="text-center my-10">
-				<h1 className="text-3xl font-black">Welcome back</h1>
-				<h2>Sign in to continue to Dimewise</h2>
+				<h1 className="text-3xl font-black">{t("login.title")}</h1>
+				<h2>{t("login.greetings")}</h2>
 			</div>
 			<form
 				className="w-full max-w-sm flex flex-col gap-3"
@@ -54,7 +56,7 @@ export const Login = () => {
 				)}
 				<label className="form-control w-full">
 					<div className="label">
-						<span className="label-text">Email</span>
+						<span className="label-text">{t("auth.form.field_email.label")}</span>
 					</div>
 					<input
 						type="email"
@@ -71,7 +73,7 @@ export const Login = () => {
 				<div>
 					<label className="form-control w-full">
 						<div className="label">
-							<span className="label-text">Password</span>
+							<span className="label-text">{t("auth.form.field_password.label")}</span>
 						</div>
 						<input
 							type="password"
@@ -90,7 +92,7 @@ export const Login = () => {
 							className="link link-primary"
 							to={Routes.ForgotPassword}
 						>
-							Forgot Password?
+							{t("link.forgot_password")}
 						</Link>
 					</div>
 				</div>
@@ -98,15 +100,15 @@ export const Login = () => {
 					type="submit"
 					className="btn btn-primary w-full mt-3"
 				>
-					Login
+					{t("auth.form.button.login")}
 				</button>
 				<div className="w-full flex items-center justify-center text-sm gap-2">
-					<p>Don't have an account?</p>
+					<p>{t("link.dont_have_an_account")}</p>
 					<Link
 						className="link link-primary"
 						to={Routes.SignUp}
 					>
-						Sign Up Now
+						{t("link.sign_up_now")}
 					</Link>
 				</div>
 			</form>

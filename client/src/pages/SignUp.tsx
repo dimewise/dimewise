@@ -3,12 +3,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import type { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Routes } from "../Routes";
 import { useAuth } from "../hooks/useAuth";
 import { SignUpSchema, type SignUpSchemaType } from "../lib/schemas/SignUpSchema";
 
 export const SignUp = () => {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const { register: signUp } = useAuth();
@@ -36,8 +38,8 @@ export const SignUp = () => {
 	return (
 		<>
 			<div className="text-center my-10">
-				<h1 className="text-3xl font-black">Create an account</h1>
-				<h2>Start taking control of your finances</h2>
+				<h1 className="text-3xl font-black">{t("sign_up.title")}</h1>
+				<h2>{t("sign_up.greetings")}</h2>
 			</div>
 			<form
 				className="w-full max-w-sm flex flex-col gap-3"
@@ -54,7 +56,7 @@ export const SignUp = () => {
 				)}
 				<label className="form-control w-full">
 					<div className="label">
-						<span className="label-text">Email</span>
+						<span className="label-text">{t("auth.form.field_email.label")}</span>
 					</div>
 					<input
 						type="email"
@@ -70,7 +72,7 @@ export const SignUp = () => {
 				</label>
 				<label className="form-control w-full">
 					<div className="label">
-						<span className="label-text">Password</span>
+						<span className="label-text">{t("auth.form.field_password.label")}</span>
 					</div>
 					<input
 						type="password"
@@ -86,7 +88,7 @@ export const SignUp = () => {
 				</label>
 				<label className="form-control w-full">
 					<div className="label">
-						<span className="label-text">Confirm Password</span>
+						<span className="label-text">{t("auth.form.field_confirm_password.label")}</span>
 					</div>
 					<input
 						type="password"
@@ -104,15 +106,15 @@ export const SignUp = () => {
 					type="submit"
 					className="btn btn-primary w-full mt-3"
 				>
-					Sign Up
+					{t("auth.form.button.sign_up")}
 				</button>
 				<div className="w-full flex items-center justify-center text-sm gap-2">
-					<p>Already have an account?</p>
+					<p>{t("link.already_have_an_account")}</p>
 					<Link
 						className="link link-primary"
 						to={Routes.Login}
 					>
-						Sign In
+						{t("link.sign_in")}
 					</Link>
 				</div>
 			</form>
