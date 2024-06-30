@@ -21,9 +21,8 @@
 
 		// Some stricter flags
 		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noPropertyAccessFromIndexSignature": true
+		"noUnusedParameters": true
 	},
-	"include": ["src"],
+	"include": ["src", "src/types/vite-env.d.ts"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

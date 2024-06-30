@@ -5,6 +5,12 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Change to the client directory
+cd client/ || {
+	echo -e "${YELLOW}⚠️ Error: Failed to change directory to client/. Make sure the directory exists.${NC}"
+	exit 1
+}
+
 # Copy env files
 echo -e "${GREEN}ℹ️  Copying .env.example to .env...${NC}"
 cp .env.example .env
@@ -45,9 +51,10 @@ sed -i.bak "s|PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key|PUBLIC_SUPABASE_AN
 # Remove backup file created by sed
 rm .env.bak
 
+# Deprecated, we are only using auth on the frontend
 # Start migrations and seeding
-echo -e "${GREEN}ℹ️  Running database migrations and seeds...${NC}"
-bun db:migration-up-local
+# echo -e "${GREEN}ℹ️  Running database migrations and seeds...${NC}"
+# bun db:migration-up-local
 
 echo -e "${GREEN}✅ Initialization complete! 🚀${NC}"
 echo -e "${GREEN}ℹ️  You can now run the app by running 'bun dev' in the terminal.${NC}"

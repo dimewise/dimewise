@@ -1,58 +1,77 @@
-import { type ReactNode, createContext, useContext, useState } from "react";
+import type {
+	AuthError,
+	Session,
+	SignInWithPasswordCredentials,
+	SignUpWithPasswordCredentials,
+	User,
+} from "@supabase/supabase-js";
+import { type ReactNode, createContext, useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase/supabase";
 
 interface AuthContextType {
-	user: string | null;
-	signin: (user: string, callback: VoidFunction) => void;
-	signout: (callback: VoidFunction) => void;
+	user: User | null;
+	session: Session | null;
+	login: (form: SignInWithPasswordCredentials) => Promise<AuthError | null>;
+	logout: () => void;
+	register: (form: SignUpWithPasswordCredentials) => Promise<AuthError | null>;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
 	user: null,
-	signin: () => {},
-	signout: () => {},
+	session: null,
+	login: async () => null,
+	logout: () => {},
+	register: async () => null,
 });
-
-export const useAuth = (): AuthContextType => {
-	return useContext(AuthContext);
-};
 
 interface AuthProviderProps {
 	children: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-	const [user, setUser] = useState<string | null>(null);
+	const [user, setUser] = useState<User | null>(null);
+	const [session, setSession] = useState<Session | null>(null);
+	const [loading, setLoading] = useState(true);
 
-	const signin = (newUser: string, callback: VoidFunction) => {
-		return FakeAuthProvider.signin(() => {
-			setUser(newUser);
-			callback();
+	useEffect(() => {
+		const setAuthData = async () => {
+			const {
+				data: { session },
+				error,
+			} = await supabase.auth.getSession();
+			if (error) throw error;
+			setSession(session);
+			setUser(session?.user ?? null);
+			setLoading(false);
+		};
+
+		const {
+			data: { subscription },
+		} = supabase.auth.onAuthStateChange((_event, session) => {
+			setSession(session);
+			setUser(session?.user ?? null);
+			setLoading(false);
 		});
+
+		setAuthData();
+
+		return () => subscription.unsubscribe();
+	}, []);
+
+	// supabase auth methods
+	const login = async (form: SignInWithPasswordCredentials): Promise<AuthError | null> => {
+		const { error } = await supabase.auth.signInWithPassword(form);
+		return error;
+	};
+	const logout = () => {
+		supabase.auth.signOut();
+	};
+	const register = async (form: SignUpWithPasswordCredentials): Promise<AuthError | null> => {
+		const { error } = await supabase.auth.signUp(form);
+		return error;
 	};
 
-	const signout = (callback: VoidFunction) => {
-		return FakeAuthProvider.signout(() => {
-			setUser(null);
-			callback();
-		});
-	};
+	const value = { user, session, login, logout, register };
 
-	const value = { user, signin, signout };
-
-	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-/**
- * This represents some generic auth provider API, like Firebase.
- */
-export const FakeAuthProvider = {
-	isAuthenticated: false,
-	signin(callback: VoidFunction) {
-		FakeAuthProvider.isAuthenticated = true;
-		setTimeout(callback, 100); // fake async
-	},
-	signout(callback: VoidFunction) {
-		FakeAuthProvider.isAuthenticated = false;
-		setTimeout(callback, 100);
-	},
+	return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };

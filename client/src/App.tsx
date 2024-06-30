@@ -1,18 +1,12 @@
-import { Provider } from "react-redux";
 import { RouterProvider } from "react-router-dom";
-import { PersistGate } from "redux-persist/integration/react";
-import { Router } from "./app/Router";
-import { persistor, store } from "./store/store";
+import { Router } from "./Router";
+import "./lib/locale/i18n";
+import { AuthProvider } from "./components/context/AuthContext";
 
 export const App = () => {
 	return (
-		<Provider store={store}>
-			<PersistGate
-				loading={null}
-				persistor={persistor}
-			>
-				<RouterProvider router={Router} />
-			</PersistGate>
-		</Provider>
+		<AuthProvider>
+			<RouterProvider router={Router} />
+		</AuthProvider>
 	);
 };

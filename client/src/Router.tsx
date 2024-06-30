@@ -1,12 +1,14 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
-import { AuthLayout } from "../components/layout/AuthLayout";
-import { PrivateLayout } from "../components/layout/PrivateLayout";
-import { PublicLayout } from "../components/layout/PublicLayout";
-import { RootLayout } from "../components/layout/RootLayout";
 import { Routes } from "./Routes";
+import { AuthLayout } from "./components/layout/AuthLayout";
+import { PrivateLayout } from "./components/layout/PrivateLayout";
+import { PublicLayout } from "./components/layout/PublicLayout";
+import { RootLayout } from "./components/layout/RootLayout";
+import { Dashboard } from "./pages/Dashboard";
+import { ForgotPassword } from "./pages/ForgotPassword";
 import { Home } from "./pages/Home";
-import { Login } from "./pages/auth/Login";
-import { Dashboard } from "./pages/private/Dashboard";
+import { Login } from "./pages/Login";
+import { SignUp } from "./pages/SignUp";
 
 export const Router = createBrowserRouter([
 	{
@@ -33,6 +35,14 @@ export const Router = createBrowserRouter([
 					{
 						path: Routes.Login,
 						element: <Login />,
+					},
+					{
+						path: Routes.SignUp,
+						element: <SignUp />,
+					},
+					{
+						path: Routes.ForgotPassword,
+						element: <ForgotPassword />,
 					},
 				],
 			},
