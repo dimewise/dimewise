@@ -1,7 +1,3 @@
-import { Link, Navigate, Outlet, useLocation, useMatch } from "react-router-dom";
-import { Routes } from "../../Routes";
-import { useAuth } from "../../hooks/useAuth";
-import { useTranslation } from "react-i18next";
 import {
 	ArrowLeftStartOnRectangleIcon,
 	CalendarDaysIcon,
@@ -9,6 +5,10 @@ import {
 	PlusIcon,
 	RectangleGroupIcon,
 } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
+import { Link, Navigate, Outlet, useLocation, useMatch } from "react-router-dom";
+import { Routes } from "../../Routes";
+import { useAuth } from "../../hooks/useAuth";
 import { LogoButton } from "../LogoButton";
 
 export const PrivateLayout = () => {

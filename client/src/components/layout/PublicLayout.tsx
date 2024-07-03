@@ -1,7 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Routes } from "../../Routes";
 import { MenuIcon } from "../../assets/Icons/MenuIcon";
-import { useTranslation } from "react-i18next";
 import { LogoButton } from "../LogoButton";
 
 export const PublicLayout = () => {

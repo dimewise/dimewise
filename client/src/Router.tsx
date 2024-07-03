@@ -5,12 +5,12 @@ import { PrivateLayout } from "./components/layout/PrivateLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { RootLayout } from "./components/layout/RootLayout";
 import { ForgotPassword } from "./pages/ForgotPassword";
+import { History } from "./pages/History";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
-import { SignUp } from "./pages/SignUp";
 import { Overview } from "./pages/Overview";
 import { Settings } from "./pages/Settings";
-import { History } from "./pages/History";
+import { SignUp } from "./pages/SignUp";
 
 export const Router = createBrowserRouter([
 	{
