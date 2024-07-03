@@ -1,6 +1,13 @@
 {
 	"loading": "Loading",
 	"welcome": "Welcome to Dashboard sir",
+	"nav.public.sign_in": "Sign In",
+	"nav.public.get_started": "Get Started",
+	"nav.private.overview": "Overview",
+	"nav.private.history": "History",
+	"nav.private.settings": "Settings",
+	"nav.private.log_out": "Logout",
+	"nav.private.add": "Add",
 	"auth.form.field_email.label": "Email",
 	"auth.form.field_password.label": "Password",
 	"auth.form.field_confirm_password.label": "Confirm Password",
