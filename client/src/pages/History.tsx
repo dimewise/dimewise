@@ -1,3 +1,10 @@
+import { useTranslation } from "react-i18next";
+
 export const History = () => {
-	return <div>This is the history page please select the date</div>;
+	const { t } = useTranslation();
+	return (
+		<div className="prose">
+			<h1>{t("nav.private.history")}</h1>
+		</div>
+	);
 };

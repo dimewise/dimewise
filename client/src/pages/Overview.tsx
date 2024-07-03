@@ -1,3 +1,10 @@
+import { useTranslation } from "react-i18next";
+
 export const Overview = () => {
-	return <div>This is the overview page, please take a good look</div>;
+	const { t } = useTranslation();
+	return (
+		<div className="prose">
+			<h1>{t("nav.private.overview")}</h1>
+		</div>
+	);
 };

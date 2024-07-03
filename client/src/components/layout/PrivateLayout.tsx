@@ -41,7 +41,7 @@ export const PrivateLayout = () => {
 				/>
 				<div className="drawer-content flex flex-col items-center justify-center">
 					{/* Page content here */}
-					<main>
+					<main className="h-full w-full flex align-center justify-center p-10">
 						<Outlet />
 					</main>
 				</div>
@@ -125,6 +125,7 @@ const MobileNav = () => {
 		<div className="btm-nav lg:hidden">
 			<Link
 				type="button"
+				className={useMatch(Routes.Overview) ? "active" : ""}
 				to={Routes.Overview}
 			>
 				<RectangleGroupIcon className="size-5" />
@@ -132,6 +133,7 @@ const MobileNav = () => {
 			</Link>
 			<Link
 				type="button"
+				className={useMatch(Routes.History) ? "active" : ""}
 				to={Routes.History}
 			>
 				<CalendarDaysIcon className="size-5" />
@@ -143,6 +145,7 @@ const MobileNav = () => {
 			</button>
 			<Link
 				type="button"
+				className={useMatch(Routes.Settings) ? "active" : ""}
 				to={Routes.Settings}
 			>
 				<Cog6ToothIcon className="size-5" />

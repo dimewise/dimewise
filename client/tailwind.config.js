@@ -25,6 +25,13 @@ export default {
 	],
 	theme: {
 		extend: {
+			typography: {
+				DEFAULT: {
+					css: {
+						maxWidth: "100ch", // override prose default 65ch
+					},
+				},
+			},
 			fontFamily: {
 				sans: [
 					'"Inter"',
