@@ -24,5 +24,11 @@
 	"link.dont_have_an_account": "Don't have an account?",
 	"link.sign_in": "Sign In",
 	"link.sign_up_now": "Sign Up Now",
-	"link.forgot_password": "Forgot Password?"
+	"link.forgot_password": "Forgot Password?",
+	"settings.account.title": "Account",
+	"settings.categories.title": "Categories",
+	"settings.categories.action.create": "Create",
+	"settings.categories.table.name": "Name",
+	"settings.categories.table.budget": "Budget",
+	"settings.categories.table.total-monthly-budget": "Total Monthly Budget"
 }
