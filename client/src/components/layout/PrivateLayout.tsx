@@ -42,7 +42,9 @@ export const PrivateLayout = () => {
 				<div className="drawer-content flex flex-col items-center justify-center">
 					{/* Page content here */}
 					<main className="h-full w-full flex align-center justify-center p-10">
-						<Outlet />
+						<div className="prose w-full max-w-5xl">
+							<Outlet />
+						</div>
 					</main>
 				</div>
 				<div className="drawer-side">

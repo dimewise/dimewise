@@ -1,6 +1,6 @@
 import { ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
-import { useAuth } from "../hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../hooks/useAuth";
 
 export const AccountSetting = () => {
 	const { logout } = useAuth();

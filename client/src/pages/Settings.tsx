@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { CategoriesSetting } from "../components/CategoriesSetting";
 import { AccountSetting } from "../components/AccountSetting";
+import { CategoriesSetting } from "../components/CategoriesSetting";
 
 export const Settings = () => {
 	const { t } = useTranslation();

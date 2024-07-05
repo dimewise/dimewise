@@ -1,6 +1,6 @@
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
-import type { CategoryInfo } from "../types/category";
 import { useTranslation } from "react-i18next";
+import type { CategoryInfo } from "../types/category";
 
 export const CategoriesSetting = () => {
 	const { t } = useTranslation();
