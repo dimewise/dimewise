@@ -1,15 +1,79 @@
 import { useTranslation } from "react-i18next";
 import { AccountSetting } from "../components/AccountSetting";
 import { CategoriesSetting } from "../components/CategoriesSetting";
+import { ConfirmLogoutModal } from "../components/modal/ConfirmLogoutModal";
+import { useRef, useState } from "react";
+import { CategoryFormModal } from "../components/modal/CategoryFormModal";
+import { DeleteCategoryModal } from "../components/modal/DeleteCategoryModal";
 
 export const Settings = () => {
 	const { t } = useTranslation();
+	const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+	const confirmLogoutModalRef = useRef<HTMLDialogElement>(null);
+	const categoryFormModalRef = useRef<HTMLDialogElement>(null);
+	const deleteCategoryModalRef = useRef<HTMLDialogElement>(null);
+
+	const handleShowConfirmLogoutModal = () => {
+		if (confirmLogoutModalRef.current) {
+			confirmLogoutModalRef.current.showModal();
+		}
+	};
+
+	const handleCloseConfirmLogoutModal = () => {
+		if (confirmLogoutModalRef.current) {
+			confirmLogoutModalRef.current.close();
+		}
+	};
+
+	const handleShowCategoryFormModal = () => {
+		if (categoryFormModalRef.current) {
+			categoryFormModalRef.current.showModal();
+		}
+	};
+
+	const handleCloseCategoryFormModal = () => {
+		if (categoryFormModalRef.current) {
+			categoryFormModalRef.current.close();
+		}
+	};
+
+	const handleShowDeleteCategoryModal = () => {
+		if (deleteCategoryModalRef.current) {
+			deleteCategoryModalRef.current.showModal();
+		}
+	};
+
+	const handleCloseDeleteCategoryModal = () => {
+		if (deleteCategoryModalRef.current) {
+			deleteCategoryModalRef.current.close();
+		}
+	};
 
 	return (
 		<>
 			<h1>{t("nav.private.settings")}</h1>
-			<CategoriesSetting />
-			<AccountSetting />
+			<CategoriesSetting
+				handleShowCategoryFormModal={handleShowCategoryFormModal}
+				handleShowDeleteCategoryModal={handleShowDeleteCategoryModal}
+				setSelectedCategoryId={setSelectedCategoryId}
+			/>
+			<AccountSetting handleShowConfirmLogoutModal={handleShowConfirmLogoutModal} />
+			<ConfirmLogoutModal
+				ref={confirmLogoutModalRef}
+				handleClose={handleCloseConfirmLogoutModal}
+			/>
+			<CategoryFormModal
+				ref={categoryFormModalRef}
+				handleClose={handleCloseCategoryFormModal}
+				selectedCategoryId={selectedCategoryId}
+				setSelectedCategoryId={setSelectedCategoryId}
+			/>
+			<DeleteCategoryModal
+				ref={deleteCategoryModalRef}
+				handleClose={handleCloseDeleteCategoryModal}
+				selectedCategoryId={selectedCategoryId}
+				setSelectedCategoryId={setSelectedCategoryId}
+			/>
 		</>
 	);
 };

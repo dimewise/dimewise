@@ -2,7 +2,16 @@ import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outli
 import { useTranslation } from "react-i18next";
 import type { CategoryInfo } from "../types/category";
 
-export const CategoriesSetting = () => {
+interface Props {
+	handleShowCategoryFormModal: () => void;
+	handleShowDeleteCategoryModal: () => void;
+	setSelectedCategoryId: (id: string | null) => void;
+}
+export const CategoriesSetting = ({
+	handleShowCategoryFormModal,
+	handleShowDeleteCategoryModal,
+	setSelectedCategoryId,
+}: Props) => {
 	const { t } = useTranslation();
 	const categories: CategoryInfo[] = [
 		{
@@ -24,6 +33,17 @@ export const CategoriesSetting = () => {
 
 	const currency = "JPY";
 	const totalBudget = categories.reduce((t, c) => t + c.budget, 0);
+
+	const handleEditCategory = (id: string) => {
+		setSelectedCategoryId(id);
+		handleShowCategoryFormModal();
+	};
+
+	const handleDeleteCategory = (id: string) => {
+		setSelectedCategoryId(id);
+		handleShowDeleteCategoryModal();
+	};
+
 	return (
 		<>
 			<div className="flex items-center justify-between">
@@ -31,6 +51,7 @@ export const CategoriesSetting = () => {
 				<button
 					type="button"
 					className="btn btn-primary btn-sm text-white"
+					onClick={handleShowCategoryFormModal}
 				>
 					<PlusIcon className="size-5" />
 					{t("settings.categories.action.create")}
@@ -52,10 +73,16 @@ export const CategoriesSetting = () => {
 								<td>{c.name}</td>
 								<td className="text-right w-fit text-nowrap">{`${currency} ${c.budget}`}</td>
 								<td className="flex items-center justify-end gap-5">
-									<button type="button">
+									<button
+										type="button"
+										onClick={() => handleEditCategory(c.id)}
+									>
 										<PencilSquareIcon className="size-5" />
 									</button>
-									<button type="button">
+									<button
+										type="button"
+										onClick={() => handleDeleteCategory(c.id)}
+									>
 										<TrashIcon className="size-5" />
 									</button>
 								</td>
