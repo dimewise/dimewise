@@ -36,7 +36,7 @@ export const DeleteCategoryModal = forwardRef<HTMLDialogElement, Props>(
 							<button
 								type="button"
 								className="btn btn-error text-white"
-								onClick={() => { }}
+								onClick={() => {}}
 							>
 								Logout
 							</button>

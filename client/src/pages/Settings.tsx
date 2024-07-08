@@ -1,9 +1,9 @@
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AccountSetting } from "../components/AccountSetting";
 import { CategoriesSetting } from "../components/CategoriesSetting";
-import { ConfirmLogoutModal } from "../components/modal/ConfirmLogoutModal";
-import { useRef, useState } from "react";
 import { CategoryFormModal } from "../components/modal/CategoryFormModal";
+import { ConfirmLogoutModal } from "../components/modal/ConfirmLogoutModal";
 import { DeleteCategoryModal } from "../components/modal/DeleteCategoryModal";
 
 export const Settings = () => {
