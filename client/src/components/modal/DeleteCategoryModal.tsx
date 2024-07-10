@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
 	handleClose: () => void;
@@ -8,6 +9,8 @@ interface Props {
 
 export const DeleteCategoryModal = forwardRef<HTMLDialogElement, Props>(
 	({ handleClose, selectedCategoryId, setSelectedCategoryId }, ref) => {
+		const { t } = useTranslation();
+
 		const handleCloseModal = () => {
 			if (selectedCategoryId) {
 				setSelectedCategoryId(null);
@@ -15,30 +18,34 @@ export const DeleteCategoryModal = forwardRef<HTMLDialogElement, Props>(
 			handleClose();
 		};
 
+		const handleDeleteCategory = () => {};
+
 		return (
 			<dialog
 				className="modal modal-bottom lg:modal-middle"
 				ref={ref}
 			>
 				<div className="modal-box">
-					<h3 className="font-bold text-lg">Delete Category</h3>
-					<p className="py-4">Press ESC key or click the button below to close</p>
+					<h3 className="font-bold text-lg">{t("settings.categories.delete.title")}</h3>
+					<p className="py-4">{t("settings.categories.delete.description")}</p>
 					<div className="modal-action">
-						<form method="dialog">
-							{/* if there is a button in form, it will close the modal */}
+						<form
+							method="dialog"
+							className="flex flex-row items-center gap-3"
+						>
 							<button
 								type="button"
 								className="btn"
 								onClick={handleClose}
 							>
-								Close
+								{t("common.button.cancel")}
 							</button>
 							<button
 								type="button"
 								className="btn btn-error text-white"
-								onClick={() => {}}
+								onClick={handleDeleteCategory}
 							>
-								Logout
+								{t("common.button.delete")}
 							</button>
 						</form>
 					</div>
@@ -47,12 +54,11 @@ export const DeleteCategoryModal = forwardRef<HTMLDialogElement, Props>(
 					method="dialog"
 					className="modal-backdrop"
 				>
-					{/* if there is a button in form, it will close the modal */}
 					<button
 						type="button"
 						onClick={handleCloseModal}
 					>
-						Close
+						{t("common.button.close")}
 					</button>
 				</form>
 			</dialog>

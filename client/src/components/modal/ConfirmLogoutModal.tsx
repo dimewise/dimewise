@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 interface Props {
 	handleClose: () => void;
@@ -7,6 +8,7 @@ interface Props {
 
 export const ConfirmLogoutModal = forwardRef<HTMLDialogElement, Props>(({ handleClose }, ref) => {
 	const { logout } = useAuth();
+	const { t } = useTranslation();
 
 	const handleLogout = () => {
 		logout();
@@ -18,27 +20,26 @@ export const ConfirmLogoutModal = forwardRef<HTMLDialogElement, Props>(({ handle
 			ref={ref}
 		>
 			<div className="modal-box">
-				<h3 className="font-bold text-lg">Logout</h3>
-				<p className="py-4">
-					Are you sure you want to logout from Dimewise? Doing so will require you to log back in the next time you
-					visit.
-				</p>
+				<h3 className="font-bold text-lg">{t("settings.account.logout.title")}</h3>
+				<p className="py-4">{t("settings.account.logout.description")}</p>
 				<div className="modal-action">
-					<form method="dialog">
-						{/* if there is a button in form, it will close the modal */}
+					<form
+						method="dialog"
+						className="flex flex-row items-center gap-3"
+					>
 						<button
 							type="button"
 							className="btn"
 							onClick={handleClose}
 						>
-							Close
+							{t("common.button.cancel")}
 						</button>
 						<button
 							type="button"
 							className="btn btn-error text-white"
 							onClick={handleLogout}
 						>
-							Logout
+							{t("nav.private.log_out")}
 						</button>
 					</form>
 				</div>
@@ -47,12 +48,11 @@ export const ConfirmLogoutModal = forwardRef<HTMLDialogElement, Props>(({ handle
 				method="dialog"
 				className="modal-backdrop"
 			>
-				{/* if there is a button in form, it will close the modal */}
 				<button
 					type="button"
 					onClick={handleClose}
 				>
-					Close
+					{t("common.button.close")}
 				</button>
 			</form>
 		</dialog>

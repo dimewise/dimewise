@@ -1,6 +1,9 @@
 {
 	"loading": "Loading",
 	"welcome": "Welcome to Dashboard sir",
+	"common.button.cancel": "Cancel",
+	"common.button.close": "Close",
+	"common.button.delete": "Delete",
 	"nav.public.sign_in": "Sign In",
 	"nav.public.get_started": "Get Started",
 	"nav.private.overview": "Overview",
@@ -30,5 +33,9 @@
 	"settings.categories.action.create": "Create",
 	"settings.categories.table.name": "Name",
 	"settings.categories.table.budget": "Budget",
-	"settings.categories.table.total-monthly-budget": "Total Monthly Budget"
+	"settings.categories.table.total-monthly-budget": "Total Monthly Budget",
+	"settings.categories.delete.title": "Delete Category",
+	"settings.categories.delete.description": "Are you sure you want to delete this category? This action cannot be undone.",
+	"settings.account.logout.title": "Logout",
+	"settings.account.logout.description": "Are you sure you want to logout from Dimewise? Doing so will require you to log back in the next time you visit."
 }
