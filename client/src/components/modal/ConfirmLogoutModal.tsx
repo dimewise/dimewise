@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../hooks/useAuth";
 
 interface Props {
 	handleClose: () => void;
