@@ -58,15 +58,15 @@ export const Settings = () => {
 				setSelectedCategoryId={setSelectedCategoryId}
 			/>
 			<AccountSetting handleShowConfirmLogoutModal={handleShowConfirmLogoutModal} />
-			<ConfirmLogoutModal
-				ref={confirmLogoutModalRef}
-				handleClose={handleCloseConfirmLogoutModal}
-			/>
 			<CategoryFormModal
 				ref={categoryFormModalRef}
 				handleClose={handleCloseCategoryFormModal}
 				selectedCategoryId={selectedCategoryId}
 				setSelectedCategoryId={setSelectedCategoryId}
+			/>
+			<ConfirmLogoutModal
+				ref={confirmLogoutModalRef}
+				handleClose={handleCloseConfirmLogoutModal}
 			/>
 			<DeleteCategoryModal
 				ref={deleteCategoryModalRef}

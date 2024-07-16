@@ -1,8 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { CategoryFormSchema, type CategoryFormSchemaType } from "../../lib/schemas/CategoryFormSchema";
+import { useFaker } from "../../hooks/useFaker";
 
 interface Props {
 	handleClose: () => void;
@@ -15,9 +16,14 @@ export const CategoryFormModal = forwardRef<HTMLDialogElement, Props>(
 		const { t } = useTranslation();
 		const title = selectedCategoryId ? "Edit Category" : "Create Category";
 
+		// TODO: add actual category detail api call
+		const { categories } = useFaker();
+		const targetCategory = categories.find((c) => c.id === selectedCategoryId);
+
 		const {
 			register,
 			handleSubmit,
+			reset,
 			formState: { errors },
 		} = useForm<CategoryFormSchemaType>({
 			defaultValues: CategoryFormSchema.cast({
@@ -27,6 +33,16 @@ export const CategoryFormModal = forwardRef<HTMLDialogElement, Props>(
 			resolver: yupResolver(CategoryFormSchema),
 		});
 
+		useEffect(() => {
+			// needed since modal is rendered first with empty value
+			if (targetCategory) {
+				reset({
+					name: targetCategory.name,
+					budget: targetCategory.budget,
+				});
+			}
+		}, [reset, targetCategory]);
+
 		const handleCloseModal = () => {
 			if (selectedCategoryId) {
 				setSelectedCategoryId(null);
@@ -35,6 +51,7 @@ export const CategoryFormModal = forwardRef<HTMLDialogElement, Props>(
 		};
 
 		const onSubmit = (data: CategoryFormSchemaType) => {
+			// TODO: add actual post or patch api call, don't forget to run reset() without any arguments
 			console.log(data);
 		};
 

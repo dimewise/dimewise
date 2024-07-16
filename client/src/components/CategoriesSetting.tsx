@@ -1,6 +1,6 @@
 import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
-import type { CategoryInfo } from "../types/category";
+import { useFaker } from "../hooks/useFaker";
 
 interface Props {
 	handleShowCategoryFormModal: () => void;
@@ -13,23 +13,9 @@ export const CategoriesSetting = ({
 	setSelectedCategoryId,
 }: Props) => {
 	const { t } = useTranslation();
-	const categories: CategoryInfo[] = [
-		{
-			id: "1c6a176b-9ce3-470c-9642-93eddb09dd3f",
-			name: "Groceries",
-			budget: 15000,
-		},
-		{
-			id: "82b7484d-63f0-464f-ab9d-f4d370946f01",
-			name: "Shopping",
-			budget: 10000,
-		},
-		{
-			id: "a1714200-bf84-4e82-80f5-6770e904cbaa",
-			name: "Hobbies",
-			budget: 15000,
-		},
-	];
+
+	// TODO: add actual category list api call
+	const { categories } = useFaker();
 
 	const currency = "JPY";
 	const totalBudget = categories.reduce((t, c) => t + c.budget, 0);
