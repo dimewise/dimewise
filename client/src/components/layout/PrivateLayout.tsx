@@ -1,10 +1,4 @@
-import {
-	ArrowLeftStartOnRectangleIcon,
-	CalendarDaysIcon,
-	Cog6ToothIcon,
-	PlusIcon,
-	RectangleGroupIcon,
-} from "@heroicons/react/24/outline";
+import { CalendarDaysIcon, Cog6ToothIcon, PlusIcon, RectangleGroupIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, Outlet, useLocation, useMatch } from "react-router-dom";
 import { Routes } from "../../Routes";
@@ -12,7 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { LogoButton } from "../LogoButton";
 
 export const PrivateLayout = () => {
-	const { user, logout } = useAuth();
+	const { user } = useAuth();
 	const location = useLocation();
 
 	if (!user) {
@@ -26,10 +20,6 @@ export const PrivateLayout = () => {
 			/>
 		);
 	}
-
-	const handleLogout = () => {
-		logout();
-	};
 
 	return (
 		<div className="flex h-full w-full">
@@ -57,7 +47,7 @@ export const PrivateLayout = () => {
 						<LogoButton />
 						<MenuList />
 						<div className="divider" />
-						<AccountMenuList handleLogout={handleLogout} />
+						<AccountMenuList />
 					</ul>
 				</div>
 				<MobileNav />
@@ -92,10 +82,7 @@ const MenuList = () => {
 	);
 };
 
-interface AccountMenuListProps {
-	handleLogout: () => void;
-}
-const AccountMenuList = ({ handleLogout }: AccountMenuListProps) => {
+const AccountMenuList = () => {
 	const { t } = useTranslation();
 	return (
 		<>
@@ -107,15 +94,6 @@ const AccountMenuList = ({ handleLogout }: AccountMenuListProps) => {
 					<Cog6ToothIcon className="size-5" />
 					{t("nav.private.settings")}
 				</Link>
-			</li>
-			<li>
-				<button
-					type="button"
-					onClick={handleLogout}
-				>
-					<ArrowLeftStartOnRectangleIcon className="size-5" />
-					Logout
-				</button>
 			</li>
 		</>
 	);
