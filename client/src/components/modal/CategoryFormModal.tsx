@@ -2,8 +2,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { forwardRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { CategoryFormSchema, type CategoryFormSchemaType } from "../../lib/schemas/CategoryFormSchema";
 import { useFaker } from "../../hooks/useFaker";
+import { CategoryFormSchema, type CategoryFormSchemaType } from "../../lib/schemas/CategoryFormSchema";
 
 interface Props {
 	handleClose: () => void;
