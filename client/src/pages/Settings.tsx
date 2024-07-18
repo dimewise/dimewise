@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { AccountSetting } from "../components/AccountSetting";
 import { CategoriesSetting } from "../components/CategoriesSetting";
@@ -13,41 +13,21 @@ export const Settings = () => {
 	const categoryFormModalRef = useRef<HTMLDialogElement>(null);
 	const deleteCategoryModalRef = useRef<HTMLDialogElement>(null);
 
-	const handleShowConfirmLogoutModal = () => {
-		if (confirmLogoutModalRef.current) {
-			confirmLogoutModalRef.current.showModal();
-		}
+	const handleShowModal = (modalRef: RefObject<HTMLDialogElement>) => {
+		modalRef.current?.showModal();
+	};
+	const handleCloseModal = (modalRef: RefObject<HTMLDialogElement>) => {
+		modalRef.current?.close();
 	};
 
-	const handleCloseConfirmLogoutModal = () => {
-		if (confirmLogoutModalRef.current) {
-			confirmLogoutModalRef.current.close();
-		}
-	};
+	const handleShowConfirmLogoutModal = () => handleShowModal(confirmLogoutModalRef);
+	const handleCloseConfirmLogoutModal = () => handleCloseModal(confirmLogoutModalRef);
 
-	const handleShowCategoryFormModal = () => {
-		if (categoryFormModalRef.current) {
-			categoryFormModalRef.current.showModal();
-		}
-	};
+	const handleShowCategoryFormModal = () => handleShowModal(categoryFormModalRef);
+	const handleCloseCategoryFormModal = () => handleCloseModal(categoryFormModalRef);
 
-	const handleCloseCategoryFormModal = () => {
-		if (categoryFormModalRef.current) {
-			categoryFormModalRef.current.close();
-		}
-	};
-
-	const handleShowDeleteCategoryModal = () => {
-		if (deleteCategoryModalRef.current) {
-			deleteCategoryModalRef.current.showModal();
-		}
-	};
-
-	const handleCloseDeleteCategoryModal = () => {
-		if (deleteCategoryModalRef.current) {
-			deleteCategoryModalRef.current.close();
-		}
-	};
+	const handleShowDeleteCategoryModal = () => handleShowModal(deleteCategoryModalRef);
+	const handleCloseDeleteCategoryModal = () => handleCloseModal(deleteCategoryModalRef);
 
 	return (
 		<>
