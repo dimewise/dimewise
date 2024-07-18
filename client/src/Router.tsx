@@ -4,10 +4,12 @@ import { AuthLayout } from "./components/layout/AuthLayout";
 import { PrivateLayout } from "./components/layout/PrivateLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { RootLayout } from "./components/layout/RootLayout";
-import { Dashboard } from "./pages/Dashboard";
 import { ForgotPassword } from "./pages/ForgotPassword";
+import { History } from "./pages/History";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
+import { Overview } from "./pages/Overview";
+import { Settings } from "./pages/Settings";
 import { SignUp } from "./pages/SignUp";
 
 export const Router = createBrowserRouter([
@@ -52,7 +54,19 @@ export const Router = createBrowserRouter([
 				children: [
 					{
 						path: Routes.Dashboard,
-						element: <Dashboard />,
+						element: <Navigate to={Routes.Overview} />,
+					},
+					{
+						path: Routes.Overview,
+						element: <Overview />,
+					},
+					{
+						path: Routes.History,
+						element: <History />,
+					},
+					{
+						path: Routes.Settings,
+						element: <Settings />,
 					},
 				],
 			},

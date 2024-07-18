@@ -1,8 +1,16 @@
-import { Link, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Routes } from "../../Routes";
 import { MenuIcon } from "../../assets/Icons/MenuIcon";
+import { LogoButton } from "../LogoButton";
 
 export const PublicLayout = () => {
+	const navigate = useNavigate();
+
+	const handleOnClickLogo = () => {
+		navigate(Routes.Root);
+	};
+
 	return (
 		<div className="drawer drawer-end h-full">
 			<input
@@ -13,9 +21,7 @@ export const PublicLayout = () => {
 			<div className="drawer-content flex flex-col justify-start items-center">
 				{/* Navbar */}
 				<nav className="navbar w-full max-w-7xl h-navbar flex justify-between items-center px-5 flex-none">
-					<h1 className="font-black text-2xl">
-						Dimewise<span className="text-primary">.</span>
-					</h1>
+					<LogoButton onClick={handleOnClickLogo} />
 					<div className="flex-none lg:hidden">
 						<label
 							htmlFor="nav-drawer"
@@ -52,6 +58,7 @@ export const PublicLayout = () => {
 };
 
 const MenuList = () => {
+	const { t } = useTranslation();
 	return (
 		<>
 			<li>
@@ -59,7 +66,7 @@ const MenuList = () => {
 					to={Routes.Login}
 					className="btn btn-secondary btn-ghost"
 				>
-					Sign In
+					{t("nav.public.sign_in")}
 				</Link>
 			</li>
 			<li>
@@ -67,7 +74,7 @@ const MenuList = () => {
 					to={Routes.Login}
 					className="btn btn-primary"
 				>
-					Get Started
+					{t("nav.public.get_started")}
 				</Link>
 			</li>
 		</>

@@ -2,18 +2,19 @@
 export default {
 	daisyui: {
 		themes: [
-			{
-				dimewise: {
-					primary: "#20C997",
-					secondary: "#FFC107",
-					accent: "#9b59b6",
-					"base-100": "#1C1C1C",
-					info: "#3498db",
-					success: "#28A745",
-					warning: "#F39C12",
-					error: "#E74C3C",
-				},
-			},
+			// {
+			// 	dimewise: {
+			// 		primary: "#20C997",
+			// 		secondary: "#FFC107",
+			// 		accent: "#9b59b6",
+			// 		"base-100": "#1C1C1C",
+			// 		info: "#3498db",
+			// 		success: "#28A745",
+			// 		warning: "#F39C12",
+			// 		error: "#E74C3C",
+			// 	},
+			// },
+			"emerald",
 		],
 	},
 	content: [
@@ -24,6 +25,13 @@ export default {
 	],
 	theme: {
 		extend: {
+			typography: {
+				DEFAULT: {
+					css: {
+						maxWidth: "100ch", // override prose default 65ch
+					},
+				},
+			},
 			fontFamily: {
 				sans: [
 					'"Inter"',
