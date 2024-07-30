@@ -22,17 +22,16 @@ export const PrivateLayout = () => {
 	}
 
 	return (
-		<div className="flex h-full w-full">
-			<div className="drawer lg:drawer-open">
+		<div className="flex w-full">
+			<div className="drawer h-screen lg:drawer-open">
 				<input
 					id="my-drawer-2"
 					type="checkbox"
 					className="drawer-toggle"
 				/>
 				<div className="drawer-content flex flex-col items-center justify-center">
-					{/* Page content here */}
 					<main className="h-full w-full flex align-center justify-center p-10">
-						<div className="prose w-full max-w-5xl">
+						<div className="prose w-full max-w-5xl h-full flex flex-col pb-10 lg:pb-0">
 							<Outlet />
 						</div>
 					</main>

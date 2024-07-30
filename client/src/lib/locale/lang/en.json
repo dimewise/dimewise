@@ -40,5 +40,11 @@
 	"settings.account.logout.description": "Are you sure you want to logout from Dimewise? Doing so will require you to log back in the next time you visit.",
 	"settings.categories.form.field_name.label": "Name",
 	"settings.categories.form.field_name.placeholder": "Groceries",
-	"settings.categories.form.field_budget.label": "Budget"
+	"settings.categories.form.field_budget.label": "Budget",
+	"overview.category_widget.remainder_budget": "{{prefix}}{{currency}} {{remainder}} left",
+	"overview.recent_transactions": "Recent Transactions",
+	"overview.categories": "Categories",
+	"overview.view_more": "View More",
+	"overview.transactions.table.title": "Title",
+	"overview.transactions.table.price": "Price"
 }
