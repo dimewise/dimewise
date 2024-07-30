@@ -31,7 +31,7 @@ export const Settings = () => {
 
 	return (
 		<>
-			<h1>{t("nav.private.settings")}</h1>
+			<h1 className="sticky top-0 bg-white z-10 py-2">{t("nav.private.settings")}</h1>
 			<CategoriesSetting
 				handleShowCategoryFormModal={handleShowCategoryFormModal}
 				handleShowDeleteCategoryModal={handleShowDeleteCategoryModal}
