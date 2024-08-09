@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+supabase
+pydantic
+pydantic-settings
+jwt
+
+black
+ruff
