@@ -1,13 +1,17 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { useAuth } from "../../hooks/useAuth";
+import { supabase } from "../../lib/supabase/supabase";
 
 export const baseApiV1 = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: "/api/v1",
         credentials: "include",
-        prepareHeaders: (headers) => {
+        prepareHeaders: async (headers) => {
             // handle access token for backend to authenticate requests
-            const { session } = useAuth();
+            const {
+                data: { session },
+                error,
+            } = await supabase.auth.getSession();
+            if (error) throw error;
             if (session?.access_token) {
                 headers.set("Authorization", `Bearer ${session.access_token}`)
             }
