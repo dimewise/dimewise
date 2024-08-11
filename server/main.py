@@ -9,8 +9,10 @@ from settings import settings
 from utils.jwt import JWTBearer
 
 app = FastAPI()
-pub = APIRouter()
-prt = APIRouter(dependencies=[Depends(JWTBearer(settings.SUPABASE_JWT))])
+pub = APIRouter(prefix="/api/v1")
+prt = APIRouter(
+    prefix="/api/v1", dependencies=[Depends(JWTBearer(settings.SUPABASE_JWT))]
+)
 
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
