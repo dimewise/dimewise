@@ -1,0 +1,26 @@
+version: "3" 
+
+tasks: 
+  default: 
+    cmds: 
+      - task -l
+  init: 
+    desc: "Run all init tasks"
+    silent: true
+    cmds: 
+      - task init-env
+  init-env: 
+    desc: "Initialize .env.example"
+    silent: true 
+    cmds: 
+      - | 
+        if [ ! -f .env.example ]; then 
+          echo "[client] Copying .env.example to .env"
+          cp .env.example .env
+        else 
+          echo "[client] .env already exists. Skipping..."
+        fi
+  run: 
+    desc: "Start the client"
+    cmds:
+      - bun run dev
