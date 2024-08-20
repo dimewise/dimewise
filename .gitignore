@@ -23,5 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
-## Secrets 
+# Secrets 
 .env
+
+# Server
+venv
+__pycache__
+
+# Taskfile
+.task

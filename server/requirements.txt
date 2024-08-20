@@ -4,6 +4,7 @@ supabase
 pydantic
 pydantic-settings
 jwt
+python-jose
 
 black
 ruff

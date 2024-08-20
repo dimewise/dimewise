@@ -1,20 +1,34 @@
-version: "3" 
+version: "3"
 
-includes: 
-  client: 
+includes:
+  client:
     taskfile: ./client/taskfile.yaml
     dir: ./client
     internal: true # does not expose client taskfile command to root taskfile
+  server:
+    taskfile: server/taskfile.yaml
+    dir: server
+    internal: true
 
-tasks: 
-  default: 
-    cmds: 
-      - task -l 
-  init: 
+tasks:
+  default:
+    cmds:
+      - task -l
+  init:
     desc: "Initialize Dimewise Project"
     cmds:
       - task: client:init
-  run:client: 
+      - task: server:init
+  run:
+    desc: "Start the Dimewise Project"
+    cmds:
+      - task: client:run
+      - task: server:run
+  run:client:
     desc: "Start the client"
     cmds:
       - task: client:run
+  run:server:
+    desc: "Start the server"
+    cmds:
+      - task: server:run
