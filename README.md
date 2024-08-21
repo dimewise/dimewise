@@ -14,9 +14,11 @@ _Stay tuned for more exciting features..._
 
 DimeWise leverages cutting-edge technologies:
 
-- **Frontend:** Developed with React for a responsive and dynamic interface, enhanced by the aesthetic appeal of TailwindCSS and DaisyUI.
+- **Frontend(client):** Developed with React + Vite using [TailwindCSS](https://tailwindcss.com/) and [DaisyUI](https://daisyui.com/).
 
-- **Database:** Powered by the robust combination of Supabase and Prisma (ORM), ensuring efficient data management and retrieval.
+- **Backend(server):** Developed with Python using [FastAPI](https://fastapi.tiangolo.com/).
+
+- **Database:** Powered by [Supabase](https://supabase.com/).
 
 - **Authentication:** Secured by Supabase authentication to safeguard user information and maintain data integrity.
 
@@ -28,59 +30,27 @@ Follow these steps to set up the local environment for the DimeWise project:
 
     - Open your terminal.
     - Navigate to your desired directory.
-    - Run the following command to clone the project:
+    - Clone the project:
       ```bash
       git clone [repository_url]
       ```
-
-2.  **Install Dependencies:**
-
-    - Ensure that [bun](https://bun.sh/docs/installation) is installed in your environment
-
-    - Change into the root directory of the project:
-      ```bash
+    - Enter the cloned repository: 
+      ```bash 
       cd dimewise
       ```
-    - Run bun install to install project dependencies:
-      ```bash
-      bun install
-      ```
 
-3.  **Setup pre-commit and pre-push hooks:**
+2.  **Install Pre-Requisites for the project to run smoothly:**
 
-    - Run bun run setup:hooks to set up git hooks:
-      ```bash
-      bun run setup:hooks
-      ```
+    - Ensure the following is installed in your environment: 
+      1. [bun](https://bun.sh/docs/installation)
+      2. [taskfile](https://taskfile.dev/installation/)
+      3. [docker desktop](https://www.docker.com/products/docker-desktop/)
 
-4.  **Copy Environment Variables:**
-
-    - Locate the `env.example` file in the root directory.
-    - Create a copy of this file and rename it to `.env`.
-
-5.  **Start Supabase Local Server:**
-
-    - Ensure that Prisma and Supabase CLI are installed (**optional**: this should already be done with `bun install`):
-      ```bash
-      bun add -g prisma
-      bun add -g supabase
-      ```
-    - Start the Supabase local server using the following command:
-
-      ```bash
-      bunx supabase start
-      ```
-
-      Upon running the above command, it should show your supabase status information. Copy the values of `API URL` and `anon key` into the `.env` file created in step 4.
-
-      **Note:** Ensure Docker is running, as this process requires it. If you lose the supabase status information, run `bunx supabase status` to display the information again.
-
-6.  **Execute database migrations**:
-
-    - Run the following command to apply database migrations:
-      ```bash
-      bunx prisma migrate dev
-      ```
+3. **Initialize the project using Tasks:**
+    ```bash
+    task init
+    ```
+    any errors should be verbose enough to be remedied locally, otherwise reach out to any other engineers for help for troubleshooting
 
 Now, your local environment is set up and ready for development with DimeWise!
 
