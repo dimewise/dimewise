@@ -5,30 +5,39 @@ tasks:
     cmds:
       - task -l
   init:
-    desc: "Run all init tasks"
     silent: true
+    desc: "Run all init tasks"
     cmds:
       - task init-env
       - task init-venv
   init-env:
-    desc: "Initialize .env"
     silent: true
+    desc: "Initialize .env"
     cmds:
       - |
         if [ ! -f .env ]; then 
-          echo "[server] Copying .env.example to .env"
+          echo "➜ Server - Copying .env.example to .env"
           cp .env.example .env
         else 
-          echo "[server] .env already exists. Skipping..."
+          echo "➜ Server - .env already exists. Skipping..."
         fi
   init-venv:
-    desc: "Initialize virtualenv"
     silent: true
+    desc: "Initialize or update virtualenv"
     cmds:
-      - echo "[server] Creating virtualenv"
-      - python3 -m venv venv
+      - |
+        if [ -d "venv" ]; then 
+          echo "➜ Server - Virtual environment already exists, updating..."; 
+        else 
+          echo "➜ Server - Creating virtualenv..."; 
+          echo
+          python3 -m venv venv; 
+          echo
+        fi
+      - echo
       - venv/bin/python3 -m pip install --upgrade pip
-      - venv/bin/python3 -m pip install -r requirements.txt
+      - venv/bin/python3 -m pip install -q -r requirements.txt
+      - echo
     sources:
       - venv
       - requirements.txt

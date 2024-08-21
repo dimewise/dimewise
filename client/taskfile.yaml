@@ -5,21 +5,35 @@ tasks:
     cmds:
       - task -l
   init:
-    desc: "Run all init tasks"
     silent: true
+    desc: "Run all init tasks"
     cmds:
       - task init-env
+      - task init-packages
   init-env:
-    desc: "Initialize .env"
     silent: true
+    desc: "Initialize .env"
     cmds:
       - |
         if [ ! -f .env ]; then 
-          echo "[client] Copying .env.example to .env"
+          echo "➜ Client - Copying .env.example to .env"
           cp .env.example .env
         else 
-          echo "[client] .env already exists. Skipping..."
+          echo "➜ Client - .env already exists. Skipping..."
         fi
+  init-packages: 
+    silent: true
+    desc: "Installs packages using bun, ensure bun is installed in your local environment"
+    cmds: 
+      - echo "➜ Client - Installing packages..."
+      - |
+        if ! [ -x "$(command -v bun)" ]; then
+            echo -e "${YELLOW}⚠️ Error: bun is not installed. Please install bun by running 'brew install oven-sh/bun/bun'${NC}" >&2
+            exit 1
+        fi
+      - echo
+      - bun install
+      - echo
   run:
     desc: "Start the client"
     cmds:
