@@ -5,6 +5,8 @@ pydantic
 pydantic-settings
 jwt
 python-jose
+sqlmodel
+psycopg2
 
 black
 ruff

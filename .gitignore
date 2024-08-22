@@ -26,6 +26,9 @@ dist-ssr
 # Secrets 
 .env
 
+# Client
+.vite
+
 # Server
 venv
 __pycache__

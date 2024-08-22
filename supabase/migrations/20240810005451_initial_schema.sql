@@ -1,26 +1,26 @@
-create type "public"."Currencies" as enum ('USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK', 'NZD', 'NOK', 'KRW', 'INR', 'BRL', 'RUB', 'ZAR', 'TRY', 'MXN', 'SGD', 'HKD');
+create type "public"."currencies" as enum ('USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK', 'NZD', 'NOK', 'KRW', 'INR', 'BRL', 'RUB', 'ZAR', 'TRY', 'MXN', 'SGD', 'HKD');
 
-create sequence "public"."Account_id_seq";
+create sequence "public"."account_id_seq";
 
-create sequence "public"."Category_id_seq";
+create sequence "public"."category_id_seq";
 
-create sequence "public"."Expense_id_seq";
+create sequence "public"."expense_id_seq";
 
-create sequence "public"."User_id_seq";
+create sequence "public"."user_id_seq";
 
-create table "public"."Account" (
-    "id" integer not null default nextval('"Account_id_seq"'::regclass),
+create table "public"."account" (
+    "id" integer not null default nextval('"account_id_seq"'::regclass),
     "createdAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "updatedAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "name" text not null,
     "description" text,
-    "currency" "Currencies" not null,
+    "currency" "currencies" not null,
     "userId" text
 );
 
 
-create table "public"."Category" (
-    "id" integer not null default nextval('"Category_id_seq"'::regclass),
+create table "public"."category" (
+    "id" integer not null default nextval('"category_id_seq"'::regclass),
     "createdAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "updatedAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "name" text not null,
@@ -30,8 +30,8 @@ create table "public"."Category" (
 );
 
 
-create table "public"."Expense" (
-    "id" integer not null default nextval('"Expense_id_seq"'::regclass),
+create table "public"."expense" (
+    "id" integer not null default nextval('"expense_id_seq"'::regclass),
     "createdAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "updatedAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "title" text not null,
@@ -44,118 +44,116 @@ create table "public"."Expense" (
 );
 
 
-create table "public"."User" (
-    "id" integer not null default nextval('"User_id_seq"'::regclass),
+create table "public"."user" (
+    "id" integer not null default nextval('"user_id_seq"'::regclass),
     "createdAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "updatedAt" timestamp(3) without time zone not null default CURRENT_TIMESTAMP,
     "email" text not null,
     "authId" text not null,
     "name" text,
     "avatarUrl" text,
-    "defaultCurrency" "Currencies" not null
+    "defaultCurrency" "currencies" not null
 );
 
 
-alter sequence "public"."Account_id_seq" owned by "public"."Account"."id";
+alter sequence "public"."account_id_seq" owned by "public"."account"."id";
 
-alter sequence "public"."Category_id_seq" owned by "public"."Category"."id";
+alter sequence "public"."category_id_seq" owned by "public"."category"."id";
 
-alter sequence "public"."Expense_id_seq" owned by "public"."Expense"."id";
+alter sequence "public"."expense_id_seq" owned by "public"."expense"."id";
 
-alter sequence "public"."User_id_seq" owned by "public"."User"."id";
+alter sequence "public"."user_id_seq" owned by "public"."user"."id";
 
-CREATE UNIQUE INDEX "Account_pkey" ON public."Account" USING btree (id);
+CREATE UNIQUE INDEX "account_pkey" ON public."account" USING btree (id);
 
-CREATE UNIQUE INDEX "Category_pkey" ON public."Category" USING btree (id);
+CREATE UNIQUE INDEX "category_pkey" ON public."category" USING btree (id);
 
-CREATE UNIQUE INDEX "Category_uuid_key" ON public."Category" USING btree (uuid);
+CREATE UNIQUE INDEX "category_uuid_key" ON public."category" USING btree (uuid);
 
-CREATE UNIQUE INDEX "Expense_pkey" ON public."Expense" USING btree (id);
+CREATE UNIQUE INDEX "expense_pkey" ON public."expense" USING btree (id);
 
-CREATE UNIQUE INDEX "Expense_uuid_key" ON public."Expense" USING btree (uuid);
+CREATE UNIQUE INDEX "expense_uuid_key" ON public."expense" USING btree (uuid);
 
-CREATE UNIQUE INDEX "User_authId_key" ON public."User" USING btree ("authId");
+CREATE UNIQUE INDEX "user_authId_key" ON public."user" USING btree ("authId");
 
-CREATE UNIQUE INDEX "User_email_key" ON public."User" USING btree (email);
+CREATE UNIQUE INDEX "user_email_key" ON public."user" USING btree (email);
 
-CREATE UNIQUE INDEX "User_pkey" ON public."User" USING btree (id);
+CREATE UNIQUE INDEX "user_pkey" ON public."user" USING btree (id);
 
-alter table "public"."Account" add constraint "Account_pkey" PRIMARY KEY using index "Account_pkey";
+alter table "public"."account" add constraint "account_pkey" PRIMARY KEY using index "account_pkey";
 
-alter table "public"."Category" add constraint "Category_pkey" PRIMARY KEY using index "Category_pkey";
+alter table "public"."category" add constraint "category_pkey" PRIMARY KEY using index "category_pkey";
 
-alter table "public"."Expense" add constraint "Expense_pkey" PRIMARY KEY using index "Expense_pkey";
+alter table "public"."expense" add constraint "expense_pkey" PRIMARY KEY using index "expense_pkey";
 
-alter table "public"."User" add constraint "User_pkey" PRIMARY KEY using index "User_pkey";
+alter table "public"."user" add constraint "user_pkey" PRIMARY KEY using index "user_pkey";
 
-alter table "public"."Account" add constraint "public_Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("authId") not valid;
+alter table "public"."account" add constraint "public_account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("authId") not valid;
 
-alter table "public"."Account" validate constraint "public_Account_userId_fkey";
+alter table "public"."account" validate constraint "public_account_userId_fkey";
 
-alter table "public"."Category" add constraint "Category_uuid_key" UNIQUE using index "Category_uuid_key";
+alter table "public"."category" add constraint "category_uuid_key" UNIQUE using index "category_uuid_key";
 
-alter table "public"."Category" add constraint "public_Category_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("authId") not valid;
+alter table "public"."category" add constraint "public_category_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("authId") not valid;
 
-alter table "public"."Category" validate constraint "public_Category_userId_fkey";
+alter table "public"."category" validate constraint "public_category_userId_fkey";
 
-alter table "public"."Expense" add constraint "Expense_uuid_key" UNIQUE using index "Expense_uuid_key";
+alter table "public"."expense" add constraint "expense_uuid_key" UNIQUE using index "expense_uuid_key";
 
-alter table "public"."Expense" add constraint "public_Expense_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"(uuid) not valid;
+alter table "public"."expense" add constraint "public_expense_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "category"(uuid) not valid;
 
-alter table "public"."Expense" validate constraint "public_Expense_categoryId_fkey";
+alter table "public"."expense" validate constraint "public_expense_categoryId_fkey";
 
-alter table "public"."Expense" add constraint "public_Expense_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("authId") not valid;
+alter table "public"."expense" add constraint "public_expense_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("authId") not valid;
 
-alter table "public"."Expense" validate constraint "public_Expense_userId_fkey";
+alter table "public"."expense" validate constraint "public_expense_userId_fkey";
 
-alter table "public"."User" add constraint "User_authId_key" UNIQUE using index "User_authId_key";
+alter table "public"."user" add constraint "user_authId_key" UNIQUE using index "user_authId_key";
 
-grant insert on table "public"."Account" to "anon";
+grant insert on table "public"."account" to "anon";
 
-grant select on table "public"."Account" to "anon";
+grant select on table "public"."account" to "anon";
 
-grant update on table "public"."Account" to "anon";
+grant update on table "public"."account" to "anon";
 
-grant insert on table "public"."Account" to "authenticated";
+grant insert on table "public"."account" to "authenticated";
 
-grant select on table "public"."Account" to "authenticated";
+grant select on table "public"."account" to "authenticated";
 
-grant update on table "public"."Account" to "authenticated";
+grant update on table "public"."account" to "authenticated";
 
-grant insert on table "public"."Category" to "anon";
+grant insert on table "public"."category" to "anon";
 
-grant select on table "public"."Category" to "anon";
+grant select on table "public"."category" to "anon";
 
-grant update on table "public"."Category" to "anon";
+grant update on table "public"."category" to "anon";
 
-grant insert on table "public"."Category" to "authenticated";
+grant insert on table "public"."category" to "authenticated";
 
-grant select on table "public"."Category" to "authenticated";
+grant select on table "public"."category" to "authenticated";
 
-grant update on table "public"."Category" to "authenticated";
+grant update on table "public"."category" to "authenticated";
 
-grant insert on table "public"."Expense" to "anon";
+grant insert on table "public"."expense" to "anon";
 
-grant select on table "public"."Expense" to "anon";
+grant select on table "public"."expense" to "anon";
 
-grant update on table "public"."Expense" to "anon";
+grant update on table "public"."expense" to "anon";
 
-grant insert on table "public"."Expense" to "authenticated";
+grant insert on table "public"."expense" to "authenticated";
 
-grant select on table "public"."Expense" to "authenticated";
+grant select on table "public"."expense" to "authenticated";
 
-grant update on table "public"."Expense" to "authenticated";
+grant update on table "public"."expense" to "authenticated";
 
-grant insert on table "public"."User" to "anon";
+grant insert on table "public"."user" to "anon";
 
-grant select on table "public"."User" to "anon";
+grant select on table "public"."user" to "anon";
 
-grant update on table "public"."User" to "anon";
+grant update on table "public"."user" to "anon";
 
-grant insert on table "public"."User" to "authenticated";
+grant insert on table "public"."user" to "authenticated";
 
-grant select on table "public"."User" to "authenticated";
+grant select on table "public"."user" to "authenticated";
 
-grant update on table "public"."User" to "authenticated";
-
-
+grant update on table "public"."user" to "authenticated";
