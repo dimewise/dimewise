@@ -39,11 +39,9 @@ tasks:
       - venv/bin/python3 -m pip install -q -r requirements.txt
       - echo
     sources:
-      - venv
       - requirements.txt
-    generates:
-      - venv
   run:
     desc: "Start the server"
+    dir: ./app
     cmds:
-      - venv/bin/python3 -m uvicorn main:app --reload
+      - ../venv/bin/python3 -m uvicorn main:app --reload
