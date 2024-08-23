@@ -35,6 +35,7 @@ tasks:
       - bun install
       - echo
   run:
+    silent: true
     desc: "Start the client"
     cmds:
-      - bun run dev
+      - bunx --bun vite

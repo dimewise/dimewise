@@ -69,6 +69,7 @@ tasks:
         supabase_status=$(bunx supabase status)
         api_url=$(echo "$supabase_status" | grep "API URL:" | cut -d ':' -f 2- | tr -d '[:space:]')
         anon_key=$(echo "$supabase_status" | grep "anon key:" | cut -d ':' -f 2- | tr -d '[:space:]')
+        db_url=$(echo "$supabase_status" | grep "DB URL:" | cut -d ':' -f 2- | tr -d '[:space:]')
         jwt_key=$(echo "$supabase_status" | grep "JWT secret:" | cut -d ':' -f 2- | tr -d '[:space:]')
 
         echo "➜ Updating client .env file..."
@@ -77,9 +78,8 @@ tasks:
         rm ./client/.env.bak
 
         echo "➜ Updating server .env file..."
-        sed -i.bak "s|SUPABASE_URL=.*|SUPABASE_URL=$api_url|" ./server/.env
-        sed -i.bak "s|SUPABASE_KEY=.*|SUPABASE_KEY=$anon_key|" ./server/.env
-        sed -i.bak "s|SUPABASE_JWT=.*|SUPABASE_JWT=$jwt_key|" ./server/.env
+        sed -i.bak "s|DB_URL=.*|DB_URL=$db_url|" ./server/.env
+        sed -i.bak "s|JWT_TOKEN=.*|JWT_TOKEN=$jwt_key|" ./server/.env
         rm ./server/.env.bak
       - echo "➜ Running database migrations..."
       - echo
