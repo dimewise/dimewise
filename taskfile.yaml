@@ -1,0 +1,102 @@
+version: "3"
+
+includes:
+  client:
+    taskfile: ./client/taskfile.yaml
+    dir: ./client
+    internal: true
+  server:
+    taskfile: server/taskfile.yaml
+    dir: server
+    internal: true
+
+tasks:
+  default:
+    silent: true
+    cmds:
+      - task -l
+  db:status:
+    silent: true
+    cmds:
+      - bunx supabase status
+  db:start:
+    silent: true
+    cmds:
+      - bunx supabase start
+  db:stop:
+    silent: true
+    cmds:
+      - bunx supabase stop
+  init:
+    silent: true
+    desc: "Initialize Dimewise Project"
+    cmds:
+      - echo
+      - echo "Starting initialization..."
+      - task init-hooks
+      - task: client:init
+      - task: server:init
+      - task init-supabase
+      - echo
+      - echo "Project initialization complete!"
+      - echo
+      - echo "Please run the following tasks in separate terminals:"
+      - echo "1. task run:client"
+      - echo "2. task run:server"
+      - echo
+      - echo "(tip - you can use GNU Screen to run them in the background)"
+      - echo
+  init-hooks:
+    silent: true
+    desc: "Installs git hooks"
+    cmds:
+      - echo "➜ Installing git hooks..."
+      - cp scripts/hooks/pre-commit .git/hooks/pre-commit
+      - cp scripts/hooks/pre-push .git/hooks/pre-push
+      - chmod +x .git/hooks/pre-commit
+      - chmod +x .git/hooks/pre-push
+  init-supabase:
+    silent: true
+    desc: "Installs and starts Supabase"
+    cmds:
+      - echo "➜ Starting Supabase (local)"
+      - echo
+      - bunx supabase start
+      - echo
+      - |
+        echo "➜ Extracting Supabase status..."
+
+        supabase_status=$(bunx supabase status)
+        api_url=$(echo "$supabase_status" | grep "API URL:" | cut -d ':' -f 2- | tr -d '[:space:]')
+        anon_key=$(echo "$supabase_status" | grep "anon key:" | cut -d ':' -f 2- | tr -d '[:space:]')
+        db_url=$(echo "$supabase_status" | grep "DB URL:" | cut -d ':' -f 2- | tr -d '[:space:]')
+        jwt_key=$(echo "$supabase_status" | grep "JWT secret:" | cut -d ':' -f 2- | tr -d '[:space:]')
+
+        echo "➜ Updating client .env file..."
+        sed -i.bak "s|PUBLIC_SUPABASE_URL=.*|PUBLIC_SUPABASE_URL=$api_url|" ./client/.env
+        sed -i.bak "s|PUBLIC_SUPABASE_ANON_KEY=.*|PUBLIC_SUPABASE_ANON_KEY=$anon_key|" ./client/.env
+        rm ./client/.env.bak
+
+        echo "➜ Updating server .env file..."
+        sed -i.bak "s|DB_URL=.*|DB_URL=$db_url|" ./server/.env
+        sed -i.bak "s|JWT_TOKEN=.*|JWT_TOKEN=$jwt_key|" ./server/.env
+        rm ./server/.env.bak
+      - echo "➜ Running database migrations..."
+      - echo
+      - bunx supabase migration up --local
+      - echo
+      - bunx supabase migration list --local
+      - echo
+  run:
+    desc: "Start the Dimewise Project"
+    cmds:
+      - task: client:run
+      - task: server:run
+  run:client:
+    desc: "Start the client"
+    cmds:
+      - task: client:run
+  run:server:
+    desc: "Start the server"
+    cmds:
+      - task: server:run

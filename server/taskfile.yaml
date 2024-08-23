@@ -1,0 +1,47 @@
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - task -l
+  init:
+    silent: true
+    desc: "Run all init tasks"
+    cmds:
+      - task init-env
+      - task init-venv
+  init-env:
+    silent: true
+    desc: "Initialize .env"
+    cmds:
+      - |
+        if [ ! -f .env ]; then 
+          echo "➜ Server - Copying .env.example to .env"
+          cp .env.example .env
+        else 
+          echo "➜ Server - .env already exists. Skipping..."
+        fi
+  init-venv:
+    silent: true
+    desc: "Initialize or update virtualenv"
+    cmds:
+      - |
+        if [ -d "venv" ]; then 
+          echo "➜ Server - Virtual environment already exists, updating..."; 
+        else 
+          echo "➜ Server - Creating virtualenv..."; 
+          echo
+          python3 -m venv venv; 
+          echo
+        fi
+      - echo
+      - venv/bin/python3 -m pip install --upgrade pip
+      - venv/bin/python3 -m pip install -q -r requirements.txt
+      - echo
+    sources:
+      - requirements.txt
+  run:
+    desc: "Start the server"
+    dir: ./app
+    cmds:
+      - ../venv/bin/python3 -m uvicorn main:app --reload

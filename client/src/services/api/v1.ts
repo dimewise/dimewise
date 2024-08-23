@@ -1,188 +1,114 @@
 import { baseApiV1 as api } from "./client";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getCategories: build.query<GetCategoriesApiResponse, GetCategoriesApiArg>({
+    rootGet: build.query<RootGetApiResponse, RootGetApiArg>({
+      query: () => ({ url: `/` }),
+    }),
+    signupSignupPost: build.mutation<
+      SignupSignupPostApiResponse,
+      SignupSignupPostApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/signup`,
+        method: "POST",
+        body: queryArg.signInUpRequest,
+      }),
+    }),
+    signinSigninPost: build.mutation<
+      SigninSigninPostApiResponse,
+      SigninSigninPostApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/signin`,
+        method: "POST",
+        body: queryArg.signInUpRequest,
+      }),
+    }),
+    verifyVerifyPost: build.mutation<
+      VerifyVerifyPostApiResponse,
+      VerifyVerifyPostApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/verify`,
+        method: "POST",
+        body: queryArg.verifyRequest,
+      }),
+    }),
+    getCategoriesCategoriesGet: build.query<
+      GetCategoriesCategoriesGetApiResponse,
+      GetCategoriesCategoriesGetApiArg
+    >({
       query: () => ({ url: `/categories` }),
     }),
-    postCategories: build.mutation<PostCategoriesApiResponse, PostCategoriesApiArg>({
-      query: (queryArg) => ({
-        url: `/categories`,
-        method: "POST",
-        body: queryArg.modifyCategoryDto,
-      }),
-    }),
-    getCategoriesByCategoryId: build.query<GetCategoriesByCategoryIdApiResponse, GetCategoriesByCategoryIdApiArg>({
-      query: (queryArg) => ({ url: `/categories/${queryArg.categoryId}` }),
-    }),
-    patchCategoriesByCategoryId: build.mutation<
-      PatchCategoriesByCategoryIdApiResponse,
-      PatchCategoriesByCategoryIdApiArg
+    getRecentExpensesExpensesRecentGet: build.query<
+      GetRecentExpensesExpensesRecentGetApiResponse,
+      GetRecentExpensesExpensesRecentGetApiArg
     >({
-      query: (queryArg) => ({
-        url: `/categories/${queryArg.categoryId}`,
-        method: "PATCH",
-        body: queryArg.modifyCategoryDto,
-      }),
-    }),
-    deleteCategoriesByCategoryId: build.mutation<
-      DeleteCategoriesByCategoryIdApiResponse,
-      DeleteCategoriesByCategoryIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/categories/${queryArg.categoryId}`,
-        method: "DELETE",
-      }),
-    }),
-    getExpenses: build.query<GetExpensesApiResponse, GetExpensesApiArg>({
-      query: (queryArg) => ({
-        url: `/expenses`,
-        params: {
-          type: queryArg["type"],
-          start: queryArg.start,
-          end: queryArg.end,
-        },
-      }),
-    }),
-    postExpenses: build.mutation<PostExpensesApiResponse, PostExpensesApiArg>({
-      query: (queryArg) => ({
-        url: `/expenses`,
-        method: "POST",
-        body: queryArg.modifyExpenseDto,
-      }),
-    }),
-    getExpensesByExpenseId: build.query<GetExpensesByExpenseIdApiResponse, GetExpensesByExpenseIdApiArg>({
-      query: (queryArg) => ({ url: `/expenses/${queryArg.expenseId}` }),
-    }),
-    patchExpensesByExpenseId: build.mutation<PatchExpensesByExpenseIdApiResponse, PatchExpensesByExpenseIdApiArg>({
-      query: (queryArg) => ({
-        url: `/expenses/${queryArg.expenseId}`,
-        method: "PATCH",
-        body: queryArg.modifyCategoryDto,
-      }),
-    }),
-    deleteExpensesByExpenseId: build.mutation<DeleteExpensesByExpenseIdApiResponse, DeleteExpensesByExpenseIdApiArg>({
-      query: (queryArg) => ({
-        url: `/expenses/${queryArg.expenseId}`,
-        method: "DELETE",
-      }),
+      query: () => ({ url: `/expenses/recent` }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as apiV1 };
-export type GetCategoriesApiResponse = /** status 200 OK */ {
-  /** An array of categories, null if empty */
-  categories?: BaseCategoryDto[];
+export type RootGetApiResponse = /** status 200 Successful Response */ any;
+export type RootGetApiArg = void;
+export type SignupSignupPostApiResponse =
+  /** status 201 Successful Response */ any;
+export type SignupSignupPostApiArg = {
+  signInUpRequest: SignInUpRequest;
 };
-export type GetCategoriesApiArg = void;
-export type PostCategoriesApiResponse = unknown;
-export type PostCategoriesApiArg = {
-  /** Form submission fields */
-  modifyCategoryDto: ModifyCategoryDto;
+export type SigninSigninPostApiResponse =
+  /** status 201 Successful Response */ any;
+export type SigninSigninPostApiArg = {
+  signInUpRequest: SignInUpRequest;
 };
-export type GetCategoriesByCategoryIdApiResponse = /** status 200 OK */ FullCategoryDto;
-export type GetCategoriesByCategoryIdApiArg = {
-  /** ID of the category */
-  categoryId: string;
+export type VerifyVerifyPostApiResponse =
+  /** status 201 Successful Response */ any;
+export type VerifyVerifyPostApiArg = {
+  verifyRequest: VerifyRequest;
 };
-export type PatchCategoriesByCategoryIdApiResponse = unknown;
-export type PatchCategoriesByCategoryIdApiArg = {
-  /** ID of the category */
-  categoryId: string;
-  /** Form submission fields */
-  modifyCategoryDto: ModifyCategoryDto;
+export type GetCategoriesCategoriesGetApiResponse =
+  /** status 200 Successful Response */ Category[];
+export type GetCategoriesCategoriesGetApiArg = void;
+export type GetRecentExpensesExpensesRecentGetApiResponse =
+  /** status 200 Successful Response */ Expense[];
+export type GetRecentExpensesExpensesRecentGetApiArg = void;
+export type ValidationError = {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
 };
-export type DeleteCategoriesByCategoryIdApiResponse = unknown;
-export type DeleteCategoriesByCategoryIdApiArg = {
-  /** ID of the category */
-  categoryId: string;
+export type HttpValidationError = {
+  detail?: ValidationError[];
 };
-export type GetExpensesApiResponse = /** status 200 OK */ {
-  /** List of expenses, null if empty */
-  expenses?: FullExpenseDto[];
+export type SignInUpRequest = {
+  email: string;
+  password: string;
 };
-export type GetExpensesApiArg = {
-  /** Full for getting entire list, Recent for last 20 transactions */
-  type: "full" | "recent";
-  /** Start date for querying transactions */
-  start?: string;
-  /** End date for querying transactions */
-  end?: string;
+export type VerifyRequest = {
+  token: string;
 };
-export type PostExpensesApiResponse = unknown;
-export type PostExpensesApiArg = {
-  /** Form submission fields */
-  modifyExpenseDto: ModifyExpenseDto;
-};
-export type GetExpensesByExpenseIdApiResponse = /** status 200 OK */ FullExpenseDto;
-export type GetExpensesByExpenseIdApiArg = {
-  /** ID of the expense */
-  expenseId: string;
-};
-export type PatchExpensesByExpenseIdApiResponse = unknown;
-export type PatchExpensesByExpenseIdApiArg = {
-  /** ID of the expense */
-  expenseId: string;
-  /** Form submission fields */
-  modifyCategoryDto: ModifyCategoryDto;
-};
-export type DeleteExpensesByExpenseIdApiResponse = unknown;
-export type DeleteExpensesByExpenseIdApiArg = {
-  /** ID of the expense */
-  expenseId: string;
-};
-export type BaseCategoryDto = {
-  /** ID of category */
+export type Category = {
   id: string;
-  /** Name of category */
   name: string;
-};
-export type ModifyCategoryDto = {
-  /** Name of the category */
-  name: string;
-  /** Budget of the category */
   budget: number;
 };
-export type FullCategoryDto = {
-  /** ID of category */
-  id: string;
-  /** Name of category */
-  name: string;
-  /** Budget of category */
-  budget: number;
-  /** Current amount used within category budget */
-  current: number;
-};
-export type FullExpenseDto = {
+export type Expense = {
   id: string;
   title: string;
   description: string;
   amount: number;
-  category_id: string;
-};
-export type ModifyExpenseDto = {
-  /** Title of the expense */
-  title: string;
-  /** Description of the expense */
-  description: string;
-  /** Amount spent on the expense */
-  amount: string;
-  /** ID of the category for the expense */
+  date: string;
   category_id: string;
 };
 export const {
-  useGetCategoriesQuery,
-  useLazyGetCategoriesQuery,
-  usePostCategoriesMutation,
-  useGetCategoriesByCategoryIdQuery,
-  useLazyGetCategoriesByCategoryIdQuery,
-  usePatchCategoriesByCategoryIdMutation,
-  useDeleteCategoriesByCategoryIdMutation,
-  useGetExpensesQuery,
-  useLazyGetExpensesQuery,
-  usePostExpensesMutation,
-  useGetExpensesByExpenseIdQuery,
-  useLazyGetExpensesByExpenseIdQuery,
-  usePatchExpensesByExpenseIdMutation,
-  useDeleteExpensesByExpenseIdMutation,
+  useRootGetQuery,
+  useLazyRootGetQuery,
+  useSignupSignupPostMutation,
+  useSigninSigninPostMutation,
+  useVerifyVerifyPostMutation,
+  useGetCategoriesCategoriesGetQuery,
+  useLazyGetCategoriesCategoriesGetQuery,
+  useGetRecentExpensesExpensesRecentGetQuery,
+  useLazyGetRecentExpensesExpensesRecentGetQuery,
 } = injectedRtkApi;
