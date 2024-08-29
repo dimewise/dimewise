@@ -22,7 +22,12 @@
 		"db:migration-up-local": "bunx supabase migration up --local"
 	},
 	"dependencies": {
+		"@emotion/react": "^11.13.3",
+		"@emotion/styled": "^11.13.0",
+		"@fontsource/inter": "^5.0.20",
 		"@hookform/resolvers": "^3.9.0",
+		"@mui/icons-material": "^6.0.0",
+		"@mui/material": "^6.0.0",
 		"@reduxjs/toolkit": "^2.2.7",
 		"@supabase/auth-ui-react": "^0.4.7",
 		"@supabase/auth-ui-shared": "^0.1.8",
