@@ -3,7 +3,6 @@ import { supabase } from "../../lib/supabase/supabase";
 
 export const baseApiV1 = createApi({
     baseQuery: fetchBaseQuery({
-        baseUrl: "/api/v1",
         credentials: "include",
         prepareHeaders: async (headers) => {
             // handle access token for backend to authenticate requests

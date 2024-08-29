@@ -1,114 +1,53 @@
 import { baseApiV1 as api } from "./client";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    rootGet: build.query<RootGetApiResponse, RootGetApiArg>({
-      query: () => ({ url: `/` }),
+    rootApiV1Get: build.query<RootApiV1GetApiResponse, RootApiV1GetApiArg>({
+      query: () => ({ url: `/api/v1/` }),
     }),
-    signupSignupPost: build.mutation<
-      SignupSignupPostApiResponse,
-      SignupSignupPostApiArg
+    getCategoriesApiV1CategoriesGet: build.query<
+      GetCategoriesApiV1CategoriesGetApiResponse,
+      GetCategoriesApiV1CategoriesGetApiArg
     >({
-      query: (queryArg) => ({
-        url: `/signup`,
-        method: "POST",
-        body: queryArg.signInUpRequest,
-      }),
+      query: () => ({ url: `/api/v1/categories` }),
     }),
-    signinSigninPost: build.mutation<
-      SigninSigninPostApiResponse,
-      SigninSigninPostApiArg
+    getRecentExpensesApiV1ExpensesRecentGet: build.query<
+      GetRecentExpensesApiV1ExpensesRecentGetApiResponse,
+      GetRecentExpensesApiV1ExpensesRecentGetApiArg
     >({
-      query: (queryArg) => ({
-        url: `/signin`,
-        method: "POST",
-        body: queryArg.signInUpRequest,
-      }),
-    }),
-    verifyVerifyPost: build.mutation<
-      VerifyVerifyPostApiResponse,
-      VerifyVerifyPostApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/verify`,
-        method: "POST",
-        body: queryArg.verifyRequest,
-      }),
-    }),
-    getCategoriesCategoriesGet: build.query<
-      GetCategoriesCategoriesGetApiResponse,
-      GetCategoriesCategoriesGetApiArg
-    >({
-      query: () => ({ url: `/categories` }),
-    }),
-    getRecentExpensesExpensesRecentGet: build.query<
-      GetRecentExpensesExpensesRecentGetApiResponse,
-      GetRecentExpensesExpensesRecentGetApiArg
-    >({
-      query: () => ({ url: `/expenses/recent` }),
+      query: () => ({ url: `/api/v1/expenses/recent` }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as apiV1 };
-export type RootGetApiResponse = /** status 200 Successful Response */ any;
-export type RootGetApiArg = void;
-export type SignupSignupPostApiResponse =
-  /** status 201 Successful Response */ any;
-export type SignupSignupPostApiArg = {
-  signInUpRequest: SignInUpRequest;
-};
-export type SigninSigninPostApiResponse =
-  /** status 201 Successful Response */ any;
-export type SigninSigninPostApiArg = {
-  signInUpRequest: SignInUpRequest;
-};
-export type VerifyVerifyPostApiResponse =
-  /** status 201 Successful Response */ any;
-export type VerifyVerifyPostApiArg = {
-  verifyRequest: VerifyRequest;
-};
-export type GetCategoriesCategoriesGetApiResponse =
+export type RootApiV1GetApiResponse = /** status 200 Successful Response */ any;
+export type RootApiV1GetApiArg = void;
+export type GetCategoriesApiV1CategoriesGetApiResponse =
   /** status 200 Successful Response */ Category[];
-export type GetCategoriesCategoriesGetApiArg = void;
-export type GetRecentExpensesExpensesRecentGetApiResponse =
+export type GetCategoriesApiV1CategoriesGetApiArg = void;
+export type GetRecentExpensesApiV1ExpensesRecentGetApiResponse =
   /** status 200 Successful Response */ Expense[];
-export type GetRecentExpensesExpensesRecentGetApiArg = void;
-export type ValidationError = {
-  loc: (string | number)[];
-  msg: string;
-  type: string;
-};
-export type HttpValidationError = {
-  detail?: ValidationError[];
-};
-export type SignInUpRequest = {
-  email: string;
-  password: string;
-};
-export type VerifyRequest = {
-  token: string;
-};
+export type GetRecentExpensesApiV1ExpensesRecentGetApiArg = void;
 export type Category = {
-  id: string;
+  uuid?: string;
   name: string;
   budget: number;
+  userId: string;
 };
 export type Expense = {
-  id: string;
+  uuid?: string;
   title: string;
   description: string;
   amount: number;
   date: string;
-  category_id: string;
+  categoryId: string;
+  userId: string;
 };
 export const {
-  useRootGetQuery,
-  useLazyRootGetQuery,
-  useSignupSignupPostMutation,
-  useSigninSigninPostMutation,
-  useVerifyVerifyPostMutation,
-  useGetCategoriesCategoriesGetQuery,
-  useLazyGetCategoriesCategoriesGetQuery,
-  useGetRecentExpensesExpensesRecentGetQuery,
-  useLazyGetRecentExpensesExpensesRecentGetQuery,
+  useRootApiV1GetQuery,
+  useLazyRootApiV1GetQuery,
+  useGetCategoriesApiV1CategoriesGetQuery,
+  useLazyGetCategoriesApiV1CategoriesGetQuery,
+  useGetRecentExpensesApiV1ExpensesRecentGetQuery,
+  useLazyGetRecentExpensesApiV1ExpensesRecentGetQuery,
 } = injectedRtkApi;

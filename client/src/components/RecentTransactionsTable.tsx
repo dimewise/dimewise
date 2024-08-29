@@ -19,7 +19,7 @@ export const RecentTransactionsTable = ({ recentTransactions }: Props) => {
       </thead>
       <tbody>
         {recentTransactions?.map((x) => (
-          <tr key={x.id}>
+          <tr key={x.uuid}>
             <td>{x.title} we also add categories chip here</td>
             <td className="text-nowrap w-fit truncate">{`${currency} ${x.amount}`}</td>
           </tr>
