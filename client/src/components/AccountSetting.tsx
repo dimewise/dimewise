@@ -1,4 +1,3 @@
-import { ArrowLeftStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -16,7 +15,6 @@ export const AccountSetting = ({ handleShowConfirmLogoutModal }: Props) => {
 					className="btn btn-error text-white"
 					onClick={handleShowConfirmLogoutModal}
 				>
-					<ArrowLeftStartOnRectangleIcon className="size-5" />
 					{t("nav.private.log_out")}
 				</button>
 			</div>

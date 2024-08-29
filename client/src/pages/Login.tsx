@@ -1,4 +1,3 @@
-import { XCircleIcon } from "@heroicons/react/24/outline";
 import { yupResolver } from "@hookform/resolvers/yup";
 import type { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
@@ -50,7 +49,6 @@ export const Login = () => {
 						role="alert"
 						className="alert alert-error"
 					>
-						<XCircleIcon className="size-6 text-base-100" />
 						<span>{loginError.status}</span>
 					</div>
 				)}

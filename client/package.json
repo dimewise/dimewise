@@ -22,7 +22,6 @@
 		"db:migration-up-local": "bunx supabase migration up --local"
 	},
 	"dependencies": {
-		"@heroicons/react": "^2.1.5",
 		"@hookform/resolvers": "^3.9.0",
 		"@reduxjs/toolkit": "^2.2.7",
 		"@supabase/auth-ui-react": "^0.4.7",

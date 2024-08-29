@@ -1,4 +1,3 @@
-import { CalendarDaysIcon, Cog6ToothIcon, PlusIcon, RectangleGroupIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, Outlet, useLocation, useMatch } from "react-router-dom";
 import { Routes } from "../../Routes";
@@ -64,7 +63,6 @@ const MenuList = () => {
 					to={Routes.Overview}
 					className={`w-full ${useMatch(Routes.Overview) ? "active" : ""}`}
 				>
-					<RectangleGroupIcon className="size-5" />
 					{t("nav.private.overview")}
 				</Link>
 			</li>
@@ -73,7 +71,6 @@ const MenuList = () => {
 					to={Routes.History}
 					className={`w-full ${useMatch(Routes.History) ? "active" : ""}`}
 				>
-					<CalendarDaysIcon className="size-5" />
 					{t("nav.private.history")}
 				</Link>
 			</li>
@@ -90,7 +87,6 @@ const AccountMenuList = () => {
 					to={Routes.Settings}
 					className={`w-full ${useMatch(Routes.Settings) ? "active" : ""}`}
 				>
-					<Cog6ToothIcon className="size-5" />
 					{t("nav.private.settings")}
 				</Link>
 			</li>
@@ -107,7 +103,6 @@ const MobileNav = () => {
 				className={useMatch(Routes.Overview) ? "active" : ""}
 				to={Routes.Overview}
 			>
-				<RectangleGroupIcon className="size-5" />
 				<span className="btm-nav-label">{t("nav.private.overview")}</span>
 			</Link>
 			<Link
@@ -115,11 +110,9 @@ const MobileNav = () => {
 				className={useMatch(Routes.History) ? "active" : ""}
 				to={Routes.History}
 			>
-				<CalendarDaysIcon className="size-5" />
 				<span className="btm-nav-label">{t("nav.private.history")}</span>
 			</Link>
 			<button type="button">
-				<PlusIcon className="size-5" />
 				<span className="btm-nav-label">{t("nav.private.add")}</span>
 			</button>
 			<Link
@@ -127,7 +120,6 @@ const MobileNav = () => {
 				className={useMatch(Routes.Settings) ? "active" : ""}
 				to={Routes.Settings}
 			>
-				<Cog6ToothIcon className="size-5" />
 				<span className="btm-nav-label">{t("nav.private.settings")}</span>
 			</Link>
 		</div>

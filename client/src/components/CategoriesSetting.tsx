@@ -1,4 +1,3 @@
-import { PencilSquareIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 import { useFaker } from "../hooks/useFaker";
 
@@ -39,7 +38,6 @@ export const CategoriesSetting = ({
 					className="btn btn-primary btn-sm text-white"
 					onClick={handleShowCategoryFormModal}
 				>
-					<PlusIcon className="size-5" />
 					{t("settings.categories.action.create")}
 				</button>
 			</div>
@@ -63,13 +61,13 @@ export const CategoriesSetting = ({
 										type="button"
 										onClick={() => handleEditCategory(c.id)}
 									>
-										<PencilSquareIcon className="size-5" />
+										edit
 									</button>
 									<button
 										type="button"
 										onClick={() => handleDeleteCategory(c.id)}
 									>
-										<TrashIcon className="size-5" />
+										delete
 									</button>
 								</td>
 							</tr>

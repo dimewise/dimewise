@@ -1,4 +1,3 @@
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Routes } from "../Routes";
@@ -32,7 +31,6 @@ export const Overview = () => {
             to={Routes.History}
           >
             {t("overview.view_more")}
-            <ChevronRightIcon className="size-5" />
           </Link>
         </div>
         <RecentTransactionsTable recentTransactions={expenses ?? []} />
