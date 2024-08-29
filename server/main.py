@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, FastAPI, Request
-from sqlmodel import Session, create_engine, select
+from sqlmodel import Session, create_engine, func, select
 
-from app.models import Category, Expense
+from app.models import Category, CategoryFull, Expense, ExpensePublic
 from app.settings import settings
 from app.utils.jwt import JWTBearer
 
@@ -17,15 +17,20 @@ def root():
     return "Wow"
 
 
-@prt.get("/categories", response_model=list[Category])
+@prt.get("/categories", response_model=list[CategoryFull])
 def get_categories(request: Request):
     creds = request.state.creds
     with Session(engine) as session:
-        categories = session.exec(select(Category).where(Category.userId == creds["sub"])).all()
-        return categories
+        categories = session.exec(
+            select(Category, func.sum(Expense.amount))
+            .join(Expense)
+            .where(Category.userId == creds["sub"])
+            .group_by(Category.id)
+        ).all()
+        return [CategoryFull(spent=spent, **category.__dict__) for (category, spent) in categories]
 
 
-@prt.get("/expenses/recent", response_model=list[Expense])
+@prt.get("/expenses/recent", response_model=list[ExpensePublic])
 def get_recent_expenses(request: Request):
     creds = request.state.creds
     with Session(engine) as session:
