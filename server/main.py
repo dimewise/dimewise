@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, FastAPI, Request
-from models import Category, Expense
 from sqlmodel import Session, create_engine, select
-from utils.jwt import JWTBearer
 
-from app.settings import Settings
+from app.models import Category, Expense
+from app.settings import settings
+from app.utils.jwt import JWTBearer
 
 app = FastAPI()
 pub = APIRouter(prefix="/api/v1")
-prt = APIRouter(prefix="/api/v1", dependencies=[Depends(JWTBearer(Settings.JWT_TOKEN))])
+prt = APIRouter(prefix="/api/v1", dependencies=[Depends(JWTBearer(settings.JWT_TOKEN))])
 
-engine = create_engine(Settings.DB_URL, echo=True)
+engine = create_engine(settings.DB_URL, echo=True)
 
 
 @pub.get("/")
@@ -17,7 +17,7 @@ def root():
     return "Wow"
 
 
-@prt.get("/categories", response_model="list[Category]")
+@prt.get("/categories", response_model=list[Category])
 def get_categories(request: Request):
     creds = request.state.creds
     with Session(engine) as session:
@@ -25,7 +25,7 @@ def get_categories(request: Request):
         return categories
 
 
-@prt.get("/expenses/recent", response_model="list[Expense]")
+@prt.get("/expenses/recent", response_model=list[Expense])
 def get_recent_expenses(request: Request):
     creds = request.state.creds
     with Session(engine) as session:

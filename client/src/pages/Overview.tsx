@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 import { Routes } from "../Routes";
 import { CategoryWidget } from "../components/CategoryWidget";
 import { RecentTransactionsTable } from "../components/RecentTransactionsTable";
-import { useGetCategoriesCategoriesGetQuery, useGetRecentExpensesExpensesRecentGetQuery } from "../services/api/v1";
+import { useGetCategoriesApiV1CategoriesGetQuery, useGetRecentExpensesApiV1ExpensesRecentGetQuery } from "../services/api/v1";
 
 export const Overview = () => {
   const { t } = useTranslation();
-  const { data: categories } = useGetCategoriesCategoriesGetQuery();
-  const { data: expenses } = useGetRecentExpensesExpensesRecentGetQuery();
+  const { data: categories } = useGetCategoriesApiV1CategoriesGetQuery();
+  const { data: expenses } = useGetRecentExpensesApiV1ExpensesRecentGetQuery();
 
   return (
     <>
@@ -19,7 +19,7 @@ export const Overview = () => {
         <div className="flex flex-wrap items-center lg:grid lg:grid-cols-4 gap-8">
           {categories?.map((c) => (
             <CategoryWidget
-              key={c.id}
+              key={c.uuid}
               category={c}
             />
           ))}
