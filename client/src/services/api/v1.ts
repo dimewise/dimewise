@@ -23,16 +23,17 @@ export { injectedRtkApi as apiV1 };
 export type RootApiV1GetApiResponse = /** status 200 Successful Response */ any;
 export type RootApiV1GetApiArg = void;
 export type GetCategoriesApiV1CategoriesGetApiResponse =
-  /** status 200 Successful Response */ Category[];
+  /** status 200 Successful Response */ CategoryFull[];
 export type GetCategoriesApiV1CategoriesGetApiArg = void;
 export type GetRecentExpensesApiV1ExpensesRecentGetApiResponse =
   /** status 200 Successful Response */ Expense[];
 export type GetRecentExpensesApiV1ExpensesRecentGetApiArg = void;
-export type Category = {
+export type CategoryFull = {
   uuid?: string;
   name: string;
   budget: number;
   userId: string;
+  spent: number;
 };
 export type Expense = {
   uuid?: string;

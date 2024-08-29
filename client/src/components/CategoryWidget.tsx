@@ -1,15 +1,14 @@
 import { useTranslation } from "react-i18next";
-import type { Category } from "../services/api/v1";
+import type { CategoryFull } from "../services/api/v1";
 
 interface Props {
-  category: Category;
+  category: CategoryFull;
 }
 
 export const CategoryWidget = ({ category }: Props) => {
   const { t } = useTranslation();
   const currency = "JPY";
-  // const remainingBudget = category.budget - category.expense;
-  const remainingBudget = category.budget - (category.budget / 2);
+  const remainingBudget = category.budget - category.spent;
   const remainder = Math.abs(remainingBudget);
   const prefix = remainingBudget < 0 ? "-" : "";
 
@@ -38,8 +37,7 @@ export const CategoryWidget = ({ category }: Props) => {
         </div>
         <progress
           className={`progress ${remainderColorCode}`}
-          // value={category.expense}
-          value={category.budget / 2}
+          value={category.spent}
           max={category.budget}
         />
       </div>
