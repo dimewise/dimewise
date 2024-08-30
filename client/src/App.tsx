@@ -12,6 +12,7 @@ import "@fontsource/inter/300.css";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/700.css";
+import { getTheme } from "./theme/getTheme";
 
 const App = () => {
 	const dispatch = useDispatch();
@@ -21,30 +22,7 @@ const App = () => {
 		dispatch(initializeTheme());
 	}, [dispatch]);
 
-	const theme = createTheme({
-		palette: {
-			mode,
-		},
-		typography: {
-			fontFamily: [
-				"inter",
-				// include system fonts in case of inter failing to load
-				"-apple-system",
-				"BlinkMacSystemFont",
-				'"Segoe UI"',
-				"Roboto",
-				'"Helvetica Neue"',
-				"Arial",
-				"sans-serif",
-				'"Apple Color Emoji"',
-				'"Segoe UI Emoji"',
-				'"Segoe UI Symbol"',
-			].join(","),
-			button: {
-				textTransform: "none",
-			},
-		},
-	});
+	const theme = createTheme(getTheme(mode));
 
 	return (
 		<AuthProvider>
