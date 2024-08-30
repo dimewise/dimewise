@@ -18,7 +18,7 @@ export const Router = createBrowserRouter([
 		children: [
 			{
 				path: Routes.Root,
-				element: <PublicLayout />,
+				// element: <PublicLayout />,
 				children: [
 					{
 						path: Routes.Root,

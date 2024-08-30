@@ -18,13 +18,6 @@
 						"filenameCases": ["camelCase", "PascalCase"]
 					}
 				},
-				"useNamingConvention": {
-					"level": "error",
-					"options": {
-						"strictCase": true,
-						"requireAscii": true
-					}
-				},
 				"useShorthandArrayType": "warn",
 				"useShorthandAssign": "warn",
 				"useSingleCaseStatement": "warn"
@@ -66,8 +59,7 @@
 			"linter": {
 				"rules": {
 					"style": {
-						"noDefaultExport": "off",
-						"useNamingConvention": "off"
+						"noDefaultExport": "off"
 					}
 				}
 			}
