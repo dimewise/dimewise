@@ -1,8 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { Routes } from "../Routes";
 import { useAuth } from "../hooks/useAuth";
-import { Box, Divider } from "@mui/material";
-import { NavBar } from "../components/Home/NavBar";
+import { Divider } from "@mui/material";
 import { Hero } from "../components/Home/Hero";
 import { LogoCollection } from "../components/Home/LogoCollection";
 import { Features } from "../components/Home/Features";
@@ -24,8 +23,7 @@ export const Home = () => {
 		);
 	}
 	return (
-		<Box>
-			<NavBar />
+		<>
 			<Hero />
 			<div>
 				<LogoCollection />
@@ -41,6 +39,6 @@ export const Home = () => {
 				<Divider />
 				<Footer />
 			</div>
-		</Box>
+		</>
 	);
 };

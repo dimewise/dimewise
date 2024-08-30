@@ -11,11 +11,13 @@ import Drawer from "@mui/material/Drawer";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { useState } from "react";
-import { SitemarkIcon } from "./SitemarkIcon";
-import { ToggleColorMode } from "./ToggleMode";
+import { ToggleColorMode } from "../Home/ToggleMode";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleMode } from "../../store/themeSlice";
 import type { RootState } from "../../store";
+import { SitemarkIcon } from "../../assets/icons/SitemarkIcon";
+import { Link } from "react-router-dom";
+import { Routes } from "../../Routes";
+import { toggleMode } from "../../store/themeSlice";
 
 export const NavBar = () => {
 	const dispatch = useDispatch();
@@ -35,13 +37,17 @@ export const NavBar = () => {
 			position="fixed"
 			sx={{ boxShadow: 0, bgcolor: "transparent", backgroundImage: "none", mt: 4 }}
 		>
-			<Container maxWidth="lg">
+			<Container
+				maxWidth="lg"
+				sx={{ display: "flex", width: "100%", alignItems: "center", gap: 2 }}
+			>
 				<Toolbar
 					sx={{
 						display: "flex",
 						alignItems: "center",
 						justifyContent: "space-between",
 						flexShrink: 0,
+						flex: 1,
 						borderRadius: (theme) => `calc(${theme.shape.borderRadius}px + 8px)`,
 						backdropFilter: "blur(24px)",
 						border: "1px solid",
@@ -110,6 +116,8 @@ export const NavBar = () => {
 						}}
 					>
 						<Button
+							component={Link}
+							to={Routes.SignIn}
 							color="primary"
 							variant="text"
 							size="small"
@@ -117,16 +125,14 @@ export const NavBar = () => {
 							Sign in
 						</Button>
 						<Button
+							component={Link}
+							to={Routes.SignUp}
 							color="primary"
 							variant="contained"
 							size="small"
 						>
 							Sign up
 						</Button>
-						<ToggleColorMode
-							mode={mode}
-							toggleColorMode={handleToggleMode}
-						/>
 					</Box>
 					<Box sx={{ display: { sm: "flex", md: "none" } }}>
 						<IconButton
@@ -161,6 +167,8 @@ export const NavBar = () => {
 								<MenuItem>Blog</MenuItem>
 								<MenuItem>
 									<Button
+										component={Link}
+										to={Routes.SignIn}
 										color="primary"
 										variant="contained"
 										fullWidth
@@ -170,6 +178,8 @@ export const NavBar = () => {
 								</MenuItem>
 								<MenuItem>
 									<Button
+										component={Link}
+										to={Routes.SignUp}
 										color="primary"
 										variant="outlined"
 										fullWidth
@@ -187,6 +197,13 @@ export const NavBar = () => {
 						</Drawer>
 					</Box>
 				</Toolbar>
+				<ToggleColorMode
+					mode={mode}
+					toggleColorMode={handleToggleMode}
+					sx={{
+						p: 3,
+					}}
+				/>
 			</Container>
 		</AppBar>
 	);
