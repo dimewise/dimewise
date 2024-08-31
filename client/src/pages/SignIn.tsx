@@ -6,18 +6,25 @@ import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
-import Link from "@mui/material/Link";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
-import { useState } from "react";
 import { SitemarkIcon } from "../assets/icons/SitemarkIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { FacebookIcon } from "../assets/icons/FacebookIcon";
-import { Routes } from "../Routes";
 import { ForgotPasswordDialog } from "../components/SignIn/ForgotPasswordDialog";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Routes } from "../Routes";
+import { useAuth } from "../hooks/useAuth";
+import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
+import type { AuthError } from "@supabase/supabase-js";
+import { Alert, Link } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
 	display: "flex",
@@ -46,55 +53,42 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export const SignIn = () => {
-	const [emailError, setEmailError] = useState(false);
-	const [emailErrorMessage, setEmailErrorMessage] = useState("");
-	const [passwordError, setPasswordError] = useState(false);
-	const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-	const [open, setOpen] = useState(false);
+	const { login } = useAuth();
+	const { t } = useTranslation();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const [openForgotPasswordDialog, setOpenForgotPasswordDialog] = useState(false);
+	const [loginError, setLoginError] = useState<AuthError | null>(null);
 
-	const handleClickOpen = () => {
-		setOpen(true);
-	};
+	// register form schema
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<LoginSchemaType>({
+		resolver: yupResolver(LoginSchema),
+	});
 
-	const handleClose = () => {
-		setOpen(false);
-	};
-
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		const data = new FormData(event.currentTarget);
-		console.log({
-			email: data.get("email"),
-			password: data.get("password"),
+	// handle on sign in form submit
+	const from = location.state?.from?.pathname || "/";
+	const onSubmit = (data: LoginSchemaType) => {
+		login(data).then((error) => {
+			if (error) {
+				setLoginError(error);
+			} else {
+				navigate(from, { replace: true });
+			}
 		});
 	};
 
-	const validateInputs = () => {
-		const email = document.getElementById("email") as HTMLInputElement;
-		const password = document.getElementById("password") as HTMLInputElement;
-
-		let isValid = true;
-
-		if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-			setEmailError(true);
-			setEmailErrorMessage("Please enter a valid email address.");
-			isValid = false;
-		} else {
-			setEmailError(false);
-			setEmailErrorMessage("");
-		}
-
-		if (!password.value || password.value.length < 6) {
-			setPasswordError(true);
-			setPasswordErrorMessage("Password must be at least 6 characters long.");
-			isValid = false;
-		} else {
-			setPasswordError(false);
-			setPasswordErrorMessage("");
-		}
-
-		return isValid;
+	// handle forgot password
+	const handleClickOpenForgotPasswordDialog = () => {
+		setOpenForgotPasswordDialog(true);
 	};
+	const handleCloseForgotPasswordDialog = () => {
+		setOpenForgotPasswordDialog(false);
+	};
+
 	return (
 		<SignInContainer
 			direction="column"
@@ -117,7 +111,7 @@ export const SignIn = () => {
 					</Typography>
 					<Box
 						component="form"
-						onSubmit={handleSubmit}
+						onSubmit={handleSubmit(onSubmit)}
 						noValidate
 						sx={{
 							display: "flex",
@@ -126,22 +120,23 @@ export const SignIn = () => {
 							gap: 2,
 						}}
 					>
+						{loginError && <Alert severity="error">{loginError.message}</Alert>}
 						<FormControl>
-							<FormLabel htmlFor="email">Email</FormLabel>
+							<FormLabel htmlFor="email">{t("auth.form.field_email.label")}</FormLabel>
 							<TextField
-								error={emailError}
-								helperText={emailErrorMessage}
+								error={!!errors.email}
+								helperText={errors.email?.message}
 								id="email"
 								type="email"
-								name="email"
 								placeholder="your@email.com"
 								autoComplete="email"
 								autoFocus
 								required
 								fullWidth
 								variant="outlined"
-								color={emailError ? "error" : "primary"}
+								color={errors.email ? "error" : "primary"}
 								sx={{ ariaLabel: "email" }}
+								{...register("email")}
 							/>
 						</FormControl>
 						<FormControl>
@@ -149,7 +144,7 @@ export const SignIn = () => {
 								<FormLabel htmlFor="password">Password</FormLabel>
 								<Link
 									component="button"
-									onClick={handleClickOpen}
+									onClick={handleClickOpenForgotPasswordDialog}
 									variant="body2"
 									sx={{ alignSelf: "baseline" }}
 								>
@@ -157,18 +152,18 @@ export const SignIn = () => {
 								</Link>
 							</Box>
 							<TextField
-								error={passwordError}
-								helperText={passwordErrorMessage}
-								name="password"
+								error={!!errors.password}
+								helperText={errors.password?.message}
 								placeholder="••••••"
 								type="password"
 								id="password"
 								autoComplete="current-password"
-								autoFocus
 								required
 								fullWidth
+								color={errors.password ? "error" : "primary"}
 								variant="outlined"
-								color={passwordError ? "error" : "primary"}
+								sx={{ ariaLabel: "password" }}
+								{...register("password")}
 							/>
 						</FormControl>
 						<FormControlLabel
@@ -181,14 +176,13 @@ export const SignIn = () => {
 							label="Remember me"
 						/>
 						<ForgotPasswordDialog
-							open={open}
-							handleClose={handleClose}
+							open={openForgotPasswordDialog}
+							handleClose={handleCloseForgotPasswordDialog}
 						/>
 						<Button
 							type="submit"
 							fullWidth
 							variant="contained"
-							onClick={validateInputs}
 						>
 							Sign in
 						</Button>
