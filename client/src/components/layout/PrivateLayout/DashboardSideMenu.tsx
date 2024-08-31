@@ -23,7 +23,7 @@ const Drawer = styled(MuiDrawer)({
 	},
 });
 
-export const SideMenu = () => {
+export const DashboardSideMenu = () => {
 	return (
 		<Drawer
 			variant="permanent"

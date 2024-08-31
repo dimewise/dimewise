@@ -27,7 +27,7 @@ const Toolbar = styled(MuiToolbar)({
 	},
 });
 
-export const AppNavbar = () => {
+export const DashboardNavbar = () => {
 	const [open, setOpen] = useState(false);
 
 	const toggleDrawer = (newOpen: boolean) => () => {
@@ -44,7 +44,6 @@ export const AppNavbar = () => {
 				backgroundImage: "none",
 				borderBottom: "1px solid",
 				borderColor: "divider",
-				top: "56px",
 			}}
 		>
 			<Toolbar variant="regular">

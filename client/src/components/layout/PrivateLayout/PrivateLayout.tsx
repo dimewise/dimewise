@@ -2,8 +2,8 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Routes } from "../../../Routes";
 import { useAuth } from "../../../hooks/useAuth";
 import { alpha, Box, Stack } from "@mui/material";
-import { SideMenu } from "./DashboardSideMenu";
-import { AppNavbar } from "./DashboardNavbar";
+import { DashboardSideMenu } from "./DashboardSideMenu";
+import { DashboardNavbar } from "./DashboardNavbar";
 import { Header } from "./Header";
 
 export const PrivateLayout = () => {
@@ -24,8 +24,8 @@ export const PrivateLayout = () => {
 
 	return (
 		<Box sx={{ display: "flex" }}>
-			<SideMenu />
-			<AppNavbar />
+			<DashboardSideMenu />
+			<DashboardNavbar />
 			<Box
 				component="main"
 				sx={(theme) => ({
