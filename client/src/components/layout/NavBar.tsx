@@ -14,10 +14,10 @@ import { useState } from "react";
 import { ToggleColorMode } from "../Home/ToggleMode";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { SitemarkIcon } from "../../assets/icons/SitemarkIcon";
 import { Link } from "react-router-dom";
 import { Routes } from "../../Routes";
 import { toggleMode } from "../../store/themeSlice";
+import { DimewiseIcon } from "../../assets/icons/DimewiseIcon";
 
 export const NavBar = () => {
 	const dispatch = useDispatch();
@@ -60,7 +60,7 @@ export const NavBar = () => {
 					disableGutters
 				>
 					<Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", px: 0 }}>
-						<SitemarkIcon />
+						<DimewiseIcon />
 						<Box sx={{ display: { xs: "none", md: "flex" } }}>
 							<Button
 								variant="text"

@@ -9,7 +9,6 @@ import Link from "@mui/material/Link";
 import { Link as RouterLink } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { SitemarkIcon } from "../assets/icons/SitemarkIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { FacebookIcon } from "../assets/icons/FacebookIcon";
 import { Routes } from "../Routes";
@@ -22,6 +21,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { SignUpSchema, type SignUpSchemaType } from "../lib/schemas/SignUpSchema";
 import { Alert } from "@mui/material";
+import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
 
 export const SignUp = () => {
 	const { t } = useTranslation();
@@ -53,7 +53,7 @@ export const SignUp = () => {
 
 	return (
 		<>
-			<SitemarkIcon />
+			<DimewiseIcon />
 			<Typography
 				component="h1"
 				variant="h4"

@@ -19,7 +19,7 @@ export const Copyright = (props: any) => {
 				color="inherit"
 				href="https://mui.com/"
 			>
-				Sitemark
+				{import.meta.env.VITE_APP_NAME}
 			</Link>{" "}
 			{new Date().getFullYear()}
 			{"."}

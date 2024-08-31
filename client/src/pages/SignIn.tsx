@@ -8,7 +8,6 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { SitemarkIcon } from "../assets/icons/SitemarkIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { FacebookIcon } from "../assets/icons/FacebookIcon";
 import { ForgotPasswordDialog } from "../components/SignIn/ForgotPasswordDialog";
@@ -22,6 +21,7 @@ import { useAuth } from "../hooks/useAuth";
 import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
 import type { AuthError } from "@supabase/supabase-js";
 import { Alert, Link } from "@mui/material";
+import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
 
 export const SignIn = () => {
 	const { login } = useAuth();
@@ -62,7 +62,7 @@ export const SignIn = () => {
 
 	return (
 		<>
-			<SitemarkIcon />
+			<DimewiseIcon />
 			<Typography
 				component="h1"
 				variant="h4"

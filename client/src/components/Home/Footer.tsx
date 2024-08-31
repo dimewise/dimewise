@@ -11,7 +11,7 @@ import { visuallyHidden } from "@mui/utils";
 import FacebookIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/X";
-import { SitemarkIcon } from "../../assets/icons/SitemarkIcon";
+import { DimewiseIcon } from "../../assets/icons/DimewiseIcon";
 
 function Copyright() {
 	return (
@@ -24,7 +24,7 @@ function Copyright() {
 				color="text.secondary"
 				href="https://mui.com/"
 			>
-				Sitemark
+				{import.meta.env.VITE_APP_NAME}
 			</Link>
 			&nbsp;
 			{new Date().getFullYear()}
@@ -61,7 +61,7 @@ export const Footer = () => {
 					}}
 				>
 					<Box sx={{ width: { xs: "100%", sm: "60%" } }}>
-						<SitemarkIcon />
+						<DimewiseIcon />
 						<Typography
 							variant="body2"
 							gutterBottom
