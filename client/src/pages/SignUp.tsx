@@ -12,11 +12,19 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
-import { useState } from "react";
 import { SitemarkIcon } from "../assets/icons/SitemarkIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { FacebookIcon } from "../assets/icons/FacebookIcon";
 import { Routes } from "../Routes";
+import { yupResolver } from "@hookform/resolvers/yup";
+import type { AuthError } from "@supabase/supabase-js";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
+import { SignUpSchema, type SignUpSchemaType } from "../lib/schemas/SignUpSchema";
+import { Alert } from "@mui/material";
 
 const Card = styled(MuiCard)(({ theme }) => ({
 	display: "flex",
@@ -45,59 +53,33 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export const SignUp = () => {
-	const [emailError, setEmailError] = useState(false);
-	const [emailErrorMessage, setEmailErrorMessage] = useState("");
-	const [passwordError, setPasswordError] = useState(false);
-	const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
-	const [nameError, setNameError] = useState(false);
-	const [nameErrorMessage, setNameErrorMessage] = useState("");
-	const validateInputs = () => {
-		const email = document.getElementById("email") as HTMLInputElement;
-		const password = document.getElementById("password") as HTMLInputElement;
-		const name = document.getElementById("name") as HTMLInputElement;
+	const { t } = useTranslation();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const { register: signUp } = useAuth();
+	const [signUpError, setsignUpError] = useState<AuthError | null>(null);
 
-		let isValid = true;
+	// register form schema
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<SignUpSchemaType>({
+		resolver: yupResolver(SignUpSchema),
+	});
 
-		if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-			setEmailError(true);
-			setEmailErrorMessage("Please enter a valid email address.");
-			isValid = false;
-		} else {
-			setEmailError(false);
-			setEmailErrorMessage("");
-		}
-
-		if (!password.value || password.value.length < 6) {
-			setPasswordError(true);
-			setPasswordErrorMessage("Password must be at least 6 characters long.");
-			isValid = false;
-		} else {
-			setPasswordError(false);
-			setPasswordErrorMessage("");
-		}
-
-		if (!name.value || name.value.length < 1) {
-			setNameError(true);
-			setNameErrorMessage("Name is required.");
-			isValid = false;
-		} else {
-			setNameError(false);
-			setNameErrorMessage("");
-		}
-
-		return isValid;
-	};
-
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		const data = new FormData(event.currentTarget);
-		console.log({
-			name: data.get("name"),
-			lastName: data.get("lastName"),
-			email: data.get("email"),
-			password: data.get("password"),
+	// handle on sign up form submit
+	const from = location.state?.from?.pathname || "/";
+	const onSubmit = (data: SignUpSchemaType) => {
+		signUp(data).then((error) => {
+			if (error) {
+				setsignUpError(error);
+			} else {
+				navigate(from, { replace: true });
+			}
 		});
 	};
+
 	return (
 		<SignUpContainer
 			direction="column"
@@ -120,52 +102,55 @@ export const SignUp = () => {
 					</Typography>
 					<Box
 						component="form"
-						onSubmit={handleSubmit}
+						onSubmit={handleSubmit(onSubmit)}
 						sx={{ display: "flex", flexDirection: "column", gap: 2 }}
 					>
+						{signUpError && <Alert severity="error">{signUpError.message}</Alert>}
 						<FormControl>
-							<FormLabel htmlFor="name">Full name</FormLabel>
-							<TextField
-								autoComplete="name"
-								name="name"
-								required
-								fullWidth
-								id="name"
-								placeholder="Jon Snow"
-								error={nameError}
-								helperText={nameErrorMessage}
-								color={nameError ? "error" : "primary"}
-							/>
-						</FormControl>
-						<FormControl>
-							<FormLabel htmlFor="email">Email</FormLabel>
+							<FormLabel htmlFor="name">{t("auth.form.field_email.label")}</FormLabel>
 							<TextField
 								required
 								fullWidth
 								id="email"
 								placeholder="your@email.com"
-								name="email"
 								autoComplete="email"
 								variant="outlined"
-								error={emailError}
-								helperText={emailErrorMessage}
-								color={passwordError ? "error" : "primary"}
+								error={!!errors.email}
+								helperText={errors.email?.message}
+								color={errors.email ? "error" : "primary"}
+								{...register("email")}
 							/>
 						</FormControl>
 						<FormControl>
-							<FormLabel htmlFor="password">Password</FormLabel>
+							<FormLabel htmlFor="password">{t("auth.form.field_password.label")}</FormLabel>
 							<TextField
 								required
 								fullWidth
-								name="password"
 								placeholder="••••••"
 								type="password"
 								id="password"
 								autoComplete="new-password"
 								variant="outlined"
-								error={passwordError}
-								helperText={passwordErrorMessage}
-								color={passwordError ? "error" : "primary"}
+								error={!!errors.password}
+								helperText={errors.password?.message}
+								color={errors.password ? "error" : "primary"}
+								{...register("password")}
+							/>
+						</FormControl>
+						<FormControl>
+							<FormLabel htmlFor="confirm-password">{t("auth.form.field_confirm_password.label")}</FormLabel>
+							<TextField
+								required
+								fullWidth
+								placeholder="••••••"
+								type="password"
+								id="confirm-password"
+								autoComplete="new-password"
+								variant="outlined"
+								error={!!errors.confirmPassword}
+								helperText={errors.confirmPassword?.message}
+								color={errors.confirmPassword ? "error" : "primary"}
+								{...register("confirmPassword")}
 							/>
 						</FormControl>
 						<FormControlLabel
@@ -181,7 +166,6 @@ export const SignUp = () => {
 							type="submit"
 							fullWidth
 							variant="contained"
-							onClick={validateInputs}
 						>
 							Sign up
 						</Button>
