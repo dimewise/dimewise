@@ -8,9 +8,6 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import MuiCard from "@mui/material/Card";
-import { styled } from "@mui/material/styles";
 import { SitemarkIcon } from "../assets/icons/SitemarkIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { FacebookIcon } from "../assets/icons/FacebookIcon";
@@ -25,32 +22,6 @@ import { useAuth } from "../hooks/useAuth";
 import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
 import type { AuthError } from "@supabase/supabase-js";
 import { Alert, Link } from "@mui/material";
-
-const Card = styled(MuiCard)(({ theme }) => ({
-	display: "flex",
-	flexDirection: "column",
-	alignSelf: "center",
-	width: "100%",
-	padding: theme.spacing(4),
-	gap: theme.spacing(2),
-	margin: "auto",
-	boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
-	[theme.breakpoints.up("sm")]: {
-		width: "450px",
-	},
-	...theme.applyStyles("dark", {
-		boxShadow: "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
-	}),
-}));
-
-const SignInContainer = styled(Stack)(({ theme }) => ({
-	height: "100%",
-	backgroundImage: "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
-	backgroundRepeat: "no-repeat",
-	...theme.applyStyles("dark", {
-		backgroundImage: "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
-	}),
-}));
 
 export const SignIn = () => {
 	const { login } = useAuth();
@@ -90,139 +61,127 @@ export const SignIn = () => {
 	};
 
 	return (
-		<SignInContainer
-			direction="column"
-			justifyContent="space-between"
-		>
-			<Stack
+		<>
+			<SitemarkIcon />
+			<Typography
+				component="h1"
+				variant="h4"
+				sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+			>
+				Sign in
+			</Typography>
+			<Box
+				component="form"
+				onSubmit={handleSubmit(onSubmit)}
+				noValidate
 				sx={{
-					justifyContent: "center",
-					height: "100dvh",
+					display: "flex",
+					flexDirection: "column",
+					width: "100%",
+					gap: 2,
 				}}
 			>
-				<Card variant="outlined">
-					<SitemarkIcon />
-					<Typography
-						component="h1"
-						variant="h4"
-						sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-					>
-						Sign in
-					</Typography>
-					<Box
-						component="form"
-						onSubmit={handleSubmit(onSubmit)}
-						noValidate
-						sx={{
-							display: "flex",
-							flexDirection: "column",
-							width: "100%",
-							gap: 2,
-						}}
-					>
-						{loginError && <Alert severity="error">{loginError.message}</Alert>}
-						<FormControl>
-							<FormLabel htmlFor="email">{t("auth.form.field_email.label")}</FormLabel>
-							<TextField
-								error={!!errors.email}
-								helperText={errors.email?.message}
-								id="email"
-								type="email"
-								placeholder="your@email.com"
-								autoComplete="email"
-								autoFocus
-								required
-								fullWidth
-								variant="outlined"
-								color={errors.email ? "error" : "primary"}
-								sx={{ ariaLabel: "email" }}
-								{...register("email")}
-							/>
-						</FormControl>
-						<FormControl>
-							<Box sx={{ display: "flex", justifyContent: "space-between" }}>
-								<FormLabel htmlFor="password">Password</FormLabel>
-								<Link
-									component="button"
-									onClick={handleClickOpenForgotPasswordDialog}
-									variant="body2"
-									sx={{ alignSelf: "baseline" }}
-								>
-									Forgot your password?
-								</Link>
-							</Box>
-							<TextField
-								error={!!errors.password}
-								helperText={errors.password?.message}
-								placeholder="••••••"
-								type="password"
-								id="password"
-								autoComplete="current-password"
-								required
-								fullWidth
-								color={errors.password ? "error" : "primary"}
-								variant="outlined"
-								sx={{ ariaLabel: "password" }}
-								{...register("password")}
-							/>
-						</FormControl>
-						<FormControlLabel
-							control={
-								<Checkbox
-									value="remember"
-									color="primary"
-								/>
-							}
-							label="Remember me"
-						/>
-						<ForgotPasswordDialog
-							open={openForgotPasswordDialog}
-							handleClose={handleCloseForgotPasswordDialog}
-						/>
-						<Button
-							type="submit"
-							fullWidth
-							variant="contained"
+				{loginError && <Alert severity="error">{loginError.message}</Alert>}
+				<FormControl>
+					<FormLabel htmlFor="email">{t("auth.form.field_email.label")}</FormLabel>
+					<TextField
+						error={!!errors.email}
+						helperText={errors.email?.message}
+						id="email"
+						type="email"
+						placeholder="your@email.com"
+						autoComplete="email"
+						autoFocus
+						required
+						fullWidth
+						variant="outlined"
+						color={errors.email ? "error" : "primary"}
+						sx={{ ariaLabel: "email" }}
+						{...register("email")}
+					/>
+				</FormControl>
+				<FormControl>
+					<Box sx={{ display: "flex", justifyContent: "space-between" }}>
+						<FormLabel htmlFor="password">Password</FormLabel>
+						<Link
+							component="button"
+							onClick={handleClickOpenForgotPasswordDialog}
+							variant="body2"
+							sx={{ alignSelf: "baseline" }}
 						>
-							Sign in
-						</Button>
-						<Typography sx={{ textAlign: "center" }}>
-							Don&apos;t have an account?{" "}
-							<span>
-								<Link
-									component={RouterLink}
-									to={Routes.SignUp}
-									variant="body2"
-									sx={{ alignSelf: "center" }}
-								>
-									Sign up
-								</Link>
-							</span>
-						</Typography>
+							Forgot your password?
+						</Link>
 					</Box>
-					<Divider>or</Divider>
-					<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-						<Button
-							type="submit"
-							fullWidth
-							variant="outlined"
-							onClick={() => alert("Sign in with Google")}
-							startIcon={<GoogleIcon />}
+					<TextField
+						error={!!errors.password}
+						helperText={errors.password?.message}
+						placeholder="••••••"
+						type="password"
+						id="password"
+						autoComplete="current-password"
+						required
+						fullWidth
+						color={errors.password ? "error" : "primary"}
+						variant="outlined"
+						sx={{ ariaLabel: "password" }}
+						{...register("password")}
+					/>
+				</FormControl>
+				<FormControlLabel
+					control={
+						<Checkbox
+							value="remember"
+							color="primary"
+						/>
+					}
+					label="Remember me"
+				/>
+				<ForgotPasswordDialog
+					open={openForgotPasswordDialog}
+					handleClose={handleCloseForgotPasswordDialog}
+				/>
+				<Button
+					type="submit"
+					fullWidth
+					variant="contained"
+				>
+					Sign in
+				</Button>
+				<Typography sx={{ textAlign: "center" }}>
+					Don&apos;t have an account?{" "}
+					<span>
+						<Link
+							component={RouterLink}
+							to={Routes.SignUp}
+							variant="body2"
+							sx={{ alignSelf: "center" }}
 						>
-							Sign in with Google
-						</Button>
-						<Button
-							type="submit"
-							fullWidth
-							variant="outlined"
-							onClick={() => alert("Sign in with Facebook")}
-							startIcon={<FacebookIcon />}
-						>
-							Sign in with Facebook
-						</Button>
-					</Box>
-				</Card>
-			</Stack>
-		</SignInContainer>
+							Sign up
+						</Link>
+					</span>
+				</Typography>
+			</Box>
+			<Divider>or</Divider>
+			<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+				<Button
+					type="submit"
+					fullWidth
+					variant="outlined"
+					onClick={() => alert("Sign in with Google")}
+					startIcon={<GoogleIcon />}
+				>
+					Sign in with Google
+				</Button>
+				<Button
+					type="submit"
+					fullWidth
+					variant="outlined"
+					onClick={() => alert("Sign in with Facebook")}
+					startIcon={<FacebookIcon />}
+				>
+					Sign in with Facebook
+				</Button>
+			</Box>
+		</>
 	);
 };

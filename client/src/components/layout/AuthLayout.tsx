@@ -1,11 +1,38 @@
 import { Link, Outlet } from "react-router-dom";
+import MuiCard from "@mui/material/Card";
 import { Routes } from "../../Routes";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, Stack, styled } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { ToggleColorMode } from "../Home/ToggleMode";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { toggleMode } from "../../store/themeSlice";
+
+const Card = styled(MuiCard)(({ theme }) => ({
+	display: "flex",
+	flexDirection: "column",
+	alignSelf: "center",
+	width: "100%",
+	padding: theme.spacing(4),
+	gap: theme.spacing(2),
+	margin: "auto",
+	boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
+	[theme.breakpoints.up("sm")]: {
+		width: "450px",
+	},
+	...theme.applyStyles("dark", {
+		boxShadow: "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
+	}),
+}));
+
+const AuthContainer = styled(Stack)(({ theme }) => ({
+	height: "100%",
+	backgroundImage: "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
+	backgroundRepeat: "no-repeat",
+	...theme.applyStyles("dark", {
+		backgroundImage: "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
+	}),
+}));
 
 export const AuthLayout = () => {
 	const dispatch = useDispatch();
@@ -53,7 +80,18 @@ export const AuthLayout = () => {
 					toggleColorMode={handleToggleMode}
 				/>
 			</Box>
-			<Outlet />
+			<AuthContainer>
+				<Stack
+					sx={{
+						justifyContent: "center",
+						height: "100dvh",
+					}}
+				>
+					<Card variant="outlined">
+						<Outlet />
+					</Card>
+				</Stack>
+			</AuthContainer>
 		</>
 	);
 };
