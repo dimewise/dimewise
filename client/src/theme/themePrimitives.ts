@@ -25,16 +25,16 @@ declare module "@mui/material/styles/createPalette" {
 const customTheme = createTheme();
 
 export const brand = {
-    50: "hsl(210, 100%, 95%)",
-    100: "hsl(210, 100%, 92%)",
-    200: "hsl(210, 100%, 80%)",
-    300: "hsl(210, 100%, 65%)",
-    400: "hsl(210, 98%, 48%)",
-    500: "hsl(210, 98%, 42%)",
-    600: "hsl(210, 98%, 55%)",
-    700: "hsl(210, 100%, 35%)",
-    800: "hsl(210, 100%, 16%)",
-    900: "hsl(210, 100%, 21%)",
+    50: "#e6f8f0", // Very light green, softer variant
+    100: "#cceee1", // Light green, softer variant
+    200: "#a1dccb", // Soft teal-green
+    300: "#76cab4", // Light teal
+    400: "#4cb79e", // Slightly darker teal
+    500: "#263455", // Brand dark blue
+    600: "#23304e", // Slightly darker blue
+    700: "#1f2b45", // Darker blue, close to the original blue theme
+    800: "#1a253b", // Very dark blue
+    900: "#141b2b", // Near-black blue for high contrast
 };
 
 export const gray = {
