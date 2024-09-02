@@ -60,7 +60,7 @@ export const NavBar = () => {
 					disableGutters
 				>
 					<Box sx={{ flexGrow: 1, display: "flex", alignItems: "center", px: 0 }}>
-						<DimewiseIcon />
+						<DimewiseIcon mode={mode} />
 						<Box sx={{ display: { xs: "none", md: "flex" } }}>
 							<Button
 								variant="text"

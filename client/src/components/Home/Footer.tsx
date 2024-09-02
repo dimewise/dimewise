@@ -12,6 +12,8 @@ import FacebookIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import TwitterIcon from "@mui/icons-material/X";
 import { DimewiseIcon } from "../../assets/icons/DimewiseIcon";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 function Copyright() {
 	return (
@@ -33,6 +35,8 @@ function Copyright() {
 }
 
 export const Footer = () => {
+	const mode = useSelector((state: RootState) => state.theme.mode);
+
 	return (
 		<Container
 			sx={{
@@ -61,7 +65,7 @@ export const Footer = () => {
 					}}
 				>
 					<Box sx={{ width: { xs: "100%", sm: "60%" } }}>
-						<DimewiseIcon />
+						<DimewiseIcon mode={mode} />
 						<Typography
 							variant="body2"
 							gutterBottom

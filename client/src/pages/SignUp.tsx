@@ -22,11 +22,14 @@ import { useAuth } from "../hooks/useAuth";
 import { SignUpSchema, type SignUpSchemaType } from "../lib/schemas/SignUpSchema";
 import { Alert } from "@mui/material";
 import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 
 export const SignUp = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const mode = useSelector((state: RootState) => state.theme.mode);
 	const { register: signUp } = useAuth();
 	const [signUpError, setsignUpError] = useState<AuthError | null>(null);
 
@@ -53,7 +56,7 @@ export const SignUp = () => {
 
 	return (
 		<>
-			<DimewiseIcon />
+			<DimewiseIcon mode={mode} />
 			<Typography
 				component="h1"
 				variant="h4"

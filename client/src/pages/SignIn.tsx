@@ -22,11 +22,14 @@ import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
 import type { AuthError } from "@supabase/supabase-js";
 import { Alert, Link } from "@mui/material";
 import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 
 export const SignIn = () => {
 	const { login } = useAuth();
 	const { t } = useTranslation();
 	const navigate = useNavigate();
+	const mode = useSelector((state: RootState) => state.theme.mode);
 	const location = useLocation();
 	const [openForgotPasswordDialog, setOpenForgotPasswordDialog] = useState(false);
 	const [loginError, setLoginError] = useState<AuthError | null>(null);
@@ -62,7 +65,7 @@ export const SignIn = () => {
 
 	return (
 		<>
-			<DimewiseIcon />
+			<DimewiseIcon mode={mode} />
 			<Typography
 				component="h1"
 				variant="h4"
