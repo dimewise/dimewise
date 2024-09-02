@@ -104,7 +104,7 @@ export const Pricing = () => {
 								tier.title === "Professional" &&
 								((theme) => ({
 									border: "none",
-									background: "radial-gradient(circle at 50% 0%, hsl(220, 20%, 35%), hsl(220, 30%, 6%))",
+									background: "hsl(220, 20%, 35%)",
 									boxShadow: "0 8px 12px hsla(220, 20%, 42%, 0.2)",
 									...theme.applyStyles("dark", {
 										background: "radial-gradient(circle at 50% 0%, hsl(220, 20%, 20%), hsl(220, 30%, 16%))",
