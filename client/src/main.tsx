@@ -1,12 +1,10 @@
 import React from "react";
-//biome-ignore lint/style/useNamingConvention: default export from react
 import ReactDOM from "react-dom/client";
-import { App } from "./App.tsx";
-import "./index.css";
+import { RootApp } from "./App.tsx";
 
 const root = document.getElementById("root") as HTMLElement;
 ReactDOM.createRoot(root).render(
 	<React.StrictMode>
-		<App />
+		<RootApp />
 	</React.StrictMode>,
 );

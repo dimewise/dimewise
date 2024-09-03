@@ -3,9 +3,8 @@ export enum Routes {
 
 	// auth
 	Auth = "/auth",
-	Login = "/auth/login",
-	SignUp = "/auth/signup",
-	ForgotPassword = "/auth/fogot-password",
+	SignIn = "/auth/sign-in",
+	SignUp = "/auth/sign-up",
 
 	// public
 	Root = "/",
@@ -13,6 +12,9 @@ export enum Routes {
 	// private
 	Dashboard = "/dashboard",
 	Overview = "/dashboard/overview",
-	History = "/dashboard/history",
+	Transactions = "/dashboard/history",
+	Categories = "/dashboard/categories",
 	Settings = "/dashboard/settings",
+	About = "/dashboard/about",
+	Feedback = "/dashboard/feedback",
 }

@@ -1,6 +1,15 @@
 import { Navigate } from "react-router-dom";
 import { Routes } from "../Routes";
 import { useAuth } from "../hooks/useAuth";
+import { Divider } from "@mui/material";
+import { Hero } from "../components/Home/Hero";
+import { LogoCollection } from "../components/Home/LogoCollection";
+import { Features } from "../components/Home/Features";
+import { Testimonials } from "../components/Home/Testimonials";
+import { Highlights } from "../components/Home/Highlights";
+import { Pricing } from "../components/Home/Pricing";
+import { FAQ } from "../components/Home/FAQ";
+import { Footer } from "../components/Home/Footer";
 
 export const Home = () => {
 	const { user } = useAuth();
@@ -14,32 +23,22 @@ export const Home = () => {
 		);
 	}
 	return (
-		<div className="prose h-full w-full">
-			<section className="mt-32 flex flex-col justify-center items-center text-center">
-				<h1 className="mb-0 text-5xl">
-					Budget with a <span className="text-primary underline decoration-solid">purpose</span> Count your dimes{" "}
-					<span className="text-primary underline decoration-solid">wisely</span>
-				</h1>
-				<p className="">
-					Dimewise is a financial tool that utilizes the "Envelope" system and "Zero-based" budgeting method to bring
-					purpose to each dollar you spend. Create categories with ease and assign a monthly budget broken down to each
-					category for your own clarity.
-				</p>
-				<div className="flex justify-center items-center gap-x-3 mt-5">
-					<button
-						type="button"
-						className="btn btn-primary"
-					>
-						Get Started
-					</button>
-					<button
-						type="button"
-						className="btn btn-primary btn-outline"
-					>
-						Find out more
-					</button>
-				</div>
-			</section>
-		</div>
+		<>
+			<Hero />
+			<div>
+				<LogoCollection />
+				<Features />
+				<Divider />
+				<Testimonials />
+				<Divider />
+				<Highlights />
+				<Divider />
+				<Pricing />
+				<Divider />
+				<FAQ />
+				<Divider />
+				<Footer />
+			</div>
+		</>
 	);
 };

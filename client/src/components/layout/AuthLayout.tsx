@@ -1,25 +1,97 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
+import MuiCard from "@mui/material/Card";
 import { Routes } from "../../Routes";
-import { LogoButton } from "../LogoButton";
+import { Box, Button, IconButton, Stack, styled } from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import { ToggleColorMode } from "../Home/ToggleMode";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../store";
+import { toggleMode } from "../../store/themeSlice";
+
+const Card = styled(MuiCard)(({ theme }) => ({
+	display: "flex",
+	flexDirection: "column",
+	alignSelf: "center",
+	width: "100%",
+	padding: theme.spacing(4),
+	gap: theme.spacing(2),
+	margin: "auto",
+	boxShadow: "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
+	[theme.breakpoints.up("sm")]: {
+		width: "450px",
+	},
+	...theme.applyStyles("dark", {
+		boxShadow: "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
+	}),
+}));
+
+const AuthContainer = styled(Stack)(({ theme }) => ({
+	height: "100%",
+	backgroundImage: "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
+	backgroundRepeat: "no-repeat",
+	...theme.applyStyles("dark", {
+		backgroundImage: "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
+	}),
+}));
 
 export const AuthLayout = () => {
-	const navigate = useNavigate();
+	const dispatch = useDispatch();
+	const mode = useSelector((state: RootState) => state.theme.mode);
 
-	const handleOnClickLogo = () => {
-		navigate(Routes.Root);
+	const handleToggleMode = () => {
+		dispatch(toggleMode());
 	};
 
 	return (
-		<main className="flex-1 w-full h-full flex justify-evenly items-start">
-			<div className="flex flex-col items-center justify-start w-full h-full">
-				<nav className="navbar w-full max-w-7xl h-navbar flex justify-between items-center px-5 flex-none fixed top-0 left-0">
-					<LogoButton onClick={handleOnClickLogo} />
-				</nav>
-				<div className="w-full flex-1 flex flex-col items-center justify-center">
-					<Outlet />
-				</div>
-			</div>
-			<div className="w-full h-full bg-primary hidden lg:flex" />
-		</main>
+		<>
+			<Box
+				sx={{
+					position: "absolute",
+					top: 0,
+					width: "100%",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "space-between",
+					p: 2,
+				}}
+			>
+				<Button
+					variant="text"
+					size="small"
+					aria-label="Back to templates"
+					startIcon={<ArrowBackRoundedIcon />}
+					component={Link}
+					to={Routes.Root}
+					sx={{ display: { xs: "none", sm: "flex" } }}
+				>
+					Back to home
+				</Button>
+				<IconButton
+					size="small"
+					aria-label="Back to templates"
+					component={Link}
+					to={Routes.Root}
+					sx={{ display: { xs: "auto", sm: "none" } }}
+				>
+					<ArrowBackRoundedIcon />
+				</IconButton>
+				<ToggleColorMode
+					mode={mode}
+					toggleColorMode={handleToggleMode}
+				/>
+			</Box>
+			<AuthContainer>
+				<Stack
+					sx={{
+						justifyContent: "center",
+						height: "100dvh",
+					}}
+				>
+					<Card variant="outlined">
+						<Outlet />
+					</Card>
+				</Stack>
+			</AuthContainer>
+		</>
 	);
 };
