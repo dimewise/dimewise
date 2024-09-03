@@ -12,6 +12,8 @@
 	"nav.private.settings": "Settings",
 	"nav.private.about": "About",
 	"nav.private.feedback": "Feedback",
+	"nav.private.dashboard": "Dashboard",
+	"nav.private.home": "Home",
 	"nav.private.log_out": "Logout",
 	"nav.private.add": "Add",
 	"auth.form.field_email.label": "Email",
