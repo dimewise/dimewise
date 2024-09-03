@@ -4,12 +4,15 @@ import { AuthLayout } from "./components/layout/AuthLayout";
 import { PrivateLayout } from "./components/layout/PrivateLayout/PrivateLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { RootLayout } from "./components/layout/RootLayout";
-import { History } from "./pages/History";
+import { Transactions } from "./pages/Transactions";
 import { Home } from "./pages/Home";
 import { Overview } from "./pages/Overview";
 import { Settings } from "./pages/Settings";
 import { SignUp } from "./pages/SignUp";
 import { SignIn } from "./pages/SignIn";
+import { Categories } from "./pages/Categories";
+import { About } from "./pages/About";
+import { Feedback } from "./pages/Feedback";
 
 export const Router = createBrowserRouter([
 	{
@@ -56,12 +59,24 @@ export const Router = createBrowserRouter([
 						element: <Overview />,
 					},
 					{
-						path: Routes.History,
-						element: <History />,
+						path: Routes.Transactions,
+						element: <Transactions />,
+					},
+					{
+						path: Routes.Categories,
+						element: <Categories />,
 					},
 					{
 						path: Routes.Settings,
 						element: <Settings />,
+					},
+					{
+						path: Routes.About,
+						element: <About />,
+					},
+					{
+						path: Routes.Feedback,
+						element: <Feedback />,
 					},
 				],
 			},

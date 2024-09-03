@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 
-export const History = () => {
+export const About = () => {
 	const { t } = useTranslation();
 	return (
 		<>
-			<h1>{t("nav.private.history")}</h1>
+			<h1>{t("nav.private.about")}</h1>
 		</>
 	);
 };
