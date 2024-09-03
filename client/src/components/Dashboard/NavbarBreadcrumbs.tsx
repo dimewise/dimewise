@@ -2,6 +2,9 @@ import { styled } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import Breadcrumbs, { breadcrumbsClasses } from "@mui/material/Breadcrumbs";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
+import { useTranslation } from "react-i18next";
+import { Routes } from "../../Routes";
+import { useLocation } from "react-router-dom";
 
 const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
 	margin: theme.spacing(1, 0),
@@ -14,18 +17,40 @@ const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
 	},
 }));
 
+const getBreadcrumbName = (path: string) => {
+	switch (path) {
+		case Routes.Overview:
+			return "nav.private.home";
+		case Routes.Transactions:
+			return "nav.private.transactions";
+		case Routes.Categories:
+			return "nav.private.categories";
+		case Routes.Settings:
+			return "nav.private.settings";
+		case Routes.About:
+			return "nav.private.about";
+		case Routes.Feedback:
+			return "nav.private.feedback";
+		default:
+			return "nav.private.home";
+	}
+};
+
 export const NavbarBreadcrumbs = () => {
+	const { t } = useTranslation();
+	const location = useLocation();
+
 	return (
 		<StyledBreadcrumbs
 			aria-label="breadcrumb"
 			separator={<NavigateNextRoundedIcon fontSize="small" />}
 		>
-			<Typography variant="body1">Dashboard</Typography>
+			<Typography variant="body1">{t("nav.private.dashboard")}</Typography>
 			<Typography
 				variant="body1"
 				sx={{ color: "text.primary", fontWeight: 600 }}
 			>
-				Home
+				{t(`${getBreadcrumbName(location.pathname)}`)}
 			</Typography>
 		</StyledBreadcrumbs>
 	);
