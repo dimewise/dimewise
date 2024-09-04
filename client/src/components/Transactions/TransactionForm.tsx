@@ -3,7 +3,7 @@ import { Box, Button, FormControl, FormLabel, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { TransactionFormSchema, type TransactionFormSchemaType } from "../../lib/schemas/TransactionSchema";
+import { TransactionSchema, type TransactionSchemaType } from "../../lib/schemas/TransactionSchema";
 
 export const TransactionForm = () => {
 	const { t } = useTranslation();
@@ -12,11 +12,11 @@ export const TransactionForm = () => {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<TransactionFormSchemaType>({
-		resolver: yupResolver(TransactionFormSchema),
+	} = useForm<TransactionSchemaType>({
+		resolver: yupResolver(TransactionSchema),
 	});
 
-	const onSubmit = (data: TransactionFormSchemaType) => {
+	const onSubmit = (data: TransactionSchemaType) => {
 		// submit the form based on the backend endpoint
 		console.log("submitted", data);
 	};
@@ -91,6 +91,7 @@ export const TransactionForm = () => {
 					type="submit"
 					fullWidth
 					variant="contained"
+					sx={{ mt: 3 }}
 				>
 					{t("common.button.create")}
 				</Button>

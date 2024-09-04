@@ -57,5 +57,8 @@
 	"transactions.form.field_description.label": "Description",
 	"transactions.form.field_amount.label": "Amount",
 	"transactions.form.field_date.label": "Date",
-	"transactions.form.title.create_transaction": "Create Transaction"
+	"transactions.form.title.create_transaction": "Create Transaction",
+	"categories.form.title.create_category": "Create Category",
+	"categories.form.field_name.label": "Name",
+	"categories.form.field_budget.label": "Budget"
 }
