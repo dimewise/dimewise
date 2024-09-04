@@ -43,4 +43,4 @@ tasks:
   run:
     desc: "Start the server"
     cmds:
-      - ./venv/bin/python3 -m uvicorn main:app --reload
+      - venv/bin/python3 -m uvicorn src.main:app --reload

@@ -23,7 +23,7 @@ venv = "venv"
 extraPaths=["./server"]
 
 [tool.ruff]
-extend-exclude = ["./venv"]  # Exclude the virtual environment directory
+extend-exclude = ["venv"]  # Exclude the virtual environment directory
 line-length = 120
 target-version = "py312"
 select = [
@@ -61,4 +61,5 @@ ignore = [
     "TD003",
     "FIX002", # too verbose descriptions of todos
     "RET504",
+    "PLC0414",
 ]
