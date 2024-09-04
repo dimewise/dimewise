@@ -8,4 +8,4 @@ export const CategoryFormSchema = yup.object({
 	budget: yup.number().required("Budget is required"),
 });
 
-export interface CategoryFormSchemaType extends yup.InferType<typeof CategoryFormSchema> {}
+export interface CategoryFormSchemaType extends yup.InferType<typeof CategoryFormSchema> { }

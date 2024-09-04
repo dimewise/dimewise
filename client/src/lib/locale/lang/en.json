@@ -4,6 +4,7 @@
 	"common.button.cancel": "Cancel",
 	"common.button.close": "Close",
 	"common.button.delete": "Delete",
+	"common.button.create": "Create",
 	"nav.public.sign_in": "Sign In",
 	"nav.public.get_started": "Get Started",
 	"nav.private.overview": "Overview",
@@ -51,5 +52,10 @@
 	"overview.categories": "Categories",
 	"overview.view_more": "View More",
 	"overview.transactions.table.title": "Title",
-	"overview.transactions.table.price": "Price"
+	"overview.transactions.table.price": "Price",
+	"transactions.form.field_title.label": "Title",
+	"transactions.form.field_description.label": "Description",
+	"transactions.form.field_amount.label": "Amount",
+	"transactions.form.field_date.label": "Date",
+	"transactions.form.title.create_transaction": "Create Transaction"
 }
