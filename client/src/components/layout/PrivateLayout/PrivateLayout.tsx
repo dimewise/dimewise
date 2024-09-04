@@ -37,10 +37,9 @@ export const PrivateLayout = () => {
 				<Stack
 					spacing={2}
 					sx={{
+						width: "100%",
+						height: "100dvh",
 						alignItems: "center",
-						mx: 3,
-						pb: 10,
-						mt: { xs: 8, md: 0 },
 					}}
 				>
 					<Header />
