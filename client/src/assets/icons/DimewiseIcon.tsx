@@ -11,10 +11,8 @@ export const DimewiseIcon = ({ mode }: Props) => {
 	return (
 		<SvgIcon sx={{ height: 21, width: 100, mr: 2 }}>
 			<svg
-				id="Layer_1"
-				data-name="Layer 1"
 				xmlns="http://www.w3.org/2000/svg"
-				viewBox="0 0 175.96 31.99"
+				viewBox="0 0 176 32"
 			>
 				<title>Dimewise Logo</title>
 				<g>
