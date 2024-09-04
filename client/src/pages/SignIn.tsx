@@ -1,28 +1,28 @@
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Alert, Link } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
-import { Link as RouterLink } from "react-router-dom";
 import Divider from "@mui/material/Divider";
+import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
-import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { GoogleIcon } from "../assets/icons/GoogleIcon";
-import { FacebookIcon } from "../assets/icons/FacebookIcon";
-import { ForgotPasswordDialog } from "../components/SignIn/ForgotPasswordDialog";
-import { yupResolver } from "@hookform/resolvers/yup";
+import type { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { Link as RouterLink } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Routes } from "../Routes";
+import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
+import { FacebookIcon } from "../assets/icons/FacebookIcon";
+import { GoogleIcon } from "../assets/icons/GoogleIcon";
+import { ForgotPasswordDialog } from "../components/SignIn/ForgotPasswordDialog";
 import { useAuth } from "../hooks/useAuth";
 import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
-import type { AuthError } from "@supabase/supabase-js";
-import { Alert, Link } from "@mui/material";
-import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
-import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 
 export const SignIn = () => {

@@ -1,20 +1,20 @@
 import { RouterProvider } from "react-router-dom";
 import { Router } from "./Router";
 import "./lib/locale/i18n";
-import { AuthProvider } from "./components/context/AuthContext";
-import { Provider, useDispatch, useSelector } from "react-redux";
-import { store, type RootState } from "./store";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { useEffect } from "react";
-import { initializeTheme } from "./store/themeSlice";
 import { CssBaseline } from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { useEffect } from "react";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { AuthProvider } from "./components/context/AuthContext";
+import { type RootState, store } from "./store";
+import { initializeTheme } from "./store/themeSlice";
 import "@fontsource/inter/300.css";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/700.css";
-import { getTheme } from "./theme/getTheme";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { getTheme } from "./theme/getTheme";
 
 const App = () => {
 	const dispatch = useDispatch();

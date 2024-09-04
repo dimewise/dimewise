@@ -1,23 +1,23 @@
-import { alpha } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import MenuIcon from "@mui/icons-material/Menu";
 import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
 import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
-import MenuItem from "@mui/material/MenuItem";
 import Drawer from "@mui/material/Drawer";
-import MenuIcon from "@mui/icons-material/Menu";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import Toolbar from "@mui/material/Toolbar";
+import { alpha } from "@mui/material/styles";
 import { useState } from "react";
-import { ToggleColorMode } from "../Home/ToggleMode";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../store";
 import { Link } from "react-router-dom";
 import { Routes } from "../../Routes";
-import { toggleMode } from "../../store/themeSlice";
 import { DimewiseIcon } from "../../assets/icons/DimewiseIcon";
+import type { RootState } from "../../store";
+import { toggleMode } from "../../store/themeSlice";
+import { ToggleColorMode } from "../Home/ToggleMode";
 
 export const NavBar = () => {
 	const dispatch = useDispatch();

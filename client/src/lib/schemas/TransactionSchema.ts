@@ -7,4 +7,4 @@ export const TransactionFormSchema = yup.object({
 	date: yup.date().required("Date is required"), // TODO: if we want to restrict user from setting future date
 });
 
-export interface TransactionFormSchemaType extends yup.InferType<typeof TransactionFormSchema> { }
+export interface TransactionFormSchemaType extends yup.InferType<typeof TransactionFormSchema> {}

@@ -1,3 +1,6 @@
+import FacebookIcon from "@mui/icons-material/GitHub";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import TwitterIcon from "@mui/icons-material/X";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -8,11 +11,8 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
-import FacebookIcon from "@mui/icons-material/GitHub";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import TwitterIcon from "@mui/icons-material/X";
-import { DimewiseIcon } from "../../assets/icons/DimewiseIcon";
 import { useSelector } from "react-redux";
+import { DimewiseIcon } from "../../assets/icons/DimewiseIcon";
 import type { RootState } from "../../store";
 
 function Copyright() {

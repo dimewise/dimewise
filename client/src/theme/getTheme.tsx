@@ -1,13 +1,13 @@
-import type { } from "@mui/material/themeCssVarsAugmentation";
 import type { PaletteMode, ThemeOptions } from "@mui/material";
-import { getDesignTokens } from "./themePrimitives";
+import type {} from "@mui/material/themeCssVarsAugmentation";
 import {
-	inputsCustomizations,
 	dataDisplayCustomizations,
 	feedbackCustomizations,
+	inputsCustomizations,
 	navigationCustomizations,
 	surfacesCustomizations,
 } from "./customizations";
+import { getDesignTokens } from "./themePrimitives";
 
 export const getTheme = (mode: PaletteMode): ThemeOptions => {
 	return {

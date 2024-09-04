@@ -1,12 +1,12 @@
-import { alpha, type Theme, type Components } from "@mui/material/styles";
-import { outlinedInputClasses } from "@mui/material/OutlinedInput";
-import { svgIconClasses } from "@mui/material/SvgIcon";
-import { toggleButtonGroupClasses } from "@mui/material/ToggleButtonGroup";
-import { toggleButtonClasses } from "@mui/material/ToggleButton";
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
-import { gray, brand } from "../themePrimitives";
+import { outlinedInputClasses } from "@mui/material/OutlinedInput";
+import { svgIconClasses } from "@mui/material/SvgIcon";
+import { toggleButtonClasses } from "@mui/material/ToggleButton";
+import { toggleButtonGroupClasses } from "@mui/material/ToggleButtonGroup";
+import { type Components, type Theme, alpha } from "@mui/material/styles";
+import { brand, gray } from "../themePrimitives";
 
 /* eslint-disable import/prefer-default-export */
 export const inputsCustomizations: Components<Theme> = {

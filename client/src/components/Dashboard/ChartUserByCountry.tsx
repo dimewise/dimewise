@@ -1,16 +1,16 @@
-import { PieChart } from "@mui/x-charts/PieChart";
-import { useDrawingArea } from "@mui/x-charts/hooks";
-import { styled } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import LinearProgress, { linearProgressClasses } from "@mui/material/LinearProgress";
-import { IndiaFlag } from "../../assets/icons/IndiaFlag";
-import { UsaFlag } from "../../assets/icons/UsaFlag";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { useDrawingArea } from "@mui/x-charts/hooks";
 import { BrazilFlag } from "../../assets/icons/BrazilFlag";
 import { GlobeFlag } from "../../assets/icons/GlobeFlag";
+import { IndiaFlag } from "../../assets/icons/IndiaFlag";
+import { UsaFlag } from "../../assets/icons/UsaFlag";
 
 const data = [
 	{ label: "India", value: 50000 },

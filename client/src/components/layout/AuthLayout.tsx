@@ -1,12 +1,12 @@
-import { Link, Outlet } from "react-router-dom";
-import MuiCard from "@mui/material/Card";
-import { Routes } from "../../Routes";
-import { Box, Button, IconButton, Stack, styled } from "@mui/material";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
-import { ToggleColorMode } from "../Home/ToggleMode";
+import { Box, Button, IconButton, Stack, styled } from "@mui/material";
+import MuiCard from "@mui/material/Card";
 import { useDispatch, useSelector } from "react-redux";
+import { Link, Outlet } from "react-router-dom";
+import { Routes } from "../../Routes";
 import type { RootState } from "../../store";
 import { toggleMode } from "../../store/themeSlice";
+import { ToggleColorMode } from "../Home/ToggleMode";
 
 const Card = styled(MuiCard)(({ theme }) => ({
 	display: "flex",

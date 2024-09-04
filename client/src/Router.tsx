@@ -4,15 +4,15 @@ import { AuthLayout } from "./components/layout/AuthLayout";
 import { PrivateLayout } from "./components/layout/PrivateLayout/PrivateLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { RootLayout } from "./components/layout/RootLayout";
-import { Transactions } from "./pages/Transactions";
+import { About } from "./pages/About";
+import { Categories } from "./pages/Categories";
+import { Feedback } from "./pages/Feedback";
 import { Home } from "./pages/Home";
 import { Overview } from "./pages/Overview";
 import { Settings } from "./pages/Settings";
-import { SignUp } from "./pages/SignUp";
 import { SignIn } from "./pages/SignIn";
-import { Categories } from "./pages/Categories";
-import { About } from "./pages/About";
-import { Feedback } from "./pages/Feedback";
+import { SignUp } from "./pages/SignUp";
+import { Transactions } from "./pages/Transactions";
 
 export const Router = createBrowserRouter([
 	{

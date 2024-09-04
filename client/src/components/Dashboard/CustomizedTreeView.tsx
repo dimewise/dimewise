@@ -1,18 +1,18 @@
-import clsx from "clsx";
-import { animated, useSpring } from "@react-spring/web";
-import type { TransitionProps } from "@mui/material/transitions";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
+import { useTheme } from "@mui/material/styles";
+import type { TransitionProps } from "@mui/material/transitions";
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
-import { unstable_useTreeItem2 as useTreeItem2, type UseTreeItem2Parameters } from "@mui/x-tree-view/useTreeItem2";
 import { TreeItem2Content, TreeItem2IconContainer, TreeItem2Label, TreeItem2Root } from "@mui/x-tree-view/TreeItem2";
 import { TreeItem2Icon } from "@mui/x-tree-view/TreeItem2Icon";
 import { TreeItem2Provider } from "@mui/x-tree-view/TreeItem2Provider";
 import type { TreeViewBaseItem } from "@mui/x-tree-view/models";
-import { useTheme } from "@mui/material/styles";
+import { type UseTreeItem2Parameters, unstable_useTreeItem2 as useTreeItem2 } from "@mui/x-tree-view/useTreeItem2";
+import { animated, useSpring } from "@react-spring/web";
+import clsx from "clsx";
 import { forwardRef } from "react";
 
 type Color = "blue" | "green";
@@ -135,7 +135,7 @@ const CustomLabel = ({ color, expandable, children, ...other }: CustomLabelProps
 
 interface CustomTreeItemProps
 	extends Omit<UseTreeItem2Parameters, "rootRef">,
-	Omit<React.HTMLAttributes<HTMLLIElement>, "onFocus"> { }
+		Omit<React.HTMLAttributes<HTMLLIElement>, "onFocus"> {}
 
 const CustomTreeItem = forwardRef(function CustomTreeItem(props: CustomTreeItemProps, ref: React.Ref<HTMLLIElement>) {
 	const { id, itemId, label, disabled, children, ...other } = props;

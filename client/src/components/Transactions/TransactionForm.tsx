@@ -1,9 +1,9 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, Checkbox, FormControl, FormControlLabel, FormLabel, TextField } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
-import { TransactionFormSchema, type TransactionFormSchemaType } from "../../lib/schemas/TransactionSchema";
-import { useTranslation } from "react-i18next";
+import { Box, Button, FormControl, FormLabel, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { TransactionFormSchema, type TransactionFormSchemaType } from "../../lib/schemas/TransactionSchema";
 
 export const TransactionForm = () => {
 	const { t } = useTranslation();
