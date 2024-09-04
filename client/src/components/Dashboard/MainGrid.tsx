@@ -1,7 +1,4 @@
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid2";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import { alpha, Box, Grid2 as Grid, Stack, Typography } from "@mui/material";
 import { ChartUserByCountry } from "./ChartUserByCountry";
 import { Copyright } from "./Copyright";
 import { CustomizedDataGrid } from "./CustomizedDataGrid";
@@ -46,15 +43,26 @@ const data: StatCardProps[] = [
 
 export const MainGrid = () => {
 	return (
-		<Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-			{/* cards */}
-			<Typography
-				component="h2"
-				variant="h6"
-				sx={{ mb: 2 }}
+		<Box sx={{ px: 3, width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+			<Stack
+				sx={(theme) => ({
+					alignItems: "center",
+					justifyContent: "space-between",
+					position: "sticky",
+					top: 0,
+					backgroundColor: alpha(theme.palette.background.default, 1),
+					pb: 2,
+				})}
+				direction="row"
 			>
-				Overview
-			</Typography>
+				<Typography
+					component="h2"
+					variant="h6"
+				>
+					Overview
+				</Typography>
+			</Stack>
+
 			<Grid
 				container
 				spacing={2}

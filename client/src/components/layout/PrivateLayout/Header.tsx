@@ -27,6 +27,7 @@ export const Header = () => {
 				justifyContent: "space-between",
 				maxWidth: { sm: "100%", md: "1700px" },
 				pt: 1.5,
+				px: 3,
 			}}
 			spacing={2}
 		>
