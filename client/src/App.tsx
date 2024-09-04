@@ -13,6 +13,8 @@ import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/700.css";
 import { getTheme } from "./theme/getTheme";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 const App = () => {
 	const dispatch = useDispatch();
@@ -25,12 +27,14 @@ const App = () => {
 	const theme = createTheme(getTheme(mode));
 
 	return (
-		<AuthProvider>
-			<ThemeProvider theme={theme}>
-				<CssBaseline />
-				<RouterProvider router={Router} />
-			</ThemeProvider>
-		</AuthProvider>
+		<LocalizationProvider dateAdapter={AdapterLuxon}>
+			<AuthProvider>
+				<ThemeProvider theme={theme}>
+					<CssBaseline />
+					<RouterProvider router={Router} />
+				</ThemeProvider>
+			</AuthProvider>
+		</LocalizationProvider>
 	);
 };
 
