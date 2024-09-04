@@ -1,9 +1,9 @@
+import { Box, Stack, alpha } from "@mui/material";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Routes } from "../../../Routes";
 import { useAuth } from "../../../hooks/useAuth";
-import { alpha, Box, Stack } from "@mui/material";
-import { DashboardSideMenu } from "./DashboardSideMenu";
 import { DashboardNavbar } from "./DashboardNavbar";
+import { DashboardSideMenu } from "./DashboardSideMenu";
 import { Header } from "./Header";
 
 export const PrivateLayout = () => {

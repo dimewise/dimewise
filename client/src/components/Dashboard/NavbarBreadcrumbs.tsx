@@ -1,10 +1,10 @@
-import { styled } from "@mui/material/styles";
-import Typography from "@mui/material/Typography";
-import Breadcrumbs, { breadcrumbsClasses } from "@mui/material/Breadcrumbs";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
+import Breadcrumbs, { breadcrumbsClasses } from "@mui/material/Breadcrumbs";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
-import { Routes } from "../../Routes";
 import { useLocation } from "react-router-dom";
+import { Routes } from "../../Routes";
 
 const StyledBreadcrumbs = styled(Breadcrumbs)(({ theme }) => ({
 	margin: theme.spacing(1, 0),

@@ -1,7 +1,7 @@
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
-import type { GridCellParams, GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { SparkLineChart } from "@mui/x-charts/SparkLineChart";
+import type { GridCellParams, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 
 type SparkLineData = number[];
 

@@ -1,28 +1,28 @@
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Alert } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
 import Divider from "@mui/material/Divider";
+import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormLabel from "@mui/material/FormLabel";
-import FormControl from "@mui/material/FormControl";
 import Link from "@mui/material/Link";
-import { Link as RouterLink } from "react-router-dom";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { GoogleIcon } from "../assets/icons/GoogleIcon";
-import { FacebookIcon } from "../assets/icons/FacebookIcon";
-import { Routes } from "../Routes";
-import { yupResolver } from "@hookform/resolvers/yup";
 import type { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { Link as RouterLink } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Routes } from "../Routes";
+import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
+import { FacebookIcon } from "../assets/icons/FacebookIcon";
+import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { useAuth } from "../hooks/useAuth";
 import { SignUpSchema, type SignUpSchemaType } from "../lib/schemas/SignUpSchema";
-import { Alert } from "@mui/material";
-import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
-import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 
 export const SignUp = () => {

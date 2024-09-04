@@ -1,11 +1,11 @@
-import Grid from "@mui/material/Grid2";
 import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { Copyright } from "./Copyright";
 import { ChartUserByCountry } from "./ChartUserByCountry";
-import { CustomizedTreeView } from "./CustomizedTreeView";
+import { Copyright } from "./Copyright";
 import { CustomizedDataGrid } from "./CustomizedDataGrid";
+import { CustomizedTreeView } from "./CustomizedTreeView";
 import { HighlightedCard } from "./HighlightedCard";
 import { PageViewsBarChart } from "./PageViewsBarChart";
 import { SessionsChart } from "./SessionsChart";

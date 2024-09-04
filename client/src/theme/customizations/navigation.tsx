@@ -1,13 +1,13 @@
-import * as React from "react";
-import { type Theme, alpha, type Components } from "@mui/material/styles";
-import type { SvgIconProps } from "@mui/material/SvgIcon";
+import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
 import { buttonBaseClasses } from "@mui/material/ButtonBase";
 import { dividerClasses } from "@mui/material/Divider";
 import { menuItemClasses } from "@mui/material/MenuItem";
 import { selectClasses } from "@mui/material/Select";
+import type { SvgIconProps } from "@mui/material/SvgIcon";
 import { tabClasses } from "@mui/material/Tab";
-import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
-import { gray, brand } from "../themePrimitives";
+import { type Components, type Theme, alpha } from "@mui/material/styles";
+import * as React from "react";
+import { brand, gray } from "../themePrimitives";
 
 /* eslint-disable import/prefer-default-export */
 export const navigationCustomizations: Components<Theme> = {

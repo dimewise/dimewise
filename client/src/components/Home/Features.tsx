@@ -106,9 +106,9 @@ export const MobileLayout = ({ selectedItemIndex, handleItemClick, selectedFeatu
 					style={
 						items[selectedItemIndex]
 							? ({
-								"--items-imageLight": items[selectedItemIndex].imageLight,
-								"--items-imageDark": items[selectedItemIndex].imageDark,
-							} as any)
+									"--items-imageLight": items[selectedItemIndex].imageLight,
+									"--items-imageDark": items[selectedItemIndex].imageDark,
+								} as any)
 							: {}
 					}
 				/>
@@ -258,9 +258,9 @@ export const Features = () => {
 							style={
 								items[selectedItemIndex]
 									? ({
-										"--items-imageLight": items[selectedItemIndex].imageLight,
-										"--items-imageDark": items[selectedItemIndex].imageDark,
-									} as any)
+											"--items-imageLight": items[selectedItemIndex].imageLight,
+											"--items-imageDark": items[selectedItemIndex].imageDark,
+										} as any)
 									: {}
 							}
 						/>

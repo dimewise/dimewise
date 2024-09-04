@@ -1,7 +1,7 @@
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import FormControl from "@mui/material/FormControl";
 import InputAdornment from "@mui/material/InputAdornment";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 
 export const Search = () => {
 	return (

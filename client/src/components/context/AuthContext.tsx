@@ -20,7 +20,7 @@ export const AuthContext = createContext<AuthContextType>({
 	user: null,
 	session: null,
 	login: async () => null,
-	logout: () => { },
+	logout: () => {},
 	register: async () => null,
 });
 
