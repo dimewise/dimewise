@@ -1,6 +1,6 @@
 from uuid import UUID, uuid4
 
-from sqlmodel import Field, SQLModel, delete, func, select
+from sqlmodel import Field, SQLModel, delete, func, select, update
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.expenses import Expense
@@ -30,6 +30,10 @@ class CategoryPost(CategoryWithoutIds):
     pass
 
 
+class CategoryPatch(CategoryWithoutIds):
+    pass
+
+
 # -- Service
 
 
@@ -53,5 +57,13 @@ class Category(CategoryBase, table=True):
     @classmethod
     async def delete(cls, db: AsyncSession, user_id: UUID, category_id: UUID):
         statement = delete(Category).where(Category.user_id == user_id, Category.id == category_id)
+        await db.exec(statement)
+        await db.commit()
+
+    @classmethod
+    async def update(cls, db: AsyncSession, user_id: UUID, category_id: UUID, category: CategoryPatch):
+        statement = (
+            update(Category).where(Category.user_id == user_id, Category.id == category_id).values(**category.__dict__)
+        )
         await db.exec(statement)
         await db.commit()

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, FastAPI, Request
 
-from src.categories import Category, CategoryFull, CategoryPost
+from src.categories import Category, CategoryFull, CategoryPatch, CategoryPost
 from src.database import get_db_session
 from src.expenses import Expense, ExpensePublic
 from src.settings import settings
@@ -33,6 +33,11 @@ async def create_category(req: Request, category: CategoryPost):
 @prt.delete("/category/{category_id}")
 async def delete_category(req: Request, category_id: UUID):
     await Category.delete(req.state.db, req.state.user_id, category_id)
+
+
+@prt.patch("/category/{category_id}")
+async def update_category(req: Request, category_id: UUID, category: CategoryPatch):
+    await Category.update(req.state.db, req.state.user_id, category_id, category)
 
 
 @prt.get("/expenses/recent", response_model=list[ExpensePublic])
