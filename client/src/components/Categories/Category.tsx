@@ -9,9 +9,10 @@ import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
 interface Props {
   category: CategoryFull
   handleSubmit: () => void;
+  handleSetCategory: () => void;
 }
 
-export const Category = ({ children, category, handleSubmit }: PropsWithChildren<Props>) => {
+export const Category = ({ children, category, handleSubmit, handleSetCategory }: PropsWithChildren<Props>) => {
   const { t } = useTranslation();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const [deleteCategory] = useDeleteCategoryApiV1CategoryCategoryIdDeleteMutation();
@@ -28,6 +29,11 @@ export const Category = ({ children, category, handleSubmit }: PropsWithChildren
   const handleClose = () => {
     setAnchor(null);
   };
+
+  const handleEdit = () => {
+    handleSetCategory();
+    handleClose();
+  }
 
   const handleDelete = () => {
     deleteCategory({ categoryId: category.id });
@@ -47,7 +53,7 @@ export const Category = ({ children, category, handleSubmit }: PropsWithChildren
           <MoreVertRounded />
         </IconButton>
         <Menu anchorEl={anchor} open={open} onClose={handleClose}>
-          <MenuItem onClick={() => alert('TODO: Edit')}>{t('common.button.edit')}</MenuItem>
+          <MenuItem onClick={handleEdit}>{t('common.button.edit')}</MenuItem>
           <MenuItem onClick={handleDelete}>{t('common.button.delete')}</MenuItem>
         </Menu>
       </Stack>

@@ -3,27 +3,40 @@ import { Box, Button, FormControl, FormLabel, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { CategorySchema, type CategorySchemaType } from "../../lib/schemas/CategorySchema";
-import { useCreateCategoryApiV1CategoryPostMutation } from "../../services/api/v1";
+import { useCreateCategoryApiV1CategoryPostMutation, useUpdateCategoryApiV1CategoryCategoryIdPatchMutation, type CategoryPatch } from "../../services/api/v1";
+import type { CreateUpdateCategory } from "../../pages/Categories";
 
 interface Props {
+  category: CreateUpdateCategory | null;
   handleClose: () => void
 }
 
-export const CategoryForm = ({ handleClose }: Props) => {
+export const CategoryForm = ({ category, handleClose }: Props) => {
   const { t } = useTranslation();
   const [createCategory] = useCreateCategoryApiV1CategoryPostMutation()
+  const [updateCategory] = useUpdateCategoryApiV1CategoryCategoryIdPatchMutation()
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<CategorySchemaType>({
+    defaultValues: {
+      ...category,
+    },
     resolver: yupResolver(CategorySchema),
   });
 
   const onSubmit = (data: CategorySchemaType) => {
-    createCategory({ categoryPost: data }).then(() => {
-      handleClose()
-    })
+    if (category?.id) {
+      updateCategory({ categoryId: category.id, categoryPatch: data }).then(() => {
+        handleClose()
+      })
+    } else {
+      createCategory({ categoryPost: data }).then(() => {
+        handleClose()
+      })
+    }
   };
 
   return (
@@ -66,7 +79,7 @@ export const CategoryForm = ({ handleClose }: Props) => {
           variant="contained"
           sx={{ mt: 3 }}
         >
-          {t("common.button.create")}
+          {t("common.button.confirm")}
         </Button>
       </Box>
     </>

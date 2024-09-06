@@ -1,24 +1,34 @@
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Stack, Typography, alpha } from "@mui/material";
 import { useState } from "react";
-import { useGetCategoriesApiV1CategoriesGetQuery } from "../services/api/v1";
+import { useGetCategoriesApiV1CategoriesGetQuery, type CategoryFull, type CategoryPost } from "../services/api/v1";
 import { Category } from "../components/Categories/Category";
 import { useTranslation } from "react-i18next";
 import { CategoryFormPopup } from "../components/Categories/CategoryFormPopup";
 
+export type CreateUpdateCategory = CategoryPost & { id: string }
+
 export const Categories = () => {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
   const { data: categories, refetch } = useGetCategoriesApiV1CategoriesGetQuery()
   const total = categories?.reduce((acc, { budget }) => acc + budget, 0)
+  const [category, setCategory] = useState<CreateUpdateCategory | null>(null)
 
   const handleOnClickCreate = () => {
-    setOpen(true);
+    setCategory({ id: "", name: "", budget: 0 });
   };
 
   const handleSubmit = () => {
-    setOpen(false);
+    setCategory(null);
     refetch();
+  }
+
+  const handleOpen = (open: boolean) => {
+    setCategory(open ? { id: "", name: "", budget: 0 } : null);
+  }
+
+  const handleSetCategory = (category: CategoryFull) => () => {
+    setCategory(category)
   }
 
   return (
@@ -57,12 +67,13 @@ export const Categories = () => {
           <Box>{total}</Box>
         </Stack>
       </Stack>
-      <Stack sx={{ overflowY: "auto", pb: 3 }}>
-        {categories?.map(c => <Category key={c.id} category={c} handleSubmit={handleSubmit} />)}
+      <Stack sx={{ overflohandleSetCategory: "auto", pb: 3 }}>
+        {categories?.map(c => <Category key={c.id} category={c} handleSubmit={handleSubmit} handleSetCategory={handleSetCategory(c)} />)}
       </Stack>
       <CategoryFormPopup
-        open={open}
-        setOpen={setOpen}
+        category={category}
+        open={category !== null}
+        setOpen={handleOpen}
         handleClose={handleSubmit}
       />
     </Box >

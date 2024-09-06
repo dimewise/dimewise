@@ -29,6 +29,16 @@ const injectedRtkApi = api.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    updateCategoryApiV1CategoryCategoryIdPatch: build.mutation<
+      UpdateCategoryApiV1CategoryCategoryIdPatchApiResponse,
+      UpdateCategoryApiV1CategoryCategoryIdPatchApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/category/${queryArg.categoryId}`,
+        method: "PATCH",
+        body: queryArg.categoryPatch,
+      }),
+    }),
     getRecentExpensesApiV1ExpensesRecentGet: build.query<
       GetRecentExpensesApiV1ExpensesRecentGetApiResponse,
       GetRecentExpensesApiV1ExpensesRecentGetApiArg
@@ -54,6 +64,12 @@ export type DeleteCategoryApiV1CategoryCategoryIdDeleteApiResponse =
 export type DeleteCategoryApiV1CategoryCategoryIdDeleteApiArg = {
   categoryId: string;
 };
+export type UpdateCategoryApiV1CategoryCategoryIdPatchApiResponse =
+  /** status 200 Successful Response */ any;
+export type UpdateCategoryApiV1CategoryCategoryIdPatchApiArg = {
+  categoryId: string;
+  categoryPatch: CategoryPatch;
+};
 export type GetRecentExpensesApiV1ExpensesRecentGetApiResponse =
   /** status 200 Successful Response */ Expense[];
 export type GetRecentExpensesApiV1ExpensesRecentGetApiArg = void;
@@ -76,6 +92,10 @@ export type CategoryPost = {
   name: string;
   budget: number;
 };
+export type CategoryPatch = {
+  name: string;
+  budget: number;
+};
 export type Expense = {
   id?: string;
   title: string;
@@ -92,6 +112,7 @@ export const {
   useLazyGetCategoriesApiV1CategoriesGetQuery,
   useCreateCategoryApiV1CategoryPostMutation,
   useDeleteCategoryApiV1CategoryCategoryIdDeleteMutation,
+  useUpdateCategoryApiV1CategoryCategoryIdPatchMutation,
   useGetRecentExpensesApiV1ExpensesRecentGetQuery,
   useLazyGetRecentExpensesApiV1ExpensesRecentGetQuery,
 } = injectedRtkApi;

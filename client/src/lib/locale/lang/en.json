@@ -4,6 +4,7 @@
   "categories.total": "Total",
   "common.button.cancel": "Cancel",
   "common.button.close": "Close",
+  "common.button.confirm": "Confirm",
   "common.button.create": "Create",
   "common.button.delete": "Delete",
   "common.button.edit": "Edit",
@@ -61,6 +62,7 @@
   "transactions.form.field_date.label": "Date",
   "transactions.form.title.create_transaction": "Create Transaction",
   "categories.form.title.create_category": "Create Category",
+  "categories.form.title.edit_category": "Edit Category",
   "categories.form.field_name.label": "Name",
   "categories.form.field_budget.label": "Budget"
 }
