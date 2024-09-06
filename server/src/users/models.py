@@ -1,6 +1,7 @@
 from uuid import UUID, uuid4
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 class UserBase(SQLModel):
@@ -8,4 +9,8 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    pass
+    @classmethod
+    async def get(cls, db: AsyncSession, user_id: UUID):
+        statement = select(User).where(User.id == user_id)
+        user = await db.exec(statement)
+        return user.first()
