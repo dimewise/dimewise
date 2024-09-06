@@ -1,9 +1,12 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, FastAPI, Request
 
-from src.categories import Category, CategoryFull
+from src.categories import Category, CategoryFull, CategoryPost
 from src.database import get_db_session
 from src.expenses import Expense, ExpensePublic
 from src.settings import settings
+from src.users import User
 from src.utils.jwt import JWTBearer
 
 app = FastAPI()
@@ -17,14 +20,24 @@ def root():
 
 
 @prt.get("/categories", response_model=list[CategoryFull])
-async def get_categories(request: Request):
-    categories = await Category.get_all(request.state.db, request.state.user_id)
-    return [CategoryFull(spent=spent or 0, **category.__dict__) for (category, spent) in categories]
+async def get_categories(req: Request):
+    categories = await Category.get_all(req.state.db, req.state.user_id)
+    return categories
+
+
+@prt.post("/category")
+async def create_category(req: Request, category: CategoryPost):
+    await Category.create(req.state.db, req.state.user_id, category)
+
+
+@prt.delete("/category/{category_id}")
+async def delete_category(req: Request, category_id: UUID):
+    await Category.delete(req.state.db, req.state.user_id, category_id)
 
 
 @prt.get("/expenses/recent", response_model=list[ExpensePublic])
-async def get_recent_expenses(request: Request):
-    expenses = await Expense.get_all(request.state.db, request.state.user_id)
+async def get_recent_expenses(req: Request):
+    expenses = await Expense.get_all(req.state.db, req.state.user_id)
     return expenses
 
 
