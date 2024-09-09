@@ -49,6 +49,7 @@ export const SignUp = () => {
 			if (error) {
 				setsignUpError(error);
 			} else {
+				// TODO: add external call to API to register to our own user table here, only if sign up is successful
 				navigate(from, { replace: true });
 			}
 		});
