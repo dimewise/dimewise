@@ -8,9 +8,9 @@ import MuiToolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
+import { DimewiseLogo } from "../../../assets/icons/DimewiseLogo";
 import { MenuButton } from "../../MenuButton";
 import { SideMenuMobile } from "./SideMenuMobile";
-import { DimewiseLogo } from "../../../assets/icons/DimewiseLogo";
 
 const Toolbar = styled(MuiToolbar)({
 	width: "100%",

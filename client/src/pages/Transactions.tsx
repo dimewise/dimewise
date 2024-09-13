@@ -1,9 +1,9 @@
 import { Box, List } from "@mui/material";
+import { DateTime } from "luxon";
 import { useState } from "react";
 import { TransactionFormPopup } from "../components/Transactions/TransactionFormPopup";
-import { TransactionNavbar } from "../components/Transactions/TransactionNavbar";
 import { TransactionListItem } from "../components/Transactions/TransactionListItem";
-import { DateTime } from "luxon";
+import { TransactionNavbar } from "../components/Transactions/TransactionNavbar";
 
 // INFO: Ideally the API should return TransactionType
 // TODO: Remove this once API is in place for getting transactions
@@ -89,7 +89,15 @@ export const Transactions = () => {
 	};
 
 	return (
-		<Box sx={{ px: 3, width: "100%", maxWidth: { sm: "100%", md: "1700px" }, overflowY: "auto", pt: { xs: 8, md: 0 } }}>
+		<Box
+			sx={{
+				px: 3,
+				width: "100%",
+				maxWidth: { sm: "100%", md: "1700px" },
+				overflowY: "auto",
+				pt: { xs: 8, md: 0 },
+			}}
+		>
 			<TransactionNavbar
 				selectedMonth={selectedMonth}
 				setSelectedMonth={setSelectedMonth}
