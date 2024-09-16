@@ -1,4 +1,4 @@
-import { alpha, Box, Grid2 as Grid, Stack, Typography } from "@mui/material";
+import { Box, Grid2 as Grid, Stack, Typography, alpha } from "@mui/material";
 import { ChartUserByCountry } from "./ChartUserByCountry";
 import { Copyright } from "./Copyright";
 import { CustomizedDataGrid } from "./CustomizedDataGrid";

@@ -30,8 +30,7 @@ const items = [
 	{
 		icon: <AutoFixHighRoundedIcon />,
 		title: "Innovative functionality",
-		description:
-			"Stay ahead with features that set new standards, addressing your evolving needs better than the rest.",
+		description: "Stay ahead with features that set new standards, addressing your evolving needs better than the rest.",
 	},
 	{
 		icon: <SupportAgentRoundedIcon />,
@@ -77,8 +76,8 @@ export const Highlights = () => {
 					variant="body1"
 					sx={{ color: "text.secondary" }}
 				>
-					Explore why our product stands out: adaptability, durability, user-friendly design, and innovation. Enjoy
-					reliable customer support and precision in every detail.
+					Explore why our product stands out: adaptability, durability, user-friendly design, and innovation. Enjoy reliable
+					customer support and precision in every detail.
 				</Typography>
 			</Box>
 			<Grid

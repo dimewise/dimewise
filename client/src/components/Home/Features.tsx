@@ -158,8 +158,8 @@ export const Features = () => {
 					variant="body1"
 					sx={{ color: "text.secondary", mb: { xs: 2, sm: 4 } }}
 				>
-					Provide a brief overview of the key features of the product. For example, you could list the number of
-					features, their types or benefits, and add-ons.
+					Provide a brief overview of the key features of the product. For example, you could list the number of features,
+					their types or benefits, and add-ons.
 				</Typography>
 			</Box>
 			<Box

@@ -141,8 +141,8 @@ export const Testimonials = () => {
 					variant="body1"
 					sx={{ color: "text.secondary" }}
 				>
-					See what our customers love about our products. Discover how we excel in efficiency, durability, and
-					satisfaction. Join us for quality, innovation, and reliable support.
+					See what our customers love about our products. Discover how we excel in efficiency, durability, and satisfaction.
+					Join us for quality, innovation, and reliable support.
 				</Typography>
 			</Box>
 			<Grid

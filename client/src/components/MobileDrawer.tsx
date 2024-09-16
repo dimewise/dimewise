@@ -27,7 +27,7 @@ export const MobileDrawer = ({ title, open, setOpen, children }: PropsWithChildr
 				},
 			}}
 		>
-			<DialogTitle>{title}</DialogTitle>
+			<DialogTitle sx={{ mt: 1 }}>{title}</DialogTitle>
 			<DialogContent>{children}</DialogContent>
 		</Drawer>
 	);

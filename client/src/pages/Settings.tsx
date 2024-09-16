@@ -1,5 +1,5 @@
-import { useTranslation } from "react-i18next";
 import { Box, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export const Settings = () => {
   const { t } = useTranslation();
