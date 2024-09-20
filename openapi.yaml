@@ -29,6 +29,21 @@ components:
       - spent
       title: CategoryFull
       type: object
+    UserCreate:
+      properties:
+        default_currency:
+          type: string
+        email:
+          type: string
+        id:
+          format: uuid
+          type: string
+      required:
+      - default_currency
+      - email
+      - id
+      title: UserCreate
+      type: object
   securitySchemes:
     BearerToken:
       bearerFormat: JWT
@@ -201,6 +216,46 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: UpateCategory
+  /api/v1/user/register:
+    post:
+      deprecated: false
+      operationId: ApiV1UserRegisterCreateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+        required: true
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Validation Exception
+                examples:
+                - detail: Bad Request
+                  extra: {}
+                  status_code: 400
+                properties:
+                  detail:
+                    type: string
+                  extra:
+                    additionalProperties: {}
+                    type:
+                    - 'null'
+                    - object
+                    - array
+                  status_code:
+                    type: integer
+                required:
+                - detail
+                - status_code
+                type: object
+          description: Bad request syntax or unsupported method
+      summary: CreateUser
 security:
 - BearerToken: []
 servers:

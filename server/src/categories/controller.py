@@ -15,7 +15,7 @@ from src.models import Category
 from src.utils.jwt import AuthUser
 
 
-class CategoryRepository(SQLAlchemyAsyncRepository[Category]):
+class CategoryRepository(SQLAlchemyAsyncRepository[Category]):  # pyright: ignore reportInvalidTypeArguments
     """Category repository"""
 
     model_type = Category

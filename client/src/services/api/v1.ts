@@ -39,6 +39,16 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.categoryCreate,
       }),
     }),
+    apiV1UserRegisterCreateUser: build.mutation<
+      ApiV1UserRegisterCreateUserApiResponse,
+      ApiV1UserRegisterCreateUserApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/user/register`,
+        method: "POST",
+        body: queryArg.userCreate,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -64,6 +74,11 @@ export type ApiV1CategoryCategoryIdUpateCategoryApiArg = {
   categoryId: string;
   categoryCreate: CategoryCreate;
 };
+export type ApiV1UserRegisterCreateUserApiResponse =
+  /** status 201 Document created, URL follows */ void;
+export type ApiV1UserRegisterCreateUserApiArg = {
+  userCreate: UserCreate;
+};
 export type CategoryFull = {
   budget: number;
   id: string;
@@ -74,6 +89,11 @@ export type CategoryCreate = {
   budget: number;
   name: string;
 };
+export type UserCreate = {
+  default_currency: string;
+  email: string;
+  id: string;
+};
 export const {
   useApiV1RootQuery,
   useLazyApiV1RootQuery,
@@ -82,4 +102,5 @@ export const {
   useApiV1CategoryCreateCategoryMutation,
   useApiV1CategoryCategoryIdDeleteCategoryMutation,
   useApiV1CategoryCategoryIdUpateCategoryMutation,
+  useApiV1UserRegisterCreateUserMutation,
 } = injectedRtkApi;

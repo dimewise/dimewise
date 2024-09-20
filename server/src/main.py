@@ -6,6 +6,7 @@ from litestar.openapi.plugins import YamlRenderPlugin
 from src.categories.controller import CategoryController
 from src.database import db_config, provide_db
 from src.settings import settings
+from src.users.controller import UserController
 from src.utils.jwt import jwt_auth
 
 
@@ -23,7 +24,7 @@ async def root() -> str:
 app = Litestar(
     debug=True,
     path="/api/v1",
-    route_handlers=[root, CategoryController],
+    route_handlers=[root, CategoryController, UserController],
     on_app_init=[jwt_auth.on_app_init],
     dependencies={"db": provide_db},
     plugins=[SQLAlchemyPlugin(db_config)],
