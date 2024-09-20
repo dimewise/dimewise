@@ -62,4 +62,6 @@ ignore = [
     "FIX002", # too verbose descriptions of todos
     "RET504",
     "PLC0414",
+    "RUF012",
+    "TRY002",
 ]

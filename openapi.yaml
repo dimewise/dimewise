@@ -1,0 +1,207 @@
+components:
+  schemas:
+    CategoryCreate:
+      properties:
+        budget:
+          type: integer
+        name:
+          type: string
+      required:
+      - budget
+      - name
+      title: CategoryCreate
+      type: object
+    CategoryFull:
+      properties:
+        budget:
+          type: integer
+        id:
+          format: uuid
+          type: string
+        name:
+          type: string
+        spent:
+          type: integer
+      required:
+      - budget
+      - id
+      - name
+      - spent
+      title: CategoryFull
+      type: object
+  securitySchemes:
+    BearerToken:
+      bearerFormat: JWT
+      description: JWT api-key authentication and authorization.
+      name: Authorization
+      scheme: Bearer
+      type: http
+info:
+  title: Dimewise
+  version: 0.0.1
+openapi: 3.1.0
+paths:
+  /api/v1:
+    get:
+      deprecated: false
+      operationId: ApiV1Root
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Request fulfilled, document follows
+          headers: {}
+      summary: Root
+  /api/v1/category:
+    get:
+      deprecated: false
+      operationId: ApiV1CategoryGetCategories
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/CategoryFull'
+                type: array
+          description: Request fulfilled, document follows
+          headers: {}
+      summary: GetCategories
+    post:
+      deprecated: false
+      operationId: ApiV1CategoryCreateCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+        required: true
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Validation Exception
+                examples:
+                - detail: Bad Request
+                  extra: {}
+                  status_code: 400
+                properties:
+                  detail:
+                    type: string
+                  extra:
+                    additionalProperties: {}
+                    type:
+                    - 'null'
+                    - object
+                    - array
+                  status_code:
+                    type: integer
+                required:
+                - detail
+                - status_code
+                type: object
+          description: Bad request syntax or unsupported method
+      summary: CreateCategory
+  /api/v1/category/{category_id}:
+    delete:
+      deprecated: false
+      operationId: ApiV1CategoryCategoryIdDeleteCategory
+      parameters:
+      - allowEmptyValue: false
+        allowReserved: false
+        deprecated: false
+        in: path
+        name: category_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        '204':
+          description: Request fulfilled, nothing follows
+          headers: {}
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Validation Exception
+                examples:
+                - detail: Bad Request
+                  extra: {}
+                  status_code: 400
+                properties:
+                  detail:
+                    type: string
+                  extra:
+                    additionalProperties: {}
+                    type:
+                    - 'null'
+                    - object
+                    - array
+                  status_code:
+                    type: integer
+                required:
+                - detail
+                - status_code
+                type: object
+          description: Bad request syntax or unsupported method
+      summary: DeleteCategory
+    patch:
+      deprecated: false
+      operationId: ApiV1CategoryCategoryIdUpateCategory
+      parameters:
+      - allowEmptyValue: false
+        allowReserved: false
+        deprecated: false
+        in: path
+        name: category_id
+        required: true
+        schema:
+          format: uuid
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+        required: true
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Validation Exception
+                examples:
+                - detail: Bad Request
+                  extra: {}
+                  status_code: 400
+                properties:
+                  detail:
+                    type: string
+                  extra:
+                    additionalProperties: {}
+                    type:
+                    - 'null'
+                    - object
+                    - array
+                  status_code:
+                    type: integer
+                required:
+                - detail
+                - status_code
+                type: object
+          description: Bad request syntax or unsupported method
+      summary: UpateCategory
+security:
+- BearerToken: []
+servers:
+- url: /

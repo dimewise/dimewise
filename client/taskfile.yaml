@@ -10,6 +10,7 @@ tasks:
     cmds:
       - task init-env
       - task init-packages
+      - task openapi
   init-env:
     silent: true
     desc: "Initialize .env"
@@ -21,10 +22,10 @@ tasks:
         else 
           echo "➜ Client - .env already exists. Skipping..."
         fi
-  init-packages: 
+  init-packages:
     silent: true
     desc: "Installs packages using bun, ensure bun is installed in your local environment"
-    cmds: 
+    cmds:
       - echo "➜ Client - Installing packages..."
       - |
         if ! [ -x "$(command -v bun)" ]; then
@@ -34,6 +35,11 @@ tasks:
       - echo
       - bun install
       - echo
+  openapi:
+    silent: true
+    desc: "Generates code from openapi spec"
+    cmds:
+      - bunx @rtk-query/codegen-openapi ./src/services/api/config.cjs
   run:
     silent: true
     desc: "Start the client"

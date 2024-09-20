@@ -3,7 +3,7 @@ import { Box, Button, FormControl, FormLabel, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { CategorySchema, type CategorySchemaType } from "../../lib/schemas/CategorySchema";
-import { useCreateCategoryApiV1CategoryPostMutation, useUpdateCategoryApiV1CategoryCategoryIdPatchMutation, type CategoryPatch } from "../../services/api/v1";
+import { useApiV1CategoryCategoryIdUpateCategoryMutation, useApiV1CategoryCreateCategoryMutation } from "../../services/api/v1";
 import type { CreateUpdateCategory } from "../../pages/Categories";
 
 interface Props {
@@ -13,8 +13,8 @@ interface Props {
 
 export const CategoryForm = ({ category, handleClose }: Props) => {
   const { t } = useTranslation();
-  const [createCategory] = useCreateCategoryApiV1CategoryPostMutation()
-  const [updateCategory] = useUpdateCategoryApiV1CategoryCategoryIdPatchMutation()
+  const [createCategory] = useApiV1CategoryCreateCategoryMutation()
+  const [updateCategory] = useApiV1CategoryCategoryIdUpateCategoryMutation()
 
   const {
     register,
@@ -29,11 +29,11 @@ export const CategoryForm = ({ category, handleClose }: Props) => {
 
   const onSubmit = (data: CategorySchemaType) => {
     if (category?.id) {
-      updateCategory({ categoryId: category.id, categoryPatch: data }).then(() => {
+      updateCategory({ categoryId: category.id, categoryCreate: data }).then(() => {
         handleClose()
       })
     } else {
-      createCategory({ categoryPost: data }).then(() => {
+      createCategory({ categoryCreate: data }).then(() => {
         handleClose()
       })
     }

@@ -1,118 +1,85 @@
 import { baseApiV1 as api } from "./client";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    rootApiV1Get: build.query<RootApiV1GetApiResponse, RootApiV1GetApiArg>({
-      query: () => ({ url: `/api/v1/` }),
+    apiV1Root: build.query<ApiV1RootApiResponse, ApiV1RootApiArg>({
+      query: () => ({ url: `/api/v1` }),
     }),
-    getCategoriesApiV1CategoriesGet: build.query<
-      GetCategoriesApiV1CategoriesGetApiResponse,
-      GetCategoriesApiV1CategoriesGetApiArg
+    apiV1CategoryGetCategories: build.query<
+      ApiV1CategoryGetCategoriesApiResponse,
+      ApiV1CategoryGetCategoriesApiArg
     >({
-      query: () => ({ url: `/api/v1/categories` }),
+      query: () => ({ url: `/api/v1/category` }),
     }),
-    createCategoryApiV1CategoryPost: build.mutation<
-      CreateCategoryApiV1CategoryPostApiResponse,
-      CreateCategoryApiV1CategoryPostApiArg
+    apiV1CategoryCreateCategory: build.mutation<
+      ApiV1CategoryCreateCategoryApiResponse,
+      ApiV1CategoryCreateCategoryApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/category`,
         method: "POST",
-        body: queryArg.categoryPost,
+        body: queryArg.categoryCreate,
       }),
     }),
-    deleteCategoryApiV1CategoryCategoryIdDelete: build.mutation<
-      DeleteCategoryApiV1CategoryCategoryIdDeleteApiResponse,
-      DeleteCategoryApiV1CategoryCategoryIdDeleteApiArg
+    apiV1CategoryCategoryIdDeleteCategory: build.mutation<
+      ApiV1CategoryCategoryIdDeleteCategoryApiResponse,
+      ApiV1CategoryCategoryIdDeleteCategoryApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/category/${queryArg.categoryId}`,
         method: "DELETE",
       }),
     }),
-    updateCategoryApiV1CategoryCategoryIdPatch: build.mutation<
-      UpdateCategoryApiV1CategoryCategoryIdPatchApiResponse,
-      UpdateCategoryApiV1CategoryCategoryIdPatchApiArg
+    apiV1CategoryCategoryIdUpateCategory: build.mutation<
+      ApiV1CategoryCategoryIdUpateCategoryApiResponse,
+      ApiV1CategoryCategoryIdUpateCategoryApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v1/category/${queryArg.categoryId}`,
         method: "PATCH",
-        body: queryArg.categoryPatch,
+        body: queryArg.categoryCreate,
       }),
-    }),
-    getRecentExpensesApiV1ExpensesRecentGet: build.query<
-      GetRecentExpensesApiV1ExpensesRecentGetApiResponse,
-      GetRecentExpensesApiV1ExpensesRecentGetApiArg
-    >({
-      query: () => ({ url: `/api/v1/expenses/recent` }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as apiV1 };
-export type RootApiV1GetApiResponse = /** status 200 Successful Response */ any;
-export type RootApiV1GetApiArg = void;
-export type GetCategoriesApiV1CategoriesGetApiResponse =
-  /** status 200 Successful Response */ CategoryFull[];
-export type GetCategoriesApiV1CategoriesGetApiArg = void;
-export type CreateCategoryApiV1CategoryPostApiResponse =
-  /** status 200 Successful Response */ any;
-export type CreateCategoryApiV1CategoryPostApiArg = {
-  categoryPost: CategoryPost;
+export type ApiV1RootApiResponse = unknown;
+export type ApiV1RootApiArg = void;
+export type ApiV1CategoryGetCategoriesApiResponse =
+  /** status 200 Request fulfilled, document follows */ CategoryFull[];
+export type ApiV1CategoryGetCategoriesApiArg = void;
+export type ApiV1CategoryCreateCategoryApiResponse =
+  /** status 201 Document created, URL follows */ void;
+export type ApiV1CategoryCreateCategoryApiArg = {
+  categoryCreate: CategoryCreate;
 };
-export type DeleteCategoryApiV1CategoryCategoryIdDeleteApiResponse =
-  /** status 200 Successful Response */ any;
-export type DeleteCategoryApiV1CategoryCategoryIdDeleteApiArg = {
+export type ApiV1CategoryCategoryIdDeleteCategoryApiResponse =
+  /** status 204 Request fulfilled, nothing follows */ void;
+export type ApiV1CategoryCategoryIdDeleteCategoryApiArg = {
   categoryId: string;
 };
-export type UpdateCategoryApiV1CategoryCategoryIdPatchApiResponse =
-  /** status 200 Successful Response */ any;
-export type UpdateCategoryApiV1CategoryCategoryIdPatchApiArg = {
+export type ApiV1CategoryCategoryIdUpateCategoryApiResponse =
+  /** status 200 Request fulfilled, document follows */ void;
+export type ApiV1CategoryCategoryIdUpateCategoryApiArg = {
   categoryId: string;
-  categoryPatch: CategoryPatch;
+  categoryCreate: CategoryCreate;
 };
-export type GetRecentExpensesApiV1ExpensesRecentGetApiResponse =
-  /** status 200 Successful Response */ Expense[];
-export type GetRecentExpensesApiV1ExpensesRecentGetApiArg = void;
 export type CategoryFull = {
-  name: string;
   budget: number;
   id: string;
-  user_id: string;
+  name: string;
   spent: number;
 };
-export type ValidationError = {
-  loc: (string | number)[];
-  msg: string;
-  type: string;
-};
-export type HttpValidationError = {
-  detail?: ValidationError[];
-};
-export type CategoryPost = {
-  name: string;
+export type CategoryCreate = {
   budget: number;
-};
-export type CategoryPatch = {
   name: string;
-  budget: number;
-};
-export type Expense = {
-  id?: string;
-  title: string;
-  description: string;
-  amount: number;
-  date: string;
-  category_id: string;
-  user_id: string;
 };
 export const {
-  useRootApiV1GetQuery,
-  useLazyRootApiV1GetQuery,
-  useGetCategoriesApiV1CategoriesGetQuery,
-  useLazyGetCategoriesApiV1CategoriesGetQuery,
-  useCreateCategoryApiV1CategoryPostMutation,
-  useDeleteCategoryApiV1CategoryCategoryIdDeleteMutation,
-  useUpdateCategoryApiV1CategoryCategoryIdPatchMutation,
-  useGetRecentExpensesApiV1ExpensesRecentGetQuery,
-  useLazyGetRecentExpensesApiV1ExpensesRecentGetQuery,
+  useApiV1RootQuery,
+  useLazyApiV1RootQuery,
+  useApiV1CategoryGetCategoriesQuery,
+  useLazyApiV1CategoryGetCategoriesQuery,
+  useApiV1CategoryCreateCategoryMutation,
+  useApiV1CategoryCategoryIdDeleteCategoryMutation,
+  useApiV1CategoryCategoryIdUpateCategoryMutation,
 } = injectedRtkApi;
