@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
   const register = async (form: SignUpWithPasswordCredentials): Promise<{ userCreate: UserCreate, error: AuthError | null } | null> => {
     const { data, error } = await supabase.auth.signUp(form);
+    // TODO: hard code the default currency in the form?
     return { userCreate: { id: data.user?.id ?? "", email: data.user?.email ?? "", default_currency: "JPY" }, error };
   };
 

@@ -90,7 +90,27 @@ export type CategoryCreate = {
   name: string;
 };
 export type UserCreate = {
-  default_currency: string;
+  default_currency:
+    | "USD"
+    | "EUR"
+    | "JPY"
+    | "GBP"
+    | "AUD"
+    | "CAD"
+    | "CHF"
+    | "CNY"
+    | "SEK"
+    | "NZD"
+    | "NOK"
+    | "KRW"
+    | "INR"
+    | "BRL"
+    | "RUB"
+    | "ZAR"
+    | "TRY"
+    | "MXN"
+    | "SGD"
+    | "HKD";
   email: string;
   id: string;
 };
