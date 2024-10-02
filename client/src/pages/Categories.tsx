@@ -1,16 +1,16 @@
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Stack, Typography, alpha } from "@mui/material";
 import { useState } from "react";
-import { useGetCategoriesApiV1CategoriesGetQuery, type CategoryFull, type CategoryPost } from "../services/api/v1";
+import { useApiV1CategoryGetCategoriesQuery, type CategoryFull, type CategoryCreate } from "../services/api/v1";
 import { Category } from "../components/Categories/Category";
 import { useTranslation } from "react-i18next";
 import { CategoryFormPopup } from "../components/Categories/CategoryFormPopup";
 
-export type CreateUpdateCategory = CategoryPost & { id: string }
+export type CreateUpdateCategory = CategoryCreate & { id: string }
 
 export const Categories = () => {
   const { t } = useTranslation();
-  const { data: categories, refetch } = useGetCategoriesApiV1CategoriesGetQuery()
+  const { data: categories, refetch } = useApiV1CategoryGetCategoriesQuery()
   const total = categories?.reduce((acc, { budget }) => acc + budget, 0)
   const [category, setCategory] = useState<CreateUpdateCategory | null>(null)
 

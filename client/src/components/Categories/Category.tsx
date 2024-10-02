@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Box, Button, IconButton, Menu, MenuItem, Stack } from "@mui/material";
-import { useDeleteCategoryApiV1CategoryCategoryIdDeleteMutation, type CategoryFull } from "../../services/api/v1";
+import { useApiV1CategoryCategoryIdDeleteCategoryMutation, type CategoryFull } from "../../services/api/v1";
 import { useState, type PropsWithChildren } from "react";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -15,7 +15,7 @@ interface Props {
 export const Category = ({ children, category, handleSubmit, handleSetCategory }: PropsWithChildren<Props>) => {
   const { t } = useTranslation();
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
-  const [deleteCategory] = useDeleteCategoryApiV1CategoryCategoryIdDeleteMutation();
+  const [deleteCategory] = useApiV1CategoryCategoryIdDeleteCategoryMutation()
   // const [open, setOpen] = useState<boolean>(false);
 
   // const handleClick = () => {

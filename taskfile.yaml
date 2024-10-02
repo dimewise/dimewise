@@ -3,7 +3,7 @@ version: "3"
 includes:
   client:
     taskfile: ./client/taskfile.yaml
-    dir: ./client
+    dir: client
     internal: true
   server:
     taskfile: server/taskfile.yaml
@@ -27,6 +27,16 @@ tasks:
     silent: true
     cmds:
       - bunx supabase stop
+  db:seed:
+    silent: true
+    cmds:
+      - task: server:db:seed
+  openapi:
+    silent: true
+    desc: "Creates openapi spec and generate code"
+    cmds:
+      - task: server:openapi
+      - task: client:openapi
   init:
     silent: true
     desc: "Initialize Dimewise Project"
@@ -41,8 +51,8 @@ tasks:
       - echo "Project initialization complete!"
       - echo
       - echo "Please run the following tasks in separate terminals:"
-      - echo "1. task run:client"
-      - echo "2. task run:server"
+      - echo "1. task run:server"
+      - echo "2. task run:client"
       - echo
       - echo "(tip - you can use GNU Screen to run them in the background)"
       - echo

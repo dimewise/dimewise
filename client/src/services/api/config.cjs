@@ -1,6 +1,6 @@
 /** @type {import("@rtk-query/codegen-openapi").ConfigFile} */
 const config = {
-  schemaFile: "../../../../openapi.json",
+  schemaFile: "../../../../openapi.yaml",
   apiFile: "./client.ts",
   apiImport: "baseApiV1",
   outputFile: "./v1.ts",

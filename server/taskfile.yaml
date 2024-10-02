@@ -10,6 +10,9 @@ tasks:
     cmds:
       - task init-env
       - task init-venv
+      - task openapi
+      - task db:upgrade
+
   init-env:
     silent: true
     desc: "Initialize .env"
@@ -40,6 +43,26 @@ tasks:
       - echo
     sources:
       - requirements.txt
+  openapi:
+    desc: "Generate openapi spec"
+    silent: true
+    cmds:
+      - LITESTAR_APP=src.main:app venv/bin/litestar schema openapi --output ../openapi.yaml
+  db:revision:
+    desc: "Generate migration revision"
+    silent: true
+    cmds:
+      - venv/bin/alembic revision --autogenerate -m {{.NAME}}
+  db:upgrade:
+    desc: "Apply unran migrations"
+    silent: true
+    cmds:
+      - venv/bin/alembic upgrade head
+  db:seed:
+    desc: "Seed database based on user id"
+    silent: true
+    cmds:
+      - venv/bin/python -m src.utils.seeder {{.USER_ID}}
   run:
     desc: "Start the server"
     cmds:
