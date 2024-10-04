@@ -41,6 +41,7 @@ export const DashboardNavbar = () => {
 			sx={{
 				display: { xs: "auto", md: "none" },
 				boxShadow: 0,
+				height: "64px",
 				bgcolor: "background.paper",
 				backgroundImage: "none",
 				borderBottom: "1px solid",

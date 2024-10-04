@@ -1,9 +1,12 @@
-import { Box, List } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { Box, Button, List } from "@mui/material";
 import { DateTime } from "luxon";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TransactionListItem } from "../components/TransactionListItem";
+import { MonthNavigator } from "../components/Transactions/MonthNavigator";
 import { TransactionFormPopup } from "../components/Transactions/TransactionFormPopup";
-import { TransactionNavbar } from "../components/Transactions/TransactionNavbar";
+import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
 
 // INFO: Ideally the API should return TransactionType
 // TODO: Remove this once API is in place for getting transactions
@@ -78,6 +81,7 @@ const fakeTransactions: TransactionType[] = [
 ];
 
 export const Transactions = () => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [selectedMonth, setSelectedMonth] = useState(DateTime.now());
 
@@ -89,19 +93,25 @@ export const Transactions = () => {
 	};
 
 	return (
-		<Box
-			sx={{
-				px: 3,
-				width: "100%",
-				maxWidth: { sm: "100%", md: "1700px" },
-				overflowY: "auto",
-				pt: { xs: 8, md: 0 },
-			}}
-		>
-			<TransactionNavbar
-				selectedMonth={selectedMonth}
-				setSelectedMonth={setSelectedMonth}
-				handleOnClickCreate={handleOnClickCreate}
+		<>
+			<PageNavbar
+				title={t("nav.private.transactions")}
+				secondaryAction={
+					<Button
+						variant="contained"
+						size="small"
+						startIcon={<AddIcon />}
+						onClick={handleOnClickCreate}
+					>
+						{t("common.button.create")}
+					</Button>
+				}
+				secondaryTitle={
+					<MonthNavigator
+						selectedMonth={selectedMonth}
+						setSelectedMonth={setSelectedMonth}
+					/>
+				}
 			/>
 			<Box sx={{ overflowY: "auto", pb: 3 }}>
 				<List>
@@ -117,6 +127,6 @@ export const Transactions = () => {
 				open={open}
 				setOpen={setOpen}
 			/>
-		</Box>
+		</>
 	);
 };
