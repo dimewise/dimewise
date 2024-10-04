@@ -22,6 +22,7 @@ export const Overview = () => {
 				<CurrentMonthWidget />
 				<MonthlyOverviewWidget />
 				<CategoriesWidget />
+				<RecentTransactionsWidget />
 			</Grid>
 			<Copyright sx={{ my: 4 }} />
 		</>

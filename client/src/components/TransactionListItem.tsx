@@ -1,8 +1,8 @@
 import { ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { DateTime } from "luxon";
 import { useState } from "react";
-import type { TransactionType } from "../../pages/Transactions";
-import { TransactionDetails } from "./TransactionDetails";
+import type { TransactionType } from "../pages/Transactions";
+import { TransactionDetails } from "./Transactions/TransactionDetails";
 
 interface Props {
 	transaction: TransactionType;

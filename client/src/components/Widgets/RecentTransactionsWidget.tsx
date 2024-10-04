@@ -1,9 +1,7 @@
-import { Box, List } from "@mui/material";
-import { DateTime } from "luxon";
-import { useState } from "react";
-import { TransactionListItem } from "../components/TransactionListItem";
-import { TransactionFormPopup } from "../components/Transactions/TransactionFormPopup";
-import { TransactionNavbar } from "../components/Transactions/TransactionNavbar";
+import { Button, Card, CardContent, Grid2 as Grid, List, Stack, Typography } from "@mui/material";
+import { Link } from "react-router-dom";
+import { Routes } from "../../Routes";
+import { TransactionListItem } from "../TransactionListItem";
 
 // INFO: Ideally the API should return TransactionType
 // TODO: Remove this once API is in place for getting transactions
@@ -19,6 +17,7 @@ export type TransactionType = {
 	date: string;
 	category: CategoryType;
 };
+
 const fakeTransactions: TransactionType[] = [
 	{
 		id: "b9fabc70-2bc9-4b84-a196-0c674bbd5657",
@@ -77,33 +76,37 @@ const fakeTransactions: TransactionType[] = [
 	},
 ];
 
-export const Transactions = () => {
-	const [open, setOpen] = useState(false);
-	const [selectedMonth, setSelectedMonth] = useState(DateTime.now());
-
-	// TODO: add get transactions API call here
+export const RecentTransactionsWidget = () => {
 	const transactions = fakeTransactions;
 
-	const handleOnClickCreate = () => {
-		setOpen(true);
-	};
-
 	return (
-		<Box
-			sx={{
-				px: 3,
-				width: "100%",
-				maxWidth: { sm: "100%", md: "1700px" },
-				overflowY: "auto",
-				pt: { xs: 8, md: 0 },
-			}}
-		>
-			<TransactionNavbar
-				selectedMonth={selectedMonth}
-				setSelectedMonth={setSelectedMonth}
-				handleOnClickCreate={handleOnClickCreate}
-			/>
-			<Box sx={{ overflowY: "auto", pb: 3 }}>
+		<Grid size={12}>
+			<Card
+				variant="outlined"
+				sx={{ height: "100%", flexGrow: 1 }}
+			>
+				<CardContent>
+					<Stack
+						direction="row"
+						sx={{ alignItems: "center", justifyContent: "space-between" }}
+					>
+						<Typography
+							component="h2"
+							variant="subtitle2"
+							gutterBottom
+						>
+							Recent Transactions
+						</Typography>
+						<Button
+							component={Link}
+							variant="contained"
+							size="small"
+							to={Routes.Transactions}
+						>
+							View more
+						</Button>
+					</Stack>
+				</CardContent>
 				<List>
 					{transactions.map((t) => (
 						<TransactionListItem
@@ -112,11 +115,7 @@ export const Transactions = () => {
 						/>
 					))}
 				</List>
-			</Box>
-			<TransactionFormPopup
-				open={open}
-				setOpen={setOpen}
-			/>
-		</Box>
+			</Card>
+		</Grid>
 	);
 };
