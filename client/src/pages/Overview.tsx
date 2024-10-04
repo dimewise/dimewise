@@ -20,6 +20,7 @@ export const Overview = () => {
 				sx={{ mb: (theme) => theme.spacing(2) }}
 			>
 				<CurrentMonthWidget />
+				<MonthlyOverviewWidget />
 			</Grid>
 			<Copyright sx={{ my: 4 }} />
 		</>
