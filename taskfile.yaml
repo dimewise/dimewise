@@ -42,19 +42,26 @@ tasks:
     desc: "Initialize Dimewise Project"
     cmds:
       - echo
-      - echo "Starting initialization..."
+      - echo "Starting Dimewise initialization..."
       - task init-hooks
+      - echo "➜ Initializing client..."
       - task: client:init
+      - echo "➜ Initializing server..."
       - task: server:init
+      - echo "➜ Starting Supabase setup..."
       - task init-supabase
+      - echo "➜ Running database migrations..."
+      - task: server:db:upgrade
+      - echo "➜ Generating OpenAPI documentation..."
+      - task openapi
       - echo
-      - echo "Project initialization complete!"
+      - echo "✅ Dimewise project initialization complete!"
       - echo
-      - echo "Please run the following tasks in separate terminals:"
-      - echo "1. task run:server"
-      - echo "2. task run:client"
+      - echo "➜ Please run the following tasks in separate terminals:"
+      - echo "   1. task run:server"
+      - echo "   2. task run:client"
       - echo
-      - echo "(tip - you can use GNU Screen to run them in the background)"
+      - echo "Tip - You can use GNU Screen to run them in the background)"
       - echo
   init-hooks:
     silent: true
@@ -69,14 +76,12 @@ tasks:
     silent: true
     desc: "Installs and starts Supabase"
     cmds:
-      - echo "➜ Starting Supabase (local)"
-      - echo
-      - bunx supabase start
-      - echo
+      - echo "➜ Starting supabase locally..."
+      - bunx supabase start > /dev/null 2>&1
       - |
         echo "➜ Extracting Supabase status..."
 
-        supabase_status=$(bunx supabase status)
+        supabase_status=$(bunx supabase status) > /dev/null 2>&1
         api_url=$(echo "$supabase_status" | grep "API URL:" | cut -d ':' -f 2- | tr -d '[:space:]')
         anon_key=$(echo "$supabase_status" | grep "anon key:" | cut -d ':' -f 2- | tr -d '[:space:]')
         db_url=$(echo "$supabase_status" | grep "DB URL:" | cut -d ':' -f 2- | tr -d '[:space:]')
@@ -87,16 +92,13 @@ tasks:
         sed -i.bak "s|PUBLIC_SUPABASE_ANON_KEY=.*|PUBLIC_SUPABASE_ANON_KEY=$anon_key|" ./client/.env
         rm ./client/.env.bak
 
+        # Add +asyncpg to the DB_URL
+        db_url_with_asyncpg=$(echo "$db_url" | sed "s|postgresql://|postgresql+asyncpg://|")
+
         echo "➜ Updating server .env file..."
-        sed -i.bak "s|DB_URL=.*|DB_URL=$db_url|" ./server/.env
+        sed -i.bak "s|DB_URL=.*|DB_URL=$db_url_with_asyncpg|" ./server/.env
         sed -i.bak "s|JWT_TOKEN=.*|JWT_TOKEN=$jwt_key|" ./server/.env
         rm ./server/.env.bak
-      - echo "➜ Running database migrations..."
-      - echo
-      - bunx supabase migration up --local
-      - echo
-      - bunx supabase migration list --local
-      - echo
   run:
     desc: "Start the Dimewise Project"
     cmds:
