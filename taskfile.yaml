@@ -87,8 +87,11 @@ tasks:
         sed -i.bak "s|PUBLIC_SUPABASE_ANON_KEY=.*|PUBLIC_SUPABASE_ANON_KEY=$anon_key|" ./client/.env
         rm ./client/.env.bak
 
+        # Add +asyncpg to the DB_URL
+        db_url_with_asyncpg=$(echo "$db_url" | sed "s|postgresql://|postgresql+asyncpg://|")
+
         echo "➜ Updating server .env file..."
-        sed -i.bak "s|DB_URL=.*|DB_URL=$db_url|" ./server/.env
+        sed -i.bak "s|DB_URL=.*|DB_URL=$db_url_with_asyncpg|" ./server/.env
         sed -i.bak "s|JWT_TOKEN=.*|JWT_TOKEN=$jwt_key|" ./server/.env
         rm ./server/.env.bak
       - echo "➜ Running database migrations..."
