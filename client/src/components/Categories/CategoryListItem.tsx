@@ -39,23 +39,25 @@ export const CategoryListItem = ({ category, handleSubmit, handleSetCategory }: 
 	return (
 		<>
 			<ListItem
+				disablePadding
 				key={category.id}
-				secondaryAction={
-					<IconButton
-						sx={{ marginLeft: "auto" }}
-						onClick={handleClick}
-					>
-						<MoreVertRounded />
-					</IconButton>
-				}
-				sx={{ pr: 10, mb: 2 }}
+				sx={{ mb: 2 }}
 			>
 				<Stack
 					direction="row"
 					sx={{ width: "100%", alignItems: "center", justifyContent: "space-between" }}
 				>
 					<ListItemText primary={category.name} />
-					<Typography>{budgetStr}</Typography>
+					<Stack
+						direction="row"
+						gap={1.5}
+						sx={{ alignItems: "center", justifyContent: "space-between" }}
+					>
+						<Typography>{budgetStr}</Typography>
+						<IconButton onClick={handleClick}>
+							<MoreVertRounded />
+						</IconButton>
+					</Stack>
 				</Stack>
 			</ListItem>
 			<Menu
