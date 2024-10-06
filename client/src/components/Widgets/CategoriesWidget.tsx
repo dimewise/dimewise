@@ -83,9 +83,10 @@ const CategoryWidgetItem = ({ category }: { category: DataType }) => {
 	const currency = "JPY";
 	const progress = (category.used / category.budget) * 100;
 	const severity = progress > 65 ? "error" : progress > 30 ? "warning" : "primary";
+	const remainder = category.budget - category.used;
 
 	const spentStr = `${currency} ${category.used}`;
-	const budgetStr = `/ ${currency} ${category.budget} (${progress.toFixed(1)}%)`;
+	const budgetStr = `/ ${currency} ${category.budget} (${currency} ${remainder} left)`;
 
 	return (
 		<Grid size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
