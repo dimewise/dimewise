@@ -1,5 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Button, List, Stack, Typography } from "@mui/material";
+import { Button, Divider, List, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryFormPopup } from "../components/Categories/CategoryFormPopup";
@@ -49,13 +49,17 @@ export const Categories = () => {
 					</Button>
 				}
 				secondaryTitle={
-					<Stack
-						direction="row"
-						sx={{ alignItems: "center", justifyContent: "space-between" }}
-					>
-						<Typography variant="h6">{t("categories.total-budget")} </Typography>
-						<Typography variant="h6">{`${currency} ${total}`}</Typography>
-					</Stack>
+					<>
+						<Divider />
+						<Stack
+							direction="row"
+							sx={{ alignItems: "center", justifyContent: "space-between" }}
+						>
+							<Typography variant="h6">{t("categories.total-budget")} </Typography>
+							<Typography variant="h6">{`${currency} ${total}`}</Typography>
+						</Stack>
+						<Divider />
+					</>
 				}
 			/>
 			<List>
