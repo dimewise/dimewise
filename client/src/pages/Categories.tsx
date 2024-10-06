@@ -1,9 +1,9 @@
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Stack } from "@mui/material";
+import { Button, List, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Category } from "../components/Categories/Category";
 import { CategoryFormPopup } from "../components/Categories/CategoryFormPopup";
+import { CategoryListItem } from "../components/Categories/CategoryListItem";
 import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
 import { type CategoryCreate, type CategoryFull, useApiV1CategoryGetCategoriesQuery } from "../services/api/v1";
 
@@ -14,6 +14,8 @@ export const Categories = () => {
 	const { data: categories, refetch } = useApiV1CategoryGetCategoriesQuery();
 	const total = categories?.reduce((acc, { budget }) => acc + budget, 0);
 	const [category, setCategory] = useState<CreateUpdateCategory | null>(null);
+
+	const currency = "JPY";
 
 	const handleOnClickCreate = () => {
 		setCategory({ id: "", name: "", budget: 0 });
@@ -49,25 +51,23 @@ export const Categories = () => {
 				secondaryTitle={
 					<Stack
 						direction="row"
-						gap="8px"
-						margin="16px"
-						marginBottom={0}
+						sx={{ alignItems: "center", justifyContent: "space-between" }}
 					>
-						<Box>{t("categories.total")}</Box>
-						<Box>{total}</Box>
+						<Typography variant="h6">{t("categories.total-budget")} </Typography>
+						<Typography variant="h6">{`${currency} ${total}`}</Typography>
 					</Stack>
 				}
 			/>
-			<Stack sx={{ overflohandleSetCategory: "auto", pb: 3 }}>
+			<List>
 				{categories?.map((c) => (
-					<Category
+					<CategoryListItem
 						key={c.id}
 						category={c}
 						handleSubmit={handleSubmit}
 						handleSetCategory={handleSetCategory(c)}
 					/>
 				))}
-			</Stack>
+			</List>
 			<CategoryFormPopup
 				category={category}
 				open={category !== null}
