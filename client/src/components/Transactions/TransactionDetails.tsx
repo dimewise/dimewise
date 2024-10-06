@@ -1,5 +1,6 @@
 import { Stack, Typography } from "@mui/material";
 import { DateTime } from "luxon";
+import { useTranslation } from "react-i18next";
 import type { TransactionType } from "../../pages/Transactions";
 import { DesktopDialog } from "../DesktopDialog";
 import { MobileDrawer } from "../MobileDrawer";
@@ -33,17 +34,21 @@ export const TransactionDetails = ({ open, setOpen, transaction }: Props) => {
 };
 
 const TransactionContent = ({ transaction }: { transaction: TransactionType }) => {
+	const { t } = useTranslation();
 	const date = DateTime.fromISO(transaction.date).toFormat("MMM d, yyyy");
+	const currency = "JPY";
+	const transactionAmountStr = `${currency} ${transaction.amount}`;
+
 	return (
 		<Stack
 			direction="column"
 			gap={1}
 		>
-			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>Description</Typography>
+			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.description")}</Typography>
 			<Typography>{transaction.description}</Typography>
-			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>Amount</Typography>
-			<Typography>{transaction.amount} JPY</Typography>
-			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>Date of transaction</Typography>
+			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.amount")}</Typography>
+			<Typography>{transactionAmountStr}</Typography>
+			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.date-of-transaction")}</Typography>
 			<Typography>{date}</Typography>
 		</Stack>
 	);

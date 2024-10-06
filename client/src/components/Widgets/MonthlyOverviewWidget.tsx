@@ -11,6 +11,7 @@ import {
 	ResponsiveChartContainer,
 } from "@mui/x-charts";
 import { DateTime } from "luxon";
+import { useTranslation } from "react-i18next";
 
 type CategoryDataType = {
 	label: string;
@@ -28,6 +29,7 @@ type ApiData = {
 };
 
 export const MonthlyOverviewWidget = () => {
+	const { t } = useTranslation();
 	// call user to get currency
 	const currency = "JPY";
 
@@ -104,7 +106,7 @@ export const MonthlyOverviewWidget = () => {
 						variant="subtitle2"
 						gutterBottom
 					>
-						YTD Overview
+						{t("overview.widget.ytd-overview.title")}
 					</Typography>
 					<Stack sx={{ justifyContent: "space-between" }}>
 						<Typography
@@ -117,7 +119,7 @@ export const MonthlyOverviewWidget = () => {
 							variant="caption"
 							sx={{ color: "text.secondary" }}
 						>
-							Amount saved this year
+							{t("overview.widget.ytd-overview.amount-saved-this-year")}
 						</Typography>
 					</Stack>
 					<ResponsiveChartContainer

@@ -6,6 +6,7 @@ import Divider from "@mui/material/Divider";
 import Drawer, { drawerClasses } from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useTranslation } from "react-i18next";
 import { MenuButton } from "../../MenuButton";
 import { CardAlert } from "./CardAlert";
 import { MenuContent } from "./MenuContent";
@@ -16,6 +17,7 @@ interface SideMenuMobileProps {
 }
 
 export const SideMenuMobile = ({ open, toggleDrawer }: SideMenuMobileProps) => {
+	const { t } = useTranslation();
 	return (
 		<Drawer
 			anchor="right"
@@ -71,7 +73,7 @@ export const SideMenuMobile = ({ open, toggleDrawer }: SideMenuMobileProps) => {
 						fullWidth
 						startIcon={<LogoutRoundedIcon />}
 					>
-						Logout
+						{t("common.button.logout")}
 					</Button>
 				</Stack>
 			</Stack>

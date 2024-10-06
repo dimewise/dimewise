@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, Grid2 as Grid, List, Stack, Typography } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Routes } from "../../Routes";
 import { TransactionListItem } from "../TransactionListItem";
@@ -77,6 +78,7 @@ const fakeTransactions: TransactionType[] = [
 ];
 
 export const RecentTransactionsWidget = () => {
+	const { t } = useTranslation();
 	const transactions = fakeTransactions;
 
 	return (
@@ -95,7 +97,7 @@ export const RecentTransactionsWidget = () => {
 							variant="subtitle2"
 							gutterBottom
 						>
-							Recent Transactions
+							{t("overview.widget.recent-transactions.title")}
 						</Typography>
 						<Button
 							component={Link}
@@ -103,7 +105,7 @@ export const RecentTransactionsWidget = () => {
 							size="small"
 							to={Routes.Transactions}
 						>
-							View more
+							{t("overview.widget.recent-transactions.view-more")}
 						</Button>
 					</Stack>
 				</CardContent>

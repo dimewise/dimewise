@@ -1,6 +1,7 @@
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { Box, Button, IconButton, Stack, styled } from "@mui/material";
 import MuiCard from "@mui/material/Card";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet } from "react-router-dom";
 import { Routes } from "../../Routes";
@@ -35,6 +36,7 @@ const AuthContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export const AuthLayout = () => {
+	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const mode = useSelector((state: RootState) => state.theme.mode);
 
@@ -64,7 +66,7 @@ export const AuthLayout = () => {
 					to={Routes.Root}
 					sx={{ display: { xs: "none", sm: "flex" } }}
 				>
-					Back to home
+					{t("common.button.back-to-home")}
 				</Button>
 				<IconButton
 					size="small"

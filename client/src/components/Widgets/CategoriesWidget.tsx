@@ -1,6 +1,7 @@
 import Add from "@mui/icons-material/Add";
 import { Button, Card, CardContent, Grid2 as Grid, LinearProgress, Stack, Typography, alpha } from "@mui/material";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { CreateUpdateCategory } from "../../pages/Categories";
 import { useApiV1CategoryGetCategoriesQuery } from "../../services/api/v1";
 import { CategoryFormPopup } from "../Categories/CategoryFormPopup";
@@ -21,6 +22,7 @@ const fakeCategoryData: DataType[] = [
 ];
 
 export const CategoriesWidget = () => {
+	const { t } = useTranslation();
 	// TODO: get categories data from api
 	const data = fakeCategoryData;
 
@@ -49,7 +51,7 @@ export const CategoriesWidget = () => {
 							variant="subtitle2"
 							gutterBottom
 						>
-							Categories
+							{t("overview.widget.category.title")}
 						</Typography>
 						<Grid
 							container
@@ -129,6 +131,7 @@ const CategoryWidgetItem = ({ category }: { category: DataType }) => {
 };
 
 const CreateCategoryPlaceholder = ({ onClick }: { onClick: (open: boolean) => void }) => {
+	const { t } = useTranslation();
 	const handleOnClick = () => {
 		onClick(true);
 	};
@@ -165,7 +168,7 @@ const CreateCategoryPlaceholder = ({ onClick }: { onClick: (open: boolean) => vo
 						m: 0,
 					}}
 				>
-					Add Category
+					{t("overview.widget.category.add-category")}
 				</Typography>
 			</Button>
 		</Grid>

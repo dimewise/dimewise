@@ -8,11 +8,6 @@ import {
 	useApiV1CategoryCategoryIdUpateCategoryMutation,
 	useApiV1CategoryCreateCategoryMutation,
 } from "../../services/api/v1";
-import {
-	type CategoryPatch,
-	useCreateCategoryApiV1CategoryPostMutation,
-	useUpdateCategoryApiV1CategoryCategoryIdPatchMutation,
-} from "../../services/api/v1";
 
 interface Props {
 	category: CreateUpdateCategory | null;

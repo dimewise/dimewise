@@ -1,13 +1,12 @@
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import { tabsClasses } from "@mui/material/Tabs";
 import MuiToolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { DimewiseLogo } from "../../../assets/icons/DimewiseLogo";
 import { MenuButton } from "../../MenuButton";
 import { SideMenuMobile } from "./SideMenuMobile";
@@ -29,6 +28,7 @@ const Toolbar = styled(MuiToolbar)({
 });
 
 export const DashboardNavbar = () => {
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 
 	const toggleDrawer = (newOpen: boolean) => () => {
@@ -69,7 +69,7 @@ export const DashboardNavbar = () => {
 							component="h1"
 							sx={{ color: "text.primary" }}
 						>
-							Dashboard
+							{t("nav.private.dashboard")}
 						</Typography>
 					</Stack>
 					<MenuButton

@@ -1,5 +1,6 @@
 import { Card, CardContent, Grid2 as Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { BarChart, PieChart } from "@mui/x-charts";
+import { useTranslation } from "react-i18next";
 
 type DataType = {
 	label: string;
@@ -24,6 +25,7 @@ const fakeApiData: ApiData = {
 };
 
 export const CurrentMonthWidget = () => {
+	const { t } = useTranslation();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
@@ -69,7 +71,7 @@ export const CurrentMonthWidget = () => {
 						variant="subtitle2"
 						gutterBottom
 					>
-						Summary
+						{t("overview.widget.summary.title")}
 					</Typography>
 					<Stack
 						direction="row"
