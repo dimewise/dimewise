@@ -93,7 +93,7 @@ export const MonthlyOverviewWidget = () => {
 	const savedStr = `${currency} ${savedAmount}`;
 
 	return (
-		<Grid size={{ sm: 12, lg: 9 }}>
+		<Grid size={{ sm: 12, md: 12, lg: 9 }}>
 			<Card
 				variant="outlined"
 				sx={{ width: "100%" }}

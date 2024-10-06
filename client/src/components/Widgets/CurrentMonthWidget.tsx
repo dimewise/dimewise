@@ -1,5 +1,5 @@
-import { Card, CardContent, Grid2 as Grid, Stack, Typography } from "@mui/material";
-import { BarChart } from "@mui/x-charts";
+import { Card, CardContent, Grid2 as Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { BarChart, PieChart } from "@mui/x-charts";
 
 type DataType = {
 	label: string;
@@ -24,20 +24,34 @@ const fakeApiData: ApiData = {
 };
 
 export const CurrentMonthWidget = () => {
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+
 	const data: ApiData = fakeApiData;
 	const currency = "JPY";
 
 	const totalSpent = data.categories.reduce((sum, category) => sum + category.data[0], 0);
 
-	// construct series information
-	const categorySeries = data.categories.map((c) => ({ ...c, stack: "total" }));
-	const remainderSeries = {
+	// construct bar series information
+	const categoryBarSeries = data.categories.map((c) => ({ ...c, stack: "total" }));
+	const remainderBarSeries = {
 		label: "Remainder",
 		data: [data.budget - totalSpent],
 		stack: "total",
 		color: "grey",
 	};
-	const series = remainderSeries.data[0] < 0 ? categorySeries : [...categorySeries, remainderSeries];
+	const barSeries = remainderBarSeries.data[0] < 0 ? categoryBarSeries : [...categoryBarSeries, remainderBarSeries];
+
+	// construct pie series information
+	const categoryPieSeries = data.categories.map((c) => ({
+		value: c.data[0],
+		label: c.label,
+	}));
+	const remainderPieSeries = {
+		label: "Remainder",
+		value: data.budget - totalSpent,
+	};
+	const pieSeries = remainderPieSeries.value < 0 ? categoryPieSeries : [...categoryPieSeries, remainderPieSeries];
 
 	// construct spent and budget value with currency
 	const spentStr = `${currency} ${totalSpent}`;
@@ -59,7 +73,7 @@ export const CurrentMonthWidget = () => {
 					</Typography>
 					<Stack
 						direction="row"
-						sx={{ alignItems: "center" }}
+						sx={{ alignItems: "center", mb: 2 }}
 						gap={1}
 					>
 						<Typography
@@ -77,15 +91,29 @@ export const CurrentMonthWidget = () => {
 						</Typography>
 					</Stack>
 					<BarChart
-						sx={{ height: "fit-content" }}
+						sx={{ display: { sm: "block", lg: "none" } }}
+						height={isMobile ? 80 : 0}
 						yAxis={[{ data: ["Budget Breakdown"], scaleType: "band" }]}
 						leftAxis={null}
 						bottomAxis={null}
 						slotProps={{ legend: { hidden: true } }}
-						height={80}
 						margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
 						layout="horizontal"
-						series={series}
+						series={barSeries}
+					/>
+					<PieChart
+						sx={{ display: { sm: "none", lg: "block" } }}
+						height={isMobile ? 0 : 250}
+						margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
+						series={[
+							{
+								data: pieSeries,
+								innerRadius: 40,
+								cornerRadius: 5,
+								paddingAngle: 5,
+							},
+						]}
+						slotProps={{ legend: { hidden: true } }}
 					/>
 				</CardContent>
 			</Card>
