@@ -23,159 +23,159 @@ import { FacebookIcon } from "../assets/icons/FacebookIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { useAuth } from "../hooks/useAuth";
 import { SignUpSchema, type SignUpSchemaType } from "../lib/schemas/SignUpSchema";
-import type { RootState } from "../store";
 import { useApiV1UserRegisterCreateUserMutation } from "../services/api/v1";
+import type { RootState } from "../store";
 
 export const SignUp = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const mode = useSelector((state: RootState) => state.theme.mode);
-  const { register: signUp } = useAuth();
-  const [signUpError, setsignUpError] = useState<AuthError | null>(null);
-  const [registerUser] = useApiV1UserRegisterCreateUserMutation()
+	const { t } = useTranslation();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const mode = useSelector((state: RootState) => state.theme.mode);
+	const { register: signUp } = useAuth();
+	const [signUpError, setsignUpError] = useState<AuthError | null>(null);
+	const [registerUser] = useApiV1UserRegisterCreateUserMutation();
 
-  // register form schema
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpSchemaType>({
-    resolver: yupResolver(SignUpSchema),
-  });
+	// register form schema
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<SignUpSchemaType>({
+		resolver: yupResolver(SignUpSchema),
+	});
 
-  // handle on sign up form submit
-  const from = location.state?.from?.pathname || "/";
-  const onSubmit = async (creds: SignUpSchemaType) => {
-    signUp(creds).then((resp) => {
-      if (!resp) return
-      const { userCreate, error } = resp
-      if (error) {
-        setsignUpError(error);
-      } else {
-        registerUser({ userCreate }).then(() => {
-          navigate(from, { replace: true });
-        })
-      }
-    });
-  };
+	// handle on sign up form submit
+	const from = location.state?.from?.pathname || "/";
+	const onSubmit = async (creds: SignUpSchemaType) => {
+		signUp(creds).then((resp) => {
+			if (!resp) return;
+			const { userCreate, error } = resp;
+			if (error) {
+				setsignUpError(error);
+			} else {
+				registerUser({ userCreate }).then(() => {
+					navigate(from, { replace: true });
+				});
+			}
+		});
+	};
 
-  return (
-    <>
-      <DimewiseIcon mode={mode} />
-      <Typography
-        component="h1"
-        variant="h4"
-        sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-      >
-        Sign up
-      </Typography>
-      <Box
-        component="form"
-        onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-      >
-        {signUpError && <Alert severity="error">{signUpError.message}</Alert>}
-        <FormControl>
-          <FormLabel htmlFor="name">{t("auth.form.field_email.label")}</FormLabel>
-          <TextField
-            required
-            fullWidth
-            id="email"
-            placeholder="your@email.com"
-            autoComplete="email"
-            variant="outlined"
-            error={!!errors.email}
-            helperText={errors.email?.message}
-            color={errors.email ? "error" : "primary"}
-            {...register("email")}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel htmlFor="password">{t("auth.form.field_password.label")}</FormLabel>
-          <TextField
-            required
-            fullWidth
-            placeholder="••••••"
-            type="password"
-            id="password"
-            autoComplete="new-password"
-            variant="outlined"
-            error={!!errors.password}
-            helperText={errors.password?.message}
-            color={errors.password ? "error" : "primary"}
-            {...register("password")}
-          />
-        </FormControl>
-        <FormControl>
-          <FormLabel htmlFor="confirm-password">{t("auth.form.field_confirm_password.label")}</FormLabel>
-          <TextField
-            required
-            fullWidth
-            placeholder="••••••"
-            type="password"
-            id="confirm-password"
-            autoComplete="new-password"
-            variant="outlined"
-            error={!!errors.confirmPassword}
-            helperText={errors.confirmPassword?.message}
-            color={errors.confirmPassword ? "error" : "primary"}
-            {...register("confirmPassword")}
-          />
-        </FormControl>
-        <FormControlLabel
-          control={
-            <Checkbox
-              value="allowExtraEmails"
-              color="primary"
-            />
-          }
-          label="I want to receive updates via email."
-        />
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-        >
-          Sign up
-        </Button>
-        <Typography sx={{ textAlign: "center" }}>
-          Already have an account?{" "}
-          <span>
-            <Link
-              component={RouterLink}
-              to={Routes.SignIn}
-              variant="body2"
-              sx={{ alignSelf: "center" }}
-            >
-              Sign in
-            </Link>
-          </span>
-        </Typography>
-      </Box>
-      <Divider>
-        <Typography sx={{ color: "text.secondary" }}>or</Typography>
-      </Divider>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <Button
-          type="submit"
-          fullWidth
-          variant="outlined"
-          onClick={() => alert("Sign up with Google")}
-          startIcon={<GoogleIcon />}
-        >
-          Sign up with Google
-        </Button>
-        <Button
-          type="submit"
-          fullWidth
-          variant="outlined"
-          onClick={() => alert("Sign up with Facebook")}
-          startIcon={<FacebookIcon />}
-        >
-          Sign up with Facebook
-        </Button>
-      </Box>
-    </>
-  );
+	return (
+		<>
+			<DimewiseIcon mode={mode} />
+			<Typography
+				component="h1"
+				variant="h4"
+				sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+			>
+				Sign up
+			</Typography>
+			<Box
+				component="form"
+				onSubmit={handleSubmit(onSubmit)}
+				sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+			>
+				{signUpError && <Alert severity="error">{signUpError.message}</Alert>}
+				<FormControl>
+					<FormLabel htmlFor="name">{t("auth.form.field_email.label")}</FormLabel>
+					<TextField
+						required
+						fullWidth
+						id="email"
+						placeholder="your@email.com"
+						autoComplete="email"
+						variant="outlined"
+						error={!!errors.email}
+						helperText={errors.email?.message}
+						color={errors.email ? "error" : "primary"}
+						{...register("email")}
+					/>
+				</FormControl>
+				<FormControl>
+					<FormLabel htmlFor="password">{t("auth.form.field_password.label")}</FormLabel>
+					<TextField
+						required
+						fullWidth
+						placeholder="••••••"
+						type="password"
+						id="password"
+						autoComplete="new-password"
+						variant="outlined"
+						error={!!errors.password}
+						helperText={errors.password?.message}
+						color={errors.password ? "error" : "primary"}
+						{...register("password")}
+					/>
+				</FormControl>
+				<FormControl>
+					<FormLabel htmlFor="confirm-password">{t("auth.form.field_confirm_password.label")}</FormLabel>
+					<TextField
+						required
+						fullWidth
+						placeholder="••••••"
+						type="password"
+						id="confirm-password"
+						autoComplete="new-password"
+						variant="outlined"
+						error={!!errors.confirmPassword}
+						helperText={errors.confirmPassword?.message}
+						color={errors.confirmPassword ? "error" : "primary"}
+						{...register("confirmPassword")}
+					/>
+				</FormControl>
+				<FormControlLabel
+					control={
+						<Checkbox
+							value="allowExtraEmails"
+							color="primary"
+						/>
+					}
+					label="I want to receive updates via email."
+				/>
+				<Button
+					type="submit"
+					fullWidth
+					variant="contained"
+				>
+					Sign up
+				</Button>
+				<Typography sx={{ textAlign: "center" }}>
+					Already have an account?{" "}
+					<span>
+						<Link
+							component={RouterLink}
+							to={Routes.SignIn}
+							variant="body2"
+							sx={{ alignSelf: "center" }}
+						>
+							Sign in
+						</Link>
+					</span>
+				</Typography>
+			</Box>
+			<Divider>
+				<Typography sx={{ color: "text.secondary" }}>or</Typography>
+			</Divider>
+			<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+				<Button
+					type="submit"
+					fullWidth
+					variant="outlined"
+					onClick={() => alert("Sign up with Google")}
+					startIcon={<GoogleIcon />}
+				>
+					Sign up with Google
+				</Button>
+				<Button
+					type="submit"
+					fullWidth
+					variant="outlined"
+					onClick={() => alert("Sign up with Facebook")}
+					startIcon={<FacebookIcon />}
+				>
+					Sign up with Facebook
+				</Button>
+			</Box>
+		</>
+	);
 };

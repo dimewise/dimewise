@@ -1,13 +1,30 @@
-import { MainGrid } from "../components/Dashboard/MainGrid";
-import { useApiV1CategoryGetCategoriesQuery } from "../services/api/v1";
+import { Grid2 as Grid } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { Copyright } from "../components/Dashboard/Copyright";
+import { CategoriesWidget } from "../components/Widgets/CategoriesWidget";
+import { CurrentMonthWidget } from "../components/Widgets/CurrentMonthWidget";
+import { MonthlyOverviewWidget } from "../components/Widgets/MonthlyOverviewWidget";
+import { RecentTransactionsWidget } from "../components/Widgets/RecentTransactionsWidget";
+import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
 
 export const Overview = () => {
-  const { data: categories } = useApiV1CategoryGetCategoriesQuery()
-  // const { data: expenses } = useGetRecentExpensesApiV1ExpensesRecentGetQuery();
+	const { t } = useTranslation();
 
-  return (
-    <>
-      <MainGrid />
-    </>
-  );
+	return (
+		<>
+			<PageNavbar title={t("nav.private.overview")} />
+			<Grid
+				container
+				spacing={2}
+				columns={12}
+				sx={{ mb: (theme) => theme.spacing(2) }}
+			>
+				<CurrentMonthWidget />
+				<MonthlyOverviewWidget />
+				<CategoriesWidget />
+				<RecentTransactionsWidget />
+			</Grid>
+			<Copyright sx={{ my: 4 }} />
+		</>
+	);
 };

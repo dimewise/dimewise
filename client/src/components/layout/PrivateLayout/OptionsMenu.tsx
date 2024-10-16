@@ -9,6 +9,7 @@ import MuiMenuItem from "@mui/material/MenuItem";
 import { paperClasses } from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../../hooks/useAuth";
 import { MenuButton } from "../../MenuButton";
 
@@ -17,6 +18,7 @@ const MenuItem = styled(MuiMenuItem)({
 });
 
 export const OptionsMenu = () => {
+	const { t } = useTranslation();
 	const { logout } = useAuth();
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const open = Boolean(anchorEl);
@@ -77,7 +79,7 @@ export const OptionsMenu = () => {
 						},
 					}}
 				>
-					<ListItemText>Logout</ListItemText>
+					<ListItemText>{t("common.button.logout")}</ListItemText>
 					<ListItemIcon>
 						<LogoutRoundedIcon fontSize="small" />
 					</ListItemIcon>

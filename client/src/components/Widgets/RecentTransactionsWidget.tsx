@@ -1,12 +1,8 @@
-import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, List } from "@mui/material";
-import { DateTime } from "luxon";
-import { useState } from "react";
+import { Button, Card, CardContent, Grid2 as Grid, List, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { TransactionListItem } from "../components/TransactionListItem";
-import { MonthNavigator } from "../components/Transactions/MonthNavigator";
-import { TransactionFormPopup } from "../components/Transactions/TransactionFormPopup";
-import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
+import { Link } from "react-router-dom";
+import { Routes } from "../../Routes";
+import { TransactionListItem } from "../TransactionListItem";
 
 // INFO: Ideally the API should return TransactionType
 // TODO: Remove this once API is in place for getting transactions
@@ -22,6 +18,7 @@ export type TransactionType = {
 	date: string;
 	category: CategoryType;
 };
+
 const fakeTransactions: TransactionType[] = [
 	{
 		id: "b9fabc70-2bc9-4b84-a196-0c674bbd5657",
@@ -80,40 +77,38 @@ const fakeTransactions: TransactionType[] = [
 	},
 ];
 
-export const Transactions = () => {
+export const RecentTransactionsWidget = () => {
 	const { t } = useTranslation();
-	const [open, setOpen] = useState(false);
-	const [selectedMonth, setSelectedMonth] = useState(DateTime.now());
-
-	// TODO: add get transactions API call here
 	const transactions = fakeTransactions;
 
-	const handleOnClickCreate = () => {
-		setOpen(true);
-	};
-
 	return (
-		<>
-			<PageNavbar
-				title={t("nav.private.transactions")}
-				secondaryAction={
-					<Button
-						variant="contained"
-						size="small"
-						startIcon={<AddIcon />}
-						onClick={handleOnClickCreate}
+		<Grid size={12}>
+			<Card
+				variant="outlined"
+				sx={{ height: "100%", flexGrow: 1 }}
+			>
+				<CardContent>
+					<Stack
+						direction="row"
+						sx={{ alignItems: "center", justifyContent: "space-between" }}
 					>
-						{t("common.button.create")}
-					</Button>
-				}
-				secondaryTitle={
-					<MonthNavigator
-						selectedMonth={selectedMonth}
-						setSelectedMonth={setSelectedMonth}
-					/>
-				}
-			/>
-			<Box sx={{ overflowY: "auto", pb: 3 }}>
+						<Typography
+							component="h2"
+							variant="subtitle2"
+							gutterBottom
+						>
+							{t("overview.widget.recent-transactions.title")}
+						</Typography>
+						<Button
+							component={Link}
+							variant="contained"
+							size="small"
+							to={Routes.Transactions}
+						>
+							{t("overview.widget.recent-transactions.view-more")}
+						</Button>
+					</Stack>
+				</CardContent>
 				<List>
 					{transactions.map((t) => (
 						<TransactionListItem
@@ -122,11 +117,7 @@ export const Transactions = () => {
 						/>
 					))}
 				</List>
-			</Box>
-			<TransactionFormPopup
-				open={open}
-				setOpen={setOpen}
-			/>
-		</>
+			</Card>
+		</Grid>
 	);
 };

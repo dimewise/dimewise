@@ -6,20 +6,8 @@
 	"scripts": {
 		"dev": "bunx --bun vite",
 		"build": "tsc && vite build",
-		"check": "bunx @biomejs/biome check --write .",
-		"preview": "vite preview",
-		"init:env": "chmod +x ./scripts/init.sh && ./scripts/init.sh",
-		"gen:db": "bunx supabase gen types typescript --local > src/types/supabase.ts",
-		"gen:oapi": "bunx @rtk-query/codegen-openapi ./src/services/api/config.cjs",
-		"db:reset-local": "bunx supabase db reset",
-		"db:diff-local": "bunx supabase db diff --local",
-		"db:lint-local": "bunx supabase db lint --local",
-		"db:start": "bunx supabase start",
-		"db:stop": "bunx supabase stop",
-		"db:status": "bunx supabase status",
-		"db:migration-new": "bunx supabase migration new",
-		"db:migration-list-local": "bunx supabase migration list --local",
-		"db:migration-up-local": "bunx supabase migration up --local"
+		"check": "biome check --write .",
+		"preview": "vite preview"
 	},
 	"dependencies": {
 		"@emotion/react": "^11.13.3",
