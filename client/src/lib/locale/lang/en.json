@@ -1,7 +1,6 @@
 {
 	"loading": "Loading",
 	"welcome": "Welcome to Dashboard sir",
-	"categories.total": "Total",
 	"common.button.cancel": "Cancel",
 	"common.button.close": "Close",
 	"common.button.confirm": "Confirm",
@@ -73,6 +72,7 @@
 	"transactions.details.description": "Description",
 	"transactions.details.amount": "Amount",
 	"transactions.details.date-of-transaction": "Date of transaction",
+	"categories.total-budget": "Total Budget",
 	"categories.form.title.create_category": "Create Category",
 	"categories.form.title.edit_category": "Edit Category",
 	"categories.form.field_name.label": "Name",
