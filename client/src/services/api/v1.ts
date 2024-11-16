@@ -39,6 +39,22 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.categoryCreate,
       }),
     }),
+    apiV1ExpenseGetExpenses: build.query<
+      ApiV1ExpenseGetExpensesApiResponse,
+      ApiV1ExpenseGetExpensesApiArg
+    >({
+      query: () => ({ url: `/api/v1/expense` }),
+    }),
+    apiV1ExpenseCreateExpense: build.mutation<
+      ApiV1ExpenseCreateExpenseApiResponse,
+      ApiV1ExpenseCreateExpenseApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/expense`,
+        method: "POST",
+        body: queryArg.expenseCreate,
+      }),
+    }),
     apiV1UserRegisterCreateUser: build.mutation<
       ApiV1UserRegisterCreateUserApiResponse,
       ApiV1UserRegisterCreateUserApiArg
@@ -58,24 +74,27 @@ export type ApiV1RootApiArg = void;
 export type ApiV1CategoryGetCategoriesApiResponse =
   /** status 200 Request fulfilled, document follows */ CategoryFull[];
 export type ApiV1CategoryGetCategoriesApiArg = void;
-export type ApiV1CategoryCreateCategoryApiResponse =
-  /** status 201 Document created, URL follows */ void;
+export type ApiV1CategoryCreateCategoryApiResponse = unknown;
 export type ApiV1CategoryCreateCategoryApiArg = {
   categoryCreate: CategoryCreate;
 };
-export type ApiV1CategoryCategoryIdDeleteCategoryApiResponse =
-  /** status 204 Request fulfilled, nothing follows */ void;
+export type ApiV1CategoryCategoryIdDeleteCategoryApiResponse = unknown;
 export type ApiV1CategoryCategoryIdDeleteCategoryApiArg = {
   categoryId: string;
 };
-export type ApiV1CategoryCategoryIdUpateCategoryApiResponse =
-  /** status 200 Request fulfilled, document follows */ void;
+export type ApiV1CategoryCategoryIdUpateCategoryApiResponse = unknown;
 export type ApiV1CategoryCategoryIdUpateCategoryApiArg = {
   categoryId: string;
   categoryCreate: CategoryCreate;
 };
-export type ApiV1UserRegisterCreateUserApiResponse =
-  /** status 201 Document created, URL follows */ void;
+export type ApiV1ExpenseGetExpensesApiResponse =
+  /** status 200 Request fulfilled, document follows */ Expense[];
+export type ApiV1ExpenseGetExpensesApiArg = void;
+export type ApiV1ExpenseCreateExpenseApiResponse = unknown;
+export type ApiV1ExpenseCreateExpenseApiArg = {
+  expenseCreate: ExpenseCreate;
+};
+export type ApiV1UserRegisterCreateUserApiResponse = unknown;
 export type ApiV1UserRegisterCreateUserApiArg = {
   userCreate: UserCreate;
 };
@@ -88,6 +107,25 @@ export type CategoryFull = {
 export type CategoryCreate = {
   budget: number;
   name: string;
+};
+export type CategoryExpense = {
+  budget: number;
+  id: string;
+  name: string;
+};
+export type Expense = {
+  amount: number;
+  category: CategoryExpense;
+  date: string;
+  description?: null | string;
+  id: string;
+  title: string;
+};
+export type ExpenseCreate = {
+  amount: number;
+  date: string;
+  description?: null | string;
+  title: string;
 };
 export type UserCreate = {
   default_currency:
@@ -122,5 +160,8 @@ export const {
   useApiV1CategoryCreateCategoryMutation,
   useApiV1CategoryCategoryIdDeleteCategoryMutation,
   useApiV1CategoryCategoryIdUpateCategoryMutation,
+  useApiV1ExpenseGetExpensesQuery,
+  useLazyApiV1ExpenseGetExpensesQuery,
+  useApiV1ExpenseCreateExpenseMutation,
   useApiV1UserRegisterCreateUserMutation,
 } = injectedRtkApi;

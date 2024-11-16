@@ -1,17 +1,16 @@
 import { Stack, Typography } from "@mui/material";
 import { DateTime } from "luxon";
 import { useTranslation } from "react-i18next";
-import type { TransactionType } from "../../pages/Transactions";
+import type { Expense } from "../../services/api/v1";
 import { DesktopDialog } from "../DesktopDialog";
 import { MobileDrawer } from "../MobileDrawer";
 
 interface Props {
 	open: boolean;
 	setOpen: (open: boolean) => void;
-	transaction: TransactionType;
+	transaction: Expense;
 }
 
-// TODO: switch to use actual transaction type
 export const TransactionDetails = ({ open, setOpen, transaction }: Props) => {
 	return (
 		<>
@@ -33,7 +32,7 @@ export const TransactionDetails = ({ open, setOpen, transaction }: Props) => {
 	);
 };
 
-const TransactionContent = ({ transaction }: { transaction: TransactionType }) => {
+const TransactionContent = ({ transaction }: { transaction: Expense }) => {
 	const { t } = useTranslation();
 	const date = DateTime.fromISO(transaction.date).toFormat("MMM d, yyyy");
 	const currency = "JPY";

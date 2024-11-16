@@ -3,31 +3,14 @@ import { Button, Card, CardContent, Grid2 as Grid, LinearProgress, Stack, Typogr
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CreateUpdateCategory } from "../../pages/Categories";
-import { useApiV1CategoryGetCategoriesQuery } from "../../services/api/v1";
+import { type CategoryFull, useApiV1CategoryGetCategoriesQuery } from "../../services/api/v1";
 import { CategoryFormPopup } from "../Categories/CategoryFormPopup";
-
-type DataType = {
-	id: string;
-	name: string;
-	budget: number;
-	used: number;
-};
-const fakeCategoryData: DataType[] = [
-	{ id: "1", name: "Entertainment", budget: 5000, used: 3500 },
-	{ id: "2", name: "Food", budget: 10000, used: 8200 },
-	{ id: "3", name: "Housing", budget: 500000, used: 45000 },
-	{ id: "4", name: "Transportation", budget: 3000, used: 1200 },
-	{ id: "5", name: "Utilities", budget: 10000, used: 7600 },
-	{ id: "6", name: "Check", budget: 10000, used: 7600 },
-];
 
 export const CategoriesWidget = () => {
 	const { t } = useTranslation();
-	// TODO: get categories data from api
-	const data = fakeCategoryData;
 
 	const [category, setCategory] = useState<CreateUpdateCategory | null>(null);
-	const { refetch: refetchGetCategories } = useApiV1CategoryGetCategoriesQuery();
+	const { data: categories, refetch: refetchGetCategories } = useApiV1CategoryGetCategoriesQuery();
 
 	const handleOpenCreateCategory = (open: boolean) => {
 		setCategory(open ? { id: "", name: "", budget: 0 } : null);
@@ -58,7 +41,7 @@ export const CategoriesWidget = () => {
 							spacing={2}
 							columns={12}
 						>
-							{data.map((c) => (
+							{categories?.map((c) => (
 								<CategoryWidgetItem
 									category={c}
 									key={c.id}
@@ -79,13 +62,13 @@ export const CategoriesWidget = () => {
 	);
 };
 
-const CategoryWidgetItem = ({ category }: { category: DataType }) => {
+const CategoryWidgetItem = ({ category }: { category: CategoryFull }) => {
 	const currency = "JPY";
-	const progress = (category.used / category.budget) * 100;
+	const progress = (category.spent / category.budget) * 100;
 	const severity = progress > 65 ? "error" : progress > 30 ? "warning" : "primary";
-	const remainder = category.budget - category.used;
+	const remainder = category.budget - category.spent;
 
-	const spentStr = `${currency} ${category.used}`;
+	const spentStr = `${currency} ${category.spent}`;
 	const budgetStr = `/ ${currency} ${category.budget} (${currency} ${remainder} left)`;
 
 	return (
