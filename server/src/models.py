@@ -75,6 +75,7 @@ class Expense(Base):
     amount: Mapped[int]
     date: Mapped[date]
 
+    category: Mapped["Category"] = relationship(lazy="selectin", back_populates="expenses")
     category_id: Mapped[UUID] = mapped_column(ForeignKey("category.id"))
     user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
 
@@ -83,6 +84,6 @@ class Category(Base):
     __tablename__ = "category"
     name: Mapped[str]
     budget: Mapped[int]
-    expenses: Mapped[list[Expense]] = relationship(lazy="selectin")
+    expenses: Mapped[list[Expense]] = relationship(lazy="selectin", back_populates="category")
 
     user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))

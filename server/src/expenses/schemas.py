@@ -3,9 +3,10 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
+from src.categories.schemas import CategoryExpense
+
 
 class ExpenseBase(BaseModel):
-    id: UUID
     title: str
     description: str | None
     amount: int
@@ -13,5 +14,12 @@ class ExpenseBase(BaseModel):
 
 
 class ExpensePublic(ExpenseBase):
+    id: UUID
+    category: CategoryExpense
+
     class Config:
         title = "Expense"
+
+
+class ExpenseCreate(ExpenseBase):
+    category_id: UUID

@@ -37,10 +37,7 @@ class CategoryController(Controller):
         query = select(Category).where(Category.user_id == request.user.id)
         categories = await repo.list(statement=query)
 
-        return [
-            CategoryFull(id=c.id, name=c.name, budget=c.budget, spent=sum(e.amount for e in c.expenses) or 0)
-            for c in categories
-        ]
+        return [CategoryFull(**c.__dict__, spent=sum(e.amount for e in c.expenses) or 0) for c in categories]
 
     @post()
     async def create_category(

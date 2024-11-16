@@ -15,3 +15,7 @@ class CategoryFull(CategoryBase):
 
 class CategoryCreate(CategoryBase):
     pass
+
+
+class CategoryExpense(CategoryBase):
+    id: UUID

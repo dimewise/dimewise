@@ -11,6 +11,21 @@ components:
       - name
       title: CategoryCreate
       type: object
+    CategoryExpense:
+      properties:
+        budget:
+          type: integer
+        id:
+          format: uuid
+          type: string
+        name:
+          type: string
+      required:
+      - budget
+      - id
+      - name
+      title: CategoryExpense
+      type: object
     CategoryFull:
       properties:
         budget:
@@ -28,6 +43,51 @@ components:
       - name
       - spent
       title: CategoryFull
+      type: object
+    ExpenseCreate:
+      properties:
+        amount:
+          type: integer
+        date:
+          format: date
+          type: string
+        description:
+          oneOf:
+          - type: 'null'
+          - type: string
+        title:
+          type: string
+      required:
+      - amount
+      - date
+      - title
+      title: ExpenseCreate
+      type: object
+    ExpensePublic:
+      properties:
+        amount:
+          type: integer
+        category:
+          $ref: '#/components/schemas/CategoryExpense'
+        date:
+          format: date
+          type: string
+        description:
+          oneOf:
+          - type: 'null'
+          - type: string
+        id:
+          format: uuid
+          type: string
+        title:
+          type: string
+      required:
+      - amount
+      - category
+      - date
+      - id
+      - title
+      title: Expense
       type: object
     UserCreate:
       properties:
@@ -237,6 +297,60 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: UpateCategory
+  /api/v1/expense:
+    get:
+      deprecated: false
+      operationId: ApiV1ExpenseGetExpenses
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ExpensePublic'
+                type: array
+          description: Request fulfilled, document follows
+          headers: {}
+      summary: GetExpenses
+    post:
+      deprecated: false
+      operationId: ApiV1ExpenseCreateExpense
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseCreate'
+        required: true
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Validation Exception
+                examples:
+                - detail: Bad Request
+                  extra: {}
+                  status_code: 400
+                properties:
+                  detail:
+                    type: string
+                  extra:
+                    additionalProperties: {}
+                    type:
+                    - 'null'
+                    - object
+                    - array
+                  status_code:
+                    type: integer
+                required:
+                - detail
+                - status_code
+                type: object
+          description: Bad request syntax or unsupported method
+      summary: CreateExpense
   /api/v1/user/register:
     post:
       deprecated: false

@@ -68,6 +68,7 @@
 	"transactions.form.field_description.label": "Description",
 	"transactions.form.field_amount.label": "Amount",
 	"transactions.form.field_date.label": "Date",
+	"transactions.form.field_category.label": "Category",
 	"transactions.form.title.create_transaction": "Create Transaction",
 	"transactions.details.description": "Description",
 	"transactions.details.amount": "Amount",

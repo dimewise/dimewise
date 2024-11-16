@@ -1,11 +1,11 @@
 import { ListItem, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { DateTime } from "luxon";
 import { useState } from "react";
-import type { TransactionType } from "../pages/Transactions";
+import type { Expense } from "../services/api/v1";
 import { TransactionDetails } from "./Transactions/TransactionDetails";
 
 interface Props {
-	transaction: TransactionType;
+	transaction: Expense;
 }
 
 // TODO: switch to use account currency instead of hardcoded JPY
