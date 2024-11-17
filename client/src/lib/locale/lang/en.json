@@ -73,6 +73,7 @@
 	"transactions.details.description": "Description",
 	"transactions.details.amount": "Amount",
 	"transactions.details.date-of-transaction": "Date of transaction",
+	"transactions.details.category": "Category",
 	"categories.total-budget": "Total Budget",
 	"categories.form.title.create_category": "Create Category",
 	"categories.form.title.edit_category": "Edit Category",

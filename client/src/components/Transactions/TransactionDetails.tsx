@@ -49,6 +49,8 @@ const TransactionContent = ({ transaction }: { transaction: Expense }) => {
 			<Typography>{transactionAmountStr}</Typography>
 			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.date-of-transaction")}</Typography>
 			<Typography>{date}</Typography>
+			<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.category")}</Typography>
+			<Typography>{transaction.category.name}</Typography>
 		</Stack>
 	);
 };
