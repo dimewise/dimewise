@@ -8,7 +8,7 @@ import { TransactionListItem } from "../TransactionListItem";
 export const RecentTransactionsWidget = () => {
 	const { t } = useTranslation();
 	// TODO: limit number of transactions?
-	const { data: transactions } = useApiV1ExpenseGetExpensesQuery();
+	const { data: transactions } = useApiV1ExpenseGetExpensesQuery({});
 
 	return (
 		<Grid size={12}>

@@ -43,7 +43,13 @@ const injectedRtkApi = api.injectEndpoints({
       ApiV1ExpenseGetExpensesApiResponse,
       ApiV1ExpenseGetExpensesApiArg
     >({
-      query: () => ({ url: `/api/v1/expense` }),
+      query: (queryArg) => ({
+        url: `/api/v1/expense`,
+        params: {
+          from_date: queryArg.fromDate,
+          to_date: queryArg.toDate,
+        },
+      }),
     }),
     apiV1ExpenseCreateExpense: build.mutation<
       ApiV1ExpenseCreateExpenseApiResponse,
@@ -89,7 +95,10 @@ export type ApiV1CategoryCategoryIdUpateCategoryApiArg = {
 };
 export type ApiV1ExpenseGetExpensesApiResponse =
   /** status 200 Request fulfilled, document follows */ Expense[];
-export type ApiV1ExpenseGetExpensesApiArg = void;
+export type ApiV1ExpenseGetExpensesApiArg = {
+  fromDate?: null | string;
+  toDate?: null | string;
+};
 export type ApiV1ExpenseCreateExpenseApiResponse = unknown;
 export type ApiV1ExpenseCreateExpenseApiArg = {
   expenseCreate: ExpenseCreate;
@@ -123,6 +132,7 @@ export type Expense = {
 };
 export type ExpenseCreate = {
   amount: number;
+  category_id: string;
   date: string;
   description?: null | string;
   title: string;
