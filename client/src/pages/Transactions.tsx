@@ -13,8 +13,10 @@ export const Transactions = () => {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [selectedMonth, setSelectedMonth] = useState(DateTime.now());
-	// TODO: get based on selectedMonth
-	const { data: transactions, refetch: refetchGetTransactions } = useApiV1ExpenseGetExpensesQuery();
+	const { data: transactions, refetch: refetchGetTransactions } = useApiV1ExpenseGetExpensesQuery({
+		fromDate: selectedMonth.startOf("month").toUTC().toISO(),
+		toDate: selectedMonth.endOf("month").toUTC().toISO(),
+	});
 
 	const handleOnClickCreate = () => {
 		setOpen(true);

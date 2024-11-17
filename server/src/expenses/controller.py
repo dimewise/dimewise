@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -32,9 +33,15 @@ class ExpenseController(Controller):
 
     @get()
     async def get_expenses(
-        self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any]
+        self,
+        repo: ExpenseRepository,
+        request: Request[AuthUser, Token, Any],
+        from_date: datetime | None = None,
+        to_date: datetime | None = None,
     ) -> list[ExpensePublic]:
-        query = select(Expense).where(Expense.user_id == request.user.id)
+        query = select(Expense).where(Expense.user_id == request.user.id).order_by(Expense.date.desc())
+        if from_date and to_date:
+            query = query.where(Expense.date.between(from_date, to_date))
         expenses = await repo.list(statement=query)
         expenses = [{**e.__dict__, "category": CategoryExpense(**e.category.__dict__)} for e in expenses]
         return [ExpensePublic(**e) for e in expenses]
