@@ -27,7 +27,7 @@ export const PageNavbar = ({ title, secondaryAction, secondaryTitle }: Props) =>
 			>
 				<Typography
 					component="h2"
-					variant="h6"
+					variant="h4"
 				>
 					{title}
 				</Typography>

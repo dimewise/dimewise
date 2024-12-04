@@ -13,7 +13,7 @@ export const ThemeSelector = () => {
 
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", alignItems: "start", justifyContent: "center" }}>
-			<Typography sx={{ fontSize: "1rem", fontWeight: "bold" }}>Theme</Typography>
+			<Typography variant="h5">Theme</Typography>
 			<Divider />
 			<Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
 				<Typography>Dark Mode</Typography>
