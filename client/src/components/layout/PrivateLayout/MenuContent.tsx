@@ -36,11 +36,11 @@ export const MenuContent = () => {
 	const matchRoutes = (route: Routes): boolean => {
 		const matches = useMatch(route);
 
-		return !!matches ?? false;
+		return !!matches;
 	};
 
 	return (
-		<Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
+		<Stack sx={{ flexGrow: 1, justifyContent: "space-between" }}>
 			<List dense>
 				{mainListItems.map((item) => (
 					<ListItem
@@ -59,7 +59,6 @@ export const MenuContent = () => {
 					</ListItem>
 				))}
 			</List>
-
 			<List dense>
 				{secondaryListItems.map((item) => (
 					<ListItem
