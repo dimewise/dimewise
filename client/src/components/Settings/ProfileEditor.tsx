@@ -70,67 +70,60 @@ export const ProfileEditor = () => {
 			<Divider />
 			<Box
 				sx={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "start",
-					gap: 5,
 					width: "100%",
+					maxWidth: 400,
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					justifyContent: "center",
+					gap: 2,
 					py: 2,
 				}}
 			>
-				<Box
-					sx={{
-						width: "100%",
-						maxWidth: 400,
-						display: "flex",
-						flexDirection: "column",
-						gap: 2,
-					}}
-				>
-					<TextField
-						label="Name"
-						value={username}
-						onChange={handleOnChangeUsername}
-						fullWidth
-					/>
-					<TextField
-						label="Email"
-						value={meDetail.email}
-						disabled
-					/>
-					<FormControl fullWidth>
-						<InputLabel>Default Currency</InputLabel>
-						<Select
-							value={defaultCurrency}
-							onChange={handleOnChangeDefaultCurrency}
-							label="Default Currency"
-						>
-							{Object.values(Currency).map((c) => (
-								<MenuItem
-									key={c}
-									value={c}
-								>
-									{c}
-								</MenuItem>
-							))}
-						</Select>
-					</FormControl>
-					<Box sx={{ display: "flex", alignItems: "center", justifyContent: "start" }}>
-						<Button
-							variant="contained"
-							sx={{ textTransform: "none" }}
-							disabled={username === meDetail.name || defaultCurrency === meDetail.default_currency}
-						>
-							Save
-						</Button>
-					</Box>
-				</Box>
 				<Avatar
 					sizes="small"
 					alt={meDetail.name ?? "Unnamed User"}
 					src={meDetail.avatar_url ?? ""}
 					sx={{ width: 200, height: 200 }}
 				/>
+				<TextField
+					label="Name"
+					value={username}
+					onChange={handleOnChangeUsername}
+					fullWidth
+				/>
+				<TextField
+					label="Email"
+					value={meDetail.email}
+					disabled
+					fullWidth
+				/>
+				<FormControl fullWidth>
+					<InputLabel>Default Currency</InputLabel>
+					<Select
+						value={defaultCurrency}
+						onChange={handleOnChangeDefaultCurrency}
+						label="Default Currency"
+					>
+						{Object.values(Currency).map((c) => (
+							<MenuItem
+								key={c}
+								value={c}
+							>
+								{c}
+							</MenuItem>
+						))}
+					</Select>
+				</FormControl>
+				<Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "end" }}>
+					<Button
+						variant="contained"
+						sx={{ textTransform: "none" }}
+						disabled={username === meDetail.name || defaultCurrency === meDetail.default_currency}
+					>
+						Save
+					</Button>
+				</Box>
 			</Box>
 		</Box>
 	);
