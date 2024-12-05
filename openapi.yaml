@@ -129,6 +129,50 @@ components:
       - id
       title: UserCreate
       type: object
+    UserMeDetail:
+      properties:
+        avatar_url:
+          oneOf:
+          - type: 'null'
+          - type: string
+        default_currency:
+          enum:
+          - USD
+          - EUR
+          - JPY
+          - GBP
+          - AUD
+          - CAD
+          - CHF
+          - CNY
+          - SEK
+          - NZD
+          - NOK
+          - KRW
+          - INR
+          - BRL
+          - RUB
+          - ZAR
+          - TRY
+          - MXN
+          - SGD
+          - HKD
+          type: string
+        email:
+          type: string
+        id:
+          format: uuid
+          type: string
+        name:
+          oneOf:
+          - type: 'null'
+          - type: string
+      required:
+      - default_currency
+      - email
+      - id
+      title: UserMeDetail
+      type: object
   securitySchemes:
     BearerToken:
       bearerFormat: JWT
@@ -403,6 +447,19 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: CreateExpense
+  /api/v1/user/me-detail:
+    get:
+      deprecated: false
+      operationId: ApiV1UserMeDetailGetMeDetail
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserMeDetail'
+          description: Request fulfilled, document follows
+          headers: {}
+      summary: GetMeDetail
   /api/v1/user/register:
     post:
       deprecated: false
