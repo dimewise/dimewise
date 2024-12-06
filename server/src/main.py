@@ -16,12 +16,6 @@ async def root() -> str:
     return "Groot"
 
 
-# @get("/expenses/recent", response_model=list[ExpensePublic])
-# async def get_recent_expenses(req: Request):
-#     expenses = await Expense.get_all(req.state.db, req.state.user_id)
-#     return expenses
-
-
 app = Litestar(
     debug=True,
     path="/api/v1",

@@ -95,6 +95,10 @@ components:
       type: object
     UserCreate:
       properties:
+        avatar_url:
+          oneOf:
+          - type: 'null'
+          - type: string
         default_currency:
           enum:
           - USD
@@ -117,19 +121,24 @@ components:
           - MXN
           - SGD
           - HKD
+          title: Default Currency
           type: string
         email:
           type: string
         id:
           format: uuid
           type: string
+        name:
+          oneOf:
+          - type: 'null'
+          - type: string
       required:
       - default_currency
       - email
       - id
       title: UserCreate
       type: object
-    UserMeDetail:
+    UserPublic:
       properties:
         avatar_url:
           oneOf:
@@ -157,6 +166,7 @@ components:
           - MXN
           - SGD
           - HKD
+          title: Default Currency
           type: string
         email:
           type: string
@@ -171,7 +181,7 @@ components:
       - default_currency
       - email
       - id
-      title: UserMeDetail
+      title: User
       type: object
   securitySchemes:
     BearerToken:
@@ -562,7 +572,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserMeDetail'
+                $ref: '#/components/schemas/UserPublic'
           description: Request fulfilled, document follows
           headers: {}
       summary: GetMeDetail
