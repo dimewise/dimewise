@@ -38,10 +38,13 @@ class ExpenseController(Controller):
         request: Request[AuthUser, Token, Any],
         from_date: datetime | None = None,
         to_date: datetime | None = None,
+        category_ids: list[UUID] | None = None,
     ) -> list[ExpensePublic]:
         query = select(Expense).where(Expense.user_id == request.user.id).order_by(Expense.date.desc())
         if from_date and to_date:
             query = query.where(Expense.date.between(from_date, to_date))
+        if category_ids:
+            query = query.where(Expense.category_id.in_(category_ids))
         expenses = await repo.list(statement=query)
         expenses = [{**e.__dict__, "category": CategoryExpense(**e.category.__dict__)} for e in expenses]
         return [ExpensePublic(**e) for e in expenses]
@@ -53,15 +56,15 @@ class ExpenseController(Controller):
         await repo.add(Expense(user_id=request.user.id, **data.__dict__))
         await repo.session.commit()
 
-    # @delete("/{category_id:uuid}")
-    # async def delete_category(
-    #     self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], category_id: UUID
-    # ) -> None:
-    #     await repo.delete_where(Expense.id == category_id, Expense.user_id == request.user.id)
-    #
-    # @patch("/{category_id:uuid}")
-    # async def upate_category(
-    #     self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], category_id: UUID, data: ExpenseCreate
-    # ) -> None:
-    #     category = Expense(id=category_id, user_id=request.user.id, **data.__dict__)
-    #     await repo.update(category)
+    @delete("/{expense_id:uuid}")
+    async def delete_expense(
+        self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], expense_id: UUID
+    ) -> None:
+        await repo.delete_where(Expense.id == expense_id, Expense.user_id == request.user.id)
+
+    @patch("/{expense_id:uuid}")
+    async def upate_expense(
+        self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], expense_id: UUID, data: ExpenseCreate
+    ) -> None:
+        expense = Expense(id=expense_id, user_id=request.user.id, **data.__dict__)
+        await repo.update(expense)
