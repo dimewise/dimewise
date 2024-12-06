@@ -1,14 +1,15 @@
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
-import Divider from "@mui/material/Divider";
 import MuiDrawer, { drawerClasses } from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
+import { useSelector } from "react-redux";
+import { DimewiseIcon } from "../../../assets/icons/DimewiseIcon";
+import type { RootState } from "../../../store";
 import { CardAlert } from "./CardAlert";
 import { MenuContent } from "./MenuContent";
 import { OptionsMenu } from "./OptionsMenu";
-import { SelectContent } from "./SelectContent";
 
 const drawerWidth = 240;
 
@@ -24,6 +25,7 @@ const Drawer = styled(MuiDrawer)({
 });
 
 export const DashboardSideMenu = () => {
+	const mode = useSelector((state: RootState) => state.theme.mode);
 	return (
 		<Drawer
 			variant="permanent"
@@ -34,17 +36,14 @@ export const DashboardSideMenu = () => {
 				},
 			}}
 		>
-			<Box
-				sx={{
-					display: "flex",
-					p: 1.5,
-				}}
-			>
-				<SelectContent />
+			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 2 }}>
+				<DimewiseIcon
+					mode={mode}
+					height={30}
+					width={drawerWidth}
+				/>
 			</Box>
-			<Divider />
 			<MenuContent />
-			<CardAlert />
 			<Stack
 				direction="row"
 				sx={{

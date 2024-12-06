@@ -3,13 +3,15 @@ import type { ThemeOptions } from "../../store/type";
 
 interface Props {
 	mode: ThemeOptions;
+	height?: number;
+	width?: number;
 }
 
-export const DimewiseIcon = ({ mode }: Props) => {
+export const DimewiseIcon = ({ mode, height, width }: Props) => {
 	const strokeFill = mode === "dark" ? "#FFFFFF" : "#263455";
 
 	return (
-		<SvgIcon sx={{ height: 21, width: 100, mr: 2 }}>
+		<SvgIcon sx={{ height: height ?? 21, width: width ?? 100, mr: 2 }}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 176 32"
