@@ -48,6 +48,7 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           from_date: queryArg.fromDate,
           to_date: queryArg.toDate,
+          category_ids: queryArg.categoryIds,
         },
       }),
     }),
@@ -58,6 +59,25 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v1/expense`,
         method: "POST",
+        body: queryArg.expenseCreate,
+      }),
+    }),
+    apiV1ExpenseExpenseIdDeleteExpense: build.mutation<
+      ApiV1ExpenseExpenseIdDeleteExpenseApiResponse,
+      ApiV1ExpenseExpenseIdDeleteExpenseApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/expense/${queryArg.expenseId}`,
+        method: "DELETE",
+      }),
+    }),
+    apiV1ExpenseExpenseIdUpateExpense: build.mutation<
+      ApiV1ExpenseExpenseIdUpateExpenseApiResponse,
+      ApiV1ExpenseExpenseIdUpateExpenseApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v1/expense/${queryArg.expenseId}`,
+        method: "PATCH",
         body: queryArg.expenseCreate,
       }),
     }),
@@ -104,9 +124,19 @@ export type ApiV1ExpenseGetExpensesApiResponse =
 export type ApiV1ExpenseGetExpensesApiArg = {
   fromDate?: null | string;
   toDate?: null | string;
+  categoryIds?: null | string[];
 };
 export type ApiV1ExpenseCreateExpenseApiResponse = unknown;
 export type ApiV1ExpenseCreateExpenseApiArg = {
+  expenseCreate: ExpenseCreate;
+};
+export type ApiV1ExpenseExpenseIdDeleteExpenseApiResponse = unknown;
+export type ApiV1ExpenseExpenseIdDeleteExpenseApiArg = {
+  expenseId: string;
+};
+export type ApiV1ExpenseExpenseIdUpateExpenseApiResponse = unknown;
+export type ApiV1ExpenseExpenseIdUpateExpenseApiArg = {
+  expenseId: string;
   expenseCreate: ExpenseCreate;
 };
 export type ApiV1UserMeDetailGetMeDetailApiResponse =
@@ -209,6 +239,8 @@ export const {
   useApiV1ExpenseGetExpensesQuery,
   useLazyApiV1ExpenseGetExpensesQuery,
   useApiV1ExpenseCreateExpenseMutation,
+  useApiV1ExpenseExpenseIdDeleteExpenseMutation,
+  useApiV1ExpenseExpenseIdUpateExpenseMutation,
   useApiV1UserMeDetailGetMeDetailQuery,
   useLazyApiV1UserMeDetailGetMeDetailQuery,
   useApiV1UserRegisterCreateUserMutation,
