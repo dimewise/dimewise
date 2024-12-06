@@ -3,11 +3,11 @@ import AppBar from "@mui/material/AppBar";
 import Stack from "@mui/material/Stack";
 import { tabsClasses } from "@mui/material/Tabs";
 import MuiToolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { DimewiseLogo } from "../../../assets/icons/DimewiseLogo";
+import { useSelector } from "react-redux";
+import { DimewiseIcon } from "../../../assets/icons/DimewiseIcon";
+import type { RootState } from "../../../store";
 import { MenuButton } from "../../MenuButton";
 import { SideMenuMobile } from "./SideMenuMobile";
 
@@ -28,7 +28,7 @@ const Toolbar = styled(MuiToolbar)({
 });
 
 export const DashboardNavbar = () => {
-	const { t } = useTranslation();
+	const mode = useSelector((state: RootState) => state.theme.mode);
 	const [open, setOpen] = useState(false);
 
 	const toggleDrawer = (newOpen: boolean) => () => {
@@ -63,14 +63,11 @@ export const DashboardNavbar = () => {
 						spacing={1}
 						sx={{ justifyContent: "center" }}
 					>
-						<DimewiseLogo />
-						<Typography
-							variant="h4"
-							component="h1"
-							sx={{ color: "text.primary" }}
-						>
-							{t("nav.private.dashboard")}
-						</Typography>
+						<DimewiseIcon
+							mode={mode}
+							height={30}
+							width={130}
+						/>
 					</Stack>
 					<MenuButton
 						aria-label="menu"
