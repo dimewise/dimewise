@@ -12,7 +12,7 @@ export enum Routes {
 	// private
 	Dashboard = "/dashboard",
 	Overview = "/dashboard/overview",
-	Transactions = "/dashboard/history",
+	Transactions = "/dashboard/transactions",
 	Categories = "/dashboard/categories",
 	Settings = "/dashboard/settings",
 	About = "/dashboard/about",
