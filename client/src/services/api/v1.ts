@@ -140,7 +140,7 @@ export type ApiV1ExpenseExpenseIdUpateExpenseApiArg = {
   expenseCreate: ExpenseCreate;
 };
 export type ApiV1UserMeDetailGetMeDetailApiResponse =
-  /** status 200 Request fulfilled, document follows */ UserMeDetail;
+  /** status 200 Request fulfilled, document follows */ User;
 export type ApiV1UserMeDetailGetMeDetailApiArg = void;
 export type ApiV1UserRegisterCreateUserApiResponse = unknown;
 export type ApiV1UserRegisterCreateUserApiArg = {
@@ -176,7 +176,7 @@ export type ExpenseCreate = {
   description?: null | string;
   title: string;
 };
-export type UserMeDetail = {
+export type User = {
   avatar_url?: null | string;
   default_currency:
     | "USD"
@@ -204,6 +204,7 @@ export type UserMeDetail = {
   name?: null | string;
 };
 export type UserCreate = {
+  avatar_url?: null | string;
   default_currency:
     | "USD"
     | "EUR"
@@ -227,6 +228,7 @@ export type UserCreate = {
     | "HKD";
   email: string;
   id: string;
+  name?: null | string;
 };
 export const {
   useApiV1RootQuery,

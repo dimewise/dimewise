@@ -10,7 +10,7 @@ from litestar.security.jwt.token import Token
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.models import User
-from src.users.schemas import UserCreate, UserMeDetail
+from src.users.schemas import UserCreate, UserPublic
 from src.utils.jwt import AuthUser
 
 
@@ -35,7 +35,7 @@ class UserController(Controller):
         await repo.session.commit()
 
     @get("/me-detail")
-    async def get_me_detail(self, repo: UserRepository, request: Request[AuthUser, Token, Any]) -> UserMeDetail:
+    async def get_me_detail(self, repo: UserRepository, request: Request[AuthUser, Token, Any]) -> UserPublic:
         user = await repo.get(request.user.id)
 
         if not user:
@@ -49,4 +49,4 @@ class UserController(Controller):
             "avatar_url": user.avatar_url,
         }
 
-        return UserMeDetail.model_validate(me)
+        return UserPublic.model_validate(me)
