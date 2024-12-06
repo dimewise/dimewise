@@ -61,6 +61,12 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.expenseCreate,
       }),
     }),
+    apiV1UserMeDetailGetMeDetail: build.query<
+      ApiV1UserMeDetailGetMeDetailApiResponse,
+      ApiV1UserMeDetailGetMeDetailApiArg
+    >({
+      query: () => ({ url: `/api/v1/user/me-detail` }),
+    }),
     apiV1UserRegisterCreateUser: build.mutation<
       ApiV1UserRegisterCreateUserApiResponse,
       ApiV1UserRegisterCreateUserApiArg
@@ -103,6 +109,9 @@ export type ApiV1ExpenseCreateExpenseApiResponse = unknown;
 export type ApiV1ExpenseCreateExpenseApiArg = {
   expenseCreate: ExpenseCreate;
 };
+export type ApiV1UserMeDetailGetMeDetailApiResponse =
+  /** status 200 Request fulfilled, document follows */ UserMeDetail;
+export type ApiV1UserMeDetailGetMeDetailApiArg = void;
 export type ApiV1UserRegisterCreateUserApiResponse = unknown;
 export type ApiV1UserRegisterCreateUserApiArg = {
   userCreate: UserCreate;
@@ -136,6 +145,33 @@ export type ExpenseCreate = {
   date: string;
   description?: null | string;
   title: string;
+};
+export type UserMeDetail = {
+  avatar_url?: null | string;
+  default_currency:
+    | "USD"
+    | "EUR"
+    | "JPY"
+    | "GBP"
+    | "AUD"
+    | "CAD"
+    | "CHF"
+    | "CNY"
+    | "SEK"
+    | "NZD"
+    | "NOK"
+    | "KRW"
+    | "INR"
+    | "BRL"
+    | "RUB"
+    | "ZAR"
+    | "TRY"
+    | "MXN"
+    | "SGD"
+    | "HKD";
+  email: string;
+  id: string;
+  name?: null | string;
 };
 export type UserCreate = {
   default_currency:
@@ -173,5 +209,7 @@ export const {
   useApiV1ExpenseGetExpensesQuery,
   useLazyApiV1ExpenseGetExpensesQuery,
   useApiV1ExpenseCreateExpenseMutation,
+  useApiV1UserMeDetailGetMeDetailQuery,
+  useLazyApiV1UserMeDetailGetMeDetailQuery,
   useApiV1UserRegisterCreateUserMutation,
 } = injectedRtkApi;

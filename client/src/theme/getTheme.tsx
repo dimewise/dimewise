@@ -3,7 +3,6 @@ import type {} from "@mui/material/themeCssVarsAugmentation";
 import {
 	dataDisplayCustomizations,
 	feedbackCustomizations,
-	inputsCustomizations,
 	navigationCustomizations,
 	surfacesCustomizations,
 } from "./customizations";
@@ -13,10 +12,9 @@ export const getTheme = (mode: PaletteMode): ThemeOptions => {
 	return {
 		...getDesignTokens(mode),
 		components: {
-			...inputsCustomizations,
 			...dataDisplayCustomizations,
 			...feedbackCustomizations,
-			...navigationCustomizations,
+			// ...navigationCustomizations,
 			...surfacesCustomizations,
 		},
 	};

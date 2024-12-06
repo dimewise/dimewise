@@ -6,8 +6,8 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import { useSelector } from "react-redux";
 import { DimewiseIcon } from "../../../assets/icons/DimewiseIcon";
+import { useApiV1UserMeDetailGetMeDetailQuery } from "../../../services/api/v1";
 import type { RootState } from "../../../store";
-import { CardAlert } from "./CardAlert";
 import { MenuContent } from "./MenuContent";
 import { OptionsMenu } from "./OptionsMenu";
 
@@ -26,6 +26,12 @@ const Drawer = styled(MuiDrawer)({
 
 export const DashboardSideMenu = () => {
 	const mode = useSelector((state: RootState) => state.theme.mode);
+	const { data: meDetail, isLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+
+	if (isLoading || !meDetail) {
+		return null;
+	}
+
 	return (
 		<Drawer
 			variant="permanent"
@@ -56,8 +62,8 @@ export const DashboardSideMenu = () => {
 			>
 				<Avatar
 					sizes="small"
-					alt="Riley Carter"
-					src="/static/images/avatar/7.jpg"
+					alt={meDetail.name ?? "Unnamed User"}
+					src={meDetail.avatar_url ?? ""}
 					sx={{ width: 36, height: 36 }}
 				/>
 				<Box sx={{ mr: "auto" }}>
@@ -65,13 +71,13 @@ export const DashboardSideMenu = () => {
 						variant="body2"
 						sx={{ fontWeight: 500, lineHeight: "16px" }}
 					>
-						Riley Carter
+						{meDetail.name ?? "Unnamed User"}
 					</Typography>
 					<Typography
 						variant="caption"
 						sx={{ color: "text.secondary" }}
 					>
-						riley@email.com
+						{meDetail.email}
 					</Typography>
 				</Box>
 				<OptionsMenu />

@@ -13,3 +13,8 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     pass
+
+
+class UserMeDetail(UserBase):
+    name: str | None = None
+    avatar_url: str | None = None
