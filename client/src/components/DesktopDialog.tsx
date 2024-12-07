@@ -4,17 +4,14 @@ import type { PropsWithChildren } from "react";
 interface Props {
 	title: string;
 	open: boolean;
-	setOpen: (open: boolean) => void;
+	handleClose: () => void;
 }
 
-export const DesktopDialog = ({ title, open, setOpen, children }: PropsWithChildren<Props>) => {
-	const handleCloseDialog = () => {
-		setOpen(false);
-	};
+export const DesktopDialog = ({ title, open, handleClose, children }: PropsWithChildren<Props>) => {
 	return (
 		<Dialog
 			open={open}
-			onClose={handleCloseDialog}
+			onClose={handleClose}
 			fullWidth
 			maxWidth="sm"
 			sx={{

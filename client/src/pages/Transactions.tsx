@@ -18,12 +18,12 @@ export const Transactions = () => {
 		toDate: selectedMonth.endOf("month").toUTC().toISO(),
 	});
 
-	const handleOnClickCreate = () => {
-		setOpen(true);
-	};
-
 	const handleSubmitCreateTransaction = () => {
 		setOpen(false);
+	};
+
+	const handleOpen = (open: boolean) => () => {
+		setOpen(open);
 	};
 
 	return (
@@ -35,7 +35,7 @@ export const Transactions = () => {
 						variant="contained"
 						size="small"
 						startIcon={<AddIcon />}
-						onClick={handleOnClickCreate}
+						onClick={handleOpen(true)}
 					>
 						{t("common.button.create")}
 					</Button>
@@ -59,8 +59,8 @@ export const Transactions = () => {
 			</Box>
 			<TransactionFormPopup
 				open={open}
-				setOpen={setOpen}
-				handleClose={handleSubmitCreateTransaction}
+				handleClose={handleOpen(false)}
+				handleSubmit={handleSubmitCreateTransaction}
 			/>
 		</>
 	);

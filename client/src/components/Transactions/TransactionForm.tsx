@@ -8,10 +8,10 @@ import { TransactionSchema, type TransactionSchemaType } from "../../lib/schemas
 import { useApiV1CategoryGetCategoriesQuery, useApiV1ExpenseCreateExpenseMutation } from "../../services/api/v1";
 
 interface Props {
-	handleClose: () => void;
+	handleSubmit: () => void;
 }
 
-export const TransactionForm = ({ handleClose }: Props) => {
+export const TransactionForm = ({ handleSubmit }: Props) => {
 	const { t } = useTranslation();
 	const [createTransaction] = useApiV1ExpenseCreateExpenseMutation();
 	const { data: categories } = useApiV1CategoryGetCategoriesQuery();
@@ -19,7 +19,7 @@ export const TransactionForm = ({ handleClose }: Props) => {
 	const {
 		control,
 		register,
-		handleSubmit,
+		handleSubmit: formSubmit,
 		formState: { errors },
 	} = useForm<TransactionSchemaType>({
 		defaultValues: {
@@ -33,7 +33,7 @@ export const TransactionForm = ({ handleClose }: Props) => {
 	// TODO: add edit
 	const onSubmit = (data: TransactionSchemaType) => {
 		createTransaction({ expenseCreate: data }).then(() => {
-			handleClose();
+			handleSubmit();
 		});
 	};
 
@@ -41,7 +41,7 @@ export const TransactionForm = ({ handleClose }: Props) => {
 		<>
 			<Box
 				component="form"
-				onSubmit={handleSubmit(onSubmit)}
+				onSubmit={formSubmit(onSubmit)}
 				sx={{ display: "flex", flexDirection: "column", gap: 2 }}
 			>
 				<FormControl>

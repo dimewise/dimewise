@@ -9,17 +9,17 @@ import { MobileDrawer } from "../MobileDrawer";
 
 interface Props {
 	open: boolean;
-	setOpen: (open: boolean) => void;
 	transaction: Expense;
+	handleClose: () => void;
 }
 
-export const TransactionDetails = ({ open, setOpen, transaction }: Props) => {
+export const TransactionDetails = ({ open, transaction, handleClose }: Props) => {
 	return (
 		<>
 			<MobileDrawer
 				title={transaction.title}
 				open={open}
-				setOpen={setOpen}
+				handleClose={handleClose}
 			>
 				<TransactionContent
 					transaction={transaction}
@@ -29,7 +29,7 @@ export const TransactionDetails = ({ open, setOpen, transaction }: Props) => {
 			<DesktopDialog
 				title={transaction.title}
 				open={open}
-				setOpen={setOpen}
+				handleClose={handleClose}
 			>
 				<TransactionContent
 					transaction={transaction}

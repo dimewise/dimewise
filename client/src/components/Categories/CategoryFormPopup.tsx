@@ -8,11 +8,11 @@ import { CategoryForm } from "./CategoryForm";
 interface Props {
 	category: CreateUpdateCategory | null;
 	open: boolean;
-	setOpen: (open: boolean) => void;
 	handleClose: () => void;
+	handleSubmit: () => void;
 }
 
-export const CategoryFormPopup = ({ category, open, setOpen, handleClose }: Props) => {
+export const CategoryFormPopup = ({ category, open, handleClose, handleSubmit }: Props) => {
 	const { t } = useTranslation();
 	const [formTitle, setFormTitle] = useState("");
 	useEffect(() => {
@@ -26,20 +26,20 @@ export const CategoryFormPopup = ({ category, open, setOpen, handleClose }: Prop
 			<MobileDrawer
 				title={formTitle}
 				open={open}
-				setOpen={setOpen}
+				handleClose={handleClose}
 			>
 				<CategoryForm
-					handleClose={handleClose}
+					handleSubmit={handleSubmit}
 					category={category}
 				/>
 			</MobileDrawer>
 			<DesktopDialog
 				title={formTitle}
 				open={open}
-				setOpen={setOpen}
+				handleClose={handleClose}
 			>
 				<CategoryForm
-					handleClose={handleClose}
+					handleSubmit={handleSubmit}
 					category={category}
 				/>
 			</DesktopDialog>
