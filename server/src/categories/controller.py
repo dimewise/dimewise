@@ -53,7 +53,7 @@ class CategoryController(Controller):
         await repo.delete_where(Category.id == category_id, Category.user_id == request.user.id)
 
     @patch("/{category_id:uuid}")
-    async def upate_category(
+    async def update_category(
         self, repo: CategoryRepository, request: Request[AuthUser, Token, Any], category_id: UUID, data: CategoryCreate
     ) -> None:
         category = Category(id=category_id, user_id=request.user.id, **data.__dict__)
