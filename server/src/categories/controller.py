@@ -12,7 +12,8 @@ from litestar.security.jwt.token import Token
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.categories.schemas import CategoryCreate, CategoryFull
+from src.categories.schemas import (CategoryCreate, CategoryFull,
+                                    CategoryOverview)
 from src.models import Category, Expense
 from src.utils.jwt import AuthUser
 
@@ -60,9 +61,9 @@ class CategoryController(Controller):
         self,
         repo: CategoryRepository,
         request: Request[AuthUser, Token, Any],
-        from_date: datetime | None = None,
-        to_date: datetime | None = None,
-    ) -> dict[int, list[CategoryFull]]:
+        from_date: datetime,
+        to_date: datetime,
+    ) -> CategoryOverview:
         query = (
             select(Category, func.extract("month", Expense.date), func.sum(Expense.amount))
             .outerjoin(Expense)
@@ -70,13 +71,21 @@ class CategoryController(Controller):
             .group_by(Category.id, func.extract("month", Expense.date))
             .order_by(func.extract("month", Expense.date))
         )
-        categories = await repo.session.execute(statement=query)
+        categories_per_month = await repo.session.execute(statement=query)
 
-        res = defaultdict(list[CategoryFull])
-        for category, month, spent in categories:
-            res[month].append(CategoryFull(**category.__dict__, spent=spent))
+        query = select(Category.name, Category.budget).where(Category.user_id == request.user.id)
+        categories = (await repo.session.execute(query)).fetchall()
 
-        return res
+        months = defaultdict(lambda: [0] * 12)
+        for category, month, spent in categories_per_month:
+            months[category.name][int(month) - 1] = spent
+
+        # If any categories are missing due to no expenses, init them
+        for name, _ in categories:
+            if name not in months:
+                months[name]
+
+        return CategoryOverview(months=months, budget=sum(budget for _, budget in categories))
 
     @post()
     async def create_category(

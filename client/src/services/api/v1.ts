@@ -141,9 +141,7 @@ export type ApiV1CategoryCreateCategoryApiArg = {
   categoryCreate: CategoryCreate;
 };
 export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiResponse =
-  /** status 200 Request fulfilled, document follows */ {
-    [key: string]: CategoryFull[];
-  };
+  /** status 200 Request fulfilled, document follows */ CategoryOverview;
 export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiArg = {
   fromDate?: null | string;
   toDate?: null | string;
@@ -193,6 +191,12 @@ export type CategoryFull = {
 export type CategoryCreate = {
   budget: number;
   name: string;
+};
+export type CategoryOverview = {
+  budget: number;
+  months: {
+    [key: string]: number[];
+  };
 };
 export type CategoryExpense = {
   budget: number;

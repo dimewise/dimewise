@@ -19,3 +19,8 @@ class CategoryCreate(CategoryBase):
 
 class CategoryExpense(CategoryBase):
     id: UUID
+
+
+class CategoryOverview(BaseModel):
+    budget: int
+    months: dict[str, list[int]]
