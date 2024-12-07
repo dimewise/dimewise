@@ -11,56 +11,22 @@ import {
 	ResponsiveChartContainer,
 } from "@mui/x-charts";
 import { DateTime } from "luxon";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-
-type CategoryDataType = {
-	label: string;
-	data: [number]; // only one element for data, same as Current Month Widget
-};
-
-type MonthlyDataType = {
-	monthNumber: number;
-	categories: CategoryDataType[];
-};
-
-type ApiData = {
-	budget: number;
-	months: MonthlyDataType[];
-};
+import { useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery } from "../../services/api/v1";
 
 export const MonthlyOverviewWidget = () => {
 	const { t } = useTranslation();
-	// call user to get currency
+	// TODO: call user to get currency
 	const currency = "JPY";
 
-	// call API here
-	const data = fakeApiData;
-	const months = data.months;
-
-	// find all unique categories
-	const uniqueCategories = new Set<string>();
-
-	// iterate over month and category to populate the set
-	for (const month of months) {
-		for (const category of month.categories) {
-			uniqueCategories.add(category.label);
-		}
-	}
-	// initialize each category with the zero value for each month (e.g. 12 months, 12 elements in the array)
-	const categoriesData = Array.from(uniqueCategories).reduce(
-		(acc, category) => {
-			acc[category] = Array(12).fill(0); // 12 zeros for 12 months
-			return acc;
-		},
-		{} as Record<string, number[]>,
-	);
-
-	for (const month of months) {
-		for (const category of month.categories) {
-			const monthIndex = month.monthNumber - 1;
-			categoriesData[category.label][monthIndex] = category.data[0]; // Assign the value to the correct month
-		}
-	}
+	const now = useMemo(() => DateTime.now(), []);
+	const { data: overviewData } = useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery({
+		fromDate: now.startOf("year").toUTC().toISO(),
+		toDate: now.toUTC().toISO(),
+	});
+	const budget = overviewData?.budget ?? 0;
+	const categoriesData = overviewData?.months ?? {};
 
 	// transform the data into the series array for the bar chart
 	const barData: BarSeriesType[] = Object.keys(categoriesData).map((category) => ({
@@ -70,28 +36,26 @@ export const MonthlyOverviewWidget = () => {
 		label: category,
 		layout: "vertical",
 	}));
+
 	const lineData: LineSeriesType = {
 		// this is needed to ensure the chart resize correctly
 		type: "line",
-		data: months.map(() => data.budget),
+		data: new Array(12).fill(budget),
 		label: "Budget",
 		color: "transparent",
 	};
 
+	console.log(lineData);
+
 	// collate data
-	const xAxisData = months.map((m) => DateTime.local(2024, m.monthNumber).toFormat("MMM"));
+	const xAxisData = Array.from(Array(12).keys()).map((m) => DateTime.local(now.year, m + 1).toFormat("MMM"));
 	const series = [...barData, lineData];
-	const budgetLabel = `${currency} ${data.budget}`;
+	const budgetLabel = `${currency} ${budget}`;
 
-	const savedAmount = months.reduce((totalSaved, month) => {
-		const totalExpenses = month.categories.reduce((total, category) => total + category.data[0], 0);
-
-		// only consider it a savings if expense exists
-		const savingsForMonth = totalExpenses > 0 ? data.budget - totalExpenses : 0;
-
-		return totalSaved + savingsForMonth;
-	}, 0);
-
+	const spentAmount = Object.values(categoriesData)
+		.flat()
+		.reduce((sum, value) => sum + value, 0);
+	const savedAmount = budget - spentAmount;
 	const savedStr = `${currency} ${savedAmount}`;
 
 	return (
@@ -138,7 +102,7 @@ export const MonthlyOverviewWidget = () => {
 						<ChartsAxisHighlight x="band" />
 						<ChartsTooltip />
 						<ChartsReferenceLine
-							y={data.budget}
+							y={budget}
 							label={budgetLabel}
 							labelAlign="end"
 							labelStyle={{ fill: "red" }}
@@ -150,118 +114,4 @@ export const MonthlyOverviewWidget = () => {
 			</Card>
 		</Grid>
 	);
-};
-
-const fakeApiData: ApiData = {
-	budget: 250000, // total budget in Yen
-	months: [
-		{
-			monthNumber: 1, // January
-			categories: [
-				{ label: "Food", data: [30000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [10000] },
-				{ label: "Entertainment", data: [5000] },
-			],
-		},
-		{
-			monthNumber: 2, // February
-			categories: [
-				{ label: "Food", data: [32000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [12000] },
-				{ label: "Entertainment", data: [4500] },
-			],
-		},
-		{
-			monthNumber: 3, // March
-			categories: [
-				{ label: "Food", data: [31000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [9000] },
-				{ label: "Entertainment", data: [5500] },
-			],
-		},
-		{
-			monthNumber: 4, // April
-			categories: [
-				{ label: "Food", data: [29000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [11000] },
-				{ label: "Entertainment", data: [6000] },
-			],
-		},
-		{
-			monthNumber: 5, // May
-			categories: [
-				{ label: "Food", data: [34000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [13000] },
-				{ label: "Entertainment", data: [7000] },
-			],
-		},
-		{
-			monthNumber: 6, // June
-			categories: [
-				{ label: "Food", data: [32000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [12000] },
-				{ label: "Entertainment", data: [4000] },
-			],
-		},
-		{
-			monthNumber: 7, // July
-			categories: [
-				{ label: "Food", data: [33000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [14000] },
-				{ label: "Entertainment", data: [4500] },
-			],
-		},
-		{
-			monthNumber: 8, // August
-			categories: [
-				{ label: "Food", data: [30000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [12500] },
-				{ label: "Entertainment", data: [5500] },
-			],
-		},
-		{
-			monthNumber: 9, // September
-			categories: [
-				{ label: "Food", data: [31000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [10000] },
-				{ label: "Entertainment", data: [4800] },
-			],
-		},
-		{
-			monthNumber: 10, // October
-			categories: [
-				{ label: "Food", data: [30500] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [11500] },
-				{ label: "Entertainment", data: [5200] },
-			],
-		},
-		{
-			monthNumber: 11, // November
-			categories: [
-				{ label: "Food", data: [33500] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [13500] },
-				{ label: "Entertainment", data: [4800] },
-			],
-		},
-		{
-			monthNumber: 12, // December
-			categories: [
-				{ label: "Food", data: [29000] },
-				{ label: "Rent", data: [80000] },
-				{ label: "Transportation", data: [14000] },
-				{ label: "Entertainment", data: [5100] },
-			],
-		},
-	],
 };
