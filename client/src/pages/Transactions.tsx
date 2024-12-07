@@ -3,6 +3,7 @@ import { Box, Button, List } from "@mui/material";
 import { DateTime } from "luxon";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Toast } from "../components/Toast";
 import { TransactionListItem } from "../components/TransactionListItem";
 import { MonthNavigator } from "../components/Transactions/MonthNavigator";
 import { TransactionFormPopup } from "../components/Transactions/TransactionFormPopup";
@@ -62,6 +63,7 @@ export const Transactions = () => {
 				handleClose={handleOpen(false)}
 				handleSubmit={handleSubmitCreateTransaction}
 			/>
+			<Toast />
 		</>
 	);
 };

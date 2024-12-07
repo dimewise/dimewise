@@ -4,6 +4,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTime } from "luxon";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 import { TransactionSchema, type TransactionSchemaType } from "../../lib/schemas/TransactionSchema";
 import {
 	type Expense,
@@ -11,6 +12,7 @@ import {
 	useApiV1ExpenseCreateExpenseMutation,
 	useApiV1ExpenseExpenseIdUpdateExpenseMutation,
 } from "../../services/api/v1";
+import { showToast } from "../../store/toastSlice";
 
 interface Props {
 	transaction?: Expense;
@@ -20,6 +22,7 @@ interface Props {
 
 export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Props) => {
 	const { t } = useTranslation();
+	const dispatch = useDispatch();
 	const [createTransaction] = useApiV1ExpenseCreateExpenseMutation();
 	const [editTransaction] = useApiV1ExpenseExpenseIdUpdateExpenseMutation();
 	const now = DateTime.now();
@@ -44,25 +47,28 @@ export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Prop
 		resolver: yupResolver(TransactionSchema),
 	});
 
-	// TODO: add edit
 	const onSubmit = (data: TransactionSchemaType) => {
 		if (transaction) {
 			editTransaction({ expenseId: transaction.id, expenseCreate: data })
 				.unwrap()
 				.then(() => {
 					handleSubmit();
+					dispatch(showToast({ message: t("transactions.toast.edit-success"), type: "success" }));
 				})
 				.catch((err) => {
 					console.error(err);
+					dispatch(showToast({ message: t("common.toast.error"), type: "error" }));
 				});
 		} else {
 			createTransaction({ expenseCreate: data })
 				.unwrap()
 				.then(() => {
 					handleSubmit();
+					dispatch(showToast({ message: t("transactions.toast.create-success"), type: "success" }));
 				})
 				.catch((err) => {
 					console.error(err);
+					dispatch(showToast({ message: t("common.toast.error"), type: "error" }));
 				});
 		}
 	};
@@ -196,7 +202,7 @@ export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Prop
 							},
 						}}
 					>
-						{t("common.button.create")}
+						{transaction ? t("common.button.save") : t("common.button.create")}
 					</Button>
 				</Box>
 			</Box>
