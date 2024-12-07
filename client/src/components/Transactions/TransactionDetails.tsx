@@ -1,11 +1,13 @@
 import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { DateTime } from "luxon";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type Expense, useApiV1ExpenseExpenseIdDeleteExpenseMutation } from "../../services/api/v1";
 import { DesktopDialog } from "../DesktopDialog";
 import { MobileDrawer } from "../MobileDrawer";
+import { TransactionForm } from "./TransactionForm";
+import { TransactionDetailsEnum } from "./type";
 
 interface Props {
 	open: boolean;
@@ -14,57 +16,102 @@ interface Props {
 }
 
 export const TransactionDetails = ({ open, transaction, handleClose }: Props) => {
+	const { t } = useTranslation();
+	const [detailsType, setDetailsType] = useState<TransactionDetailsEnum>(TransactionDetailsEnum.view);
+
+	const title = useMemo(() => {
+		return detailsType === TransactionDetailsEnum.view
+			? transaction.title
+			: detailsType === TransactionDetailsEnum.edit
+				? t("transactions.edit.title")
+				: t("transactions.delete.confirmation-title");
+	}, [detailsType, transaction, t]);
+
+	const handleResetOnClose = () => {
+		handleClose();
+
+		// set timeout needed to prevent modal flickering
+		setTimeout(() => {
+			setDetailsType(TransactionDetailsEnum.view);
+		}, 500);
+	};
+
 	return (
 		<>
 			<MobileDrawer
-				title={transaction.title}
+				title={title}
 				open={open}
-				handleClose={handleClose}
+				handleClose={handleResetOnClose}
 			>
 				<TransactionContent
+					detailsType={detailsType}
+					setDetailsType={setDetailsType}
 					transaction={transaction}
-					handleClose={handleClose}
+					handleCloseModal={handleResetOnClose}
 				/>
 			</MobileDrawer>
 			<DesktopDialog
-				title={transaction.title}
+				title={title}
 				open={open}
-				handleClose={handleClose}
+				handleClose={handleResetOnClose}
 			>
 				<TransactionContent
+					detailsType={detailsType}
+					setDetailsType={setDetailsType}
 					transaction={transaction}
-					handleClose={handleClose}
+					handleCloseModal={handleResetOnClose}
 				/>
 			</DesktopDialog>
 		</>
 	);
 };
 
-const TransactionContent = ({ transaction, handleClose }: { transaction: Expense; handleClose: () => void }) => {
+interface TransactionContentProps {
+	detailsType: TransactionDetailsEnum;
+	setDetailsType: (detailsType: TransactionDetailsEnum) => void;
+	transaction: Expense;
+	handleCloseModal: () => void;
+}
+
+const TransactionContent = ({
+	detailsType,
+	setDetailsType,
+	transaction,
+	handleCloseModal,
+}: TransactionContentProps) => {
 	const { t } = useTranslation();
-	const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 	const [deleteExpenseById] = useApiV1ExpenseExpenseIdDeleteExpenseMutation();
 
 	const date = DateTime.fromISO(transaction.date).toFormat("MMM d, yyyy");
 	const currency = "JPY";
 	const transactionAmountStr = `${currency} ${transaction.amount}`;
 
+	// Edit
+	const handleOnClickEdit = () => {
+		setDetailsType(TransactionDetailsEnum.edit);
+	};
+	const handleOnClickEditCancel = () => {
+		setDetailsType(TransactionDetailsEnum.view);
+	};
+	const handleOnClickEditSave = () => {
+		// add clean up code here to close
+		setDetailsType(TransactionDetailsEnum.view);
+	};
+
+	// Delete
 	const handleOnClickDelete = () => {
-		setOpenConfirmDelete(true);
+		setDetailsType(TransactionDetailsEnum.delete);
 	};
-
 	const handleOnClickDeleteCancel = () => {
-		setOpenConfirmDelete(false);
+		setDetailsType(TransactionDetailsEnum.view);
 	};
-
 	const handleOnClickDeleteConfirm = () => {
 		deleteExpenseById({
 			expenseId: transaction.id,
 		})
 			.unwrap()
 			.then(() => {
-				handleClose();
-				setOpenConfirmDelete(false);
+				handleCloseModal();
 				// TODO: Add toast for success message
 			})
 			.catch((err) => {
@@ -74,107 +121,114 @@ const TransactionContent = ({ transaction, handleClose }: { transaction: Expense
 	};
 
 	return (
-		<>
-			<Stack
-				direction="column"
-				gap={1}
-			>
-				{openConfirmDelete ? (
-					<>
-						<Typography>{t("transactions.delete.confirmation")}</Typography>
-						<Box
+		<Stack
+			direction="column"
+			gap={1}
+		>
+			{detailsType === TransactionDetailsEnum.view && (
+				<>
+					<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.description")}</Typography>
+					<Typography>{transaction.description}</Typography>
+					<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.amount")}</Typography>
+					<Typography>{transactionAmountStr}</Typography>
+					<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
+						{t("transactions.details.date-of-transaction")}
+					</Typography>
+					<Typography>{date}</Typography>
+					<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.category")}</Typography>
+					<Typography>{transaction.category.name}</Typography>
+					<Box
+						sx={{
+							width: "100%",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: { sm: "space-between", md: "end" },
+							gap: 1,
+						}}
+					>
+						<Button
 							sx={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: { sm: "space-between", md: "end" },
-								gap: 1,
+								textTransform: "none",
+								width: {
+									xs: "100%",
+									md: "fit-content",
+								},
 							}}
+							variant="contained"
+							color="error"
+							startIcon={<DeleteOutlined />}
+							onClick={handleOnClickDelete}
 						>
-							<Button
-								sx={{
-									textTransform: "none",
-									width: {
-										xs: "100%",
-										md: "fit-content",
-									},
-								}}
-								variant="contained"
-								color="secondary"
-								onClick={handleOnClickDeleteCancel}
-							>
-								{t("common.button.cancel")}
-							</Button>
-							<Button
-								sx={{
-									textTransform: "none",
-									width: {
-										xs: "100%",
-										md: "fit-content",
-									},
-								}}
-								variant="contained"
-								color="error"
-								onClick={handleOnClickDeleteConfirm}
-							>
-								{t("common.button.confirm")}
-							</Button>
-						</Box>
-					</>
-				) : (
-					<>
-						<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.description")}</Typography>
-						<Typography>{transaction.description}</Typography>
-						<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.amount")}</Typography>
-						<Typography>{transactionAmountStr}</Typography>
-						<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>
-							{t("transactions.details.date-of-transaction")}
-						</Typography>
-						<Typography>{date}</Typography>
-						<Typography sx={{ fontSize: 16, fontWeight: "bold" }}>{t("transactions.details.category")}</Typography>
-						<Typography>{transaction.category.name}</Typography>
-						<Box
+							{t("common.button.delete")}
+						</Button>
+						<Button
 							sx={{
-								width: "100%",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: { sm: "space-between", md: "end" },
-								gap: 1,
+								textTransform: "none",
+								width: {
+									xs: "100%",
+									md: "fit-content",
+								},
 							}}
+							variant="contained"
+							color="primary"
+							startIcon={<EditOutlined />}
+							onClick={handleOnClickEdit}
 						>
-							<Button
-								sx={{
-									textTransform: "none",
-									width: {
-										xs: "100%",
-										md: "fit-content",
-									},
-								}}
-								variant="contained"
-								color="error"
-								startIcon={<DeleteOutlined />}
-								onClick={handleOnClickDelete}
-							>
-								{t("common.button.delete")}
-							</Button>
-							<Button
-								sx={{
-									textTransform: "none",
-									width: {
-										xs: "100%",
-										md: "fit-content",
-									},
-								}}
-								variant="contained"
-								color="primary"
-								startIcon={<EditOutlined />}
-							>
-								{t("common.button.edit")}
-							</Button>
-						</Box>
-					</>
-				)}
-			</Stack>
-		</>
+							{t("common.button.edit")}
+						</Button>
+					</Box>
+				</>
+			)}
+			{detailsType === TransactionDetailsEnum.edit && (
+				<TransactionForm
+					transaction={transaction}
+					handleSubmit={handleOnClickEditSave}
+					handleClose={handleOnClickEditCancel}
+				/>
+			)}
+			{detailsType === TransactionDetailsEnum.delete && (
+				<>
+					<Typography>{t("transactions.delete.confirmation-body")}</Typography>
+					<Box
+						sx={{
+							width: "100%",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: { sm: "space-between", md: "end" },
+							gap: 1,
+						}}
+					>
+						<Button
+							sx={{
+								textTransform: "none",
+								width: {
+									xs: "100%",
+									md: "fit-content",
+								},
+							}}
+							variant="contained"
+							color="secondary"
+							onClick={handleOnClickDeleteCancel}
+						>
+							{t("common.button.cancel")}
+						</Button>
+						<Button
+							sx={{
+								textTransform: "none",
+								width: {
+									xs: "100%",
+									md: "fit-content",
+								},
+							}}
+							variant="contained"
+							color="error"
+							onClick={handleOnClickDeleteConfirm}
+						>
+							{t("common.button.confirm")}
+						</Button>
+					</Box>
+				</>
+			)}
+		</Stack>
 	);
 };

@@ -5,15 +5,23 @@ import { DateTime } from "luxon";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { TransactionSchema, type TransactionSchemaType } from "../../lib/schemas/TransactionSchema";
-import { useApiV1CategoryGetCategoriesQuery, useApiV1ExpenseCreateExpenseMutation } from "../../services/api/v1";
+import {
+	type Expense,
+	useApiV1CategoryGetCategoriesQuery,
+	useApiV1ExpenseCreateExpenseMutation,
+	useApiV1ExpenseExpenseIdUpateExpenseMutation,
+} from "../../services/api/v1";
 
 interface Props {
+	transaction?: Expense;
 	handleSubmit: () => void;
+	handleClose: () => void;
 }
 
-export const TransactionForm = ({ handleSubmit }: Props) => {
+export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Props) => {
 	const { t } = useTranslation();
 	const [createTransaction] = useApiV1ExpenseCreateExpenseMutation();
+	const [editTransaction] = useApiV1ExpenseExpenseIdUpateExpenseMutation();
 	const { data: categories } = useApiV1CategoryGetCategoriesQuery();
 
 	const {
@@ -23,18 +31,36 @@ export const TransactionForm = ({ handleSubmit }: Props) => {
 		formState: { errors },
 	} = useForm<TransactionSchemaType>({
 		defaultValues: {
-			date: DateTime.now().startOf("day"),
-			amount: 0,
-			category_id: "",
+			title: transaction ? transaction.title : "",
+			description: transaction?.description ? transaction.description : "",
+			date: transaction ? DateTime.fromISO(transaction.date) : DateTime.now().startOf("day"),
+			amount: transaction ? transaction.amount : 0,
+			category_id: transaction ? transaction.category.id : "",
 		},
 		resolver: yupResolver(TransactionSchema),
 	});
 
 	// TODO: add edit
 	const onSubmit = (data: TransactionSchemaType) => {
-		createTransaction({ expenseCreate: data }).then(() => {
-			handleSubmit();
-		});
+		if (transaction) {
+			editTransaction({ expenseId: transaction.id, expenseCreate: data })
+				.unwrap()
+				.then(() => {
+					handleSubmit();
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+		} else {
+			createTransaction({ expenseCreate: data })
+				.unwrap()
+				.then(() => {
+					handleSubmit();
+				})
+				.catch((err) => {
+					console.error(err);
+				});
+		}
 	};
 
 	return (
@@ -130,14 +156,45 @@ export const TransactionForm = ({ handleSubmit }: Props) => {
 						}}
 					/>
 				</FormControl>
-				<Button
-					type="submit"
-					fullWidth
-					variant="contained"
-					sx={{ mt: 3 }}
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: { sm: "space-between", md: "end" },
+						gap: 1,
+					}}
 				>
-					{t("common.button.create")}
-				</Button>
+					<Button
+						type="button"
+						fullWidth
+						variant="contained"
+						color="secondary"
+						sx={{
+							textTransform: "none",
+							width: {
+								xs: "100%",
+								md: "fit-content",
+							},
+						}}
+						onClick={handleClose}
+					>
+						{t("common.button.cancel")}
+					</Button>
+					<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						sx={{
+							textTransform: "none",
+							width: {
+								xs: "100%",
+								md: "fit-content",
+							},
+						}}
+					>
+						{t("common.button.create")}
+					</Button>
+				</Box>
 			</Box>
 		</>
 	);
