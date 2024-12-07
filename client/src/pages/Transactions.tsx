@@ -37,6 +37,9 @@ export const Transactions = () => {
 						size="small"
 						startIcon={<AddIcon />}
 						onClick={handleOpen(true)}
+						sx={{
+							textTransform: "none",
+						}}
 					>
 						{t("common.button.create")}
 					</Button>
