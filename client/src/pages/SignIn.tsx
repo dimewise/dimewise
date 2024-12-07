@@ -1,4 +1,4 @@
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Link } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -22,7 +22,7 @@ import { FacebookIcon } from "../assets/icons/FacebookIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { ForgotPasswordDialog } from "../components/SignIn/ForgotPasswordDialog";
 import { useAuth } from "../hooks/useAuth";
-import { LoginSchema, type LoginSchemaType } from "../lib/schemas/LoginSchema";
+import { type LoginFormData, LoginSchema } from "../lib/schemas/LoginSchema";
 import type { RootState } from "../store";
 
 export const SignIn = () => {
@@ -39,13 +39,13 @@ export const SignIn = () => {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<LoginSchemaType>({
-		resolver: yupResolver(LoginSchema),
+	} = useForm<LoginFormData>({
+		resolver: zodResolver(LoginSchema),
 	});
 
 	// handle on sign in form submit
 	const from = location.state?.from?.pathname || "/";
-	const onSubmit = (data: LoginSchemaType) => {
+	const onSubmit = (data: LoginFormData) => {
 		login(data).then((error) => {
 			if (error) {
 				setLoginError(error);

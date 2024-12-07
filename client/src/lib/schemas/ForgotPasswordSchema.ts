@@ -1,7 +1,13 @@
-import * as yup from "yup";
+import { z } from "zod";
 
-export const ForgotPasswordSchema = yup.object({
-	email: yup.string().email().required("Email is required"),
+export const ForgotPasswordSchema = z.object({
+	email: z
+		.string({
+			required_error: "auth.form.field_email.validate_required",
+		})
+		.email({
+			message: "auth.form.field_email.validate_not_an_email",
+		}),
 });
 
-export interface ForgotPasswordSchema extends yup.InferType<typeof ForgotPasswordSchema> {}
+export type ForgotPasswordFormData = z.infer<typeof ForgotPasswordSchema>;

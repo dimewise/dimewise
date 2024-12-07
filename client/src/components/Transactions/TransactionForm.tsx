@@ -1,13 +1,14 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, FormControl, FormLabel, MenuItem, Select, TextField } from "@mui/material";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Box, Button, FormControl, FormHelperText, FormLabel, MenuItem, Select, TextField } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTime } from "luxon";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { TransactionSchema, type TransactionSchemaType } from "../../lib/schemas/TransactionSchema";
+import { type TransactionFormData, TransactionSchema } from "../../lib/schemas/TransactionSchema";
 import {
 	type Expense,
+	type ExpenseCreate,
 	useApiV1CategoryGetCategoriesQuery,
 	useApiV1ExpenseCreateExpenseMutation,
 	useApiV1ExpenseExpenseIdUpdateExpenseMutation,
@@ -36,20 +37,24 @@ export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Prop
 		register,
 		handleSubmit: formSubmit,
 		formState: { errors },
-	} = useForm<TransactionSchemaType>({
+	} = useForm<TransactionFormData>({
 		defaultValues: {
 			title: transaction ? transaction.title : "",
 			description: transaction?.description ? transaction.description : "",
-			date: transaction ? DateTime.fromISO(transaction.date) : DateTime.now().startOf("day"),
+			date: transaction ? DateTime.fromISO(transaction.date).toJSDate() : DateTime.now().startOf("day").toJSDate(),
 			amount: transaction ? transaction.amount : 0,
 			category_id: transaction ? transaction.category.id : "",
 		},
-		resolver: yupResolver(TransactionSchema),
+		resolver: zodResolver(TransactionSchema),
 	});
 
-	const onSubmit = (data: TransactionSchemaType) => {
+	const onSubmit = (data: TransactionFormData) => {
+		const transformedData: ExpenseCreate = {
+			...data,
+			date: DateTime.fromJSDate(data.date).toISO() ?? "",
+		};
 		if (transaction) {
-			editTransaction({ expenseId: transaction.id, expenseCreate: data })
+			editTransaction({ expenseId: transaction.id, expenseCreate: transformedData })
 				.unwrap()
 				.then(() => {
 					handleSubmit();
@@ -60,7 +65,7 @@ export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Prop
 					dispatch(showToast({ message: t("common.toast.error"), type: "error" }));
 				});
 		} else {
-			createTransaction({ expenseCreate: data })
+			createTransaction({ expenseCreate: transformedData })
 				.unwrap()
 				.then(() => {
 					handleSubmit();
@@ -129,17 +134,23 @@ export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Prop
 						render={({ field }) => {
 							return (
 								<DatePicker
-									value={field.value}
+									value={field.value ? DateTime.fromJSDate(field.value) : null}
 									inputRef={field.ref}
 									onChange={(date) => {
 										field.onChange(date);
+									}}
+									slotProps={{
+										textField: {
+											error: !!errors.date,
+											helperText: errors.date?.message,
+										},
 									}}
 								/>
 							);
 						}}
 					/>
 				</FormControl>
-				<FormControl>
+				<FormControl error={!!errors.category_id}>
 					<FormLabel htmlFor="category_id">{t("transactions.form.field_category.label")}</FormLabel>
 					<Controller
 						control={control}
@@ -147,21 +158,24 @@ export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Prop
 						rules={{ required: true }}
 						render={({ field }) => {
 							return (
-								<Select
-									notched
-									{...field}
-									variant="outlined"
-									inputProps={{ id: "category_id" }}
-								>
-									{categories?.map((category) => (
-										<MenuItem
-											value={category.id}
-											key={category.id}
-										>
-											{category.name}{" "}
-										</MenuItem>
-									))}
-								</Select>
+								<>
+									<Select
+										notched
+										{...field}
+										variant="outlined"
+										inputProps={{ id: "category_id" }}
+									>
+										{categories?.map((category) => (
+											<MenuItem
+												value={category.id}
+												key={category.id}
+											>
+												{category.name}{" "}
+											</MenuItem>
+										))}
+									</Select>
+									{errors.category_id?.message && <FormHelperText>{errors.category_id.message}</FormHelperText>}
+								</>
 							);
 						}}
 					/>
