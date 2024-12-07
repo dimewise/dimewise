@@ -1,9 +1,9 @@
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, FormControl, FormLabel, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { CategorySchema, type CategorySchemaType } from "../../lib/schemas/CategorySchema";
+import { type CategoryFormData, CategorySchema } from "../../lib/schemas/CategorySchema";
 import type { CreateUpdateCategory } from "../../pages/Categories";
 import {
 	useApiV1CategoryCategoryIdUpdateCategoryMutation,
@@ -26,14 +26,14 @@ export const CategoryForm = ({ category, handleSubmit }: Props) => {
 		register,
 		handleSubmit: formSubmit,
 		formState: { errors },
-	} = useForm<CategorySchemaType>({
+	} = useForm<CategoryFormData>({
 		defaultValues: {
 			...category,
 		},
-		resolver: yupResolver(CategorySchema),
+		resolver: zodResolver(CategorySchema),
 	});
 
-	const onSubmit = (data: CategorySchemaType) => {
+	const onSubmit = (data: CategoryFormData) => {
 		if (category?.id) {
 			updateCategory({ categoryId: category.id, categoryCreate: data })
 				.unwrap()

@@ -1,4 +1,4 @@
-import { yupResolver } from "@hookform/resolvers/yup";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -22,7 +22,7 @@ import { DimewiseIcon } from "../assets/icons/DimewiseIcon";
 import { FacebookIcon } from "../assets/icons/FacebookIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { useAuth } from "../hooks/useAuth";
-import { SignUpSchema, type SignUpSchemaType } from "../lib/schemas/SignUpSchema";
+import { type SignUpFormData, SignUpSchema } from "../lib/schemas/SignUpSchema";
 import { useApiV1UserRegisterCreateUserMutation } from "../services/api/v1";
 import type { RootState } from "../store";
 
@@ -40,13 +40,13 @@ export const SignUp = () => {
 		register,
 		handleSubmit,
 		formState: { errors },
-	} = useForm<SignUpSchemaType>({
-		resolver: yupResolver(SignUpSchema),
+	} = useForm<SignUpFormData>({
+		resolver: zodResolver(SignUpSchema),
 	});
 
 	// handle on sign up form submit
 	const from = location.state?.from?.pathname || "/";
-	const onSubmit = async (creds: SignUpSchemaType) => {
+	const onSubmit = async (creds: SignUpFormData) => {
 		signUp(creds).then((resp) => {
 			if (!resp) return;
 			const { userCreate, error } = resp;

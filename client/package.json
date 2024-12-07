@@ -37,7 +37,7 @@
 		"react-router-dom": "^6.26.0",
 		"redux-persist": "^6.0.0",
 		"supabase": "^1.187.10",
-		"yup": "^1.4.0"
+		"zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",

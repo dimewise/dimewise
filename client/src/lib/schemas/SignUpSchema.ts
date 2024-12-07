@@ -1,14 +1,31 @@
-import * as yup from "yup";
+import { z } from "zod";
 
-export const SignUpSchema = yup.object({
-	email: yup.string().email().required("Email is required"),
-	password: yup.string().required("Password is required"),
-	confirmPassword: yup
-		.string()
-		.required("Password confirmation is required")
-		.test("password-match", "Password must match", function (v) {
-			return this.parent.password === v;
+export const SignUpSchema = z
+	.object({
+		email: z
+			.string({
+				required_error: "auth.form.field_email.validate_required",
+			})
+			.email({
+				message: "auth.form.field_email.validate_not_an_email",
+			}),
+		password: z
+			.string({
+				required_error: "auth.form.field_password.validate_required",
+			})
+			.min(8, "auth.form.field_password.validate_minimum_length")
+			.max(64, "auth.form.field_password.validate_maximum_length")
+			.regex(/[A-Z]/, "auth.form.field_password.validate_contains_uppercase")
+			.regex(/[a-z]/, "auth.form.field_password.validate_contains_lowercase")
+			.regex(/[0-9]/, "auth.form.field_password.validate_contains_number")
+			.regex(/[\W_]/, "auth.form.field_password.validate_contains_special_character"),
+		confirmPassword: z.string({
+			required_error: "auth.form.field_confirm_password.validate_required",
 		}),
-});
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "auth.form.field_confirm_password.validate_not_equal_password",
+		path: ["confirmPassword"],
+	});
 
-export interface SignUpSchemaType extends yup.InferType<typeof SignUpSchema> {}
+export type SignUpFormData = z.infer<typeof SignUpSchema>;

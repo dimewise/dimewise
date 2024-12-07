@@ -1,8 +1,16 @@
-import * as yup from "yup";
+import { z } from "zod";
 
-export const CategorySchema = yup.object({
-	name: yup.string().max(255, "Name cannot be longer than 255 characters").required("Name is required"),
-	budget: yup.number().required("Budget is required").min(1, "Budget has to be more than 0"),
+export const CategorySchema = z.object({
+	name: z
+		.string({
+			required_error: "categories.form.field_name.validate_required",
+		})
+		.max(255, "categories.form.field_name.validate_maximum_length"),
+	budget: z
+		.number({
+			required_error: "categories.form.field_budget.validate_required",
+		})
+		.min(1, "categories.form.field_budget.validate_minimum_value"),
 });
 
-export interface CategorySchemaType extends yup.InferType<typeof CategorySchema> {}
+export type CategoryFormData = z.infer<typeof CategorySchema>;
