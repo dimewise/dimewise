@@ -21,7 +21,7 @@ export const DesktopDialog = ({ title, open, handleClose, children }: PropsWithC
 			<DialogTitle>
 				<Typography
 					variant="h4"
-					component="h1"
+					component="span"
 				>
 					{title}
 				</Typography>
