@@ -4,18 +4,14 @@ import type { PropsWithChildren } from "react";
 interface Props {
 	title: string;
 	open: boolean;
-	setOpen: (open: boolean) => void;
+	handleClose: () => void;
 }
 
-export const MobileDrawer = ({ title, open, setOpen, children }: PropsWithChildren<Props>) => {
-	const handleCloseDrawer = () => {
-		setOpen(false);
-	};
-
+export const MobileDrawer = ({ title, open, handleClose, children }: PropsWithChildren<Props>) => {
 	return (
 		<Drawer
 			open={open}
-			onClose={handleCloseDrawer}
+			onClose={handleClose}
 			anchor="bottom"
 			sx={{
 				display: { md: "none" },

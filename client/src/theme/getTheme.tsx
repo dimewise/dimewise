@@ -12,10 +12,10 @@ export const getTheme = (mode: PaletteMode): ThemeOptions => {
 	return {
 		...getDesignTokens(mode),
 		components: {
-			...dataDisplayCustomizations,
-			...feedbackCustomizations,
+			// ...dataDisplayCustomizations,
+			// ...feedbackCustomizations,
 			// ...navigationCustomizations,
-			...surfacesCustomizations,
+			// ...surfacesCustomizations,
 		},
 	};
 };

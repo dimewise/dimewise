@@ -11,17 +11,17 @@ import {
 
 interface Props {
 	category: CreateUpdateCategory | null;
-	handleClose: () => void;
+	handleSubmit: () => void;
 }
 
-export const CategoryForm = ({ category, handleClose }: Props) => {
+export const CategoryForm = ({ category, handleSubmit }: Props) => {
 	const { t } = useTranslation();
 	const [createCategory] = useApiV1CategoryCreateCategoryMutation();
 	const [updateCategory] = useApiV1CategoryCategoryIdUpateCategoryMutation();
 
 	const {
 		register,
-		handleSubmit,
+		handleSubmit: formSubmit,
 		formState: { errors },
 	} = useForm<CategorySchemaType>({
 		defaultValues: {
@@ -33,11 +33,11 @@ export const CategoryForm = ({ category, handleClose }: Props) => {
 	const onSubmit = (data: CategorySchemaType) => {
 		if (category?.id) {
 			updateCategory({ categoryId: category.id, categoryCreate: data }).then(() => {
-				handleClose();
+				handleSubmit();
 			});
 		} else {
 			createCategory({ categoryCreate: data }).then(() => {
-				handleClose();
+				handleSubmit();
 			});
 		}
 	};
@@ -46,7 +46,7 @@ export const CategoryForm = ({ category, handleClose }: Props) => {
 		<>
 			<Box
 				component="form"
-				onSubmit={handleSubmit(onSubmit)}
+				onSubmit={formSubmit(onSubmit)}
 				sx={{ display: "flex", flexDirection: "column", gap: 2 }}
 			>
 				<FormControl>

@@ -23,11 +23,11 @@ export const Categories = () => {
 
 	const handleSubmit = () => {
 		setCategory(null);
-		refetch();
+		refetch(); // TODO: This not working?
 	};
 
-	const handleOpen = (open: boolean) => {
-		setCategory(open ? { id: "", name: "", budget: 0 } : null);
+	const handleClose = () => {
+		setCategory(null);
 	};
 
 	const handleSetCategory = (category: CategoryFull) => () => {
@@ -75,8 +75,8 @@ export const Categories = () => {
 			<CategoryFormPopup
 				category={category}
 				open={category !== null}
-				setOpen={handleOpen}
-				handleClose={handleSubmit}
+				handleClose={handleClose}
+				handleSubmit={handleSubmit}
 			/>
 		</>
 	);

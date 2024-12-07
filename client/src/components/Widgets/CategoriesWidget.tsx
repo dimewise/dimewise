@@ -5,20 +5,30 @@ import { useTranslation } from "react-i18next";
 import type { CreateUpdateCategory } from "../../pages/Categories";
 import { type CategoryFull, useApiV1CategoryGetCategoriesQuery } from "../../services/api/v1";
 import { CategoryFormPopup } from "../Categories/CategoryFormPopup";
+import { CategoryTransactionsPopup } from "../Dashboard/CategoryTransactionsPopup";
 
 export const CategoriesWidget = () => {
 	const { t } = useTranslation();
 
-	const [category, setCategory] = useState<CreateUpdateCategory | null>(null);
+	const [createCategory, setCreateCategory] = useState<CreateUpdateCategory | null>(null);
+	const [viewCategory, setViewCategory] = useState<CategoryFull | null>(null);
 	const { data: categories, refetch: refetchGetCategories } = useApiV1CategoryGetCategoriesQuery();
 
-	const handleOpenCreateCategory = (open: boolean) => {
-		setCategory(open ? { id: "", name: "", budget: 0 } : null);
+	const handleOpenCreateCategory = (open: boolean) => () => {
+		setCreateCategory(open ? { id: "", name: "", budget: 0 } : null);
 	};
 
 	const handleSubmitCreateCategory = () => {
-		setCategory(null);
+		setCreateCategory(null);
 		refetchGetCategories();
+	};
+
+	const handleCloseViewCategory = () => {
+		setViewCategory(null);
+	};
+
+	const handleSetViewCategory = (category: CategoryFull) => () => {
+		setViewCategory(category);
 	};
 
 	return (
@@ -43,26 +53,32 @@ export const CategoriesWidget = () => {
 						>
 							{categories?.map((c) => (
 								<CategoryWidgetItem
-									category={c}
 									key={c.id}
+									category={c}
+									handleClick={handleSetViewCategory(c)}
 								/>
 							))}
-							<CreateCategoryPlaceholder onClick={handleOpenCreateCategory} />
+							<CreateCategoryPlaceholder handleClick={handleOpenCreateCategory(true)} />
 						</Grid>
 					</CardContent>
 				</Card>
 			</Grid>
 			<CategoryFormPopup
-				category={category}
-				open={category !== null}
-				setOpen={handleOpenCreateCategory}
-				handleClose={handleSubmitCreateCategory}
+				category={createCategory}
+				open={createCategory !== null}
+				handleClose={handleOpenCreateCategory(false)}
+				handleSubmit={handleSubmitCreateCategory}
+			/>
+			<CategoryTransactionsPopup
+				category={viewCategory}
+				open={viewCategory !== null}
+				handleClose={handleCloseViewCategory}
 			/>
 		</>
 	);
 };
 
-const CategoryWidgetItem = ({ category }: { category: CategoryFull }) => {
+const CategoryWidgetItem = ({ category, handleClick }: { category: CategoryFull; handleClick: () => void }) => {
 	const currency = "JPY";
 	const progress = (category.spent / category.budget) * 100;
 	const severity = progress > 65 ? "error" : progress > 30 ? "warning" : "primary";
@@ -74,7 +90,20 @@ const CategoryWidgetItem = ({ category }: { category: CategoryFull }) => {
 	return (
 		<Grid size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
 			<Card>
-				<CardContent>
+				<CardContent
+					sx={(theme) => ({
+						height: "100%",
+						width: "100%",
+						display: "flex",
+						flexDirection: "column",
+						justifyContent: "center",
+						"&:hover": {
+							backgroundColor: alpha(theme.palette.grey[700], 0.2),
+							cursor: "pointer",
+						},
+					})}
+					onClick={handleClick}
+				>
 					<Typography
 						variant="caption"
 						component="p"
@@ -114,11 +143,8 @@ const CategoryWidgetItem = ({ category }: { category: CategoryFull }) => {
 	);
 };
 
-const CreateCategoryPlaceholder = ({ onClick }: { onClick: (open: boolean) => void }) => {
+const CreateCategoryPlaceholder = ({ handleClick }: { handleClick: () => void }) => {
 	const { t } = useTranslation();
-	const handleOnClick = () => {
-		onClick(true);
-	};
 
 	return (
 		<Grid size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
@@ -140,7 +166,7 @@ const CreateCategoryPlaceholder = ({ onClick }: { onClick: (open: boolean) => vo
 						color: theme.palette.grey[400],
 					},
 				})}
-				onClick={handleOnClick}
+				onClick={handleClick}
 			>
 				<Add fontSize="small" />
 				<Typography
