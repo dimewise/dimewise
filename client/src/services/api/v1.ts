@@ -31,6 +31,18 @@ const injectedRtkApi = api
           body: queryArg.categoryCreate,
         }),
       }),
+      apiV1CategoryOverviewYearGetCategoriesPerMonth: build.query<
+        ApiV1CategoryOverviewYearGetCategoriesPerMonthApiResponse,
+        ApiV1CategoryOverviewYearGetCategoriesPerMonthApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/category/overview_year`,
+          params: {
+            from_date: queryArg.fromDate,
+            to_date: queryArg.toDate,
+          },
+        }),
+      }),
       apiV1CategoryCategoryIdDeleteCategory: build.mutation<
         ApiV1CategoryCategoryIdDeleteCategoryApiResponse,
         ApiV1CategoryCategoryIdDeleteCategoryApiArg
@@ -127,6 +139,14 @@ export type ApiV1CategoryGetCategoriesApiArg = {
 export type ApiV1CategoryCreateCategoryApiResponse = unknown;
 export type ApiV1CategoryCreateCategoryApiArg = {
   categoryCreate: CategoryCreate;
+};
+export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiResponse =
+  /** status 200 Request fulfilled, document follows */ {
+    [key: string]: CategoryFull[];
+  };
+export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiArg = {
+  fromDate?: null | string;
+  toDate?: null | string;
 };
 export type ApiV1CategoryCategoryIdDeleteCategoryApiResponse = unknown;
 export type ApiV1CategoryCategoryIdDeleteCategoryApiArg = {
@@ -254,6 +274,8 @@ export const {
   useApiV1CategoryGetCategoriesQuery,
   useLazyApiV1CategoryGetCategoriesQuery,
   useApiV1CategoryCreateCategoryMutation,
+  useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery,
+  useLazyApiV1CategoryOverviewYearGetCategoriesPerMonthQuery,
   useApiV1CategoryCategoryIdDeleteCategoryMutation,
   useApiV1CategoryCategoryIdUpdateCategoryMutation,
   useApiV1ExpenseGetExpensesQuery,
