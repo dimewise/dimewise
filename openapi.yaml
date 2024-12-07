@@ -212,6 +212,29 @@ paths:
     get:
       deprecated: false
       operationId: ApiV1CategoryGetCategories
+      parameters:
+      - allowEmptyValue: false
+        allowReserved: false
+        deprecated: false
+        in: query
+        name: from_date
+        required: false
+        schema:
+          oneOf:
+          - type: 'null'
+          - format: date-time
+            type: string
+      - allowEmptyValue: false
+        allowReserved: false
+        deprecated: false
+        in: query
+        name: to_date
+        required: false
+        schema:
+          oneOf:
+          - type: 'null'
+          - format: date-time
+            type: string
       responses:
         '200':
           content:
@@ -222,6 +245,31 @@ paths:
                 type: array
           description: Request fulfilled, document follows
           headers: {}
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Validation Exception
+                examples:
+                - detail: Bad Request
+                  extra: {}
+                  status_code: 400
+                properties:
+                  detail:
+                    type: string
+                  extra:
+                    additionalProperties: {}
+                    type:
+                    - 'null'
+                    - object
+                    - array
+                  status_code:
+                    type: integer
+                required:
+                - detail
+                - status_code
+                type: object
+          description: Bad request syntax or unsupported method
       summary: GetCategories
     post:
       deprecated: false

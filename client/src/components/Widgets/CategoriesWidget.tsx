@@ -1,5 +1,6 @@
 import Add from "@mui/icons-material/Add";
 import { Button, Card, CardContent, Grid2 as Grid, LinearProgress, Stack, Typography, alpha } from "@mui/material";
+import { DateTime } from "luxon";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { CreateUpdateCategory } from "../../pages/Categories";
@@ -12,7 +13,11 @@ export const CategoriesWidget = () => {
 
 	const [createCategory, setCreateCategory] = useState<CreateUpdateCategory | null>(null);
 	const [viewCategory, setViewCategory] = useState<CategoryFull | null>(null);
-	const { data: categories, refetch: refetchGetCategories } = useApiV1CategoryGetCategoriesQuery();
+	const now = DateTime.now();
+	const { data: categories, refetch: refetchGetCategories } = useApiV1CategoryGetCategoriesQuery({
+		fromDate: now.startOf("month").toUTC().toISO(),
+		toDate: now.endOf("month").toUTC().toISO(),
+	});
 
 	const handleOpenCreateCategory = (open: boolean) => () => {
 		setCreateCategory(open ? { id: "", name: "", budget: 0 } : null);

@@ -9,7 +9,7 @@ import {
 	type Expense,
 	useApiV1CategoryGetCategoriesQuery,
 	useApiV1ExpenseCreateExpenseMutation,
-	useApiV1ExpenseExpenseIdUpateExpenseMutation,
+	useApiV1ExpenseExpenseIdUpdateExpenseMutation,
 } from "../../services/api/v1";
 
 interface Props {
@@ -21,8 +21,12 @@ interface Props {
 export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Props) => {
 	const { t } = useTranslation();
 	const [createTransaction] = useApiV1ExpenseCreateExpenseMutation();
-	const [editTransaction] = useApiV1ExpenseExpenseIdUpateExpenseMutation();
-	const { data: categories } = useApiV1CategoryGetCategoriesQuery();
+	const [editTransaction] = useApiV1ExpenseExpenseIdUpdateExpenseMutation();
+	const now = DateTime.now();
+	const { data: categories } = useApiV1CategoryGetCategoriesQuery({
+		fromDate: now.startOf("month").toUTC().toISO(),
+		toDate: now.endOf("month").toUTC().toISO(),
+	});
 
 	const {
 		control,
