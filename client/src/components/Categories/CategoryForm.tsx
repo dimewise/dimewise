@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CategorySchema, type CategorySchemaType } from "../../lib/schemas/CategorySchema";
 import type { CreateUpdateCategory } from "../../pages/Categories";
 import {
-	useApiV1CategoryCategoryIdUpateCategoryMutation,
+	useApiV1CategoryCategoryIdUpdateCategoryMutation,
 	useApiV1CategoryCreateCategoryMutation,
 } from "../../services/api/v1";
 
@@ -17,7 +17,7 @@ interface Props {
 export const CategoryForm = ({ category, handleSubmit }: Props) => {
 	const { t } = useTranslation();
 	const [createCategory] = useApiV1CategoryCreateCategoryMutation();
-	const [updateCategory] = useApiV1CategoryCategoryIdUpateCategoryMutation();
+	const [updateCategory] = useApiV1CategoryCategoryIdUpdateCategoryMutation();
 
 	const {
 		register,

@@ -308,7 +308,7 @@ paths:
       summary: DeleteCategory
     patch:
       deprecated: false
-      operationId: ApiV1CategoryCategoryIdUpateCategory
+      operationId: ApiV1CategoryCategoryIdUpdateCategory
       parameters:
       - allowEmptyValue: false
         allowReserved: false
@@ -354,7 +354,7 @@ paths:
                 - status_code
                 type: object
           description: Bad request syntax or unsupported method
-      summary: UpateCategory
+      summary: UpdateCategory
   /api/v1/expense:
     get:
       deprecated: false
@@ -522,7 +522,7 @@ paths:
       - transactions
     patch:
       deprecated: false
-      operationId: ApiV1ExpenseExpenseIdUpateExpense
+      operationId: ApiV1ExpenseExpenseIdUpdateExpense
       parameters:
       - allowEmptyValue: false
         allowReserved: false
@@ -568,7 +568,7 @@ paths:
                 - status_code
                 type: object
           description: Bad request syntax or unsupported method
-      summary: UpateExpense
+      summary: UpdateExpense
       tags:
       - transactions
   /api/v1/user/me-detail:

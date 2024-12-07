@@ -63,7 +63,7 @@ class ExpenseController(Controller):
         await repo.delete_where(Expense.id == expense_id, Expense.user_id == request.user.id)
 
     @patch("/{expense_id:uuid}", tags=["transactions"])
-    async def upate_expense(
+    async def update_expense(
         self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], expense_id: UUID, data: ExpenseCreate
     ) -> None:
         expense = Expense(id=expense_id, user_id=request.user.id, **data.__dict__)
