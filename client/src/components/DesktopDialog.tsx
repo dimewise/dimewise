@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTitle } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Divider, Typography } from "@mui/material";
 import type { PropsWithChildren } from "react";
 
 interface Props {
@@ -21,7 +21,15 @@ export const DesktopDialog = ({ title, open, setOpen, children }: PropsWithChild
 				display: { xs: "none", md: "block" },
 			}}
 		>
-			<DialogTitle>{title}</DialogTitle>
+			<DialogTitle>
+				<Typography
+					variant="h4"
+					component="h1"
+				>
+					{title}
+				</Typography>
+			</DialogTitle>
+			<Divider sx={{ border: 1 }} />
 			<DialogContent>{children}</DialogContent>
 		</Dialog>
 	);
