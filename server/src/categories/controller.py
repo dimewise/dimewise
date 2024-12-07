@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -53,6 +54,29 @@ class CategoryController(Controller):
         categories = await repo.session.execute(statement=query)
 
         return [CategoryFull(**c.__dict__, spent=spent or 0) for c, spent in categories]
+
+    @get("/overview_year")
+    async def get_categories_per_month(
+        self,
+        repo: CategoryRepository,
+        request: Request[AuthUser, Token, Any],
+        from_date: datetime | None = None,
+        to_date: datetime | None = None,
+    ) -> dict[int, list[CategoryFull]]:
+        query = (
+            select(Category, func.extract("month", Expense.date), func.sum(Expense.amount))
+            .outerjoin(Expense)
+            .where(Category.user_id == request.user.id, Expense.date.between(from_date, to_date))
+            .group_by(Category.id, func.extract("month", Expense.date))
+            .order_by(func.extract("month", Expense.date))
+        )
+        categories = await repo.session.execute(statement=query)
+
+        res = defaultdict(list[CategoryFull])
+        for category, month, spent in categories:
+            res[month].append(CategoryFull(**category.__dict__, spent=spent))
+
+        return res
 
     @post()
     async def create_category(
