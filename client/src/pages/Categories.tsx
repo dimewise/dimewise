@@ -50,6 +50,9 @@ export const Categories = () => {
 						size="small"
 						startIcon={<AddIcon />}
 						onClick={handleOnClickCreate}
+						sx={{
+							textTransform: "none",
+						}}
 					>
 						{t("common.button.create")}
 					</Button>
