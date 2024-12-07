@@ -31,7 +31,7 @@ class ExpenseController(Controller):
     dependencies = {"repo": Provide(provide_repo)}
     path = "/expense"
 
-    @get()
+    @get(tags=["transactions"])
     async def get_expenses(
         self,
         repo: ExpenseRepository,
@@ -49,20 +49,20 @@ class ExpenseController(Controller):
         expenses = [{**e.__dict__, "category": CategoryExpense(**e.category.__dict__)} for e in expenses]
         return [ExpensePublic(**e) for e in expenses]
 
-    @post()
+    @post(tags=["transactions"])
     async def create_expense(
         self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], data: ExpenseCreate
     ) -> None:
         await repo.add(Expense(user_id=request.user.id, **data.__dict__))
         await repo.session.commit()
 
-    @delete("/{expense_id:uuid}")
+    @delete("/{expense_id:uuid}", tags=["transactions"])
     async def delete_expense(
         self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], expense_id: UUID
     ) -> None:
         await repo.delete_where(Expense.id == expense_id, Expense.user_id == request.user.id)
 
-    @patch("/{expense_id:uuid}")
+    @patch("/{expense_id:uuid}", tags=["transactions"])
     async def upate_expense(
         self, repo: ExpenseRepository, request: Request[AuthUser, Token, Any], expense_id: UUID, data: ExpenseCreate
     ) -> None:

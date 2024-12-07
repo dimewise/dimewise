@@ -431,6 +431,8 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: GetExpenses
+      tags:
+      - transactions
     post:
       deprecated: false
       operationId: ApiV1ExpenseCreateExpense
@@ -470,6 +472,8 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: CreateExpense
+      tags:
+      - transactions
   /api/v1/expense/{expense_id}:
     delete:
       deprecated: false
@@ -514,6 +518,8 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: DeleteExpense
+      tags:
+      - transactions
     patch:
       deprecated: false
       operationId: ApiV1ExpenseExpenseIdUpateExpense
@@ -563,6 +569,8 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: UpateExpense
+      tags:
+      - transactions
   /api/v1/user/me-detail:
     get:
       deprecated: false
