@@ -13,7 +13,7 @@ export const Transactions = () => {
 	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [selectedMonth, setSelectedMonth] = useState(DateTime.now());
-	const { data: transactions, refetch: refetchGetTransactions } = useApiV1ExpenseGetExpensesQuery({
+	const { data: transactions } = useApiV1ExpenseGetExpensesQuery({
 		fromDate: selectedMonth.startOf("month").toUTC().toISO(),
 		toDate: selectedMonth.endOf("month").toUTC().toISO(),
 	});
@@ -23,7 +23,6 @@ export const Transactions = () => {
 	};
 
 	const handleSubmitCreateTransaction = () => {
-		refetchGetTransactions();
 		setOpen(false);
 	};
 

@@ -74,6 +74,7 @@
 	"transactions.details.amount": "Amount",
 	"transactions.details.date-of-transaction": "Date of transaction",
 	"transactions.details.category": "Category",
+	"transactions.delete.confirmation": "Are you sure you want to delete this transaction? This action is irreversible.",
 	"categories.total-budget": "Total Budget",
 	"categories.form.title.create_category": "Create Category",
 	"categories.form.title.edit_category": "Edit Category",
