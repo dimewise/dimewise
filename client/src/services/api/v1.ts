@@ -1,105 +1,114 @@
 import { baseApiV1 as api } from "./client";
-const injectedRtkApi = api.injectEndpoints({
-  endpoints: (build) => ({
-    apiV1Root: build.query<ApiV1RootApiResponse, ApiV1RootApiArg>({
-      query: () => ({ url: `/api/v1` }),
-    }),
-    apiV1CategoryGetCategories: build.query<
-      ApiV1CategoryGetCategoriesApiResponse,
-      ApiV1CategoryGetCategoriesApiArg
-    >({
-      query: () => ({ url: `/api/v1/category` }),
-    }),
-    apiV1CategoryCreateCategory: build.mutation<
-      ApiV1CategoryCreateCategoryApiResponse,
-      ApiV1CategoryCreateCategoryApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/category`,
-        method: "POST",
-        body: queryArg.categoryCreate,
+export const addTagTypes = ["transactions"] as const;
+const injectedRtkApi = api
+  .enhanceEndpoints({
+    addTagTypes,
+  })
+  .injectEndpoints({
+    endpoints: (build) => ({
+      apiV1Root: build.query<ApiV1RootApiResponse, ApiV1RootApiArg>({
+        query: () => ({ url: `/api/v1` }),
+      }),
+      apiV1CategoryGetCategories: build.query<
+        ApiV1CategoryGetCategoriesApiResponse,
+        ApiV1CategoryGetCategoriesApiArg
+      >({
+        query: () => ({ url: `/api/v1/category` }),
+      }),
+      apiV1CategoryCreateCategory: build.mutation<
+        ApiV1CategoryCreateCategoryApiResponse,
+        ApiV1CategoryCreateCategoryApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/category`,
+          method: "POST",
+          body: queryArg.categoryCreate,
+        }),
+      }),
+      apiV1CategoryCategoryIdDeleteCategory: build.mutation<
+        ApiV1CategoryCategoryIdDeleteCategoryApiResponse,
+        ApiV1CategoryCategoryIdDeleteCategoryApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/category/${queryArg.categoryId}`,
+          method: "DELETE",
+        }),
+      }),
+      apiV1CategoryCategoryIdUpateCategory: build.mutation<
+        ApiV1CategoryCategoryIdUpateCategoryApiResponse,
+        ApiV1CategoryCategoryIdUpateCategoryApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/category/${queryArg.categoryId}`,
+          method: "PATCH",
+          body: queryArg.categoryCreate,
+        }),
+      }),
+      apiV1ExpenseGetExpenses: build.query<
+        ApiV1ExpenseGetExpensesApiResponse,
+        ApiV1ExpenseGetExpensesApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/expense`,
+          params: {
+            from_date: queryArg.fromDate,
+            to_date: queryArg.toDate,
+            category_ids: queryArg.categoryIds,
+          },
+        }),
+        providesTags: ["transactions"],
+      }),
+      apiV1ExpenseCreateExpense: build.mutation<
+        ApiV1ExpenseCreateExpenseApiResponse,
+        ApiV1ExpenseCreateExpenseApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/expense`,
+          method: "POST",
+          body: queryArg.expenseCreate,
+        }),
+        invalidatesTags: ["transactions"],
+      }),
+      apiV1ExpenseExpenseIdDeleteExpense: build.mutation<
+        ApiV1ExpenseExpenseIdDeleteExpenseApiResponse,
+        ApiV1ExpenseExpenseIdDeleteExpenseApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/expense/${queryArg.expenseId}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["transactions"],
+      }),
+      apiV1ExpenseExpenseIdUpateExpense: build.mutation<
+        ApiV1ExpenseExpenseIdUpateExpenseApiResponse,
+        ApiV1ExpenseExpenseIdUpateExpenseApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/expense/${queryArg.expenseId}`,
+          method: "PATCH",
+          body: queryArg.expenseCreate,
+        }),
+        invalidatesTags: ["transactions"],
+      }),
+      apiV1UserMeDetailGetMeDetail: build.query<
+        ApiV1UserMeDetailGetMeDetailApiResponse,
+        ApiV1UserMeDetailGetMeDetailApiArg
+      >({
+        query: () => ({ url: `/api/v1/user/me-detail` }),
+      }),
+      apiV1UserRegisterCreateUser: build.mutation<
+        ApiV1UserRegisterCreateUserApiResponse,
+        ApiV1UserRegisterCreateUserApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/user/register`,
+          method: "POST",
+          body: queryArg.userCreate,
+        }),
       }),
     }),
-    apiV1CategoryCategoryIdDeleteCategory: build.mutation<
-      ApiV1CategoryCategoryIdDeleteCategoryApiResponse,
-      ApiV1CategoryCategoryIdDeleteCategoryApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/category/${queryArg.categoryId}`,
-        method: "DELETE",
-      }),
-    }),
-    apiV1CategoryCategoryIdUpateCategory: build.mutation<
-      ApiV1CategoryCategoryIdUpateCategoryApiResponse,
-      ApiV1CategoryCategoryIdUpateCategoryApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/category/${queryArg.categoryId}`,
-        method: "PATCH",
-        body: queryArg.categoryCreate,
-      }),
-    }),
-    apiV1ExpenseGetExpenses: build.query<
-      ApiV1ExpenseGetExpensesApiResponse,
-      ApiV1ExpenseGetExpensesApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/expense`,
-        params: {
-          from_date: queryArg.fromDate,
-          to_date: queryArg.toDate,
-          category_ids: queryArg.categoryIds,
-        },
-      }),
-    }),
-    apiV1ExpenseCreateExpense: build.mutation<
-      ApiV1ExpenseCreateExpenseApiResponse,
-      ApiV1ExpenseCreateExpenseApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/expense`,
-        method: "POST",
-        body: queryArg.expenseCreate,
-      }),
-    }),
-    apiV1ExpenseExpenseIdDeleteExpense: build.mutation<
-      ApiV1ExpenseExpenseIdDeleteExpenseApiResponse,
-      ApiV1ExpenseExpenseIdDeleteExpenseApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/expense/${queryArg.expenseId}`,
-        method: "DELETE",
-      }),
-    }),
-    apiV1ExpenseExpenseIdUpateExpense: build.mutation<
-      ApiV1ExpenseExpenseIdUpateExpenseApiResponse,
-      ApiV1ExpenseExpenseIdUpateExpenseApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/expense/${queryArg.expenseId}`,
-        method: "PATCH",
-        body: queryArg.expenseCreate,
-      }),
-    }),
-    apiV1UserMeDetailGetMeDetail: build.query<
-      ApiV1UserMeDetailGetMeDetailApiResponse,
-      ApiV1UserMeDetailGetMeDetailApiArg
-    >({
-      query: () => ({ url: `/api/v1/user/me-detail` }),
-    }),
-    apiV1UserRegisterCreateUser: build.mutation<
-      ApiV1UserRegisterCreateUserApiResponse,
-      ApiV1UserRegisterCreateUserApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/user/register`,
-        method: "POST",
-        body: queryArg.userCreate,
-      }),
-    }),
-  }),
-  overrideExisting: false,
-});
+    overrideExisting: false,
+  });
 export { injectedRtkApi as apiV1 };
 export type ApiV1RootApiResponse = unknown;
 export type ApiV1RootApiArg = void;
