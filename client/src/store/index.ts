@@ -5,12 +5,12 @@ import { themeReducer } from "./themeSlice";
 import { toastReducer } from "./toastSlice";
 
 export const store = configureStore({
-  reducer: {
-    [apiV1.reducerPath]: apiV1.reducer,
-    theme: themeReducer,
-    toast: toastReducer,
-  },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiV1.middleware),
+	reducer: {
+		[apiV1.reducerPath]: apiV1.reducer,
+		theme: themeReducer,
+		toast: toastReducer,
+	},
+	middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiV1.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
