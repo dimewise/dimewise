@@ -2,12 +2,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, FormControl, FormLabel, TextField } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 import { CategorySchema, type CategorySchemaType } from "../../lib/schemas/CategorySchema";
 import type { CreateUpdateCategory } from "../../pages/Categories";
 import {
 	useApiV1CategoryCategoryIdUpdateCategoryMutation,
 	useApiV1CategoryCreateCategoryMutation,
 } from "../../services/api/v1";
+import { showToast } from "../../store/toastSlice";
 
 interface Props {
 	category: CreateUpdateCategory | null;
@@ -16,6 +18,7 @@ interface Props {
 
 export const CategoryForm = ({ category, handleSubmit }: Props) => {
 	const { t } = useTranslation();
+	const dispatch = useDispatch();
 	const [createCategory] = useApiV1CategoryCreateCategoryMutation();
 	const [updateCategory] = useApiV1CategoryCategoryIdUpdateCategoryMutation();
 
@@ -32,13 +35,27 @@ export const CategoryForm = ({ category, handleSubmit }: Props) => {
 
 	const onSubmit = (data: CategorySchemaType) => {
 		if (category?.id) {
-			updateCategory({ categoryId: category.id, categoryCreate: data }).then(() => {
-				handleSubmit();
-			});
+			updateCategory({ categoryId: category.id, categoryCreate: data })
+				.unwrap()
+				.then(() => {
+					handleSubmit();
+					dispatch(showToast({ message: t("categories.toast.edit-success"), type: "success" }));
+				})
+				.catch((err) => {
+					console.error(err);
+					dispatch(showToast({ message: t("common.toast.error"), type: "error" }));
+				});
 		} else {
-			createCategory({ categoryCreate: data }).then(() => {
-				handleSubmit();
-			});
+			createCategory({ categoryCreate: data })
+				.unwrap()
+				.then(() => {
+					handleSubmit();
+					dispatch(showToast({ message: t("categories.toast.edit-success"), type: "success" }));
+				})
+				.catch((err) => {
+					console.error(err);
+					dispatch(showToast({ message: t("common.toast.error"), type: "error" }));
+				});
 		}
 	};
 

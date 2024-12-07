@@ -85,5 +85,7 @@
 	"categories.form.title.create_category": "Create Category",
 	"categories.form.title.edit_category": "Edit Category",
 	"categories.form.field_name.label": "Name",
-	"categories.form.field_budget.label": "Budget"
+	"categories.form.field_budget.label": "Budget",
+	"categories.toast.create-success": "Category successfully created!",
+	"categories.toast.edit-success": "Category successfully updated!"
 }

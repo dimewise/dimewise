@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryFormPopup } from "../components/Categories/CategoryFormPopup";
 import { CategoryListItem } from "../components/Categories/CategoryListItem";
+import { Toast } from "../components/Toast";
 import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
 import { type CategoryCreate, type CategoryFull, useApiV1CategoryGetCategoriesQuery } from "../services/api/v1";
 
@@ -83,6 +84,7 @@ export const Categories = () => {
 				handleClose={handleClose}
 				handleSubmit={handleSubmit}
 			/>
+			<Toast />
 		</>
 	);
 };
