@@ -19,14 +19,20 @@ export const TransactionFormPopup = ({ open, handleSubmit, handleClose }: Props)
 				open={open}
 				handleClose={handleClose}
 			>
-				<TransactionForm handleSubmit={handleSubmit} />
+				<TransactionForm
+					handleSubmit={handleSubmit}
+					handleClose={handleClose}
+				/>
 			</MobileDrawer>
 			<DesktopDialog
 				title={formTitle}
 				open={open}
 				handleClose={handleClose}
 			>
-				<TransactionForm handleSubmit={handleSubmit} />
+				<TransactionForm
+					handleSubmit={handleSubmit}
+					handleClose={handleClose}
+				/>
 			</DesktopDialog>
 		</>
 	);
