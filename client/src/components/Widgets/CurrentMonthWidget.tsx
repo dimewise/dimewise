@@ -1,63 +1,49 @@
 import { Card, CardContent, Grid2 as Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { BarChart, PieChart } from "@mui/x-charts";
+import { DateTime } from "luxon";
 import { useTranslation } from "react-i18next";
-
-type DataType = {
-	label: string;
-	data: [number]; // only one element for data
-};
-const fakeCategoryData: DataType[] = [
-	{ label: "Entertainment", data: [3500] }, // 3,500 JPY
-	{ label: "Food", data: [8200] }, // 8,200 JPY
-	{ label: "Housing", data: [45000] }, // 45,000 JPY
-	{ label: "Transportation", data: [1200] }, // 1,200 JPY
-	{ label: "Utilities", data: [7600] }, // 7,600 JPY
-];
-
-type ApiData = {
-	categories: DataType[];
-	budget: number;
-};
-
-const fakeApiData: ApiData = {
-	categories: fakeCategoryData,
-	budget: 100000,
-};
+import { useApiV1CategoryGetCategoriesQuery } from "../../services/api/v1";
 
 export const CurrentMonthWidget = () => {
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
 
-	const data: ApiData = fakeApiData;
+	const now = DateTime.now();
+	const { data: categories } = useApiV1CategoryGetCategoriesQuery({
+		fromDate: now.startOf("month").toUTC().toISO(),
+		toDate: now.endOf("month").toUTC().toISO(),
+	});
 	const currency = "JPY";
 
-	const totalSpent = data.categories.reduce((sum, category) => sum + category.data[0], 0);
+	const totalSpent = categories?.reduce((sum, category) => sum + category.spent, 0) ?? 0;
+	const totalBudget = categories?.reduce((sum, category) => sum + category.budget, 0) ?? 0;
 
 	// construct bar series information
-	const categoryBarSeries = data.categories.map((c) => ({ ...c, stack: "total" }));
+	const categoryBarSeries = categories?.map((c) => ({ label: c.name, data: [c.spent], stack: "total" })) ?? [];
 	const remainderBarSeries = {
 		label: "Remainder",
-		data: [data.budget - totalSpent],
+		data: [totalBudget - totalSpent],
 		stack: "total",
 		color: "grey",
 	};
 	const barSeries = remainderBarSeries.data[0] < 0 ? categoryBarSeries : [...categoryBarSeries, remainderBarSeries];
 
 	// construct pie series information
-	const categoryPieSeries = data.categories.map((c) => ({
-		value: c.data[0],
-		label: c.label,
-	}));
+	const categoryPieSeries =
+		categories?.map((c) => ({
+			value: c.spent,
+			label: c.name,
+		})) ?? [];
 	const remainderPieSeries = {
 		label: "Remainder",
-		value: data.budget - totalSpent,
+		value: totalBudget - totalSpent,
 	};
 	const pieSeries = remainderPieSeries.value < 0 ? categoryPieSeries : [...categoryPieSeries, remainderPieSeries];
 
 	// construct spent and budget value with currency
 	const spentStr = `${currency} ${totalSpent}`;
-	const budgetStr = `${currency} ${data.budget}`;
+	const budgetStr = `${currency} ${totalBudget}`;
 
 	return (
 		<Grid size={{ xs: 12, sm: 12, lg: 3 }}>
@@ -112,7 +98,7 @@ export const CurrentMonthWidget = () => {
 								data: pieSeries,
 								innerRadius: 40,
 								cornerRadius: 5,
-								paddingAngle: 5,
+								paddingAngle: 3,
 							},
 						]}
 						slotProps={{ legend: { hidden: true } }}
