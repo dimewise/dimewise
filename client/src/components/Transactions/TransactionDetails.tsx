@@ -23,7 +23,7 @@ export const TransactionDetails = ({ open, transaction, handleClose }: Props) =>
 			>
 				<TransactionContent
 					transaction={transaction}
-					setOpenDetails={setOpen}
+					handleClose={handleClose}
 				/>
 			</MobileDrawer>
 			<DesktopDialog
@@ -33,17 +33,14 @@ export const TransactionDetails = ({ open, transaction, handleClose }: Props) =>
 			>
 				<TransactionContent
 					transaction={transaction}
-					setOpenDetails={setOpen}
+					handleClose={handleClose}
 				/>
 			</DesktopDialog>
 		</>
 	);
 };
 
-const TransactionContent = ({
-	transaction,
-	setOpenDetails,
-}: { transaction: Expense; setOpenDetails: (open: boolean) => void }) => {
+const TransactionContent = ({ transaction, handleClose }: { transaction: Expense; handleClose: () => void }) => {
 	const { t } = useTranslation();
 	const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 	const [deleteExpenseById] = useApiV1ExpenseExpenseIdDeleteExpenseMutation();
@@ -66,7 +63,7 @@ const TransactionContent = ({
 		})
 			.unwrap()
 			.then(() => {
-				setOpenDetails(false);
+				handleClose();
 				setOpenConfirmDelete(false);
 				// TODO: Add toast for success message
 			})
