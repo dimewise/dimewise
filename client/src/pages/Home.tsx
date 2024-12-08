@@ -12,33 +12,33 @@ import { Testimonials } from "../components/Home/Testimonials";
 import { useAuth } from "../hooks/useAuth";
 
 export const Home = () => {
-	const { user } = useAuth();
+  const { user } = useAuth();
 
-	if (user) {
-		return (
-			<Navigate
-				to={Routes.Dashboard}
-				replace
-			/>
-		);
-	}
-	return (
-		<>
-			<Hero />
-			<div>
-				<LogoCollection />
-				<Features />
-				<Divider />
-				<Testimonials />
-				<Divider />
-				<Highlights />
-				<Divider />
-				<Pricing />
-				<Divider />
-				<FAQ />
-				<Divider />
-				<Footer />
-			</div>
-		</>
-	);
+  if (user) {
+    return (
+      <Navigate
+        to={Routes.Dashboard}
+        replace
+      />
+    );
+  }
+  return (
+    <>
+      <Hero />
+      <div>
+        <LogoCollection />
+        <Features />
+        <Divider />
+        <Testimonials />
+        <Divider />
+        <Highlights />
+        <Divider />
+        <Pricing />
+        <Divider />
+        <FAQ />
+        <Divider />
+        <Footer />
+      </div>
+    </>
+  );
 };

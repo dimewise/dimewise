@@ -1,81 +1,82 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
-	"files": {
-		"ignore": ["./src/components/Home/*", "./src/components/Dashboard/*"]
-	},
-	"organizeImports": {
-		"enabled": true
-	},
-	"linter": {
-		"enabled": true,
-		"ignore": ["./src/services/api/**"],
-		"rules": {
-			"recommended": true,
-			"style": {
-				"noDefaultExport": "error",
-				"useFilenamingConvention": {
-					"level": "error",
-					"options": {
-						"strictCase": true,
-						"requireAscii": true,
-						"filenameCases": ["camelCase", "PascalCase"]
-					}
-				},
-				"useShorthandArrayType": "warn",
-				"useShorthandAssign": "warn",
-				"useSingleCaseStatement": "warn"
-			}
-		}
-	},
-	"formatter": {
-		"enabled": true,
-		"formatWithErrors": false,
-		"lineWidth": 120,
-		"indentWidth": 2,
-		"attributePosition": "multiline",
-		"ignore": ["./src/services/api/**"]
-	},
-	"javascript": {
-		"formatter": {
-			"enabled": true,
-			"quoteStyle": "double",
-			"lineWidth": 120,
-			"trailingCommas": "all",
-			"semicolons": "always",
-			"arrowParentheses": "always"
-		}
-	},
-	"json": {
-		"formatter": {
-			"enabled": true
-		}
-	},
-	"overrides": [
-		{
-			"include": [
-				"./supabase/*",
-				"./src/types/supabase.ts",
-				"./postcss.config.js",
-				"./tailwind.config.js",
-				"./src/lib/locale/i18n.ts"
-			],
-			"linter": {
-				"rules": {
-					"style": {
-						"noDefaultExport": "off"
-					}
-				}
-			}
-		},
-		{
-			"include": ["./src/types/vite-env.d.ts"],
-			"linter": {
-				"rules": {
-					"style": {
-						"useFilenamingConvention": "off"
-					}
-				}
-			}
-		}
-	]
+  "$schema": "https://biomejs.dev/schemas/1.8.0/schema.json",
+  "files": {
+    "ignore": ["./src/components/Home/*", "./src/components/Dashboard/*"]
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "ignore": ["./src/services/api/**"],
+    "rules": {
+      "recommended": true,
+      "style": {
+        "noDefaultExport": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": true,
+            "requireAscii": true,
+            "filenameCases": ["camelCase", "PascalCase"]
+          }
+        },
+        "useShorthandArrayType": "warn",
+        "useShorthandAssign": "warn",
+        "useSingleCaseStatement": "warn"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "lineWidth": 120,
+    "indentWidth": 2,
+    "indentStyle": "space",
+    "attributePosition": "multiline",
+    "ignore": ["./src/services/api/**"]
+  },
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "quoteStyle": "double",
+      "lineWidth": 120,
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "arrowParentheses": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": true
+    }
+  },
+  "overrides": [
+    {
+      "include": [
+        "./supabase/*",
+        "./src/types/supabase.ts",
+        "./postcss.config.js",
+        "./tailwind.config.js",
+        "./src/lib/locale/i18n.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDefaultExport": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": ["./src/types/vite-env.d.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    }
+  ]
 }

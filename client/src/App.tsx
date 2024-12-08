@@ -17,29 +17,29 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { getTheme } from "./theme/getTheme";
 
 const App = () => {
-	const dispatch = useDispatch();
-	const mode = useSelector((state: RootState) => state.theme.mode);
+  const dispatch = useDispatch();
+  const mode = useSelector((state: RootState) => state.theme.mode);
 
-	useEffect(() => {
-		dispatch(initializeTheme());
-	}, [dispatch]);
+  useEffect(() => {
+    dispatch(initializeTheme());
+  }, [dispatch]);
 
-	const theme = createTheme(getTheme(mode));
+  const theme = createTheme(getTheme(mode));
 
-	return (
-		<LocalizationProvider dateAdapter={AdapterLuxon}>
-			<AuthProvider>
-				<ThemeProvider theme={theme}>
-					<CssBaseline />
-					<RouterProvider router={Router} />
-				</ThemeProvider>
-			</AuthProvider>
-		</LocalizationProvider>
-	);
+  return (
+    <LocalizationProvider dateAdapter={AdapterLuxon}>
+      <AuthProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <RouterProvider router={Router} />
+        </ThemeProvider>
+      </AuthProvider>
+    </LocalizationProvider>
+  );
 };
 
 export const RootApp = () => (
-	<Provider store={store}>
-		<App />
-	</Provider>
+  <Provider store={store}>
+    <App />
+  </Provider>
 );

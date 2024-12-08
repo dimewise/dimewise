@@ -1,5 +1,5 @@
 export enum TransactionDetailsEnum {
-	view = "view",
-	edit = "edit",
-	delete = "delete",
+  view = "view",
+  edit = "edit",
+  delete = "delete",
 }
