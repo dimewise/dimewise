@@ -31,7 +31,7 @@
 	"auth.form.field_email.validate_not_an_email": "Not an email",
 	"auth.form.field_password.validate_required": "Password is required",
 	"auth.form.field_password.validate_minimum_length": "Password must be at least 8 characters long",
-	"auth.form.field_password.validate.maximum_length": "Password is at most 64 characters long",
+	"auth.form.field_password.validate_maximum_length": "Password is at most 64 characters long",
 	"auth.form.field_password.validate_contains_uppercase": "Password must contain at least 1 uppercase letter",
 	"auth.form.field_password.validate_contains_lowercase": "Password must contain at least 1 lower case letter",
 	"auth.form.field_password.validate_contains_number": "Password must contain at least 1 number",
