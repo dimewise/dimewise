@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Avatar,
 	Box,
@@ -7,68 +8,76 @@ import {
 	InputLabel,
 	MenuItem,
 	Select,
-	type SelectChangeEvent,
 	TextField,
 	Typography,
 } from "@mui/material";
-import { type ChangeEvent, useEffect, useState } from "react";
-import { useApiV1UserMeDetailGetMeDetailQuery } from "../../services/api/v1";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { type ProfileEditFormData, ProfileEditSchema } from "../../lib/schemas/ProfileEditSchema";
+import {
+	useApiV1UserMeDetailGetMeDetailQuery,
+	useApiV1UserMeDetailUpdateMeDetailMutation,
+} from "../../services/api/v1";
+import { showToast } from "../../store/toastSlice";
+import { Currencies } from "../../types/currency";
 
-// TODO: Shift to LiteStar to export a model
-enum Currency {
-	USD = "USD",
-	EUR = "EUR",
-	JPY = "JPY",
-	GBP = "GBP",
-	AUD = "AUD",
-	CAD = "CAD",
-	CHF = "CHF",
-	CNY = "CNY",
-	SEK = "SEK",
-	NZD = "NZD",
-	NOK = "NOK",
-	KRW = "KRW",
-	INR = "INR",
-	BRL = "BRL",
-	RUB = "RUB",
-	ZAR = "ZAR",
-	TRY = "TRY",
-	MXN = "MXN",
-	SGD = "SGD",
-	HKD = "HKD",
-}
-
-// TODO: shift to use react hook forms
 export const ProfileEditor = () => {
-	const [username, setUsername] = useState("Unnamed User");
-	const [defaultCurrency, setDefaultCurrency] = useState<Currency>(Currency.JPY);
+	const { t } = useTranslation();
+	const dispatch = useDispatch();
 	const { data: meDetail, isLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+	const [editUser] = useApiV1UserMeDetailUpdateMeDetailMutation();
 
-	useEffect(() => {
-		if (meDetail?.name) {
-			setUsername(meDetail.name);
-		}
-		if (meDetail?.default_currency) {
-			setDefaultCurrency(meDetail.default_currency as Currency);
-		}
-	}, [meDetail]);
+	const {
+		register,
+		handleSubmit: formSubmit,
+		formState: { errors },
+		watch,
+	} = useForm<ProfileEditFormData>({
+		defaultValues: {
+			name: meDetail?.name ?? undefined,
+			avatar_url: meDetail?.avatar_url ?? undefined,
+		},
+		resolver: zodResolver(ProfileEditSchema),
+	});
+	const nameValue = watch("name");
+	const isValueNotChanged = useMemo(() => {
+		return (
+			nameValue === meDetail?.name ||
+			(nameValue === undefined && meDetail?.name === null) ||
+			(nameValue === "" && meDetail?.name === null)
+		);
+	}, [meDetail?.name, nameValue]);
+
+	const onSubmit = (data: ProfileEditFormData) => {
+		editUser({
+			userEdit: {
+				name: data.name,
+				avatar_url: data.avatar_url,
+			},
+		})
+			.unwrap()
+			.then(() => {
+				dispatch(showToast({ message: t("settings.profile.toast.edit-success"), type: "success" }));
+			})
+			.catch((err) => {
+				console.error(err);
+				dispatch(showToast({ message: t("common.toast.error"), type: "error" }));
+			});
+	};
 
 	if (isLoading || !meDetail) {
 		return null;
 	}
 
-	const handleOnChangeUsername = (event: ChangeEvent<HTMLInputElement>) => {
-		setUsername(event.target.value);
-	};
-	const handleOnChangeDefaultCurrency = (event: SelectChangeEvent) => {
-		setDefaultCurrency(event.target.value as Currency);
-	};
-
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", alignItems: "start", justifyContent: "center" }}>
-			<Typography variant="h5">Profile</Typography>
+			<Typography variant="h5">{t("settings.profile.title")}</Typography>
 			<Divider />
 			<Box
+				component="form"
+				onSubmit={formSubmit(onSubmit)}
 				sx={{
 					width: "100%",
 					maxWidth: 400,
@@ -87,25 +96,32 @@ export const ProfileEditor = () => {
 					sx={{ width: 200, height: 200 }}
 				/>
 				<TextField
-					label="Name"
-					value={username}
-					onChange={handleOnChangeUsername}
+					required
+					label={t("settings.profile.form.field_name.label")}
 					fullWidth
+					placeholder="Unnamed User"
+					error={!!errors.name}
+					helperText={errors.name?.message}
+					color={errors.name ? "error" : "primary"}
+					{...register("name")}
 				/>
 				<TextField
-					label="Email"
+					label={t("settings.profile.form.field_email_address.label")}
 					value={meDetail.email}
 					disabled
 					fullWidth
 				/>
-				<FormControl fullWidth>
-					<InputLabel>Default Currency</InputLabel>
+				<FormControl
+					fullWidth
+					disabled
+				>
+					<InputLabel>{t("settings.profile.form.field_default_currency.label")}</InputLabel>
 					<Select
-						value={defaultCurrency}
-						onChange={handleOnChangeDefaultCurrency}
-						label="Default Currency"
+						value={meDetail.default_currency}
+						onChange={() => {}}
+						label={t("settings.profile.form.field_default_currency.label")}
 					>
-						{Object.values(Currency).map((c) => (
+						{Object.values(Currencies).map((c) => (
 							<MenuItem
 								key={c}
 								value={c}
@@ -117,11 +133,12 @@ export const ProfileEditor = () => {
 				</FormControl>
 				<Box sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "end" }}>
 					<Button
+						type="submit"
 						variant="contained"
 						sx={{ textTransform: "none" }}
-						disabled={username === meDetail.name || defaultCurrency === meDetail.default_currency}
+						disabled={isValueNotChanged}
 					>
-						Save
+						{t("common.button.save")}
 					</Button>
 				</Box>
 			</Box>
