@@ -8,23 +8,23 @@ import { RecentTransactionsWidget } from "../components/Widgets/RecentTransactio
 import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
 
 export const Overview = () => {
-	const { t } = useTranslation();
+  const { t } = useTranslation();
 
-	return (
-		<>
-			<PageNavbar title={t("nav.private.overview")} />
-			<Grid
-				container
-				spacing={2}
-				columns={12}
-				sx={{ mb: (theme) => theme.spacing(2) }}
-			>
-				<CurrentMonthWidget />
-				<MonthlyOverviewWidget />
-				<CategoriesWidget />
-				<RecentTransactionsWidget />
-			</Grid>
-			<Copyright sx={{ my: 4 }} />
-		</>
-	);
+  return (
+    <>
+      <PageNavbar title={t("nav.private.overview")} />
+      <Grid
+        container
+        spacing={2}
+        columns={12}
+        sx={{ mb: (theme) => theme.spacing(2) }}
+      >
+        <CurrentMonthWidget />
+        <MonthlyOverviewWidget />
+        <CategoriesWidget />
+        <RecentTransactionsWidget />
+      </Grid>
+      <Copyright sx={{ my: 4 }} />
+    </>
+  );
 };

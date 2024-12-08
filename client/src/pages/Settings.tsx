@@ -4,13 +4,13 @@ import { ThemeSelector } from "../components/Settings/ThemeSelector";
 import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
 
 export const Settings = () => {
-	const { t } = useTranslation();
+  const { t } = useTranslation();
 
-	return (
-		<>
-			<PageNavbar title={t("nav.private.settings")} />
-			<ProfileEditor />
-			<ThemeSelector />
-		</>
-	);
+  return (
+    <>
+      <PageNavbar title={t("nav.private.settings")} />
+      <ProfileEditor />
+      <ThemeSelector />
+    </>
+  );
 };
