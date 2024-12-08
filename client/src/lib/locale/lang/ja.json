@@ -31,7 +31,7 @@
 	"auth.form.field_email.validate_not_an_email": "有効なメールアドレスではありません",
 	"auth.form.field_password.validate_required": "パスワードは必須です",
 	"auth.form.field_password.validate_minimum_length": "パスワードは8文字以上である必要があります",
-	"auth.form.field_password.validate.maximum_length": "パスワードは64文字以下である必要があります",
+	"auth.form.field_password.validate_maximum_length": "パスワードは64文字以下である必要があります",
 	"auth.form.field_password.validate_contains_uppercase": "パスワードには少なくとも1つの大文字が必要です",
 	"auth.form.field_password.validate_contains_lowercase": "パスワードには少なくとも1つの小文字が必要です",
 	"auth.form.field_password.validate_contains_number": "パスワードには少なくとも1つの数字が必要です",
