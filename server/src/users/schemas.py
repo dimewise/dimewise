@@ -20,3 +20,8 @@ class UserPublic(UserBase):
 
 class UserCreate(UserBase):
     pass
+
+
+class UserEdit(BaseModel):
+    name: str | None = None
+    avatar_url: str | None = None
