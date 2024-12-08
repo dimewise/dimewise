@@ -114,6 +114,16 @@ const injectedRtkApi = api
       >({
         query: () => ({ url: `/api/v1/user/me-detail` }),
       }),
+      apiV1UserMeDetailUpdateMeDetail: build.mutation<
+        ApiV1UserMeDetailUpdateMeDetailApiResponse,
+        ApiV1UserMeDetailUpdateMeDetailApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/user/me-detail`,
+          method: "PATCH",
+          body: queryArg.userEdit,
+        }),
+      }),
       apiV1UserRegisterCreateUser: build.mutation<
         ApiV1UserRegisterCreateUserApiResponse,
         ApiV1UserRegisterCreateUserApiArg
@@ -143,8 +153,8 @@ export type ApiV1CategoryCreateCategoryApiArg = {
 export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiResponse =
   /** status 200 Request fulfilled, document follows */ CategoryOverview;
 export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiArg = {
-  fromDate?: null | string;
-  toDate?: null | string;
+  fromDate: string;
+  toDate: string;
 };
 export type ApiV1CategoryCategoryIdDeleteCategoryApiResponse = unknown;
 export type ApiV1CategoryCategoryIdDeleteCategoryApiArg = {
@@ -178,6 +188,10 @@ export type ApiV1ExpenseExpenseIdUpdateExpenseApiArg = {
 export type ApiV1UserMeDetailGetMeDetailApiResponse =
   /** status 200 Request fulfilled, document follows */ User;
 export type ApiV1UserMeDetailGetMeDetailApiArg = void;
+export type ApiV1UserMeDetailUpdateMeDetailApiResponse = unknown;
+export type ApiV1UserMeDetailUpdateMeDetailApiArg = {
+  userEdit: UserEdit;
+};
 export type ApiV1UserRegisterCreateUserApiResponse = unknown;
 export type ApiV1UserRegisterCreateUserApiArg = {
   userCreate: UserCreate;
@@ -245,6 +259,10 @@ export type User = {
   id: string;
   name?: null | string;
 };
+export type UserEdit = {
+  avatar_url?: null | string;
+  name?: null | string;
+};
 export type UserCreate = {
   avatar_url?: null | string;
   default_currency:
@@ -289,5 +307,6 @@ export const {
   useApiV1ExpenseExpenseIdUpdateExpenseMutation,
   useApiV1UserMeDetailGetMeDetailQuery,
   useLazyApiV1UserMeDetailGetMeDetailQuery,
+  useApiV1UserMeDetailUpdateMeDetailMutation,
   useApiV1UserRegisterCreateUserMutation,
 } = injectedRtkApi;

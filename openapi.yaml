@@ -153,6 +153,19 @@ components:
       - id
       title: UserCreate
       type: object
+    UserEdit:
+      properties:
+        avatar_url:
+          oneOf:
+          - type: 'null'
+          - type: string
+        name:
+          oneOf:
+          - type: 'null'
+          - type: string
+      required: []
+      title: UserEdit
+      type: object
     UserPublic:
       properties:
         avatar_url:
@@ -335,23 +348,19 @@ paths:
         deprecated: false
         in: query
         name: from_date
-        required: false
+        required: true
         schema:
-          oneOf:
-          - type: 'null'
-          - format: date-time
-            type: string
+          format: date-time
+          type: string
       - allowEmptyValue: false
         allowReserved: false
         deprecated: false
         in: query
         name: to_date
-        required: false
+        required: true
         schema:
-          oneOf:
-          - type: 'null'
-          - format: date-time
-            type: string
+          format: date-time
+          type: string
       responses:
         '200':
           content:
@@ -708,6 +717,45 @@ paths:
           description: Request fulfilled, document follows
           headers: {}
       summary: GetMeDetail
+    patch:
+      deprecated: false
+      operationId: ApiV1UserMeDetailUpdateMeDetail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEdit'
+        required: true
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Validation Exception
+                examples:
+                - detail: Bad Request
+                  extra: {}
+                  status_code: 400
+                properties:
+                  detail:
+                    type: string
+                  extra:
+                    additionalProperties: {}
+                    type:
+                    - 'null'
+                    - object
+                    - array
+                  status_code:
+                    type: integer
+                required:
+                - detail
+                - status_code
+                type: object
+          description: Bad request syntax or unsupported method
+      summary: UpdateMeDetail
   /api/v1/user/register:
     post:
       deprecated: false
