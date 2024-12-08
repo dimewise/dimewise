@@ -7,7 +7,7 @@ export const CategorySchema = z.object({
 			required_error: i18n.t("categories.form.field_name.validate_required"),
 		})
 		.max(255, i18n.t("categories.form.field_name.validate_maximum_length")),
-	budget: z
+	budget: z.coerce
 		.number({
 			required_error: i18n.t("categories.form.field_budget.validate_required"),
 		})
