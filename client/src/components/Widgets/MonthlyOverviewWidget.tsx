@@ -45,8 +45,6 @@ export const MonthlyOverviewWidget = () => {
 		color: "transparent",
 	};
 
-	console.log(lineData);
-
 	// collate data
 	const xAxisData = Array.from(Array(12).keys()).map((m) => DateTime.local(now.year, m + 1).toFormat("MMM"));
 	const series = [...barData, lineData];
