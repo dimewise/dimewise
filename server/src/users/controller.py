@@ -1,16 +1,16 @@
 from typing import Any
 
-from litestar import get, post
+from litestar import get, patch, post
 from litestar.connection import Request
 from litestar.contrib.sqlalchemy.repository import SQLAlchemyAsyncRepository
 from litestar.controller import Controller
 from litestar.di import Provide
-from litestar.exceptions.http_exceptions import NotFoundException
+from litestar.exceptions.http_exceptions import ClientException, NotFoundException
 from litestar.security.jwt.token import Token
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.models import User
-from src.users.schemas import UserCreate, UserPublic
+from src.users.schemas import UserCreate, UserEdit, UserPublic
 from src.utils.jwt import AuthUser
 
 
@@ -50,3 +50,22 @@ class UserController(Controller):
         }
 
         return UserPublic.model_validate(me)
+
+    @patch("/me-detail")
+    async def update_me_detail(
+        self, repo: UserRepository, request: Request[AuthUser, Token, Any], data: UserEdit
+    ) -> None:
+        target_user = await repo.get(request.user.id)
+
+        if not target_user:
+            raise ClientException(detail="Signed in user not found")
+
+        if data.name is not None and target_user.name is not None and data.name.strip() == "":
+            raise ClientException(detail="Name of user cannot be empty if it is already set")
+
+        if data.name is not None:
+            target_user.name = data.name
+        if data.avatar_url is not None:
+            target_user.avatar_url = data.avatar_url
+
+        await repo.update(target_user)
