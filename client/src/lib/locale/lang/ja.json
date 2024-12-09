@@ -59,6 +59,8 @@
   "settings.profile.form.field_default_currency.label": "デフォルト通貨",
   "settings.profile.form.field_name.validate_required": "名前は必須です",
   "settings.profile.form.field_name.validate_maximum_length": "名前は255文字を超えることはできません",
+  "settings.theme.title": "テーマ",
+  "settings.theme.dark-mode": "ダークモード",
   "overview.category_widget.remainder_budget": "{{prefix}}{{currency}} {{remainder}} 残っています",
   "overview.recent_transactions": "最近の取引",
   "overview.categories": "カテゴリー",
