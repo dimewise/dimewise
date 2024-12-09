@@ -5,6 +5,7 @@ import {
   Button,
   Divider,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
@@ -37,7 +38,6 @@ export const ProfileEditor = () => {
   } = useForm<ProfileEditFormData>({
     defaultValues: {
       name: meDetail?.name ?? undefined,
-      avatar_url: meDetail?.avatar_url ?? undefined,
     },
     resolver: zodResolver(ProfileEditSchema),
   });
@@ -54,7 +54,7 @@ export const ProfileEditor = () => {
     editUser({
       userEdit: {
         name: data.name,
-        avatar_url: data.avatar_url,
+        avatar_url: undefined,
       },
     })
       .unwrap()
@@ -65,6 +65,11 @@ export const ProfileEditor = () => {
         console.error(err);
         dispatch(showToast({ message: t("common.toast.error"), type: "error" }));
       });
+  };
+
+  // TODO: add profile picture with s3 integration
+  const handleOnClickAvatar = () => {
+    document.getElementById("profile-avatar-input")?.click();
   };
 
   if (isLoading || !meDetail) {
@@ -89,12 +94,20 @@ export const ProfileEditor = () => {
           py: 2,
         }}
       >
-        <Avatar
-          sizes="small"
-          alt={meDetail.name ?? "Unnamed User"}
-          src={meDetail.avatar_url ?? ""}
-          sx={{ width: 200, height: 200 }}
+        <input
+          type="file"
+          id="profile-avatar-input"
+          accept="image/*"
+          hidden
         />
+        <IconButton onClick={handleOnClickAvatar}>
+          <Avatar
+            sizes="small"
+            alt={meDetail.name ?? "Unnamed User"}
+            src={meDetail.avatar_url ?? ""}
+            sx={{ width: 200, height: 200 }}
+          />
+        </IconButton>
         <TextField
           required
           label={t("settings.profile.form.field_name.label")}
