@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert } from "@mui/material";
+import { Alert, InputLabel, MenuItem, Select } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -12,7 +12,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
@@ -25,11 +25,13 @@ import { useAuth } from "../hooks/useAuth";
 import { type SignUpFormData, SignUpSchema } from "../lib/schemas/SignUpSchema";
 import { useApiV1UserRegisterCreateUserMutation } from "../services/api/v1";
 import type { RootState } from "../store";
+import { Currencies, getCurrencyForLocale } from "../types/currency";
 
 export const SignUp = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const assumedCurrency = getCurrencyForLocale(navigator.language);
   const mode = useSelector((state: RootState) => state.theme.mode);
   const { register: signUp } = useAuth();
   const [signUpError, setsignUpError] = useState<AuthError | null>(null);
@@ -37,17 +39,24 @@ export const SignUp = () => {
 
   // register form schema
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignUpFormData>({
+    defaultValues: {
+      email: undefined,
+      password: undefined,
+      confirmPassword: undefined,
+      default_currency: assumedCurrency,
+    },
     resolver: zodResolver(SignUpSchema),
   });
 
   // handle on sign up form submit
   const from = location.state?.from?.pathname || "/";
   const onSubmit = async (creds: SignUpFormData) => {
-    signUp(creds).then((resp) => {
+    signUp(creds, creds.default_currency).then((resp) => {
       if (!resp) return;
       const { userCreate, error } = resp;
       if (error) {
@@ -121,6 +130,34 @@ export const SignUp = () => {
             helperText={errors.confirmPassword?.message}
             color={errors.confirmPassword ? "error" : "primary"}
             {...register("confirmPassword")}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <FormLabel htmlFor="default_currency">{t("auth.form.field_default_currency.label")}</FormLabel>
+          <Controller
+            control={control}
+            name="default_currency"
+            rules={{ required: true }}
+            render={({ field }) => {
+              return (
+                <>
+                  <Select
+                    notched
+                    {...field}
+                    variant="outlined"
+                  >
+                    {Object.values(Currencies).map((c) => (
+                      <MenuItem
+                        key={c}
+                        value={c}
+                      >
+                        {c}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </>
+              );
+            }}
           />
         </FormControl>
         <FormControlLabel
