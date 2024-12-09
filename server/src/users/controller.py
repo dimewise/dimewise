@@ -34,7 +34,7 @@ class UserController(Controller):
         await repo.add(User(**data.__dict__))
         await repo.session.commit()
 
-    @get("/me-detail")
+    @get("/me-detail", tags=["me-detail"])
     async def get_me_detail(self, repo: UserRepository, request: Request[AuthUser, Token, Any]) -> UserPublic:
         user = await repo.get(request.user.id)
 
@@ -51,7 +51,7 @@ class UserController(Controller):
 
         return UserPublic.model_validate(me)
 
-    @patch("/me-detail")
+    @patch("/me-detail", tags=["me-detail"])
     async def update_me_detail(
         self, repo: UserRepository, request: Request[AuthUser, Token, Any], data: UserEdit
     ) -> None:
