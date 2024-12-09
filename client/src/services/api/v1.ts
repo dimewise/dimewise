@@ -1,5 +1,5 @@
 import { baseApiV1 as api } from "./client";
-export const addTagTypes = ["transactions"] as const;
+export const addTagTypes = ["transactions", "me-detail"] as const;
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
@@ -113,6 +113,7 @@ const injectedRtkApi = api
         ApiV1UserMeDetailGetMeDetailApiArg
       >({
         query: () => ({ url: `/api/v1/user/me-detail` }),
+        providesTags: ["me-detail"],
       }),
       apiV1UserMeDetailUpdateMeDetail: build.mutation<
         ApiV1UserMeDetailUpdateMeDetailApiResponse,
@@ -123,6 +124,7 @@ const injectedRtkApi = api
           method: "PATCH",
           body: queryArg.userEdit,
         }),
+        invalidatesTags: ["me-detail"],
       }),
       apiV1UserRegisterCreateUser: build.mutation<
         ApiV1UserRegisterCreateUserApiResponse,

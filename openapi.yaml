@@ -717,6 +717,8 @@ paths:
           description: Request fulfilled, document follows
           headers: {}
       summary: GetMeDetail
+      tags:
+      - me-detail
     patch:
       deprecated: false
       operationId: ApiV1UserMeDetailUpdateMeDetail
@@ -756,6 +758,8 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: UpdateMeDetail
+      tags:
+      - me-detail
   /api/v1/user/register:
     post:
       deprecated: false
