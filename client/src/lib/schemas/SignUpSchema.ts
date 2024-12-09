@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Currencies } from "../../types/currency";
 import i18n from "../locale/i18n";
 
 export const SignUpSchema = z
@@ -22,6 +23,10 @@ export const SignUpSchema = z
       .regex(/[\W_]/, i18n.t("auth.form.field_password.validate_contains_special_character")),
     confirmPassword: z.string({
       required_error: i18n.t("auth.form.field_confirm_password.validate_required"),
+    }),
+    default_currency: z.nativeEnum(Currencies, {
+      required_error: i18n.t("auth.form.field_default_currency.validate_required"),
+      invalid_type_error: i18n.t("auth.form.field_default_currency.validate_invalid"),
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

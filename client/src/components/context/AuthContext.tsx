@@ -8,6 +8,7 @@ import type {
 import { type ReactNode, createContext, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase/supabase";
 import type { UserCreate } from "../../services/api/v1";
+import type { Currencies } from "../../types/currency";
 
 interface AuthContextType {
   user: User | null;
@@ -16,6 +17,7 @@ interface AuthContextType {
   logout: () => void;
   register: (
     form: SignUpWithPasswordCredentials,
+    defaultCurrency: Currencies,
   ) => Promise<{ userCreate: UserCreate; error: AuthError | null } | null>;
 }
 
@@ -71,10 +73,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
   const register = async (
     form: SignUpWithPasswordCredentials,
+    defaultCurrency: Currencies,
   ): Promise<{ userCreate: UserCreate; error: AuthError | null } | null> => {
     const { data, error } = await supabase.auth.signUp(form);
-    // TODO: hard code the default currency in the form?
-    return { userCreate: { id: data.user?.id ?? "", email: data.user?.email ?? "", default_currency: "JPY" }, error };
+    return {
+      userCreate: { id: data.user?.id ?? "", email: data.user?.email ?? "", default_currency: defaultCurrency },
+      error,
+    };
   };
 
   const value = { user, session, login, logout, register };

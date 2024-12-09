@@ -38,6 +38,8 @@
   "auth.form.field_password.validate_contains_special_character": "パスワードには少なくとも1つの特殊文字が必要です",
   "auth.form.field_confirm_password.validate_required": "パスワードの確認は必須です",
   "auth.form.field_confirm_password.validate_not_equal_password": "確認用パスワードが一致しません",
+  "auth.form.field_default_currency.validate_required": "デフォルト通貨が必要です",
+  "auth.form.field_default_currency.validate_invalid": "選択された通貨が無効です",
   "forgot_password.title": "パスワードをお忘れですか？",
   "forgot_password.greetings": "メールアドレスを入力してください。パスワードをリセットするリンクをお送りします。",
   "login.title": "お帰りなさい",
