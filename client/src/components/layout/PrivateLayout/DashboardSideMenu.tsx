@@ -36,9 +36,11 @@ export const DashboardSideMenu = () => {
     <Drawer
       variant="permanent"
       sx={{
+        width: drawerWidth,
         display: { xs: "none", md: "block" },
         [`& .${drawerClasses.paper}`]: {
           backgroundColor: "background.paper",
+          width: drawerWidth,
         },
       }}
     >
@@ -66,16 +68,18 @@ export const DashboardSideMenu = () => {
           src={meDetail.avatar_url ?? ""}
           sx={{ width: 36, height: 36 }}
         />
-        <Box sx={{ mr: "auto" }}>
+        <Box sx={{ mr: "auto", overflow: "hidden" }}>
           <Typography
+            noWrap
             variant="body2"
             sx={{ fontWeight: 500, lineHeight: "16px" }}
           >
             {meDetail.name ?? "Unnamed User"}
           </Typography>
           <Typography
+            noWrap
             variant="caption"
-            sx={{ color: "text.secondary" }}
+            sx={{ color: "text.secondary", display: "block" }}
           >
             {meDetail.email}
           </Typography>
