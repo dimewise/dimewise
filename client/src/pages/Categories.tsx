@@ -7,21 +7,39 @@ import { CategoryFormPopup } from "../components/Categories/CategoryFormPopup";
 import { CategoryListItem } from "../components/Categories/CategoryListItem";
 import { Toast } from "../components/Toast";
 import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
-import { type CategoryCreate, type CategoryFull, useApiV1CategoryGetCategoriesQuery } from "../services/api/v1";
+import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../lib/util/currency";
+import {
+  type CategoryCreate,
+  type CategoryFull,
+  useApiV1CategoryGetCategoriesQuery,
+  useApiV1UserMeDetailGetMeDetailQuery,
+} from "../services/api/v1";
 
 export type CreateUpdateCategory = CategoryCreate & { id: string };
 
 export const Categories = () => {
   const { t } = useTranslation();
   const now = DateTime.now();
-  const { data: categories, refetch } = useApiV1CategoryGetCategoriesQuery({
+  const locale = navigator.language;
+  const [category, setCategory] = useState<CreateUpdateCategory | null>(null);
+
+  const {
+    data: categories,
+    isLoading: categoriesIsLoading,
+    refetch,
+  } = useApiV1CategoryGetCategoriesQuery({
     fromDate: now.startOf("month").toUTC().toISO(),
     toDate: now.endOf("month").toUTC().toISO(),
   });
-  const total = categories?.reduce((acc, { budget }) => acc + budget, 0);
-  const [category, setCategory] = useState<CreateUpdateCategory | null>(null);
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
 
-  const currency = "JPY";
+  if (!categories || categoriesIsLoading || !meDetail || meDetailIsLoading) {
+    return <></>;
+  }
+
+  const total = categories?.reduce((acc, { budget }) => acc + budget, 0);
+  const currency = parseCurrencyEnum(meDetail.default_currency, locale);
+  const formattedTotal = formatCurrencyValueToLocale(total, currency, locale);
 
   const handleOnClickCreate = () => {
     setCategory({ id: "", name: "", budget: 0 });
@@ -65,7 +83,7 @@ export const Categories = () => {
               sx={{ alignItems: "center", justifyContent: "space-between" }}
             >
               <Typography variant="h6">{t("categories.total-budget")} </Typography>
-              <Typography variant="h6">{`${currency} ${total}`}</Typography>
+              <Typography variant="h6">{formattedTotal}</Typography>
             </Stack>
             <Divider />
           </>
