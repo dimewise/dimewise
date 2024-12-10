@@ -2,28 +2,36 @@ import { Card, CardContent, Grid2 as Grid, Stack, Typography, useMediaQuery, use
 import { BarChart, PieChart } from "@mui/x-charts";
 import { DateTime } from "luxon";
 import { useTranslation } from "react-i18next";
-import { useApiV1CategoryGetCategoriesQuery } from "../../services/api/v1";
+import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
+import { useApiV1CategoryGetCategoriesQuery, useApiV1UserMeDetailGetMeDetailQuery } from "../../services/api/v1";
 
 export const CurrentMonthWidget = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("lg"));
+  const locale = navigator.language;
 
   const now = DateTime.now();
-  const { data: categories } = useApiV1CategoryGetCategoriesQuery({
+  const { data: categories, isLoading: categoriesIsLoading } = useApiV1CategoryGetCategoriesQuery({
     fromDate: now.startOf("month").toUTC().toISO(),
     toDate: now.endOf("month").toUTC().toISO(),
   });
-  const currency = "JPY";
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
 
+  if (!categories || categoriesIsLoading || !meDetail || meDetailIsLoading) {
+    return <></>;
+  }
+
+  const currency = parseCurrencyEnum(meDetail.default_currency, locale);
   const totalSpent = categories?.reduce((sum, category) => sum + category.spent, 0) ?? 0;
   const totalBudget = categories?.reduce((sum, category) => sum + category.budget, 0) ?? 0;
 
   // construct bar series information
+  const remainder = totalBudget - totalSpent;
   const categoryBarSeries = categories?.map((c) => ({ label: c.name, data: [c.spent], stack: "total" })) ?? [];
   const remainderBarSeries = {
     label: "Remainder",
-    data: [totalBudget - totalSpent],
+    data: [remainder],
     stack: "total",
     color: "grey",
   };
@@ -37,13 +45,13 @@ export const CurrentMonthWidget = () => {
     })) ?? [];
   const remainderPieSeries = {
     label: "Remainder",
-    value: totalBudget - totalSpent,
+    value: remainder,
   };
-  const pieSeries = remainderPieSeries.value < 0 ? categoryPieSeries : [...categoryPieSeries, remainderPieSeries];
+  const pieSeries = remainder < 0 ? categoryPieSeries : [...categoryPieSeries, remainderPieSeries];
 
   // construct spent and budget value with currency
-  const spentStr = `${currency} ${totalSpent}`;
-  const budgetStr = `${currency} ${totalBudget}`;
+  const spentStr = formatCurrencyValueToLocale(totalSpent, currency, locale);
+  const budgetStr = formatCurrencyValueToLocale(totalBudget, currency, locale);
 
   return (
     <Grid size={{ xs: 12, sm: 12, lg: 3 }}>
@@ -61,7 +69,7 @@ export const CurrentMonthWidget = () => {
           </Typography>
           <Stack
             direction="row"
-            sx={{ alignItems: "center", mb: 2 }}
+            sx={{ alignItems: "end", mb: 2 }}
             gap={1}
           >
             <Typography
@@ -70,12 +78,11 @@ export const CurrentMonthWidget = () => {
             >
               {spentStr}
             </Typography>
-            /
             <Typography
               component="span"
               variant="caption"
             >
-              {budgetStr}
+              /&nbsp;{budgetStr}
             </Typography>
           </Stack>
           <BarChart
@@ -87,7 +94,10 @@ export const CurrentMonthWidget = () => {
             slotProps={{ legend: { hidden: true } }}
             margin={{ left: 0, right: 0, top: 10, bottom: 10 }}
             layout="horizontal"
-            series={barSeries}
+            series={barSeries.map((series) => ({
+              ...series,
+              valueFormatter: (v) => (v === null ? "" : formatCurrencyValueToLocale(v, currency, locale)),
+            }))}
           />
           <PieChart
             sx={{ display: { sm: "none", lg: "block" } }}
@@ -99,6 +109,7 @@ export const CurrentMonthWidget = () => {
                 innerRadius: 40,
                 cornerRadius: 5,
                 paddingAngle: 3,
+                valueFormatter: (v) => formatCurrencyValueToLocale(v.value, currency, locale),
               },
             ]}
             slotProps={{ legend: { hidden: true } }}
