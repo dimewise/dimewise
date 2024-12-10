@@ -1,5 +1,6 @@
+import { DeleteOutlined, EditOutlined } from "@mui/icons-material";
 import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
-import { IconButton, ListItem, ListItemText, Menu, MenuItem, Stack, Typography } from "@mui/material";
+import { IconButton, ListItem, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
@@ -77,8 +78,18 @@ export const CategoryListItem = ({ category, handleSubmit, handleSetCategory }: 
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleEdit}>{t("common.button.edit")}</MenuItem>
-        <MenuItem onClick={handleDelete}>{t("common.button.delete")}</MenuItem>
+        <MenuItem onClick={handleEdit}>
+          <ListItemIcon>
+            <EditOutlined fontSize="small" />
+          </ListItemIcon>
+          {t("common.button.edit")}
+        </MenuItem>
+        <MenuItem onClick={handleDelete}>
+          <ListItemIcon>
+            <DeleteOutlined fontSize="small" />
+          </ListItemIcon>
+          {t("common.button.delete")}
+        </MenuItem>
       </Menu>
     </>
   );
