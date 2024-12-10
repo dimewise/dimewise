@@ -1,8 +1,13 @@
 import MoreVertRounded from "@mui/icons-material/MoreVertRounded";
-import { Box, IconButton, ListItem, ListItemText, Menu, MenuItem, Stack, Typography } from "@mui/material";
+import { IconButton, ListItem, ListItemText, Menu, MenuItem, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type CategoryFull, useApiV1CategoryCategoryIdDeleteCategoryMutation } from "../../services/api/v1";
+import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
+import {
+  type CategoryFull,
+  useApiV1CategoryCategoryIdDeleteCategoryMutation,
+  useApiV1UserMeDetailGetMeDetailQuery,
+} from "../../services/api/v1";
 
 interface Props {
   category: CategoryFull;
@@ -12,10 +17,17 @@ interface Props {
 
 export const CategoryListItem = ({ category, handleSubmit, handleSetCategory }: Props) => {
   const { t } = useTranslation();
+  const locale = navigator.language;
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
   const [deleteCategory] = useApiV1CategoryCategoryIdDeleteCategoryMutation();
-  const currency = "JPY";
-  const budgetStr = `${currency} ${category.budget}`;
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+
+  if (!meDetail || meDetailIsLoading) {
+    return <></>;
+  }
+
+  const currency = parseCurrencyEnum(meDetail.default_currency, locale);
+  const budgetStr = formatCurrencyValueToLocale(category.budget, currency, locale);
 
   const open = Boolean(anchor);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
