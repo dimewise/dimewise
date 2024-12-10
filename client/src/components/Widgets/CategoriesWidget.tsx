@@ -3,22 +3,40 @@ import { Button, Card, CardContent, Grid2 as Grid, LinearProgress, Stack, Typogr
 import { DateTime } from "luxon";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
 import type { CreateUpdateCategory } from "../../pages/Categories";
-import { type CategoryFull, useApiV1CategoryGetCategoriesQuery } from "../../services/api/v1";
+import {
+  type CategoryFull,
+  useApiV1CategoryGetCategoriesQuery,
+  useApiV1UserMeDetailGetMeDetailQuery,
+} from "../../services/api/v1";
+import type { Currencies } from "../../types/currency";
 import { CategoryFormPopup } from "../Categories/CategoryFormPopup";
 import { CategoryTransactionsPopup } from "../Dashboard/CategoryTransactionsPopup";
 
 export const CategoriesWidget = () => {
   const { t } = useTranslation();
+  const locale = navigator.language;
+  const now = DateTime.now();
 
   const [createCategory, setCreateCategory] = useState<CreateUpdateCategory | null>(null);
   const [viewCategory, setViewCategory] = useState<CategoryFull | null>(null);
-  const now = DateTime.now();
-  const { data: categories, refetch: refetchGetCategories } = useApiV1CategoryGetCategoriesQuery({
+
+  const {
+    data: categories,
+    isLoading: categoriesIsLoading,
+    refetch: refetchGetCategories,
+  } = useApiV1CategoryGetCategoriesQuery({
     fromDate: now.startOf("month").toUTC().toISO(),
     toDate: now.endOf("month").toUTC().toISO(),
   });
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
 
+  if (!categories || categoriesIsLoading || !meDetail || meDetailIsLoading) {
+    return <></>;
+  }
+
+  const currency = parseCurrencyEnum(meDetail.default_currency, locale);
   const handleOpenCreateCategory = (open: boolean) => () => {
     setCreateCategory(open ? { id: "", name: "", budget: 0 } : null);
   };
@@ -60,6 +78,8 @@ export const CategoriesWidget = () => {
                 <CategoryWidgetItem
                   key={c.id}
                   category={c}
+                  currency={currency}
+                  locale={locale}
                   handleClick={handleSetViewCategory(c)}
                 />
               ))}
@@ -83,14 +103,18 @@ export const CategoriesWidget = () => {
   );
 };
 
-const CategoryWidgetItem = ({ category, handleClick }: { category: CategoryFull; handleClick: () => void }) => {
-  const currency = "JPY";
+const CategoryWidgetItem = ({
+  category,
+  currency,
+  locale,
+  handleClick,
+}: { category: CategoryFull; currency: Currencies; locale: string; handleClick: () => void }) => {
   const progress = (category.spent / category.budget) * 100;
   const severity = progress > 65 ? "error" : progress > 30 ? "warning" : "primary";
   const remainder = category.budget - category.spent;
 
-  const spentStr = `${currency} ${category.spent}`;
-  const budgetStr = `/ ${currency} ${category.budget} (${currency} ${remainder} left)`;
+  const spentStr = formatCurrencyValueToLocale(category.spent, currency, locale);
+  const budgetStr = `/ ${formatCurrencyValueToLocale(category.budget, currency, locale)} (${formatCurrencyValueToLocale(remainder, currency, locale)} left)`;
 
   return (
     <Grid size={{ xs: 12, sm: 6, lg: 4, xl: 3 }}>
