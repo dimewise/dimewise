@@ -13,18 +13,28 @@ import {
 import { DateTime } from "luxon";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery } from "../../services/api/v1";
+import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
+import {
+  useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery,
+  useApiV1UserMeDetailGetMeDetailQuery,
+} from "../../services/api/v1";
 
 export const MonthlyOverviewWidget = () => {
   const { t } = useTranslation();
-  // TODO: call user to get currency
-  const currency = "JPY";
+  const locale = navigator.language;
 
   const now = useMemo(() => DateTime.now(), []);
-  const { data: overviewData } = useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery({
-    fromDate: now.startOf("year").toUTC().toISO(),
-    toDate: now.toUTC().toISO(),
-  });
+  const { data: overviewData, isLoading: overviewDataIsLoading } =
+    useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery({
+      fromDate: now.startOf("year").toUTC().toISO(),
+      toDate: now.toUTC().toISO(),
+    });
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  if (!overviewData || overviewDataIsLoading || !meDetail || meDetailIsLoading) {
+    return <></>;
+  }
+
+  const currency = parseCurrencyEnum(meDetail.default_currency, locale);
   const budget = overviewData?.budget ?? 0;
   const categoriesData = overviewData?.months ?? {};
 
@@ -35,6 +45,7 @@ export const MonthlyOverviewWidget = () => {
     stack: "all",
     label: category,
     layout: "vertical",
+    valueFormatter: (v) => (v === null ? "" : formatCurrencyValueToLocale(v, currency, locale)),
   }));
 
   const lineData: LineSeriesType = {
@@ -43,18 +54,19 @@ export const MonthlyOverviewWidget = () => {
     data: new Array(12).fill(budget),
     label: "Budget",
     color: "transparent",
+    valueFormatter: (v) => (v === null ? "" : formatCurrencyValueToLocale(v, currency, locale)),
   };
 
   // collate data
   const xAxisData = Array.from(Array(12).keys()).map((m) => DateTime.local(now.year, m + 1).toFormat("MMM"));
   const series = [...barData, lineData];
-  const budgetLabel = `${currency} ${budget}`;
+  const budgetLabel = formatCurrencyValueToLocale(budget, currency, locale);
 
   const spentAmount = Object.values(categoriesData)
     .flat()
     .reduce((sum, value) => sum + value, 0);
   const savedAmount = budget - spentAmount;
-  const savedStr = `${currency} ${savedAmount}`;
+  const savedStr = formatCurrencyValueToLocale(savedAmount, currency, locale);
 
   return (
     <Grid size={{ sm: 12, md: 12, lg: 9 }}>
