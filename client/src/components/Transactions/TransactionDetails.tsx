@@ -3,7 +3,13 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { type Expense, useApiV1ExpenseExpenseIdDeleteExpenseMutation } from "../../services/api/v1";
+import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
+import {
+  type Expense,
+  useApiV1ExpenseExpenseIdDeleteExpenseMutation,
+  useApiV1UserMeDetailGetMeDetailQuery,
+} from "../../services/api/v1";
+import type { Currencies } from "../../types/currency";
 import { DesktopDialog } from "../DesktopDialog";
 import { MobileDrawer } from "../MobileDrawer";
 import { TransactionForm } from "./TransactionForm";
@@ -17,8 +23,15 @@ interface Props {
 
 export const TransactionDetails = ({ open, transaction, handleClose }: Props) => {
   const { t } = useTranslation();
+  const locale = navigator.language;
   const [detailsType, setDetailsType] = useState<TransactionDetailsEnum>(TransactionDetailsEnum.view);
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
 
+  if (!meDetail || meDetailIsLoading) {
+    return <></>;
+  }
+
+  const currency = parseCurrencyEnum(meDetail.default_currency, locale);
   const title = useMemo(() => {
     return detailsType === TransactionDetailsEnum.view
       ? transaction.title
@@ -44,7 +57,9 @@ export const TransactionDetails = ({ open, transaction, handleClose }: Props) =>
         handleClose={handleResetOnClose}
       >
         <TransactionContent
+          currency={currency}
           detailsType={detailsType}
+          locale={locale}
           setDetailsType={setDetailsType}
           transaction={transaction}
           handleCloseModal={handleResetOnClose}
@@ -56,7 +71,9 @@ export const TransactionDetails = ({ open, transaction, handleClose }: Props) =>
         handleClose={handleResetOnClose}
       >
         <TransactionContent
+          currency={currency}
           detailsType={detailsType}
+          locale={locale}
           setDetailsType={setDetailsType}
           transaction={transaction}
           handleCloseModal={handleResetOnClose}
@@ -67,14 +84,18 @@ export const TransactionDetails = ({ open, transaction, handleClose }: Props) =>
 };
 
 interface TransactionContentProps {
+  currency: Currencies;
   detailsType: TransactionDetailsEnum;
+  locale: string;
   setDetailsType: (detailsType: TransactionDetailsEnum) => void;
   transaction: Expense;
   handleCloseModal: () => void;
 }
 
 const TransactionContent = ({
+  currency,
   detailsType,
+  locale,
   setDetailsType,
   transaction,
   handleCloseModal,
@@ -83,8 +104,7 @@ const TransactionContent = ({
   const [deleteExpenseById] = useApiV1ExpenseExpenseIdDeleteExpenseMutation();
 
   const date = DateTime.fromISO(transaction.date).toFormat("MMM d, yyyy");
-  const currency = "JPY";
-  const transactionAmountStr = `${currency} ${transaction.amount}`;
+  const transactionAmountStr = formatCurrencyValueToLocale(transaction.amount, currency, locale);
 
   // Edit
   const handleOnClickEdit = () => {
