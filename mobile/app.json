@@ -1,21 +1,35 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "Dimewise",
+    "slug": "dimewise",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "icon": "./assets/icon/dw_ios_app_icon_1024x1024.png",
+    "scheme": "dimewise",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "splash": {
+        "image": "./assets/icon/dw_splash_screen_1024x1024.png",
+        "imageWidth": 200,
+        "resizeMode": "cover",
+        "backgroundColor": "#00EF90"
+      },
+      "bundleIdentifier": "com.anonymous.dimewise"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/icon/dw_ios_app_icon_1024x1024.png",
+        "backgroundColor": "#00EF98"
+      },
+      "splash": {
+        "image": "./assets/icon/dw_splash_screen_1024x1024.png",
+        "imageWidth": 200,
+        "resizeMode": "cover",
+        "backgroundColor": "#00EF90"
+      },
+      "package": "com.anonymous.dimewise"
     },
     "web": {
       "bundler": "metro",
@@ -27,10 +41,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/icon/dw_splash_screen_1024x1024.png",
           "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "resizeMode": "cover",
+          "backgroundColor": "#00EF90"
         }
       ]
     ],
