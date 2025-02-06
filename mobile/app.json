@@ -13,7 +13,7 @@
       "splash": {
         "image": "./assets/icon/dw_splash_screen_1024x1024.png",
         "imageWidth": 200,
-        "resizeMode": "cover",
+        "resizeMode": "contain",
         "backgroundColor": "#00EF90"
       },
       "bundleIdentifier": "com.anonymous.dimewise"
@@ -26,7 +26,7 @@
       "splash": {
         "image": "./assets/icon/dw_splash_screen_1024x1024.png",
         "imageWidth": 200,
-        "resizeMode": "cover",
+        "resizeMode": "contain",
         "backgroundColor": "#00EF90"
       },
       "package": "com.anonymous.dimewise"
@@ -43,7 +43,7 @@
         {
           "image": "./assets/icon/dw_splash_screen_1024x1024.png",
           "imageWidth": 200,
-          "resizeMode": "cover",
+          "resizeMode": "contain",
           "backgroundColor": "#00EF90"
         }
       ]
