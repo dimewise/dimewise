@@ -1,5 +1,4 @@
-import React from 'react';
-import { TextInput, StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 type Props = {
   label?: string;
@@ -7,17 +6,17 @@ type Props = {
   value: string;
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
-  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
+  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
 };
 
-export default function Input({
+export const Input = ({
   label,
   placeholder,
   value,
   onChangeText,
   secureTextEntry = false,
-  keyboardType = 'default',
-}: Props) {
+  keyboardType = "default",
+}: Props) => {
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -34,7 +33,7 @@ export default function Input({
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -43,16 +42,16 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 4,
-    color: '#25292e',
+    color: "#25292e",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#ffd33d',
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#ffd33d",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 8,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   icon: {
     marginRight: 8,
@@ -62,4 +61,3 @@ const styles = StyleSheet.create({
     height: 40,
   },
 });
-

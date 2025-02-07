@@ -1,19 +1,22 @@
 import type { ImageSource } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 
-import Button from "@/components/Button";
-import CircleButton from "@/components/CircleButton";
-import EmojiList from "@/components/EmojiList";
-import EmojiPicker from "@/components/EmojiPicker";
-import IconButton from "@/components/IconButton";
-import ImageViewer from "@/components/ImageViewer";
-import EmojiSticker from "@/components/EmojiSticker";
+import { Button } from "@/components/Button";
+import { CircleButton } from "@/components/CircleButton";
+import { EmojiList } from "@/components/EmojiList";
+import { EmojiPicker } from "@/components/EmojiPicker";
+import { EmojiSticker } from "@/components/EmojiSticker";
+import { IconButton } from "@/components/IconButton";
+import { ImageViewer } from "@/components/ImageViewer";
+import { useSession } from "@/contexts/SessionContext";
+import { router } from "expo-router";
 
 const PlaceholderImage = require("@/assets/images/background-image.png");
 
 export default function Index() {
+  const { signOut } = useSession();
   const [selectedImage, setSelectedImage] = useState<string | undefined>(
     undefined,
   );
@@ -54,21 +57,40 @@ export default function Index() {
     // we will implement this later
   };
 
+  const onSignout = async () => {
+    const { error } = await signOut();
+
+    if (error) Alert.alert(error.message);
+    router.replace("/sign-in");
+  };
+
   return (
     <View style={styles.container}>
+      <Button
+        onPress={onSignout}
+        label="Sign Out"
+        theme="primary"
+      />
       <View style={styles.imageContainer}>
         <ImageViewer
           imgSource={PlaceholderImage}
           selectedImage={selectedImage}
         />
         {pickedEmoji && (
-          <EmojiSticker imageSize={40} stickerSource={pickedEmoji} />
+          <EmojiSticker
+            imageSize={40}
+            stickerSource={pickedEmoji}
+          />
         )}
       </View>
       {showAppOptions ? (
         <View style={styles.optionsContainer}>
           <View style={styles.optionsRow}>
-            <IconButton icon="refresh" label="Reset" onPress={onReset} />
+            <IconButton
+              icon="refresh"
+              label="Reset"
+              onPress={onReset}
+            />
             <CircleButton onPress={onAddSticker} />
             <IconButton
               icon="save-alt"
@@ -90,8 +112,14 @@ export default function Index() {
           />
         </View>
       )}
-      <EmojiPicker isVisible={isModalVisible} onClose={onModalClose}>
-        <EmojiList onSelect={setPickedEmoji} onCloseModal={onModalClose} />
+      <EmojiPicker
+        isVisible={isModalVisible}
+        onClose={onModalClose}
+      >
+        <EmojiList
+          onSelect={setPickedEmoji}
+          onCloseModal={onModalClose}
+        />
       </EmojiPicker>
     </View>
   );
