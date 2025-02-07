@@ -69,7 +69,7 @@ export const SessionProvider = ({ children }: PropsWithChildren) => {
     const opts: SignInWithOAuthCredentials = {
       provider: provider,
       options: {
-        redirectTo: window.location.origin, // TODO: figure out what this is supposed to be
+        redirectTo: "", // TODO: figure out what this is supposed to be
       }
     }
     const { error } = await supabase.auth.signInWithOAuth(opts)

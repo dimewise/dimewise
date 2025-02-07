@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Alert, StyleSheet, View, AppState } from 'react-native'
+import { Alert, StyleSheet, View, AppState, Text } from 'react-native'
 import { supabase } from '../lib/supabase'
 import Input from '@/components/Input'
 import Button from '@/components/Button'
 import { useSession } from '@/contexts/SessionContext'
+import { router } from 'expo-router'
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -32,10 +33,10 @@ export default function Auth() {
 
     if (error) Alert.alert(error.message)
     setLoading(false)
+    router.replace("/")
   }
 
   async function signUpWithEmail() {
-    Alert.alert("DOING IT NOW")
     setLoading(true)
     const {
       data: { session },
@@ -45,9 +46,6 @@ export default function Auth() {
       password: password,
     })
 
-    console.error("hello")
-    Alert.alert(error?.message ?? "no errors")
-
     if (error) Alert.alert(error.message)
     if (!session) Alert.alert('Please check your inbox for email verification!')
     setLoading(false)
@@ -55,6 +53,9 @@ export default function Auth() {
 
   return (
     <View style={styles.container}>
+      {loading && (
+        <Text>Loading...</Text>
+      )}
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input
           label="Email"
@@ -73,10 +74,10 @@ export default function Auth() {
         />
       </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button label="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
+        <Button theme="primary" label="Sign in" disabled={loading} onPress={() => signInWithEmail()} />
       </View>
       <View style={styles.verticallySpaced}>
-        <Button label="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
+        <Button theme="primary" label="Sign up" disabled={loading} onPress={() => signUpWithEmail()} />
       </View>
     </View>
   )
@@ -86,6 +87,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
+    backgroundColor: "#FFFFFF"
   },
   verticallySpaced: {
     paddingTop: 4,
