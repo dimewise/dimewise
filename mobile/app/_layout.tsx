@@ -1,10 +1,10 @@
-import { Stack } from "expo-router";
+import { SessionProvider } from "@/contexts/SessionContext";
+import { Slot } from "expo-router";
 
 export default function RootLayout() {
-	return (
-		<Stack>
-			<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-			<Stack.Screen name="+not-found" />
-		</Stack>
-	);
+  return (
+    <SessionProvider>
+      <Slot />
+    </SessionProvider>
+  );
 }
