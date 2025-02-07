@@ -8,7 +8,7 @@ type Props = {
   onPress?: () => void;
 };
 
-export default function Button({ label, theme, disabled, onPress }: Props) {
+export const Button = ({ label, theme, disabled, onPress }: Props) => {
   if (theme === "primary") {
     return (
       <View
@@ -38,12 +38,15 @@ export default function Button({ label, theme, disabled, onPress }: Props) {
 
   return (
     <View style={styles.buttonContainer}>
-      <Pressable style={styles.button} onPress={onPress}>
+      <Pressable
+        style={styles.button}
+        onPress={onPress}
+      >
         <Text style={styles.buttonLabel}>{label}</Text>
       </Pressable>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   buttonContainer: {
