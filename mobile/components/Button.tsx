@@ -9,6 +9,7 @@ type Props = {
   disabled?: boolean;
   startIcon?: string;
   iconFamily?: "font-awesome";
+  fullWidth?: boolean;
   onPress?: () => void;
 };
 
@@ -18,6 +19,7 @@ export const Button = ({
   disabled,
   startIcon,
   iconFamily,
+  fullWidth,
   onPress,
 }: Props) => {
   const theme = useTheme();
@@ -25,7 +27,7 @@ export const Button = ({
 
   if (color === "primary") {
     return (
-      <View style={[styles.buttonContainer, ,]}>
+      <View style={[styles.buttonContainer, fullWidth && { width: "100%" }]}>
         <Pressable
           disabled={disabled}
           style={styles.button}
