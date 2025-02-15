@@ -26,7 +26,7 @@ AppState.addEventListener("change", (state) => {
 export default function Login() {
   const theme = useTheme();
   const styles = makeStyle(theme);
-  const { loginWithPassword, register } = useAuth();
+  const { loginWithPassword } = useAuth();
   const session = useAppSelector((state) => state.session);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,17 +39,6 @@ export default function Login() {
 
     if (session.error) Alert.alert(session.error.message);
     router.replace("/");
-  }
-
-  async function signUpWithEmail() {
-    await register({
-      email: email,
-      password: password,
-    });
-
-    if (session.error) Alert.alert(session.error.message);
-    if (!session)
-      Alert.alert("Please check your inbox for email verification!");
   }
 
   return (
@@ -104,13 +93,12 @@ const makeStyle = (theme: Theme) =>
     container: {
       paddingHorizontal: 50,
       height: "100%",
-      backgroundColor: theme.colors.secondary,
+      backgroundColor: theme.colors.background,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
       gap: 32,
-      color: theme.colors.primary,
     },
     input: {
       width: "100%",
