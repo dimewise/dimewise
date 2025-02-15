@@ -64,6 +64,6 @@ const makeStyle = (theme: Theme) =>
     },
     input: {
       flex: 1,
-      height: 40,
+      height: 50,
     },
   });
