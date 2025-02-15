@@ -10,13 +10,15 @@ import { EmojiPicker } from "@/components/EmojiPicker";
 import { EmojiSticker } from "@/components/EmojiSticker";
 import { IconButton } from "@/components/IconButton";
 import { ImageViewer } from "@/components/ImageViewer";
-import { useSession } from "@/contexts/SessionContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useAppSelector } from "@/store/store";
 import { router } from "expo-router";
 
 const PlaceholderImage = require("@/assets/images/background-image.png");
 
 export default function Index() {
-  const { signOut } = useSession();
+  const { logout } = useAuth();
+  const session = useAppSelector((state) => state.session);
   const [selectedImage, setSelectedImage] = useState<string | undefined>(
     undefined,
   );
@@ -58,10 +60,10 @@ export default function Index() {
   };
 
   const onSignout = async () => {
-    const { error } = await signOut();
+    await logout();
 
-    if (error) Alert.alert(error.message);
-    router.replace("/sign-in");
+    if (session.error) Alert.alert(session.error.message);
+    router.replace("/(auth)/login");
   };
 
   return (

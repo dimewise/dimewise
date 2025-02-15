@@ -1,10 +1,11 @@
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { useSession } from "@/contexts/SessionContext";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
+import { useAppSelector } from "@/store/store";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Alert, AppState, StyleSheet, Text, View } from "react-native";
-import { supabase } from "../lib/supabase";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -18,43 +19,36 @@ AppState.addEventListener("change", (state) => {
   }
 });
 
-export default function Auth() {
-  const { signInWithPassword, signUpWithPassword } = useSession();
+export default function Login() {
+  const { loginWithPassword, register } = useAuth();
+  const session = useAppSelector((state) => state.session);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
   async function signInWithEmail() {
-    setLoading(true);
-    const { error } = await signInWithPassword({
+    await loginWithPassword({
       email: email,
       password: password,
     });
 
-    if (error) Alert.alert(error.message);
-    setLoading(false);
+    if (session.error) Alert.alert(session.error.message);
     router.replace("/");
   }
 
   async function signUpWithEmail() {
-    setLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await signUpWithPassword({
+    await register({
       email: email,
       password: password,
     });
 
-    if (error) Alert.alert(error.message);
+    if (session.error) Alert.alert(session.error.message);
     if (!session)
       Alert.alert("Please check your inbox for email verification!");
-    setLoading(false);
   }
 
   return (
     <View style={styles.container}>
-      {loading && <Text>Loading...</Text>}
+      {session.loading && <Text>Loading...</Text>}
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input
           label="Email"
@@ -76,7 +70,7 @@ export default function Auth() {
         <Button
           theme="primary"
           label="Sign in"
-          disabled={loading}
+          disabled={session.loading}
           onPress={() => signInWithEmail()}
         />
       </View>
@@ -84,7 +78,7 @@ export default function Auth() {
         <Button
           theme="primary"
           label="Sign up"
-          disabled={loading}
+          disabled={session.loading}
           onPress={() => signUpWithEmail()}
         />
       </View>
