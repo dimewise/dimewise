@@ -65,7 +65,7 @@ const makeStyle = (theme: Theme) =>
       marginHorizontal: 20,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: theme.colors.primary,
+      backgroundColor: theme.color.primary,
       borderRadius: 18,
     },
     button: {
