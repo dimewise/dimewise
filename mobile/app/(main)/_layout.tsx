@@ -1,11 +1,11 @@
-import { useSession } from "@/contexts/SessionContext";
+import { useAppSelector } from "@/store/store";
 import { Redirect, Stack } from "expo-router";
 
 export default function AppLayout() {
-  const { session } = useSession();
+  const { session } = useAppSelector((state) => state.session);
 
   if (!session) {
-    return <Redirect href="/sign-in" />;
+    return <Redirect href="/(auth)/login" />;
   }
 
   return (
