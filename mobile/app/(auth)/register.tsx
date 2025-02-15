@@ -1,35 +1,116 @@
-import { Link, Stack } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { Button } from "@/components/Button";
+import { Input } from "@/components/Input";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useAppSelector } from "@/store/store";
+import type { Theme } from "@/style/theme";
+import { Image } from "expo-image";
+import { Link } from "expo-router";
+import { useState } from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
+  const theme = useTheme();
+  const styles = makeStyle(theme);
+  const { register } = useAuth();
+  const session = useAppSelector((state) => state.session);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  async function signUpWithEmail() {
+    if (password === confirmPassword) {
+      await register({
+        email: email,
+        password: password,
+      });
+
+      if (session.error) Alert.alert(session.error.message);
+      if (!session)
+        Alert.alert("Please check your inbox for email verification!");
+    } else {
+      Alert.alert("Password does not match");
+    }
+  }
+
   return (
-    <>
-      <Stack.Screen
-        options={{ title: "Oops! This page is still under construction" }}
+    <SafeAreaView style={styles.container}>
+      {session.loading && <Text>Loading...</Text>}
+      <Image
+        style={styles.logo}
+        source={require("../../assets/logo/logo_full_colored.svg")}
+        contentFit="contain"
       />
-      <View style={styles.container}>
-        <Link
-          href="/"
-          style={styles.button}
-        >
-          Go back to Home screen!
-        </Link>
+      <Text style={styles.greetings}>Welcome back!</Text>
+      <View style={styles.input}>
+        <Input
+          label="Email"
+          onChangeText={(text) => setEmail(text)}
+          value={email}
+          placeholder="email@address.com"
+        />
+        <Input
+          label="Password"
+          onChangeText={(text) => setPassword(text)}
+          value={password}
+          secureTextEntry={true}
+          placeholder="Password"
+        />
+        <Input
+          label="Confirm Password"
+          onChangeText={(text) => setConfirmPassword(text)}
+          value={password}
+          secureTextEntry={true}
+          placeholder="Confirm Password"
+        />
       </View>
-    </>
+      <View>
+        <Button
+          color="primary"
+          label="Sign in"
+          disabled={session.loading}
+          onPress={() => signUpWithEmail()}
+        />
+      </View>
+      <View>
+        <Text>
+          Already have an account?&nbsp;
+          <Link
+            style={styles.signUpText}
+            href={"/(auth)/login"}
+          >
+            Sign In
+          </Link>
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#25292e",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  button: {
-    fontSize: 20,
-    textDecorationLine: "underline",
-    color: "#fff",
-  },
-});
+const makeStyle = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 50,
+      height: "100%",
+      backgroundColor: theme.colors.background,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 32,
+    },
+    input: {
+      width: "100%",
+    },
+    logo: {
+      width: "100%",
+      height: 60,
+    },
+    greetings: {
+      fontSize: theme.fontSizes.xl,
+    },
+    signUpText: {
+      textDecorationLine: "underline",
+    },
+  });

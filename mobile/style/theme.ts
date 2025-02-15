@@ -1,7 +1,7 @@
 export const colors = {
   primary: "#263455", // dark blue (logo stroke)
   secondary: "#00ef98", // green (logo background)
-  background: "#f8fafc", // soft off-white background
+  background: "#FAFAFA", // soft off-white background
   text: "#1e293b", // dark slate text for readability
   accent: "#64748b", // muted blue-gray accent for buttons or borders
   highlight: "#34d399", // vibrant green highlight (close to your secondary)
