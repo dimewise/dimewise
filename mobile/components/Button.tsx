@@ -1,36 +1,45 @@
+import { useTheme } from "@/contexts/ThemeContext";
+import type { Theme } from "@/style/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type Props = {
   label: string;
-  theme?: "primary";
+  color?: "primary";
   disabled?: boolean;
+  startIcon?: string;
+  iconFamily?: "font-awesome";
   onPress?: () => void;
 };
 
-export const Button = ({ label, theme, disabled, onPress }: Props) => {
-  if (theme === "primary") {
+export const Button = ({
+  label,
+  color,
+  disabled,
+  startIcon,
+  iconFamily,
+  onPress,
+}: Props) => {
+  const theme = useTheme();
+  const styles = makeStyle(theme);
+
+  if (color === "primary") {
     return (
-      <View
-        style={[
-          styles.buttonContainer,
-          { borderWidth: 4, borderColor: "#ffd33d", borderRadius: 18 },
-        ]}
-      >
+      <View style={[styles.buttonContainer, ,]}>
         <Pressable
           disabled={disabled}
-          style={[styles.button, { backgroundColor: "#fff" }]}
+          style={styles.button}
           onPress={onPress}
         >
-          <FontAwesome
-            name="picture-o"
-            size={18}
-            color="#25292e"
-            style={styles.buttonIcon}
-          />
-          <Text style={[styles.buttonLabel, { color: "#25292e" }]}>
-            {label}
-          </Text>
+          {startIcon && iconFamily && (
+            <FontAwesome
+              name="picture-o"
+              size={18}
+              color="#25292e"
+              style={styles.buttonIcon}
+            />
+          )}
+          <Text style={[styles.buttonLabel]}>{label}</Text>
         </Pressable>
       </View>
     );
@@ -48,28 +57,30 @@ export const Button = ({ label, theme, disabled, onPress }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  buttonContainer: {
-    width: 320,
-    height: 68,
-    marginHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 3,
-  },
-  button: {
-    borderRadius: 10,
-    width: "100%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-  },
-  buttonIcon: {
-    paddingRight: 8,
-  },
-  buttonLabel: {
-    color: "#fff",
-    fontSize: 16,
-  },
-});
+const makeStyle = (theme: Theme) =>
+  StyleSheet.create({
+    buttonContainer: {
+      width: 320,
+      height: 60,
+      marginHorizontal: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.primary,
+      borderRadius: 18,
+    },
+    button: {
+      borderRadius: 10,
+      width: "100%",
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+    },
+    buttonIcon: {
+      paddingRight: 8,
+    },
+    buttonLabel: {
+      color: "#FFFFFF",
+      fontSize: 16,
+    },
+  });

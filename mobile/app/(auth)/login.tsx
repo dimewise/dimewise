@@ -1,11 +1,15 @@
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { useAppSelector } from "@/store/store";
-import { router } from "expo-router";
+import type { Theme } from "@/style/theme";
+import { Image } from "expo-image";
+import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, AppState, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -20,6 +24,8 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function Login() {
+  const theme = useTheme();
+  const styles = makeStyle(theme);
   const { loginWithPassword, register } = useAuth();
   const session = useAppSelector((state) => state.session);
   const [email, setEmail] = useState("");
@@ -47,17 +53,21 @@ export default function Login() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {session.loading && <Text>Loading...</Text>}
-      <View style={[styles.verticallySpaced, styles.mt20]}>
+      <Image
+        style={styles.logo}
+        source={require("../../assets/logo/logo_full_colored.svg")}
+        contentFit="contain"
+      />
+      <Text style={styles.greetings}>Welcome back!</Text>
+      <View style={styles.input}>
         <Input
           label="Email"
           onChangeText={(text) => setEmail(text)}
           value={email}
           placeholder="email@address.com"
         />
-      </View>
-      <View style={styles.verticallySpaced}>
         <Input
           label="Password"
           onChangeText={(text) => setPassword(text)}
@@ -66,38 +76,53 @@ export default function Login() {
           placeholder="Password"
         />
       </View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
+      <View>
         <Button
-          theme="primary"
+          color="primary"
           label="Sign in"
           disabled={session.loading}
           onPress={() => signInWithEmail()}
         />
       </View>
-      <View style={styles.verticallySpaced}>
-        <Button
-          theme="primary"
-          label="Sign up"
-          disabled={session.loading}
-          onPress={() => signUpWithEmail()}
-        />
+      <View>
+        <Text>
+          Don't have an account?&nbsp;
+          <Link
+            style={styles.signUpText}
+            href={"/(auth)/register"}
+          >
+            Sign Up
+          </Link>
+        </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginTop: 40,
-    padding: 12,
-    backgroundColor: "#FFFFFF",
-  },
-  verticallySpaced: {
-    paddingTop: 4,
-    paddingBottom: 4,
-    alignSelf: "stretch",
-  },
-  mt20: {
-    marginTop: 20,
-  },
-});
+const makeStyle = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 50,
+      height: "100%",
+      backgroundColor: theme.colors.secondary,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 32,
+      color: theme.colors.primary,
+    },
+    input: {
+      width: "100%",
+    },
+    logo: {
+      width: "100%",
+      height: 60,
+    },
+    greetings: {
+      fontSize: theme.fontSizes.xl,
+    },
+    signUpText: {
+      textDecorationLine: "underline",
+    },
+  });
