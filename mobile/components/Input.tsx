@@ -1,3 +1,5 @@
+import { useTheme } from "@/contexts/ThemeContext";
+import type { Theme } from "@/style/theme";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 type Props = {
@@ -17,6 +19,9 @@ export const Input = ({
   secureTextEntry = false,
   keyboardType = "default",
 }: Props) => {
+  const theme = useTheme();
+  const styles = makeStyle(theme);
+
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
@@ -35,29 +40,30 @@ export const Input = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 4,
-    color: "#25292e",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderColor: "#ffd33d",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    backgroundColor: "#fff",
-  },
-  icon: {
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    height: 40,
-  },
-});
+const makeStyle = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      marginBottom: 16,
+    },
+    label: {
+      fontSize: 16,
+      marginBottom: 4,
+      color: "#25292e",
+    },
+    inputContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderColor: theme.color.primary,
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      backgroundColor: "#fff",
+    },
+    icon: {
+      marginRight: 8,
+    },
+    input: {
+      flex: 1,
+      height: 40,
+    },
+  });

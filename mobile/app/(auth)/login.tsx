@@ -49,13 +49,13 @@ export default function Login() {
         source={require("../../assets/logo/logo_full_colored.svg")}
         contentFit="contain"
       />
-      <Text style={styles.greetings}>Welcome back!</Text>
+      <Text style={[styles.greetings]}>Welcome back!</Text>
       <View style={styles.input}>
         <Input
           label="Email"
           onChangeText={(text) => setEmail(text)}
           value={email}
-          placeholder="email@address.com"
+          placeholder="yamada.taro@email.com"
         />
         <Input
           label="Password"
@@ -93,7 +93,7 @@ const makeStyle = (theme: Theme) =>
     container: {
       paddingHorizontal: 50,
       height: "100%",
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.color.background,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -109,6 +109,7 @@ const makeStyle = (theme: Theme) =>
     },
     greetings: {
       fontSize: theme.fontSizes.xl,
+      fontFamily: theme.typography.regular,
     },
     signUpText: {
       textDecorationLine: "underline",

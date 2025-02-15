@@ -48,7 +48,7 @@ export default function Register() {
           label="Email"
           onChangeText={(text) => setEmail(text)}
           value={email}
-          placeholder="email@address.com"
+          placeholder="yamada.taro@email.com"
         />
         <Input
           label="Password"
@@ -93,7 +93,7 @@ const makeStyle = (theme: Theme) =>
     container: {
       paddingHorizontal: 50,
       height: "100%",
-      backgroundColor: theme.colors.background,
+      backgroundColor: theme.color.background,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
