@@ -71,7 +71,7 @@ export default function Index() {
       <Button
         onPress={onSignout}
         label="Sign Out"
-        theme="primary"
+        color="primary"
       />
       <View style={styles.imageContainer}>
         <ImageViewer
@@ -104,7 +104,7 @@ export default function Index() {
       ) : (
         <View style={styles.footerContainer}>
           <Button
-            theme="primary"
+            color="primary"
             label="Choose a photo"
             onPress={pickImageAsync}
           />
