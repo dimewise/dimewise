@@ -9,7 +9,7 @@ export default function AuthLayout() {
         animated={true}
         backgroundColor="#000000"
       />
-      <Stack>
+      <Stack initialRouteName="login">
         <Stack.Screen
           name="login"
           options={{ headerShown: false }}

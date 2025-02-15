@@ -14,9 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAppSelector } from "@/store/store";
 import { router } from "expo-router";
 
-const PlaceholderImage = require("@/assets/images/background-image.png");
-
-export default function Index() {
+export default function Home() {
   const { logout } = useAuth();
   const session = useAppSelector((state) => state.session);
   const [selectedImage, setSelectedImage] = useState<string | undefined>(
@@ -75,7 +73,7 @@ export default function Index() {
       />
       <View style={styles.imageContainer}>
         <ImageViewer
-          imgSource={PlaceholderImage}
+          imgSource={require("@/assets/images/background-image.png")}
           selectedImage={selectedImage}
         />
         {pickedEmoji && (

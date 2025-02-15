@@ -1,13 +1,13 @@
 import { Link, Stack } from "expo-router";
 import { StyleSheet, View } from "react-native";
 
-export default function NotFoundScreen() {
+export default function Settings() {
   return (
     <>
-      <Stack.Screen options={{ title: "Oops! Not Found" }} />
+      <Stack.Screen options={{ title: "Settings" }} />
       <View style={styles.container}>
         <Link
-          href="/(auth)/login"
+          href="/(main)/(tabs)/home"
           style={styles.button}
         >
           Go back to Home screen!

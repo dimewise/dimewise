@@ -39,7 +39,7 @@ export default function Login() {
     });
 
     if (session.error) Alert.alert(session.error.message);
-    router.replace("/");
+    router.replace("/(main)/(tabs)/home");
   }
 
   return (
