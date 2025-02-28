@@ -13,4 +13,8 @@ export const useMakeGlobalStyles = (theme: Theme) =>
       justifyContent: "center",
       gap: 10,
     },
+    safeAreaContainer: {
+      flex: 1,
+      backgroundColor: theme.color.background,
+    },
   });

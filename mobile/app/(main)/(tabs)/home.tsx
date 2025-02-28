@@ -72,62 +72,67 @@ export default function Home() {
   };
 
   return (
-    <SafeAreaView style={gstyles.container}>
-      <Button
-        onPress={onSignout}
-        label="Sign Out"
-        color="primary"
-      />
-      <View style={styles.imageContainer}>
-        <ImageViewer
-          imgSource={require("@/assets/images/background-image.png")}
-          selectedImage={selectedImage}
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      style={gstyles.safeAreaContainer}
+    >
+      <View style={gstyles.container}>
+        <Button
+          onPress={onSignout}
+          label="Sign Out"
+          color="primary"
         />
-        {pickedEmoji && (
-          <EmojiSticker
-            imageSize={40}
-            stickerSource={pickedEmoji}
+        <View style={styles.imageContainer}>
+          <ImageViewer
+            imgSource={require("@/assets/images/background-image.png")}
+            selectedImage={selectedImage}
           />
-        )}
-      </View>
-      {showAppOptions ? (
-        <View style={styles.optionsContainer}>
-          <View style={styles.optionsRow}>
-            <IconButton
-              icon="refresh"
-              label="Reset"
-              onPress={onReset}
+          {pickedEmoji && (
+            <EmojiSticker
+              imageSize={40}
+              stickerSource={pickedEmoji}
             />
-            <CircleButton onPress={onAddSticker} />
-            <IconButton
-              icon="save-alt"
-              label="Save"
-              onPress={onSaveImageAsync}
+          )}
+        </View>
+        {showAppOptions ? (
+          <View style={styles.optionsContainer}>
+            <View style={styles.optionsRow}>
+              <IconButton
+                icon="refresh"
+                label="Reset"
+                onPress={onReset}
+              />
+              <CircleButton onPress={onAddSticker} />
+              <IconButton
+                icon="save-alt"
+                label="Save"
+                onPress={onSaveImageAsync}
+              />
+            </View>
+          </View>
+        ) : (
+          <View style={styles.footerContainer}>
+            <Button
+              color="primary"
+              label="Choose a photo"
+              onPress={pickImageAsync}
+            />
+            <Button
+              label="Use this photo"
+              onPress={() => setShowAppOptions(true)}
             />
           </View>
-        </View>
-      ) : (
-        <View style={styles.footerContainer}>
-          <Button
-            color="primary"
-            label="Choose a photo"
-            onPress={pickImageAsync}
+        )}
+        <EmojiPicker
+          isVisible={isModalVisible}
+          onClose={onModalClose}
+        >
+          <EmojiList
+            onSelect={setPickedEmoji}
+            onCloseModal={onModalClose}
           />
-          <Button
-            label="Use this photo"
-            onPress={() => setShowAppOptions(true)}
-          />
-        </View>
-      )}
-      <EmojiPicker
-        isVisible={isModalVisible}
-        onClose={onModalClose}
-      >
-        <EmojiList
-          onSelect={setPickedEmoji}
-          onCloseModal={onModalClose}
-        />
-      </EmojiPicker>
+        </EmojiPicker>
+      </View>
     </SafeAreaView>
   );
 }
