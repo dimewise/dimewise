@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { useAppSelector } from "@/store/store";
 import type { Theme } from "@/style/theme";
 import { Image } from "expo-image";
@@ -12,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
   const theme = useTheme();
+  const gstyles = useMakeGlobalStyles(theme);
   const styles = makeStyle(theme);
   const { register } = useAuth();
   const session = useAppSelector((state) => state.session);
@@ -35,7 +37,7 @@ export default function Register() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={gstyles.container}>
       {session.loading && <Text>Loading...</Text>}
       <Image
         style={styles.logo}
@@ -90,16 +92,6 @@ export default function Register() {
 
 const makeStyle = (theme: Theme) =>
   StyleSheet.create({
-    container: {
-      paddingHorizontal: 50,
-      height: "100%",
-      backgroundColor: theme.color.background,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 32,
-    },
     input: {
       width: "100%",
     },

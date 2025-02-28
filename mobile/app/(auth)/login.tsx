@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { supabase } from "@/lib/supabase";
 import { useAppSelector } from "@/store/store";
 import type { Theme } from "@/style/theme";
@@ -26,6 +27,7 @@ AppState.addEventListener("change", (state) => {
 
 export default function Login() {
   const theme = useTheme();
+  const gstyles = useMakeGlobalStyles(theme);
   const styles = makeStyle(theme);
   const { loginWithPassword } = useAuth();
   const session = useAppSelector((state) => state.session);
@@ -43,7 +45,7 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={gstyles.container}>
       {session.loading && <Text>Loading...</Text>}
       <Image
         style={styles.logo}
@@ -124,16 +126,6 @@ export default function Login() {
 
 const makeStyle = (theme: Theme) =>
   StyleSheet.create({
-    container: {
-      paddingHorizontal: 30,
-      height: "100%",
-      backgroundColor: theme.color.background,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 10,
-    },
     input: {
       width: "100%",
       gap: 5,
