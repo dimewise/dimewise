@@ -10,11 +10,18 @@ import { EmojiPicker } from "@/components/EmojiPicker";
 import { EmojiSticker } from "@/components/EmojiSticker";
 import { IconButton } from "@/components/IconButton";
 import { ImageViewer } from "@/components/ImageViewer";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { useAppSelector } from "@/store/store";
+import type { Theme } from "@/style/theme";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
+  const theme = useTheme();
+  const gstyles = useMakeGlobalStyles(theme);
+  const styles = makeStyle(theme);
   const { logout } = useAuth();
   const session = useAppSelector((state) => state.session);
   const [selectedImage, setSelectedImage] = useState<string | undefined>(
@@ -65,7 +72,7 @@ export default function Home() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={gstyles.container}>
       <Button
         onPress={onSignout}
         label="Sign Out"
@@ -121,29 +128,25 @@ export default function Home() {
           onCloseModal={onModalClose}
         />
       </EmojiPicker>
-    </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#25292e",
-    alignItems: "center",
-  },
-  imageContainer: {
-    flex: 1,
-  },
-  footerContainer: {
-    flex: 1 / 3,
-    alignItems: "center",
-  },
-  optionsContainer: {
-    position: "absolute",
-    bottom: 80,
-  },
-  optionsRow: {
-    alignItems: "center",
-    flexDirection: "row",
-  },
-});
+const makeStyle = (_: Theme) =>
+  StyleSheet.create({
+    imageContainer: {
+      flex: 1,
+    },
+    footerContainer: {
+      flex: 1 / 3,
+      alignItems: "center",
+    },
+    optionsContainer: {
+      position: "absolute",
+      bottom: 80,
+    },
+    optionsRow: {
+      alignItems: "center",
+      flexDirection: "row",
+    },
+  });

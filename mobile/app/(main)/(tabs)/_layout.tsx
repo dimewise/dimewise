@@ -1,19 +1,17 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTheme } from "@/contexts/ThemeContext";
+import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
+  const theme = useTheme();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#ffd33d",
-        headerStyle: {
-          backgroundColor: "#25292e",
-        },
-        headerShadowVisible: false,
-        headerTintColor: "#fff",
+        headerShown: false,
+        tabBarActiveTintColor: theme.color.text,
         tabBarStyle: {
-          backgroundColor: "#25292e",
+          backgroundColor: theme.color.background,
         },
       }}
     >
@@ -48,12 +46,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: "Settings",
+          title: "Profile",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "settings" : "settings-outline"}
+            <FontAwesome
+              name={focused ? "user" : "user-o"}
               color={color}
               size={24}
             />
