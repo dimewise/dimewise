@@ -1,5 +1,6 @@
 import { useAppSelector } from "@/store/store";
 import { Redirect, Stack } from "expo-router";
+import { StatusBar } from "react-native";
 
 export default function AppLayout() {
   const { session } = useAppSelector((state) => state.session);
@@ -9,12 +10,19 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen
-        name="(tabs)"
-        options={{ headerShown: false }}
+    <>
+      <StatusBar
+        barStyle="dark-content"
+        animated={true}
+        backgroundColor="#FFFFFF"
       />
-      <Stack.Screen name="+not-found" />
-    </Stack>
+      <Stack>
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+    </>
   );
 }

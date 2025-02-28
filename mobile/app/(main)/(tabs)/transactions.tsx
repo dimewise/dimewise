@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import type { Theme } from "@/style/theme";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Transactions() {
@@ -9,8 +9,13 @@ export default function Transactions() {
   const gstyles = useMakeGlobalStyles(theme);
   const styles = makeStyle(theme);
   return (
-    <SafeAreaView style={gstyles.container}>
-      <Text style={styles.text}>About Screen</Text>
+    <SafeAreaView
+      edges={["top", "left", "right"]}
+      style={gstyles.safeAreaContainer}
+    >
+      <View style={gstyles.container}>
+        <Text style={styles.text}>About Screen</Text>
+      </View>
     </SafeAreaView>
   );
 }
