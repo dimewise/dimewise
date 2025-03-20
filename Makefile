@@ -71,7 +71,25 @@ init-server: ## Initializes server dependencies
 	venv/bin/python -m pip install --upgrade pip; \
 	venv/bin/python -m pip install -q -r requirements.txt
 
+##@ Database - Commands used to interact with the database through Alembic
+.PHONY: db-revision
+db-revision: ## Creates the next empty migration file
+	cd ./server && venv/bin/alembic revision --autogenerate -m {{.NAME}}
+
+.PHONY: db-upgrade
+db-upgrade: ## Apply unran up migrations
+	cd ./server && venv/bin/alembic upgrade head
+
+.PHONY: db-downgrade
+db-downgrade: ## Applies down migrations up till the beginning
+	cd ./server && venv/bin/alembic downgrade base
+
+.PHONY: db-seed
+db-seed: ## Seeds database based on user id
+	cd ./server && venv/bin/python -m src.utils.seeder {{.USER_ID}}
+
 ##@ Generator - Commands used for code generation
+.PHONY: gen-openapi
 gen-openapi: ## Generates code based on OpenAPI specification
 	@echo "Generating OpenAPI Specification from litestart(python)..."
 	cd ./server && LITESTAR_APP=src.main:app venv/bin/litestar schema openapi --output ../openapi.yaml
