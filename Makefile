@@ -9,35 +9,67 @@ help: ## Show a list of commands
 
 ##@ Initialization - Helpers for project setup
 
-.PHONY: init-tools
-init-tools: ## Initializes necessary dev tools for running the server
-	@echo "Installing necessary packages for initialization..."
-	$(MAKE) init-mobile
-	$(MAKE) init-client
-	$(MAKE) init-server
+.PHONY: init
+init: ## Initializes necessary dev tools for local development
+	@echo "Initializing all necessary development tools..."
+	@printf "\n ----- Initialize Mobile -----\n"
+	@$(MAKE) init-mobile
+	@printf "\n ----- Initialize Client (Web) -----\n"
+	@$(MAKE) init-client
+	@printf "\n ----- Initialize Database -----\n"
+	@$(MAKE) init-db
+	@printf "\n ----- Initialize Server -----\n"
+	@$(MAKE) init-server
+	@printf "\n"
 	@echo "Tools initialization complete."
+	@printf "\n"
+	@printf "\n"
 
 .PHONY: init-mobile
 init-mobile: ## Initializes mobile dependencies
-	@echo "Installing mobile development dependencies..."
 	@cd ./mobile && \
-	npx expo install
+		npx expo install
 
 .PHONY: init-client
 init-client: ## Initializes client (web) dependencies
-	@echo "Installing client development dependencies..."
 	@cd ./client && \
-	if [ ! -f .env ]; then \
-		cp .env.example .env; \
-	else \
-		echo "client's .env already exists. skipping .env creation..."; \
-	fi; \
-	bun install
+		if [ ! -f .env ]; then \
+			echo "Creating .env file..."; \
+			cp .env.example .env; \
+		else \
+			echo "client .env already exists, skipping .env creation..."; \
+		fi; \
+		echo "Installing client dependencies with Bun..."; \
+		bun install
+
+.PHONY: init-db
+init-db: ## Initializes the database from DB_URL in .env
+	@export DB_NAME='dimewise'; \
+		export DB_USER='postgres'; \
+		export DB_PASSWORD='password'; \
+		export DB_HOST='localhost'; \
+		export DB_PORT='5432'; \
+		echo "Creating database $$DB_NAME on $$DB_HOST:$$DB_PORT..."; \
+		PGPASSWORD=$$DB_PASSWORD psql -U $$DB_USER -c "DROP DATABASE IF EXISTS $$DB_NAME"; \
+		PGPASSWORD=$$DB_PASSWORD psql -U $$DB_USER -c "CREATE DATABASE $$DB_NAME"
 
 .PHONY: init-server
 init-server: ## Initializes server dependencies
-	# TODO - shift code generation here
-	@echo "Installing server dependencies..."
+	@cd ./server && \
+	echo "Checking .env..."; \
+	if [ ! -f .env ]; then \
+		echo "Creating .env file..."; \
+		cp .env.example .env; \
+	else \
+		echo "server .env already exists, skipping .env creation..."; \
+	fi; \
+	echo "Checking virtual environment (venv)..."; \
+	if [ ! -d "venv" ]; then \
+		echo "Creating virtual environment..."; \
+		python3 -m venv venv; \
+	fi; \
+	venv/bin/python -m pip install --upgrade pip; \
+	venv/bin/python -m pip install -q -r requirements.txt
 
 ##@ Generator - Commands used for code generation
 gen-openapi: ## Generates code based on OpenAPI specification
@@ -65,5 +97,5 @@ run-client: ## Starts the client (web)
 .PHONY: run-server
 run-server: ## Starts the server
 	@echo "Starting server"
-	cd ./server && go run ./cmd/server/main.go
+	cd ./server && venv/bin/python -m uvicorn src.main:app --reload
 
