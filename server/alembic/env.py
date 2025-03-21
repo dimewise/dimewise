@@ -8,8 +8,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-from src.models import Base
-from src.settings import settings
+from src.core.settings import settings
+from src.models.base import Base
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))  # Insert <.>/src
 
@@ -27,7 +27,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
-config.set_main_option("sqlalchemy.url", settings.DB_URL)
+config.set_main_option("sqlalchemy.url", settings.db_url)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

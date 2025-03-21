@@ -6,12 +6,14 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from src.models import Category, Expense, User
-from src.settings import settings
+from src.core.settings import settings
+from src.models.category import Category
+from src.models.expense import Expense
+from src.models.user import User
 
 
 async def main():
-    engine = create_async_engine(settings.DB_URL, echo=True)
+    engine = create_async_engine(settings.db_url, echo=True)
     session = async_sessionmaker(bind=engine)
 
     async with session() as s:

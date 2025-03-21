@@ -4,9 +4,9 @@ from litestar.openapi.config import OpenAPIConfig
 from litestar.openapi.plugins import YamlRenderPlugin
 
 from src.categories.controller import CategoryController
-from src.database import db_config, provide_db
+from src.core.database import db_config, provide_db
+from src.core.settings import settings
 from src.expenses.controller import ExpenseController
-from src.settings import settings
 from src.users.controller import UserController
 from src.utils.jwt import jwt_auth
 
@@ -23,5 +23,7 @@ app = Litestar(
     on_app_init=[jwt_auth.on_app_init],
     dependencies={"db": provide_db},
     plugins=[SQLAlchemyPlugin(db_config)],
-    openapi_config=OpenAPIConfig(title="Dimewise", version=settings.VERSION, render_plugins=[YamlRenderPlugin()]),
+    openapi_config=OpenAPIConfig(
+        title="Dimewise", version=settings.app_api_version, render_plugins=[YamlRenderPlugin()]
+    ),
 )
