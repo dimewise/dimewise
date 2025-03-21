@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.expenses.schemas import CategoryExpense, ExpenseCreate, ExpensePublic
-from src.models import Expense
+from src.models.expense import Expense
 from src.utils.jwt import AuthUser
 
 

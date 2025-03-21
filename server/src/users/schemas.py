@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from src.models import Currencies
+from src.models.enum import Currencies
 
 
 class UserBase(BaseModel):

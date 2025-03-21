@@ -9,8 +9,8 @@ from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.models import Base
-from src.settings import settings
+from src.core.settings import settings
+from src.models.base import Base
 
 
 class AuthUser(BaseModel):
@@ -30,7 +30,7 @@ async def provide_db(db_session: AsyncSession) -> AsyncGenerator[AsyncSession, N
 
 
 db_config = SQLAlchemyAsyncConfig(
-    connection_string=settings.DB_URL,
+    connection_string=settings.db_url,
     metadata=Base.metadata,
     before_send_handler=asyncio.autocommit_before_send_handler,
 )
