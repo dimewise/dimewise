@@ -14,7 +14,7 @@ from src.schema.user import AuthUser, UserCreate, UserEdit, UserPublic
 
 class UserController(Controller):
     dependencies = {"user_repo": Provide(provide_user_repo)}
-    path = "/user"
+    path = "/users"
 
     @post("/register")
     async def create_user(self, user_repo: UserRepository, data: UserCreate) -> None:

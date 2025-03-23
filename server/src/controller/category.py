@@ -19,7 +19,7 @@ from src.utils.jwt import AuthUser
 
 class CategoryController(Controller):
     dependencies = {"category_repo": Provide(provide_category_repo)}
-    path = "/category"
+    path = "/categories"
 
     @get()
     async def get_categories(
