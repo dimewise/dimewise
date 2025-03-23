@@ -7,9 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.core.settings import settings
-from src.models.category import Category
-from src.models.expense import Expense
-from src.models.user import User
+from src.model.category import Category
+from src.model.expense import Expense
+from src.model.user import User
 
 
 async def main():
