@@ -2,40 +2,28 @@ from typing import Any
 
 from litestar import get, patch, post
 from litestar.connection import Request
-from litestar.contrib.sqlalchemy.repository import SQLAlchemyAsyncRepository
 from litestar.controller import Controller
 from litestar.di import Provide
 from litestar.exceptions.http_exceptions import ClientException, NotFoundException
 from litestar.security.jwt.token import Token
-from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.model.user import UserModel
+from src.repository.user import UserRepository, provide_user_repo
 from src.schema.user import AuthUser, UserCreate, UserEdit, UserPublic
 
 
-class UserRepository(SQLAlchemyAsyncRepository[UserModel]):  # pyright: ignore reportInvalidTypeArguments
-    """User repository"""
-
-    model_type = UserModel
-
-
-async def provide_repo(db_session: AsyncSession) -> UserRepository:
-    """User repository provider"""
-    return UserRepository(session=db_session)
-
-
 class UserController(Controller):
-    dependencies = {"repo": Provide(provide_repo)}
+    dependencies = {"user_repo": Provide(provide_user_repo)}
     path = "/user"
 
     @post("/register")
-    async def create_user(self, repo: UserRepository, data: UserCreate) -> None:
-        await repo.add(UserModel(**data.__dict__))
-        await repo.session.commit()
+    async def create_user(self, user_repo: UserRepository, data: UserCreate) -> None:
+        await user_repo.add(UserModel(**data.__dict__))
+        await user_repo.session.commit()
 
     @get("/me-detail", tags=["me-detail"])
-    async def get_me_detail(self, repo: UserRepository, request: Request[AuthUser, Token, Any]) -> UserPublic:
-        user = await repo.get(request.user.id)
+    async def get_me_detail(self, user_repo: UserRepository, request: Request[AuthUser, Token, Any]) -> UserPublic:
+        user = await user_repo.get(request.user.id)
 
         if not user:
             raise NotFoundException(detail="Signed in user not found")
@@ -52,9 +40,9 @@ class UserController(Controller):
 
     @patch("/me-detail", tags=["me-detail"])
     async def update_me_detail(
-        self, repo: UserRepository, request: Request[AuthUser, Token, Any], data: UserEdit
+        self, user_repo: UserRepository, request: Request[AuthUser, Token, Any], data: UserEdit
     ) -> None:
-        target_user = await repo.get(request.user.id)
+        target_user = await user_repo.get(request.user.id)
 
         if not target_user:
             raise ClientException(detail="Signed in user not found")
@@ -67,4 +55,4 @@ class UserController(Controller):
         if data.avatar_url is not None:
             target_user.avatar_url = data.avatar_url
 
-        await repo.update(target_user)
+        await user_repo.update(target_user)
