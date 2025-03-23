@@ -12,8 +12,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.model.expense import Expense
-from src.schemas.expense import CategoryExpense, ExpenseCreate, ExpensePublic
-from src.schemas.user import AuthUser
+from src.schema.expense import CategoryExpense, ExpenseCreate, ExpensePublic
+from src.schema.user import AuthUser
 
 
 class ExpenseRepository(SQLAlchemyAsyncRepository[Expense]):  # pyright: ignore reportInvalidTypeArguments

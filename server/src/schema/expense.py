@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from src.schemas.category import CategoryExpense
+from src.schema.category import CategoryExpense
 
 
 class ExpenseBase(BaseModel):

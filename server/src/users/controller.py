@@ -10,7 +10,7 @@ from litestar.security.jwt.token import Token
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.model.user import User
-from src.schemas.user import AuthUser, UserCreate, UserEdit, UserPublic
+from src.schema.user import AuthUser, UserCreate, UserEdit, UserPublic
 
 
 class UserRepository(SQLAlchemyAsyncRepository[User]):  # pyright: ignore reportInvalidTypeArguments

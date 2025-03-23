@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.model.category import Category
 from src.model.expense import Expense
-from src.schemas.category import CategoryCreate, CategoryFull, CategoryOverview
+from src.schema.category import CategoryCreate, CategoryFull, CategoryOverview
 from src.utils.jwt import AuthUser
 
 
