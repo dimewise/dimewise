@@ -9,14 +9,14 @@ from litestar.exceptions.http_exceptions import ClientException, NotFoundExcepti
 from litestar.security.jwt.token import Token
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.model.user import User
+from src.model.user import UserModel
 from src.schema.user import AuthUser, UserCreate, UserEdit, UserPublic
 
 
-class UserRepository(SQLAlchemyAsyncRepository[User]):  # pyright: ignore reportInvalidTypeArguments
+class UserRepository(SQLAlchemyAsyncRepository[UserModel]):  # pyright: ignore reportInvalidTypeArguments
     """User repository"""
 
-    model_type = User
+    model_type = UserModel
 
 
 async def provide_repo(db_session: AsyncSession) -> UserRepository:
@@ -30,7 +30,7 @@ class UserController(Controller):
 
     @post("/register")
     async def create_user(self, repo: UserRepository, data: UserCreate) -> None:
-        await repo.add(User(**data.__dict__))
+        await repo.add(UserModel(**data.__dict__))
         await repo.session.commit()
 
     @get("/me-detail", tags=["me-detail"])

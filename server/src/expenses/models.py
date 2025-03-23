@@ -1,9 +1,8 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlmodel import Field, SQLModel, select
-
-from src.database import AsyncSession
 
 
 class ExpenseBase(SQLModel):
@@ -20,5 +19,5 @@ class Expense(ExpenseBase, table=True):
     @classmethod
     async def get_all(cls, db: AsyncSession, user_id: UUID):
         statement = select(Expense).where(Expense.user_id == user_id)
-        expenses = await db.exec(statement)
+        expenses = await db.execute(statement)
         return expenses.all()

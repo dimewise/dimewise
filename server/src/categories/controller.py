@@ -12,16 +12,16 @@ from litestar.security.jwt.token import Token
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.model.category import Category
-from src.model.expense import Expense
+from src.model.category import CategoryModel
+from src.model.expense import ExpenseModel
 from src.schema.category import CategoryCreate, CategoryFull, CategoryOverview
 from src.utils.jwt import AuthUser
 
 
-class CategoryRepository(SQLAlchemyAsyncRepository[Category]):  # pyright: ignore reportInvalidTypeArguments
+class CategoryRepository(SQLAlchemyAsyncRepository[CategoryModel]):  # pyright: ignore reportInvalidTypeArguments
     """Category repository"""
 
-    model_type = Category
+    model_type = CategoryModel
 
 
 async def provide_repo(db_session: AsyncSession) -> CategoryRepository:
@@ -41,16 +41,18 @@ class CategoryController(Controller):
         from_date: datetime | None = None,
         to_date: datetime | None = None,
     ) -> list[CategoryFull]:
-        subquery = select(Expense.category_id, func.sum(Expense.amount).label("spent")).group_by(Expense.category_id)
+        subquery = select(ExpenseModel.category_id, func.sum(ExpenseModel.amount).label("spent")).group_by(
+            ExpenseModel.category_id
+        )
         if from_date and to_date:
-            subquery = subquery.where(Expense.date.between(from_date, to_date))
+            subquery = subquery.where(ExpenseModel.date.between(from_date, to_date))
         subquery = subquery.subquery()
 
         query = (
-            select(Category, subquery.c.spent)
-            .outerjoin(subquery, subquery.c.category_id == Category.id)
-            .where(Category.user_id == request.user.id)
-            .group_by(Category.id, subquery.c.spent)
+            select(CategoryModel, subquery.c.spent)
+            .outerjoin(subquery, subquery.c.category_id == CategoryModel.id)
+            .where(CategoryModel.user_id == request.user.id)
+            .group_by(CategoryModel.id, subquery.c.spent)
         )
         categories = await repo.session.execute(statement=query)
 
@@ -65,15 +67,15 @@ class CategoryController(Controller):
         to_date: datetime,
     ) -> CategoryOverview:
         query = (
-            select(Category, func.extract("month", Expense.date), func.sum(Expense.amount))
-            .outerjoin(Expense)
-            .where(Category.user_id == request.user.id, Expense.date.between(from_date, to_date))
-            .group_by(Category.id, func.extract("month", Expense.date))
-            .order_by(func.extract("month", Expense.date))
+            select(CategoryModel, func.extract("month", ExpenseModel.date), func.sum(ExpenseModel.amount))
+            .outerjoin(ExpenseModel)
+            .where(CategoryModel.user_id == request.user.id, ExpenseModel.date.between(from_date, to_date))
+            .group_by(CategoryModel.id, func.extract("month", ExpenseModel.date))
+            .order_by(func.extract("month", ExpenseModel.date))
         )
         categories_per_month = await repo.session.execute(statement=query)
 
-        query = select(Category.name, Category.budget).where(Category.user_id == request.user.id)
+        query = select(CategoryModel.name, CategoryModel.budget).where(CategoryModel.user_id == request.user.id)
         categories = (await repo.session.execute(query)).fetchall()
 
         months = defaultdict(lambda: [0] * 12)
@@ -91,18 +93,18 @@ class CategoryController(Controller):
     async def create_category(
         self, repo: CategoryRepository, request: Request[AuthUser, Token, Any], data: CategoryCreate
     ) -> None:
-        await repo.add(Category(user_id=request.user.id, **data.__dict__))
+        await repo.add(CategoryModel(user_id=request.user.id, **data.__dict__))
         await repo.session.commit()
 
     @delete("/{category_id:uuid}")
     async def delete_category(
         self, repo: CategoryRepository, request: Request[AuthUser, Token, Any], category_id: UUID
     ) -> None:
-        await repo.delete_where(Category.id == category_id, Category.user_id == request.user.id)
+        await repo.delete_where(CategoryModel.id == category_id, CategoryModel.user_id == request.user.id)
 
     @patch("/{category_id:uuid}")
     async def update_category(
         self, repo: CategoryRepository, request: Request[AuthUser, Token, Any], category_id: UUID, data: CategoryCreate
     ) -> None:
-        category = Category(id=category_id, user_id=request.user.id, **data.__dict__)
+        category = CategoryModel(id=category_id, user_id=request.user.id, **data.__dict__)
         await repo.update(category)

@@ -5,7 +5,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Category(base.UUIDAuditBase):
+class CategoryModel(base.UUIDAuditBase):
     __tablename__ = "category"
 
     name: Mapped[str]

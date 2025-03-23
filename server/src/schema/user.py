@@ -2,7 +2,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from src.model.enum import Currencies
+from src.model.enum import CurrenciesEnum
 
 
 class AuthUser(BaseModel):
@@ -15,7 +15,7 @@ class UserBase(BaseModel):
     name: str | None = None
     email: str
     avatar_url: str | None = None
-    default_currency: Currencies = Field(..., title="Default Currency")
+    default_currency: CurrenciesEnum = Field(..., title="Default Currency")
 
 
 class UserPublic(UserBase):
