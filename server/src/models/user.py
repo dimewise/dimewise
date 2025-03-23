@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.models.enum import Currencies
 
 
-class User(base.UUIDBase):
+class User(base.UUIDAuditBase):
     __tablename__ = "user"
 
     email: Mapped[str]
