@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.core.settings import settings
-from src.models.base import Base
+from src.model.base import Base
 
 
 async def provide_db(db_session: AsyncSession) -> AsyncGenerator[AsyncSession, None]:

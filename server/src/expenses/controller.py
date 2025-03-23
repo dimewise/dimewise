@@ -11,7 +11,7 @@ from litestar.security.jwt.token import Token
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.models.expense import Expense
+from src.model.expense import Expense
 from src.schemas.expense import CategoryExpense, ExpenseCreate, ExpensePublic
 from src.schemas.user import AuthUser
 

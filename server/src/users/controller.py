@@ -9,7 +9,7 @@ from litestar.exceptions.http_exceptions import ClientException, NotFoundExcepti
 from litestar.security.jwt.token import Token
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.models.user import User
+from src.model.user import User
 from src.schemas.user import AuthUser, UserCreate, UserEdit, UserPublic
 
 

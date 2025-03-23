@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from src.models.category import Category
+    from src.model.category import Category
 
 
 class Expense(base.UUIDAuditBase):

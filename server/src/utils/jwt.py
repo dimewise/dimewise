@@ -5,7 +5,7 @@ from litestar.connection import ASGIConnection
 from litestar.security.jwt import JWTAuth, Token
 
 from src.core.settings import settings
-from src.models.user import User
+from src.model.user import User
 from src.schemas.user import AuthUser
 
 

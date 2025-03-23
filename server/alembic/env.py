@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from src.core.settings import settings
-from src.models.base import Base
+from src.model.base import Base
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))  # Insert <.>/src
 

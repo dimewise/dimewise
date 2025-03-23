@@ -5,7 +5,7 @@ from litestar.plugins.sqlalchemy import base
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.models.enum import Currencies
+from src.model.enum import Currencies
 
 
 class Account(base.UUIDAuditBase):
