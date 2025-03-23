@@ -12,9 +12,9 @@ from litestar.security.jwt.token import Token
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.categories.schemas import CategoryCreate, CategoryFull, CategoryOverview
 from src.models.category import Category
 from src.models.expense import Expense
+from src.schemas.category import CategoryCreate, CategoryFull, CategoryOverview
 from src.utils.jwt import AuthUser
 
 

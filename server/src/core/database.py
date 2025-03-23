@@ -1,21 +1,14 @@
 from collections.abc import AsyncGenerator
-from uuid import UUID
 
 from advanced_alchemy.extensions.litestar.plugins.init.config import asyncio
 from litestar.contrib.sqlalchemy.plugins import SQLAlchemyAsyncConfig
 from litestar.exceptions import ClientException
 from litestar.status_codes import HTTP_409_CONFLICT
-from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.core.settings import settings
 from src.models.base import Base
-
-
-class AuthUser(BaseModel):
-    id: UUID
-    email: str
 
 
 async def provide_db(db_session: AsyncSession) -> AsyncGenerator[AsyncSession, None]:
