@@ -1,6 +1,6 @@
 from typing import Literal
 
-Currencies = Literal[
+CurrenciesEnum = Literal[
     "USD",
     "EUR",
     "JPY",

@@ -5,7 +5,7 @@ from litestar.connection import ASGIConnection
 from litestar.security.jwt import JWTAuth, Token
 
 from src.core.settings import settings
-from src.model.user import User
+from src.model.user import UserModel
 from src.schema.user import AuthUser
 
 
@@ -13,7 +13,7 @@ async def retrieve_user_handler(token: Token, _: ASGIConnection[Any, Any, Any, A
     return AuthUser(id=UUID(token.sub), email=token.extras["email"])
 
 
-jwt_auth = JWTAuth[User](
+jwt_auth = JWTAuth[UserModel](
     retrieve_user_handler=retrieve_user_handler,
     token_secret=settings.jwt_token,
     exclude=["/schema", "/user/register"],  # TODO: Add here

@@ -5,17 +5,17 @@ from litestar.plugins.sqlalchemy import base
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.model.enum import Currencies
+from src.model.enum import CurrenciesEnum
 
 
-class Account(base.UUIDAuditBase):
+class AccountModel(base.UUIDAuditBase):
     __tablename__ = "account"
 
     name: Mapped[str]
     description: Mapped[str | None]
-    currency: Mapped[Currencies] = mapped_column(
+    currency: Mapped[CurrenciesEnum] = mapped_column(
         Enum(
-            *get_args(Currencies),
+            *get_args(CurrenciesEnum),
             name="currencies",
             create_constraint=True,
             validate_strings=True,

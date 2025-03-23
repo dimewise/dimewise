@@ -7,9 +7,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from src.core.settings import settings
-from src.model.category import Category
-from src.model.expense import Expense
-from src.model.user import User
+from src.model.category import CategoryModel
+from src.model.expense import ExpenseModel
+from src.model.user import UserModel
 
 
 async def main():
@@ -27,15 +27,15 @@ async def main():
                 f"\tWith python: python -m seeder {uuid4()}"
             )
             raise Exception(msg) from None
-        u = (await s.execute(select(User).where(User.id == user_id))).one()[0]
-        c1 = Category(id=uuid4(), user_id=u.id, name="Groceries", budget=26000)
-        c2 = Category(id=uuid4(), user_id=u.id, name="Health", budget=17000)
-        e1 = Expense(category_id=c1.id, user_id=u.id, title="FamilyMart", amount=400, date=date(2024, 9, 9))
-        e2 = Expense(category_id=c1.id, user_id=u.id, title="Hanamasa", amount=1500, date=date(2024, 9, 8))
-        e3 = Expense(category_id=c1.id, user_id=u.id, title="MyBasket", amount=1300, date=date(2024, 9, 8))
-        e4 = Expense(category_id=c2.id, user_id=u.id, title="Gym", amount=8000, date=date(2024, 9, 5))
-        e5 = Expense(category_id=c2.id, user_id=u.id, title="Vitamins", amount=6000, date=date(2024, 9, 4))
-        e6 = Expense(category_id=c2.id, user_id=u.id, title="Protein", amount=6900, date=date(2024, 9, 5))
+        u = (await s.execute(select(UserModel).where(UserModel.id == user_id))).one()[0]
+        c1 = CategoryModel(id=uuid4(), user_id=u.id, name="Groceries", budget=26000)
+        c2 = CategoryModel(id=uuid4(), user_id=u.id, name="Health", budget=17000)
+        e1 = ExpenseModel(category_id=c1.id, user_id=u.id, title="FamilyMart", amount=400, date=date(2024, 9, 9))
+        e2 = ExpenseModel(category_id=c1.id, user_id=u.id, title="Hanamasa", amount=1500, date=date(2024, 9, 8))
+        e3 = ExpenseModel(category_id=c1.id, user_id=u.id, title="MyBasket", amount=1300, date=date(2024, 9, 8))
+        e4 = ExpenseModel(category_id=c2.id, user_id=u.id, title="Gym", amount=8000, date=date(2024, 9, 5))
+        e5 = ExpenseModel(category_id=c2.id, user_id=u.id, title="Vitamins", amount=6000, date=date(2024, 9, 4))
+        e6 = ExpenseModel(category_id=c2.id, user_id=u.id, title="Protein", amount=6900, date=date(2024, 9, 5))
         items = [c1, c2, e1, e2, e3, e4, e5, e6]
         for item in items:
             s.add(item)
