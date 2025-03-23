@@ -17,7 +17,7 @@ from src.schema.user import AuthUser
 
 class ExpenseController(Controller):
     dependencies = {"expense_repo": Provide(provide_expense_repo)}
-    path = "/expense"
+    path = "/expenses"
 
     @get(tags=["transactions"])
     async def get_expenses(
