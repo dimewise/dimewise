@@ -5,6 +5,11 @@ from pydantic import BaseModel, Field
 from src.models.enum import Currencies
 
 
+class AuthUser(BaseModel):
+    id: UUID
+    email: str
+
+
 class UserBase(BaseModel):
     id: UUID
     name: str | None = None

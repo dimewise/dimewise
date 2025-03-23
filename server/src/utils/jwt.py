@@ -4,9 +4,9 @@ from uuid import UUID
 from litestar.connection import ASGIConnection
 from litestar.security.jwt import JWTAuth, Token
 
-from src.core.database import AuthUser
 from src.core.settings import settings
 from src.models.user import User
+from src.schemas.user import AuthUser
 
 
 async def retrieve_user_handler(token: Token, _: ASGIConnection[Any, Any, Any, Any]) -> AuthUser:
