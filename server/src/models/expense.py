@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from src.models.category import Category
 
 
-class Expense(base.UUIDBase):
+class Expense(base.UUIDAuditBase):
     __tablename__ = "expense"
 
     title: Mapped[str]

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from src.models.enum import Currencies
 
 
-class Account(base.UUIDBase):
+class Account(base.UUIDAuditBase):
     __tablename__ = "account"
 
     name: Mapped[str]
