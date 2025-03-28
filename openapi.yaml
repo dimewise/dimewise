@@ -71,8 +71,8 @@ components:
           type: string
         description:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
         title:
           type: string
       required:
@@ -93,8 +93,8 @@ components:
           type: string
         description:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
         id:
           format: uuid
           type: string
@@ -112,8 +112,8 @@ components:
       properties:
         avatar_url:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
         default_currency:
           enum:
           - USD
@@ -145,8 +145,8 @@ components:
           type: string
         name:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
       required:
       - default_currency
       - email
@@ -157,12 +157,12 @@ components:
       properties:
         avatar_url:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
         name:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
       required: []
       title: UserEdit
       type: object
@@ -170,8 +170,8 @@ components:
       properties:
         avatar_url:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
         default_currency:
           enum:
           - USD
@@ -203,8 +203,8 @@ components:
           type: string
         name:
           oneOf:
-          - type: 'null'
           - type: string
+          - type: 'null'
       required:
       - default_currency
       - email
@@ -236,10 +236,10 @@ paths:
           description: Request fulfilled, document follows
           headers: {}
       summary: Root
-  /api/v1/category:
+  /api/v1/categories:
     get:
       deprecated: false
-      operationId: ApiV1CategoryGetCategories
+      operationId: ApiV1CategoriesGetCategories
       parameters:
       - allowEmptyValue: false
         allowReserved: false
@@ -249,9 +249,9 @@ paths:
         required: false
         schema:
           oneOf:
-          - type: 'null'
           - format: date-time
             type: string
+          - type: 'null'
       - allowEmptyValue: false
         allowReserved: false
         deprecated: false
@@ -260,9 +260,9 @@ paths:
         required: false
         schema:
           oneOf:
-          - type: 'null'
           - format: date-time
             type: string
+          - type: 'null'
       responses:
         '200':
           content:
@@ -301,7 +301,7 @@ paths:
       summary: GetCategories
     post:
       deprecated: false
-      operationId: ApiV1CategoryCreateCategory
+      operationId: ApiV1CategoriesCreateCategory
       requestBody:
         content:
           application/json:
@@ -338,10 +338,10 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: CreateCategory
-  /api/v1/category/overview_year:
+  /api/v1/categories/overview_year:
     get:
       deprecated: false
-      operationId: ApiV1CategoryOverviewYearGetCategoriesPerMonth
+      operationId: ApiV1CategoriesOverviewYearGetCategoriesPerMonth
       parameters:
       - allowEmptyValue: false
         allowReserved: false
@@ -395,14 +395,12 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: GetCategoriesPerMonth
-  /api/v1/category/{category_id}:
+  /api/v1/categories/{category_id}:
     delete:
       deprecated: false
-      operationId: ApiV1CategoryCategoryIdDeleteCategory
+      operationId: ApiV1CategoriesCategoryIdDeleteCategory
       parameters:
-      - allowEmptyValue: false
-        allowReserved: false
-        deprecated: false
+      - deprecated: false
         in: path
         name: category_id
         required: true
@@ -441,11 +439,9 @@ paths:
       summary: DeleteCategory
     patch:
       deprecated: false
-      operationId: ApiV1CategoryCategoryIdUpdateCategory
+      operationId: ApiV1CategoriesCategoryIdUpdateCategory
       parameters:
-      - allowEmptyValue: false
-        allowReserved: false
-        deprecated: false
+      - deprecated: false
         in: path
         name: category_id
         required: true
@@ -488,10 +484,10 @@ paths:
                 type: object
           description: Bad request syntax or unsupported method
       summary: UpdateCategory
-  /api/v1/expense:
+  /api/v1/expenses:
     get:
       deprecated: false
-      operationId: ApiV1ExpenseGetExpenses
+      operationId: ApiV1ExpensesGetExpenses
       parameters:
       - allowEmptyValue: false
         allowReserved: false
@@ -501,9 +497,9 @@ paths:
         required: false
         schema:
           oneOf:
-          - type: 'null'
           - format: date-time
             type: string
+          - type: 'null'
       - allowEmptyValue: false
         allowReserved: false
         deprecated: false
@@ -512,9 +508,9 @@ paths:
         required: false
         schema:
           oneOf:
-          - type: 'null'
           - format: date-time
             type: string
+          - type: 'null'
       - allowEmptyValue: false
         allowReserved: false
         deprecated: false
@@ -523,11 +519,11 @@ paths:
         required: false
         schema:
           oneOf:
-          - type: 'null'
           - items:
               format: uuid
               type: string
             type: array
+          - type: 'null'
       responses:
         '200':
           content:
@@ -568,7 +564,7 @@ paths:
       - transactions
     post:
       deprecated: false
-      operationId: ApiV1ExpenseCreateExpense
+      operationId: ApiV1ExpensesCreateExpense
       requestBody:
         content:
           application/json:
@@ -607,14 +603,12 @@ paths:
       summary: CreateExpense
       tags:
       - transactions
-  /api/v1/expense/{expense_id}:
+  /api/v1/expenses/{expense_id}:
     delete:
       deprecated: false
-      operationId: ApiV1ExpenseExpenseIdDeleteExpense
+      operationId: ApiV1ExpensesExpenseIdDeleteExpense
       parameters:
-      - allowEmptyValue: false
-        allowReserved: false
-        deprecated: false
+      - deprecated: false
         in: path
         name: expense_id
         required: true
@@ -655,11 +649,9 @@ paths:
       - transactions
     patch:
       deprecated: false
-      operationId: ApiV1ExpenseExpenseIdUpdateExpense
+      operationId: ApiV1ExpensesExpenseIdUpdateExpense
       parameters:
-      - allowEmptyValue: false
-        allowReserved: false
-        deprecated: false
+      - deprecated: false
         in: path
         name: expense_id
         required: true
@@ -704,10 +696,10 @@ paths:
       summary: UpdateExpense
       tags:
       - transactions
-  /api/v1/user/me-detail:
+  /api/v1/users/me-detail:
     get:
       deprecated: false
-      operationId: ApiV1UserMeDetailGetMeDetail
+      operationId: ApiV1UsersMeDetailGetMeDetail
       responses:
         '200':
           content:
@@ -721,7 +713,7 @@ paths:
       - me-detail
     patch:
       deprecated: false
-      operationId: ApiV1UserMeDetailUpdateMeDetail
+      operationId: ApiV1UsersMeDetailUpdateMeDetail
       requestBody:
         content:
           application/json:
@@ -760,10 +752,10 @@ paths:
       summary: UpdateMeDetail
       tags:
       - me-detail
-  /api/v1/user/register:
+  /api/v1/users/register:
     post:
       deprecated: false
-      operationId: ApiV1UserRegisterCreateUser
+      operationId: ApiV1UsersRegisterCreateUser
       requestBody:
         content:
           application/json:
