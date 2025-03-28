@@ -9,65 +9,65 @@ const injectedRtkApi = api
       apiV1Root: build.query<ApiV1RootApiResponse, ApiV1RootApiArg>({
         query: () => ({ url: `/api/v1` }),
       }),
-      apiV1CategoryGetCategories: build.query<
-        ApiV1CategoryGetCategoriesApiResponse,
-        ApiV1CategoryGetCategoriesApiArg
+      apiV1CategoriesGetCategories: build.query<
+        ApiV1CategoriesGetCategoriesApiResponse,
+        ApiV1CategoriesGetCategoriesApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/category`,
+          url: `/api/v1/categories`,
           params: {
             from_date: queryArg.fromDate,
             to_date: queryArg.toDate,
           },
         }),
       }),
-      apiV1CategoryCreateCategory: build.mutation<
-        ApiV1CategoryCreateCategoryApiResponse,
-        ApiV1CategoryCreateCategoryApiArg
+      apiV1CategoriesCreateCategory: build.mutation<
+        ApiV1CategoriesCreateCategoryApiResponse,
+        ApiV1CategoriesCreateCategoryApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/category`,
+          url: `/api/v1/categories`,
           method: "POST",
           body: queryArg.categoryCreate,
         }),
       }),
-      apiV1CategoryOverviewYearGetCategoriesPerMonth: build.query<
-        ApiV1CategoryOverviewYearGetCategoriesPerMonthApiResponse,
-        ApiV1CategoryOverviewYearGetCategoriesPerMonthApiArg
+      apiV1CategoriesOverviewYearGetCategoriesPerMonth: build.query<
+        ApiV1CategoriesOverviewYearGetCategoriesPerMonthApiResponse,
+        ApiV1CategoriesOverviewYearGetCategoriesPerMonthApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/category/overview_year`,
+          url: `/api/v1/categories/overview_year`,
           params: {
             from_date: queryArg.fromDate,
             to_date: queryArg.toDate,
           },
         }),
       }),
-      apiV1CategoryCategoryIdDeleteCategory: build.mutation<
-        ApiV1CategoryCategoryIdDeleteCategoryApiResponse,
-        ApiV1CategoryCategoryIdDeleteCategoryApiArg
+      apiV1CategoriesCategoryIdDeleteCategory: build.mutation<
+        ApiV1CategoriesCategoryIdDeleteCategoryApiResponse,
+        ApiV1CategoriesCategoryIdDeleteCategoryApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/category/${queryArg.categoryId}`,
+          url: `/api/v1/categories/${queryArg.categoryId}`,
           method: "DELETE",
         }),
       }),
-      apiV1CategoryCategoryIdUpdateCategory: build.mutation<
-        ApiV1CategoryCategoryIdUpdateCategoryApiResponse,
-        ApiV1CategoryCategoryIdUpdateCategoryApiArg
+      apiV1CategoriesCategoryIdUpdateCategory: build.mutation<
+        ApiV1CategoriesCategoryIdUpdateCategoryApiResponse,
+        ApiV1CategoriesCategoryIdUpdateCategoryApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/category/${queryArg.categoryId}`,
+          url: `/api/v1/categories/${queryArg.categoryId}`,
           method: "PATCH",
           body: queryArg.categoryCreate,
         }),
       }),
-      apiV1ExpenseGetExpenses: build.query<
-        ApiV1ExpenseGetExpensesApiResponse,
-        ApiV1ExpenseGetExpensesApiArg
+      apiV1ExpensesGetExpenses: build.query<
+        ApiV1ExpensesGetExpensesApiResponse,
+        ApiV1ExpensesGetExpensesApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/expense`,
+          url: `/api/v1/expenses`,
           params: {
             from_date: queryArg.fromDate,
             to_date: queryArg.toDate,
@@ -76,62 +76,62 @@ const injectedRtkApi = api
         }),
         providesTags: ["transactions"],
       }),
-      apiV1ExpenseCreateExpense: build.mutation<
-        ApiV1ExpenseCreateExpenseApiResponse,
-        ApiV1ExpenseCreateExpenseApiArg
+      apiV1ExpensesCreateExpense: build.mutation<
+        ApiV1ExpensesCreateExpenseApiResponse,
+        ApiV1ExpensesCreateExpenseApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/expense`,
+          url: `/api/v1/expenses`,
           method: "POST",
           body: queryArg.expenseCreate,
         }),
         invalidatesTags: ["transactions"],
       }),
-      apiV1ExpenseExpenseIdDeleteExpense: build.mutation<
-        ApiV1ExpenseExpenseIdDeleteExpenseApiResponse,
-        ApiV1ExpenseExpenseIdDeleteExpenseApiArg
+      apiV1ExpensesExpenseIdDeleteExpense: build.mutation<
+        ApiV1ExpensesExpenseIdDeleteExpenseApiResponse,
+        ApiV1ExpensesExpenseIdDeleteExpenseApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/expense/${queryArg.expenseId}`,
+          url: `/api/v1/expenses/${queryArg.expenseId}`,
           method: "DELETE",
         }),
         invalidatesTags: ["transactions"],
       }),
-      apiV1ExpenseExpenseIdUpdateExpense: build.mutation<
-        ApiV1ExpenseExpenseIdUpdateExpenseApiResponse,
-        ApiV1ExpenseExpenseIdUpdateExpenseApiArg
+      apiV1ExpensesExpenseIdUpdateExpense: build.mutation<
+        ApiV1ExpensesExpenseIdUpdateExpenseApiResponse,
+        ApiV1ExpensesExpenseIdUpdateExpenseApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/expense/${queryArg.expenseId}`,
+          url: `/api/v1/expenses/${queryArg.expenseId}`,
           method: "PATCH",
           body: queryArg.expenseCreate,
         }),
         invalidatesTags: ["transactions"],
       }),
-      apiV1UserMeDetailGetMeDetail: build.query<
-        ApiV1UserMeDetailGetMeDetailApiResponse,
-        ApiV1UserMeDetailGetMeDetailApiArg
+      apiV1UsersMeDetailGetMeDetail: build.query<
+        ApiV1UsersMeDetailGetMeDetailApiResponse,
+        ApiV1UsersMeDetailGetMeDetailApiArg
       >({
-        query: () => ({ url: `/api/v1/user/me-detail` }),
+        query: () => ({ url: `/api/v1/users/me-detail` }),
         providesTags: ["me-detail"],
       }),
-      apiV1UserMeDetailUpdateMeDetail: build.mutation<
-        ApiV1UserMeDetailUpdateMeDetailApiResponse,
-        ApiV1UserMeDetailUpdateMeDetailApiArg
+      apiV1UsersMeDetailUpdateMeDetail: build.mutation<
+        ApiV1UsersMeDetailUpdateMeDetailApiResponse,
+        ApiV1UsersMeDetailUpdateMeDetailApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/user/me-detail`,
+          url: `/api/v1/users/me-detail`,
           method: "PATCH",
           body: queryArg.userEdit,
         }),
         invalidatesTags: ["me-detail"],
       }),
-      apiV1UserRegisterCreateUser: build.mutation<
-        ApiV1UserRegisterCreateUserApiResponse,
-        ApiV1UserRegisterCreateUserApiArg
+      apiV1UsersRegisterCreateUser: build.mutation<
+        ApiV1UsersRegisterCreateUserApiResponse,
+        ApiV1UsersRegisterCreateUserApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/user/register`,
+          url: `/api/v1/users/register`,
           method: "POST",
           body: queryArg.userCreate,
         }),
@@ -142,60 +142,60 @@ const injectedRtkApi = api
 export { injectedRtkApi as apiV1 };
 export type ApiV1RootApiResponse = unknown;
 export type ApiV1RootApiArg = void;
-export type ApiV1CategoryGetCategoriesApiResponse =
+export type ApiV1CategoriesGetCategoriesApiResponse =
   /** status 200 Request fulfilled, document follows */ CategoryFull[];
-export type ApiV1CategoryGetCategoriesApiArg = {
-  fromDate?: null | string;
-  toDate?: null | string;
+export type ApiV1CategoriesGetCategoriesApiArg = {
+  fromDate?: string | null;
+  toDate?: string | null;
 };
-export type ApiV1CategoryCreateCategoryApiResponse = unknown;
-export type ApiV1CategoryCreateCategoryApiArg = {
+export type ApiV1CategoriesCreateCategoryApiResponse = unknown;
+export type ApiV1CategoriesCreateCategoryApiArg = {
   categoryCreate: CategoryCreate;
 };
-export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiResponse =
+export type ApiV1CategoriesOverviewYearGetCategoriesPerMonthApiResponse =
   /** status 200 Request fulfilled, document follows */ CategoryOverview;
-export type ApiV1CategoryOverviewYearGetCategoriesPerMonthApiArg = {
+export type ApiV1CategoriesOverviewYearGetCategoriesPerMonthApiArg = {
   fromDate: string;
   toDate: string;
 };
-export type ApiV1CategoryCategoryIdDeleteCategoryApiResponse = unknown;
-export type ApiV1CategoryCategoryIdDeleteCategoryApiArg = {
+export type ApiV1CategoriesCategoryIdDeleteCategoryApiResponse = unknown;
+export type ApiV1CategoriesCategoryIdDeleteCategoryApiArg = {
   categoryId: string;
 };
-export type ApiV1CategoryCategoryIdUpdateCategoryApiResponse = unknown;
-export type ApiV1CategoryCategoryIdUpdateCategoryApiArg = {
+export type ApiV1CategoriesCategoryIdUpdateCategoryApiResponse = unknown;
+export type ApiV1CategoriesCategoryIdUpdateCategoryApiArg = {
   categoryId: string;
   categoryCreate: CategoryCreate;
 };
-export type ApiV1ExpenseGetExpensesApiResponse =
+export type ApiV1ExpensesGetExpensesApiResponse =
   /** status 200 Request fulfilled, document follows */ Expense[];
-export type ApiV1ExpenseGetExpensesApiArg = {
-  fromDate?: null | string;
-  toDate?: null | string;
-  categoryIds?: null | string[];
+export type ApiV1ExpensesGetExpensesApiArg = {
+  fromDate?: string | null;
+  toDate?: string | null;
+  categoryIds?: string[] | null;
 };
-export type ApiV1ExpenseCreateExpenseApiResponse = unknown;
-export type ApiV1ExpenseCreateExpenseApiArg = {
+export type ApiV1ExpensesCreateExpenseApiResponse = unknown;
+export type ApiV1ExpensesCreateExpenseApiArg = {
   expenseCreate: ExpenseCreate;
 };
-export type ApiV1ExpenseExpenseIdDeleteExpenseApiResponse = unknown;
-export type ApiV1ExpenseExpenseIdDeleteExpenseApiArg = {
+export type ApiV1ExpensesExpenseIdDeleteExpenseApiResponse = unknown;
+export type ApiV1ExpensesExpenseIdDeleteExpenseApiArg = {
   expenseId: string;
 };
-export type ApiV1ExpenseExpenseIdUpdateExpenseApiResponse = unknown;
-export type ApiV1ExpenseExpenseIdUpdateExpenseApiArg = {
+export type ApiV1ExpensesExpenseIdUpdateExpenseApiResponse = unknown;
+export type ApiV1ExpensesExpenseIdUpdateExpenseApiArg = {
   expenseId: string;
   expenseCreate: ExpenseCreate;
 };
-export type ApiV1UserMeDetailGetMeDetailApiResponse =
+export type ApiV1UsersMeDetailGetMeDetailApiResponse =
   /** status 200 Request fulfilled, document follows */ User;
-export type ApiV1UserMeDetailGetMeDetailApiArg = void;
-export type ApiV1UserMeDetailUpdateMeDetailApiResponse = unknown;
-export type ApiV1UserMeDetailUpdateMeDetailApiArg = {
+export type ApiV1UsersMeDetailGetMeDetailApiArg = void;
+export type ApiV1UsersMeDetailUpdateMeDetailApiResponse = unknown;
+export type ApiV1UsersMeDetailUpdateMeDetailApiArg = {
   userEdit: UserEdit;
 };
-export type ApiV1UserRegisterCreateUserApiResponse = unknown;
-export type ApiV1UserRegisterCreateUserApiArg = {
+export type ApiV1UsersRegisterCreateUserApiResponse = unknown;
+export type ApiV1UsersRegisterCreateUserApiArg = {
   userCreate: UserCreate;
 };
 export type CategoryFull = {
@@ -223,7 +223,7 @@ export type Expense = {
   amount: number;
   category: CategoryExpense;
   date: string;
-  description?: null | string;
+  description?: string | null;
   id: string;
   title: string;
 };
@@ -231,11 +231,11 @@ export type ExpenseCreate = {
   amount: number;
   category_id: string;
   date: string;
-  description?: null | string;
+  description?: string | null;
   title: string;
 };
 export type User = {
-  avatar_url?: null | string;
+  avatar_url?: string | null;
   default_currency:
     | "USD"
     | "EUR"
@@ -259,14 +259,14 @@ export type User = {
     | "HKD";
   email: string;
   id: string;
-  name?: null | string;
+  name?: string | null;
 };
 export type UserEdit = {
-  avatar_url?: null | string;
-  name?: null | string;
+  avatar_url?: string | null;
+  name?: string | null;
 };
 export type UserCreate = {
-  avatar_url?: null | string;
+  avatar_url?: string | null;
   default_currency:
     | "USD"
     | "EUR"
@@ -290,25 +290,25 @@ export type UserCreate = {
     | "HKD";
   email: string;
   id: string;
-  name?: null | string;
+  name?: string | null;
 };
 export const {
   useApiV1RootQuery,
   useLazyApiV1RootQuery,
-  useApiV1CategoryGetCategoriesQuery,
-  useLazyApiV1CategoryGetCategoriesQuery,
-  useApiV1CategoryCreateCategoryMutation,
-  useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery,
-  useLazyApiV1CategoryOverviewYearGetCategoriesPerMonthQuery,
-  useApiV1CategoryCategoryIdDeleteCategoryMutation,
-  useApiV1CategoryCategoryIdUpdateCategoryMutation,
-  useApiV1ExpenseGetExpensesQuery,
-  useLazyApiV1ExpenseGetExpensesQuery,
-  useApiV1ExpenseCreateExpenseMutation,
-  useApiV1ExpenseExpenseIdDeleteExpenseMutation,
-  useApiV1ExpenseExpenseIdUpdateExpenseMutation,
-  useApiV1UserMeDetailGetMeDetailQuery,
-  useLazyApiV1UserMeDetailGetMeDetailQuery,
-  useApiV1UserMeDetailUpdateMeDetailMutation,
-  useApiV1UserRegisterCreateUserMutation,
+  useApiV1CategoriesGetCategoriesQuery,
+  useLazyApiV1CategoriesGetCategoriesQuery,
+  useApiV1CategoriesCreateCategoryMutation,
+  useApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery,
+  useLazyApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery,
+  useApiV1CategoriesCategoryIdDeleteCategoryMutation,
+  useApiV1CategoriesCategoryIdUpdateCategoryMutation,
+  useApiV1ExpensesGetExpensesQuery,
+  useLazyApiV1ExpensesGetExpensesQuery,
+  useApiV1ExpensesCreateExpenseMutation,
+  useApiV1ExpensesExpenseIdDeleteExpenseMutation,
+  useApiV1ExpensesExpenseIdUpdateExpenseMutation,
+  useApiV1UsersMeDetailGetMeDetailQuery,
+  useLazyApiV1UsersMeDetailGetMeDetailQuery,
+  useApiV1UsersMeDetailUpdateMeDetailMutation,
+  useApiV1UsersRegisterCreateUserMutation,
 } = injectedRtkApi;
