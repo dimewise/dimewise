@@ -9,6 +9,7 @@ class Settings(BaseSettings):
 
     db_url: str = Field(default=..., validation_alias="DATABASE_URL")
     jwt_token: str = Field(default=..., validation_alias="JWT_TOKEN")
+    clerk_secret_key: str = Field(default=..., validation_alias="CLERK_SECRET_KEY")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

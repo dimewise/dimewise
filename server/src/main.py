@@ -24,6 +24,6 @@ app = Litestar(
     dependencies={"db": provide_db},
     plugins=[SQLAlchemyPlugin(db_config)],
     openapi_config=OpenAPIConfig(
-        title="Dimewise", version=settings.app_api_version, render_plugins=[YamlRenderPlugin()]
+        title=settings.app_name, version=settings.app_api_version, render_plugins=[YamlRenderPlugin()]
     ),
 )
