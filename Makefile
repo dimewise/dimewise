@@ -16,10 +16,10 @@ init: ## Initializes necessary dev tools for local development
 	@$(MAKE) init-mobile
 	@printf "\n ----- Initialize Client (Web) -----\n"
 	@$(MAKE) init-client
-	@printf "\n ----- Initialize Database -----\n"
-	@$(MAKE) init-db
 	@printf "\n ----- Initialize Server -----\n"
 	@$(MAKE) init-server
+	@printf "\n ----- Initialize Supabase (DB) -----\n"
+	@$(MAKE) init-supabase
 	@printf "\n"
 	@echo "Tools initialization complete."
 	@printf "\n"
@@ -42,17 +42,6 @@ init-client: ## Initializes client (web) dependencies
 		echo "Installing client dependencies with Bun..."; \
 		bun install
 
-.PHONY: init-db
-init-db: ## Initializes the database from DB_URL in .env
-	@export DB_NAME='dimewise'; \
-		export DB_USER='postgres'; \
-		export DB_PASSWORD='password'; \
-		export DB_HOST='localhost'; \
-		export DB_PORT='5432'; \
-		echo "Creating database $$DB_NAME on $$DB_HOST:$$DB_PORT..."; \
-		PGPASSWORD=$$DB_PASSWORD psql -U $$DB_USER -c "DROP DATABASE IF EXISTS $$DB_NAME"; \
-		PGPASSWORD=$$DB_PASSWORD psql -U $$DB_USER -c "CREATE DATABASE $$DB_NAME"
-
 .PHONY: init-server
 init-server: ## Initializes server dependencies
 	@cd ./server && \
@@ -70,6 +59,20 @@ init-server: ## Initializes server dependencies
 	fi; \
 	venv/bin/python -m pip install --upgrade pip; \
 	venv/bin/python -m pip install -q -r requirements.txt
+
+.PHONY: init-supabase
+init-supabase: ## Initializes supabase, docker is required alongside bunx
+	@echo "Starting supabase through bunx command"
+	@bunx supabase start;
+	@echo "Extracting supbase status"
+	@supabase_status="$$(bunx supabase status 2>/dev/null)"; \
+	db_url="$$(echo "$$supabase_status" | grep 'DB URL:' | cut -d ':' -f 2- | tr -d '[:space:]')"; \
+	jwt_key="$$(echo "$$supabase_status" | grep 'JWT secret:' | cut -d ':' -f 2- | tr -d '[:space:]')"; \
+	db_url_with_asyncpg="$$(echo "$$db_url" | sed 's|postgresql://|postgresql+asyncpg://|')"; \
+	echo "Updating server/.env file..."; \
+	sed -i.bak "s|DATABASE_URL=.*|DATABASE_URL=$$db_url_with_asyncpg|" ./server/.env; \
+	sed -i.bak "s|JWT_TOKEN=.*|JWT_TOKEN=$$jwt_key|" ./server/.env; \
+	rm ./server/.env.bak
 
 ##@ Database - Commands used to interact with the database through Alembic
 .PHONY: db-revision
