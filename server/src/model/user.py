@@ -1,13 +1,13 @@
 from typing import get_args
 
-from litestar.plugins.sqlalchemy import base
 from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.model.base import Base
 from src.model.enum import CurrenciesEnum
 
 
-class UserModel(base.UUIDAuditBase):
+class UserModel(Base):
     __tablename__ = "user"
 
     email: Mapped[str]

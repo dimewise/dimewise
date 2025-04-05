@@ -3,12 +3,12 @@ from collections.abc import AsyncGenerator
 from advanced_alchemy.extensions.litestar.plugins.init.config import asyncio
 from litestar.contrib.sqlalchemy.plugins import SQLAlchemyAsyncConfig
 from litestar.exceptions import ClientException
+from litestar.plugins.sqlalchemy import base
 from litestar.status_codes import HTTP_409_CONFLICT
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from src.core.settings import settings
-from src.model.base import Base
 
 
 async def provide_db(db_session: AsyncSession) -> AsyncGenerator[AsyncSession, None]:
@@ -24,6 +24,6 @@ async def provide_db(db_session: AsyncSession) -> AsyncGenerator[AsyncSession, N
 
 db_config = SQLAlchemyAsyncConfig(
     connection_string=settings.db_url,
-    metadata=Base.metadata,
+    metadata=base.UUIDAuditBase.metadata,
     before_send_handler=asyncio.autocommit_before_send_handler,
 )
