@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material/styles";
 import { useSelector } from "react-redux";
 import { DimewiseIcon } from "../../../assets/icons/DimewiseIcon";
-import { useApiV1UserMeDetailGetMeDetailQuery } from "../../../services/api/v1";
+import { useApiV1UsersMeDetailGetMeDetailQuery } from "../../../services/api/v1";
 import type { RootState } from "../../../store";
 import { MenuContent } from "./MenuContent";
 import { OptionsMenu } from "./OptionsMenu";
@@ -26,7 +26,7 @@ const Drawer = styled(MuiDrawer)({
 
 export const DashboardSideMenu = () => {
   const mode = useSelector((state: RootState) => state.theme.mode);
-  const { data: meDetail, isLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const { data: meDetail, isLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
 
   if (isLoading || !meDetail) {
     return null;

@@ -9,9 +9,9 @@ import { type TransactionFormData, TransactionSchema } from "../../lib/schemas/T
 import {
   type Expense,
   type ExpenseCreate,
-  useApiV1CategoryGetCategoriesQuery,
-  useApiV1ExpenseCreateExpenseMutation,
-  useApiV1ExpenseExpenseIdUpdateExpenseMutation,
+  useApiV1CategoriesGetCategoriesQuery,
+  useApiV1ExpensesCreateExpenseMutation,
+  useApiV1ExpensesExpenseIdUpdateExpenseMutation,
 } from "../../services/api/v1";
 import { showToast } from "../../store/toastSlice";
 
@@ -24,10 +24,10 @@ interface Props {
 export const TransactionForm = ({ transaction, handleSubmit, handleClose }: Props) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [createTransaction] = useApiV1ExpenseCreateExpenseMutation();
-  const [editTransaction] = useApiV1ExpenseExpenseIdUpdateExpenseMutation();
+  const [createTransaction] = useApiV1ExpensesCreateExpenseMutation();
+  const [editTransaction] = useApiV1ExpensesExpenseIdUpdateExpenseMutation();
   const now = DateTime.now();
-  const { data: categories } = useApiV1CategoryGetCategoriesQuery({
+  const { data: categories } = useApiV1CategoriesGetCategoriesQuery({
     fromDate: now.startOf("month").toUTC().toISO(),
     toDate: now.endOf("month").toUTC().toISO(),
   });

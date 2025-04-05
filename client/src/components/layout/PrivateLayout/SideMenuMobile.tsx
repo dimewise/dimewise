@@ -6,7 +6,7 @@ import Drawer, { drawerClasses } from "@mui/material/Drawer";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useTranslation } from "react-i18next";
-import { useApiV1UserMeDetailGetMeDetailQuery } from "../../../services/api/v1";
+import { useApiV1UsersMeDetailGetMeDetailQuery } from "../../../services/api/v1";
 import { MenuContent } from "./MenuContent";
 
 interface SideMenuMobileProps {
@@ -16,7 +16,7 @@ interface SideMenuMobileProps {
 
 export const SideMenuMobile = ({ open, toggleDrawer }: SideMenuMobileProps) => {
   const { t } = useTranslation();
-  const { data: meDetail, isLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const { data: meDetail, isLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
 
   if (isLoading || !meDetail) {
     return null;

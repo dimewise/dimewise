@@ -7,8 +7,8 @@ import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/c
 import type { CreateUpdateCategory } from "../../pages/Categories";
 import {
   type CategoryFull,
-  useApiV1CategoryGetCategoriesQuery,
-  useApiV1UserMeDetailGetMeDetailQuery,
+  useApiV1CategoriesGetCategoriesQuery,
+  useApiV1UsersMeDetailGetMeDetailQuery,
 } from "../../services/api/v1";
 import type { Currencies } from "../../types/currency";
 import { CategoryFormPopup } from "../Categories/CategoryFormPopup";
@@ -26,11 +26,11 @@ export const CategoriesWidget = () => {
     data: categories,
     isLoading: categoriesIsLoading,
     refetch: refetchGetCategories,
-  } = useApiV1CategoryGetCategoriesQuery({
+  } = useApiV1CategoriesGetCategoriesQuery({
     fromDate: now.startOf("month").toUTC().toISO(),
     toDate: now.endOf("month").toUTC().toISO(),
   });
-  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
 
   if (!categories || categoriesIsLoading || !meDetail || meDetailIsLoading) {
     return <></>;

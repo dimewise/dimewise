@@ -2,13 +2,13 @@ import { Button, Card, CardContent, Grid2 as Grid, List, Stack, Typography } fro
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { Routes } from "../../Routes";
-import { useApiV1ExpenseGetExpensesQuery } from "../../services/api/v1";
+import { useApiV1ExpensesGetExpensesQuery } from "../../services/api/v1";
 import { TransactionListItem } from "../TransactionListItem";
 
 export const RecentTransactionsWidget = () => {
   const { t } = useTranslation();
   // TODO: limit number of transactions?
-  const { data: transactions } = useApiV1ExpenseGetExpensesQuery({});
+  const { data: transactions } = useApiV1ExpensesGetExpensesQuery({});
 
   return (
     <Grid size={12}>

@@ -6,8 +6,8 @@ import { useTranslation } from "react-i18next";
 import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
 import {
   type CategoryFull,
-  useApiV1CategoryCategoryIdDeleteCategoryMutation,
-  useApiV1UserMeDetailGetMeDetailQuery,
+  useApiV1CategoriesCategoryIdDeleteCategoryMutation,
+  useApiV1UsersMeDetailGetMeDetailQuery,
 } from "../../services/api/v1";
 
 interface Props {
@@ -20,8 +20,8 @@ export const CategoryListItem = ({ category, handleSubmit, handleSetCategory }: 
   const { t } = useTranslation();
   const locale = navigator.language;
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-  const [deleteCategory] = useApiV1CategoryCategoryIdDeleteCategoryMutation();
-  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const [deleteCategory] = useApiV1CategoriesCategoryIdDeleteCategoryMutation();
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
 
   if (!meDetail || meDetailIsLoading) {
     return <></>;

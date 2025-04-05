@@ -6,8 +6,8 @@ import { useDispatch } from "react-redux";
 import { type CategoryFormData, CategorySchema } from "../../lib/schemas/CategorySchema";
 import type { CreateUpdateCategory } from "../../pages/Categories";
 import {
-  useApiV1CategoryCategoryIdUpdateCategoryMutation,
-  useApiV1CategoryCreateCategoryMutation,
+  useApiV1CategoriesCategoryIdUpdateCategoryMutation,
+  useApiV1CategoriesCreateCategoryMutation,
 } from "../../services/api/v1";
 import { showToast } from "../../store/toastSlice";
 
@@ -19,8 +19,8 @@ interface Props {
 export const CategoryForm = ({ category, handleSubmit }: Props) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [createCategory] = useApiV1CategoryCreateCategoryMutation();
-  const [updateCategory] = useApiV1CategoryCategoryIdUpdateCategoryMutation();
+  const [createCategory] = useApiV1CategoriesCreateCategoryMutation();
+  const [updateCategory] = useApiV1CategoriesCategoryIdUpdateCategoryMutation();
 
   const {
     register,

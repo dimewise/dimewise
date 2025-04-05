@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Alert, InputLabel, MenuItem, Select } from "@mui/material";
+import { Alert, MenuItem, Select } from "@mui/material";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -23,7 +23,7 @@ import { FacebookIcon } from "../assets/icons/FacebookIcon";
 import { GoogleIcon } from "../assets/icons/GoogleIcon";
 import { useAuth } from "../hooks/useAuth";
 import { type SignUpFormData, SignUpSchema } from "../lib/schemas/SignUpSchema";
-import { useApiV1UserRegisterCreateUserMutation } from "../services/api/v1";
+import { useApiV1UsersRegisterCreateUserMutation } from "../services/api/v1";
 import type { RootState } from "../store";
 import { Currencies, getCurrencyForLocale } from "../types/currency";
 
@@ -35,7 +35,7 @@ export const SignUp = () => {
   const mode = useSelector((state: RootState) => state.theme.mode);
   const { register: signUp } = useAuth();
   const [signUpError, setsignUpError] = useState<AuthError | null>(null);
-  const [registerUser] = useApiV1UserRegisterCreateUserMutation();
+  const [registerUser] = useApiV1UsersRegisterCreateUserMutation();
 
   // register form schema
   const {
