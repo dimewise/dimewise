@@ -11,8 +11,8 @@ import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../lib/util/curr
 import {
   type CategoryCreate,
   type CategoryFull,
-  useApiV1CategoryGetCategoriesQuery,
-  useApiV1UserMeDetailGetMeDetailQuery,
+  useApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery,
+  useApiV1UsersMeDetailGetMeDetailQuery,
 } from "../services/api/v1";
 
 export type CreateUpdateCategory = CategoryCreate & { id: string };
@@ -27,11 +27,11 @@ export const Categories = () => {
     data: categories,
     isLoading: categoriesIsLoading,
     refetch,
-  } = useApiV1CategoryGetCategoriesQuery({
+  } = useApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery({
     fromDate: now.startOf("month").toUTC().toISO(),
     toDate: now.endOf("month").toUTC().toISO(),
   });
-  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
 
   if (!categories || categoriesIsLoading || !meDetail || meDetailIsLoading) {
     return <></>;

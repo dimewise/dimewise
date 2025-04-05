@@ -4,11 +4,7 @@ import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
-import {
-  type Expense,
-  useApiV1ExpenseExpenseIdDeleteExpenseMutation,
-  useApiV1UserMeDetailGetMeDetailQuery,
-} from "../../services/api/v1";
+import { type Expense, useApiV1UsersMeDetailGetMeDetailQuery } from "../../services/api/v1";
 import type { Currencies } from "../../types/currency";
 import { DesktopDialog } from "../DesktopDialog";
 import { MobileDrawer } from "../MobileDrawer";
@@ -25,7 +21,7 @@ export const TransactionDetails = ({ open, transaction, handleClose }: Props) =>
   const { t } = useTranslation();
   const locale = navigator.language;
   const [detailsType, setDetailsType] = useState<TransactionDetailsEnum>(TransactionDetailsEnum.view);
-  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
 
   if (!meDetail || meDetailIsLoading) {
     return <></>;

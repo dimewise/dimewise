@@ -18,8 +18,8 @@ import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { type ProfileEditFormData, ProfileEditSchema } from "../../lib/schemas/ProfileEditSchema";
 import {
-  useApiV1UserMeDetailGetMeDetailQuery,
-  useApiV1UserMeDetailUpdateMeDetailMutation,
+  useApiV1UsersMeDetailGetMeDetailQuery,
+  useApiV1UsersMeDetailUpdateMeDetailMutation,
 } from "../../services/api/v1";
 import { showToast } from "../../store/toastSlice";
 import { Currencies } from "../../types/currency";
@@ -27,8 +27,8 @@ import { Currencies } from "../../types/currency";
 export const ProfileEditor = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { data: meDetail, isLoading } = useApiV1UserMeDetailGetMeDetailQuery();
-  const [editUser] = useApiV1UserMeDetailUpdateMeDetailMutation();
+  const { data: meDetail, isLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
+  const [editUser] = useApiV1UsersMeDetailUpdateMeDetailMutation();
 
   const {
     register,

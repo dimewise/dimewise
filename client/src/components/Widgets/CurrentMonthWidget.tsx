@@ -3,7 +3,7 @@ import { BarChart, PieChart } from "@mui/x-charts";
 import { DateTime } from "luxon";
 import { useTranslation } from "react-i18next";
 import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
-import { useApiV1CategoryGetCategoriesQuery, useApiV1UserMeDetailGetMeDetailQuery } from "../../services/api/v1";
+import { useApiV1CategoriesGetCategoriesQuery, useApiV1UsersMeDetailGetMeDetailQuery } from "../../services/api/v1";
 
 export const CurrentMonthWidget = () => {
   const { t } = useTranslation();
@@ -12,11 +12,11 @@ export const CurrentMonthWidget = () => {
   const locale = navigator.language;
 
   const now = DateTime.now();
-  const { data: categories, isLoading: categoriesIsLoading } = useApiV1CategoryGetCategoriesQuery({
+  const { data: categories, isLoading: categoriesIsLoading } = useApiV1CategoriesGetCategoriesQuery({
     fromDate: now.startOf("month").toUTC().toISO(),
     toDate: now.endOf("month").toUTC().toISO(),
   });
-  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
 
   if (!categories || categoriesIsLoading || !meDetail || meDetailIsLoading) {
     return <></>;

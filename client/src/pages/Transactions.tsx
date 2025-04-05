@@ -8,13 +8,13 @@ import { TransactionListItem } from "../components/TransactionListItem";
 import { MonthNavigator } from "../components/Transactions/MonthNavigator";
 import { TransactionFormPopup } from "../components/Transactions/TransactionFormPopup";
 import { PageNavbar } from "../components/layout/PrivateLayout/PageNavbar";
-import { useApiV1ExpenseGetExpensesQuery } from "../services/api/v1";
+import { useApiV1ExpensesGetExpensesQuery } from "../services/api/v1";
 
 export const Transactions = () => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(DateTime.now());
-  const { data: transactions } = useApiV1ExpenseGetExpensesQuery({
+  const { data: transactions } = useApiV1ExpensesGetExpensesQuery({
     fromDate: selectedMonth.startOf("month").toUTC().toISO(),
     toDate: selectedMonth.endOf("month").toUTC().toISO(),
   });

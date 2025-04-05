@@ -15,8 +15,8 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrencyValueToLocale, parseCurrencyEnum } from "../../lib/util/currency";
 import {
-  useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery,
-  useApiV1UserMeDetailGetMeDetailQuery,
+  useApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery,
+  useApiV1UsersMeDetailGetMeDetailQuery,
 } from "../../services/api/v1";
 
 export const MonthlyOverviewWidget = () => {
@@ -25,11 +25,11 @@ export const MonthlyOverviewWidget = () => {
 
   const now = useMemo(() => DateTime.now(), []);
   const { data: overviewData, isLoading: overviewDataIsLoading } =
-    useApiV1CategoryOverviewYearGetCategoriesPerMonthQuery({
+    useApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery({
       fromDate: now.startOf("year").toUTC().toISO(),
       toDate: now.toUTC().toISO(),
     });
-  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UserMeDetailGetMeDetailQuery();
+  const { data: meDetail, isLoading: meDetailIsLoading } = useApiV1UsersMeDetailGetMeDetailQuery();
   if (!overviewData || overviewDataIsLoading || !meDetail || meDetailIsLoading) {
     return <></>;
   }
