@@ -1,11 +1,12 @@
 from uuid import UUID
 
-from litestar.plugins.sqlalchemy import base
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.model.base import Base
 
-class CategoryModel(base.UUIDAuditBase):
+
+class CategoryModel(Base):
     __tablename__ = "category"
 
     name: Mapped[str]

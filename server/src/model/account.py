@@ -1,14 +1,14 @@
 from typing import get_args
 from uuid import UUID
 
-from litestar.plugins.sqlalchemy import base
 from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
+from src.model.base import Base
 from src.model.enum import CurrenciesEnum
 
 
-class AccountModel(base.UUIDAuditBase):
+class AccountModel(Base):
     __tablename__ = "account"
 
     name: Mapped[str]

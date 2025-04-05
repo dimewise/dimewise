@@ -1,8 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from pydantic import BaseModel
-
+from src.schema.base import BaseModel
 from src.schema.category import CategoryExpense
 
 

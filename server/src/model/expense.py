@@ -2,15 +2,16 @@ from datetime import date
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from litestar.plugins.sqlalchemy import base
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.model.base import Base
 
 if TYPE_CHECKING:
     from src.model.category import CategoryModel
 
 
-class ExpenseModel(base.UUIDAuditBase):
+class ExpenseModel(Base):
     __tablename__ = "expense"
 
     title: Mapped[str]

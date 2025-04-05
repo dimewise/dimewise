@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from src.schema.base import BaseModel
 
 
 class CategoryBase(BaseModel):

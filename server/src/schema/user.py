@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from src.model.enum import CurrenciesEnum
+from src.schema.base import BaseModel
 
 
 class AuthUser(BaseModel):
