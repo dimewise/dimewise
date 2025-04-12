@@ -2,6 +2,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { persistor, store } from "@/store/store";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
@@ -38,6 +39,7 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <ThemeProvider>
             <Slot />
+            <StatusBar style="auto" />
           </ThemeProvider>
         </SafeAreaProvider>
       </PersistGate>
