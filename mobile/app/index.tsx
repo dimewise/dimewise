@@ -3,7 +3,7 @@ import { Redirect } from "expo-router";
 
 export default function Index() {
   const session = useAppSelector((s) => s.session);
-  const targetHref = !session ? "/login" : "/(main)/(tabs)/home";
+  const targetHref = !session ? "/login" : "/(app)/(tabs)/home";
 
   return <Redirect href={targetHref} />;
 }
