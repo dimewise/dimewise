@@ -11,7 +11,7 @@ export const useMakeGlobalStyles = (theme: Theme) =>
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: 10,
+      gap: 16,
     },
     safeAreaContainer: {
       flex: 1,
