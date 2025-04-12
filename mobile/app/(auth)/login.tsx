@@ -35,12 +35,12 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   async function signInWithEmail() {
-    await loginWithPassword({
+    const { error: loginErr } = await loginWithPassword({
       email: email,
       password: password,
     });
 
-    if (session.error) Alert.alert(session.error.message);
+    if (loginErr) Alert.alert(loginErr.message);
     router.replace("/(main)/(tabs)/home");
   }
 
