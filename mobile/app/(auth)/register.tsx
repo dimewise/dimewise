@@ -23,14 +23,15 @@ export default function Register() {
 
   async function signUpWithEmail() {
     if (password === confirmPassword) {
-      await register({
+      const { data, error: registerErr } = await register({
         email: email,
         password: password,
       });
 
-      if (session.error) Alert.alert(session.error.message);
-      if (!session)
-        Alert.alert("Please check your inbox for email verification!");
+      // on error, show an alert
+      if (registerErr) Alert.alert(registerErr.message);
+      // on successs, notify that email will be sent
+      if (data) Alert.alert("Please check your inbox for email verification!");
     } else {
       Alert.alert("Password does not match");
     }
