@@ -28,6 +28,13 @@ init: ## Initializes necessary dev tools for local development
 .PHONY: init-mobile
 init-mobile: ## Initializes mobile dependencies
 	@cd ./mobile && \
+		if [ ! -f .env ]; then \
+			echo "Creating .env file..."; \
+			cp .env.example .env; \
+		else \
+			echo "mobile .env already exists, skipping .env creation..."; \
+		fi; \
+		echo "Installing expo related dependencies with npm..."; \
 		npx expo install
 
 .PHONY: init-client
@@ -69,6 +76,12 @@ init-supabase: ## Initializes supabase, docker is required alongside bunx
 	db_url="$$(echo "$$supabase_status" | grep 'DB URL:' | cut -d ':' -f 2- | tr -d '[:space:]')"; \
 	jwt_key="$$(echo "$$supabase_status" | grep 'JWT secret:' | cut -d ':' -f 2- | tr -d '[:space:]')"; \
 	db_url_with_asyncpg="$$(echo "$$db_url" | sed 's|postgresql://|postgresql+asyncpg://|')"; \
+	api_url="$$(echo "$$supabase_status" | grep 'API URL:' | cut -d ':' -f 2- | tr -d '[:space:]')"; \
+	anon_key="$$(echo "$$supabase_status" | grep 'anon key:' | cut -d ':' -f 2- | tr -d '[:space:]')"; \
+	echo "Updating mobile/.env file..."; \
+	sed -i.bak "s|EXPO_PUBLIC_SUPABASE_URL=.*|EXPO_PUBLIC_SUPABASE_URL=$$api_url|" ./mobile/.env; \
+	sed -i.bak "s|EXPO_PUBLIC_SUPABASE_ANON_KEY=.*|EXPO_PUBLIC_SUPABASE_ANON_KEY=$$anon_key|" ./mobile/.env; \
+	rm ./mobile/.env.bak
 	echo "Updating server/.env file..."; \
 	sed -i.bak "s|DATABASE_URL=.*|DATABASE_URL=$$db_url_with_asyncpg|" ./server/.env; \
 	sed -i.bak "s|JWT_TOKEN=.*|JWT_TOKEN=$$jwt_key|" ./server/.env; \
