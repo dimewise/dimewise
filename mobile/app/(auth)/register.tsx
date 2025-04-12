@@ -62,7 +62,7 @@ export default function Register() {
         <Input
           label="Confirm Password"
           onChangeText={(text) => setConfirmPassword(text)}
-          value={password}
+          value={confirmPassword}
           secureTextEntry={true}
           placeholder="Confirm Password"
         />
@@ -70,7 +70,7 @@ export default function Register() {
       <View>
         <Button
           color="primary"
-          label="Sign in"
+          label="Sign Up"
           disabled={session.loading}
           onPress={() => signUpWithEmail()}
         />
