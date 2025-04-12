@@ -41,7 +41,7 @@ export default function Login() {
     });
 
     if (loginErr) Alert.alert(loginErr.message);
-    router.replace("/(main)/(tabs)/home");
+    router.replace("/(app)/(tabs)/home");
   }
 
   return (
