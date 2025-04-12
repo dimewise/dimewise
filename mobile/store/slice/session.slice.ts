@@ -1,17 +1,15 @@
 import { type PayloadAction, createSlice } from "@reduxjs/toolkit";
-import type { AuthError, Session } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import { signInWithPassword, signOut } from "../api/supabase-auth";
 
 interface SessionInterface {
   session: Session | null;
   loading: boolean;
-  error: AuthError | null | undefined;
 }
 
 const initialState: SessionInterface = {
   session: null,
   loading: false,
-  error: null,
 };
 
 type SetSessionPayload = {
@@ -39,11 +37,10 @@ const sessionSlice = createSlice({
       loading: false,
       session: action.payload.data.session,
     }));
-    builder.addCase(signInWithPassword.rejected, (state, action) => ({
+    builder.addCase(signInWithPassword.rejected, (state) => ({
       ...state,
       loading: false,
       session: null,
-      error: action.payload,
     }));
 
     // TODO: add socials login
@@ -57,12 +54,10 @@ const sessionSlice = createSlice({
       ...state,
       loading: false,
       session: null,
-      error: null,
     }));
-    builder.addCase(signOut.rejected, (state, action) => ({
+    builder.addCase(signOut.rejected, (state) => ({
       ...state,
       loading: false,
-      error: action.payload,
     }));
   },
 });
