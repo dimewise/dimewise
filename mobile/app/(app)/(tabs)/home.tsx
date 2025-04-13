@@ -65,10 +65,10 @@ export default function Home() {
   };
 
   const onSignout = async () => {
-    await logout();
+    const { error: logoutErr } = await logout();
 
-    if (session.error) Alert.alert(session.error.message);
-    router.replace("/(auth)/login");
+    if (logoutErr) Alert.alert(logoutErr.message);
+    router.replace("/login");
   };
 
   return (
