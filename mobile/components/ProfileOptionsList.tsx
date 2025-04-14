@@ -18,11 +18,14 @@ export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
       <View style={styles.optionsContainer}>
         {optionListItems.map((o, i) => (
           <Pressable
+            key={o.title}
             style={[
               styles.optionItem,
               i === optionListItems.length - 1 && styles.optionItemLast,
             ]}
+            onPress={o.onPress}
           >
+            {o.startIcon}
             <Text>{o.title}</Text>
           </Pressable>
         ))}
@@ -54,7 +57,12 @@ const makeStyle = (theme: Theme) =>
     optionItem: {
       borderBottomWidth: 1,
       borderBottomColor: theme.color.backgroundMid,
-      paddingVertical: 24,
+      paddingVertical: 16,
+      display: "flex",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-start",
+      gap: 16,
     },
     optionItemLast: {
       borderBottomWidth: 0,

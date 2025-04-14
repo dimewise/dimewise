@@ -4,6 +4,6 @@ export type OptionListItem = {
   startIcon?: ReactNode;
   title: string;
   renderSecondaryAction?: ReactNode;
-  onClick?: () => void;
+  onPress?: () => void;
   secondaryAction?: () => void;
 };

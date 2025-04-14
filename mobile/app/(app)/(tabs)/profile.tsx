@@ -1,23 +1,27 @@
 import { ProfileOptionsList } from "@/components/ProfileOptionsList";
 import type { OptionListItem } from "@/components/types";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import type { Theme } from "@/style/theme";
-import { FontAwesome } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
   const theme = useTheme();
+  const { logout } = useAuth();
   const gstyles = useMakeGlobalStyles(theme);
   const styles = makeStyle(theme);
 
+  /* User Profile */
   const profileOptions: OptionListItem[] = [
     {
       startIcon: (
-        <FontAwesome
-          name={"user"}
+        <MaterialCommunityIcons
+          name="account-edit"
           color={"#000000"}
           size={24}
         />
@@ -25,11 +29,13 @@ export default function Profile() {
       title: "Edit Profile (WIP)",
     },
   ];
+
+  /* User Preference */
   const preferencesOptions: OptionListItem[] = [
     {
       startIcon: (
-        <FontAwesome
-          name={"user"}
+        <MaterialCommunityIcons
+          name="palette"
           color={"#000000"}
           size={24}
         />
@@ -38,8 +44,8 @@ export default function Profile() {
     },
     {
       startIcon: (
-        <FontAwesome
-          name={"user"}
+        <Ionicons
+          name="language"
           color={"#000000"}
           size={24}
         />
@@ -48,8 +54,8 @@ export default function Profile() {
     },
     {
       startIcon: (
-        <FontAwesome
-          name={"user"}
+        <Ionicons
+          name="notifications"
           color={"#000000"}
           size={24}
         />
@@ -57,11 +63,13 @@ export default function Profile() {
       title: "Notification (WIP)",
     },
   ];
+
+  /* Customer Support/Legal */
   const supportOptions: OptionListItem[] = [
     {
       startIcon: (
-        <FontAwesome
-          name={"user"}
+        <Ionicons
+          name="help-circle"
           color={"#000000"}
           size={24}
         />
@@ -70,36 +78,54 @@ export default function Profile() {
     },
     {
       startIcon: (
-        <FontAwesome
-          name={"user"}
-          color={"#000000"}
-          size={24}
-        />
-      ),
-      title: "Terms & Privacy Policy (WIP)",
-    },
-    {
-      startIcon: (
-        <FontAwesome
-          name={"user"}
+        <Ionicons
+          name="chatbox-ellipses"
           color={"#000000"}
           size={24}
         />
       ),
       title: "Contact Support (WIP)",
     },
+    {
+      startIcon: (
+        <Ionicons
+          name="lock-closed"
+          color={"#000000"}
+          size={24}
+        />
+      ),
+      title: "Privacy Policy (WIP)",
+    },
+    {
+      startIcon: (
+        <Ionicons
+          name="document-text"
+          color={"#000000"}
+          size={24}
+        />
+      ),
+      title: "Terms of Service (WIP)",
+    },
   ];
 
+  /* Authentication */
+  const handleLogout = async () => {
+    const { error: logoutErr } = await logout();
+
+    if (logoutErr) Alert.alert(logoutErr.message);
+    router.replace("/login");
+  };
   const logoutOption: OptionListItem[] = [
     {
       startIcon: (
-        <FontAwesome
-          name={"user"}
+        <MaterialCommunityIcons
+          name="logout"
           color={"#000000"}
           size={24}
         />
       ),
       title: "Logout",
+      onPress: handleLogout,
     },
   ];
 
@@ -110,10 +136,12 @@ export default function Profile() {
     >
       <ScrollView>
         <View style={[gstyles.container, styles.containerOverride]}>
-          <Image
-            style={styles.profilePicture}
-            source={require("@/assets/images/background-image.png")}
-          />
+          <View style={styles.pfpWrapper}>
+            <Image
+              style={styles.profilePicture}
+              source={require("@/assets/images/background-image.png")}
+            />
+          </View>
           <View style={styles.userInfoContainer}>
             <Text style={styles.username}>Dimewise</Text>
             <Text style={styles.email}>no-reply@dimewise.com</Text>
@@ -131,7 +159,7 @@ export default function Profile() {
             optionListItems={supportOptions}
           />
           <ProfileOptionsList
-            title="Support"
+            title="Authentication"
             optionListItems={logoutOption}
           />
         </View>
@@ -153,8 +181,14 @@ const makeStyle = (theme: Theme) =>
     profilePicture: {
       width: 150,
       height: 150,
+      overflow: "hidden",
       borderRadius: "100%",
-      marginBottom: 10,
+    },
+    pfpWrapper: {
+      width: 150,
+      height: 150,
+      overflow: "hidden",
+      borderRadius: "100%",
     },
     userInfoContainer: {
       display: "flex",
