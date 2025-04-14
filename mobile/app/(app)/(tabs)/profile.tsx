@@ -1,4 +1,4 @@
-import { ProfileOptionsList } from "@/components/ProfileOptionsList";
+import { ProfileOptionsList } from "@/components/profile/ProfileOptionsList";
 import type { OptionListItem } from "@/components/types";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";

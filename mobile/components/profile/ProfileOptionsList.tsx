@@ -1,7 +1,7 @@
 import { useTheme } from "@/contexts/ThemeContext";
 import type { Theme } from "@/style/theme";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { OptionListItem } from "./types";
+import type { OptionListItem } from "../types";
 
 interface Props {
   title: string;
