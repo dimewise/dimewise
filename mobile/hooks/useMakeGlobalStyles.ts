@@ -1,12 +1,12 @@
-import type { Theme } from "@/style/theme";
 import { StyleSheet } from "react-native";
+import type { MD3Theme } from "react-native-paper";
 
-export const useMakeGlobalStyles = (theme: Theme) =>
+export const useMakeGlobalStyles = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
       paddingHorizontal: 30,
       height: "100%",
-      backgroundColor: theme.color.background,
+      backgroundColor: theme.colors.background,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -15,6 +15,6 @@ export const useMakeGlobalStyles = (theme: Theme) =>
     },
     safeAreaContainer: {
       flex: 1,
-      backgroundColor: theme.color.background,
+      backgroundColor: theme.colors.background,
     },
   });

@@ -1,7 +1,6 @@
-import { useTheme } from "@/contexts/ThemeContext";
-import type { Theme } from "@/style/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 
 type Props = {
   label: string;
@@ -59,7 +58,7 @@ export const Button = ({
   );
 };
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     buttonContainer: {
       width: 320,
@@ -67,7 +66,7 @@ const makeStyle = (theme: Theme) =>
       marginHorizontal: 20,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: theme.color.primary,
+      backgroundColor: theme.colors.primary,
       borderRadius: 18,
     },
     button: {

@@ -1,6 +1,5 @@
-import { useTheme } from "@/contexts/ThemeContext";
-import type { Theme } from "@/style/theme";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 import type { OptionListItem } from "../types";
 
 interface Props {
@@ -34,7 +33,7 @@ export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
   );
 };
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
       width: "100%",
@@ -46,17 +45,16 @@ const makeStyle = (theme: Theme) =>
     optionsContainer: {
       width: "100%",
       paddingHorizontal: 16,
-      backgroundColor: theme.color.backgroundLow,
       borderRadius: 12,
     },
     sectionTitleText: {
-      fontSize: theme.fontSizes.sm,
-      color: theme.color.secondaryText,
+      fontSize: theme.fonts.bodyMedium.fontSize,
+      color: theme.colors.secondary,
       marginBottom: 8,
     },
     optionItem: {
       borderBottomWidth: 1,
-      borderBottomColor: theme.color.backgroundMid,
+      borderBottomColor: theme.colors.outline,
       paddingVertical: 16,
       display: "flex",
       flexDirection: "row",

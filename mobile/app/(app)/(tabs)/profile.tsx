@@ -1,13 +1,12 @@
 import { ProfileOptionsList } from "@/components/profile/ProfileOptionsList";
 import type { OptionListItem } from "@/components/types";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
-import type { Theme } from "@/style/theme";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
@@ -168,14 +167,14 @@ export default function Profile() {
   );
 }
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     containerOverride: {
       justifyContent: "flex-start",
       paddingTop: 24,
     },
     button: {
-      color: theme.color.text,
+      color: theme.colors.primary,
       textDecorationLine: "underline",
     },
     profilePicture: {
@@ -199,10 +198,10 @@ const makeStyle = (theme: Theme) =>
       marginBottom: 24,
     },
     username: {
-      fontSize: theme.fontSizes.xl,
+      fontSize: theme.fonts.headlineLarge.fontSize,
     },
     email: {
-      fontSize: theme.fontSizes.sm,
-      color: theme.color.secondaryText,
+      fontSize: theme.fonts.bodyMedium.fontSize,
+      color: theme.colors.secondary,
     },
   });

@@ -1,6 +1,6 @@
-import { useTheme } from "@/contexts/ThemeContext";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { useTheme } from "react-native-paper";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -9,9 +9,9 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.color.text,
+        tabBarActiveTintColor: theme.colors.primary,
         tabBarStyle: {
-          backgroundColor: theme.color.background,
+          backgroundColor: theme.colors.background,
         },
       }}
     >

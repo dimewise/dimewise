@@ -1,16 +1,15 @@
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { supabase } from "@/lib/supabase";
 import { useAppSelector } from "@/store/store";
-import type { Theme } from "@/style/theme";
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons"; // Social login icons
 import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, AppState, StyleSheet, Text, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
@@ -93,17 +92,17 @@ export default function Login() {
           <Ionicons
             name="logo-google"
             size={30}
-            color={theme.color.primary}
+            color={theme.colors.primary}
           />
           <FontAwesome
             name="facebook"
             size={30}
-            color={theme.color.primary}
+            color={theme.colors.primary}
           />
           <AntDesign
             name="twitter"
             size={30}
-            color={theme.color.primary}
+            color={theme.colors.primary}
           />
         </View>
       </View>
@@ -124,7 +123,7 @@ export default function Login() {
   );
 }
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     input: {
       width: "100%",
@@ -136,8 +135,8 @@ const makeStyle = (theme: Theme) =>
       marginBottom: 10,
     },
     greetings: {
-      fontSize: theme.fontSizes.xl,
-      fontFamily: theme.typography.regular,
+      fontSize: theme.fonts.headlineLarge.fontSize,
+      fontFamily: theme.fonts.headlineLarge.fontFamily,
       marginBottom: 24, // Space between greetings and inputs
     },
     signUpLink: {
@@ -145,7 +144,7 @@ const makeStyle = (theme: Theme) =>
     },
     signUpText: {
       textDecorationLine: "underline",
-      color: theme.color.primary,
+      color: theme.colors.primary,
     },
     socialLoginWrapper: {
       width: "100%",
@@ -155,7 +154,7 @@ const makeStyle = (theme: Theme) =>
     divider: {
       flex: 1,
       borderBottomWidth: 1,
-      borderBottomColor: theme.color.primary,
+      borderBottomColor: theme.colors.primary,
       marginBottom: 16, // Space after divider
     },
     dividerWrapper: {
@@ -168,8 +167,8 @@ const makeStyle = (theme: Theme) =>
     },
     orText: {
       flex: 0,
-      fontSize: theme.fontSizes.sm,
-      color: theme.color.text,
+      fontSize: theme.fonts.bodyMedium.fontSize,
+      color: theme.colors.secondary,
       marginBottom: 16,
     },
     socialIcons: {

@@ -1,12 +1,22 @@
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import { persistor, store } from "@/store/store";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { DefaultTheme, PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+
+const theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#263455", // dark blue (logo stroke)
+    secondary: "#00ef98", // green (logo background)
+    background: "#FAFAFA", // soft off-white background
+  },
+};
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,10 +47,10 @@ export default function RootLayout() {
         persistor={persistor}
       >
         <SafeAreaProvider>
-          <ThemeProvider>
+          <PaperProvider>
             <Slot />
             <StatusBar style="auto" />
-          </ThemeProvider>
+          </PaperProvider>
         </SafeAreaProvider>
       </PersistGate>
     </Provider>
