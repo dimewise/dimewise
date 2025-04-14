@@ -1,6 +1,5 @@
-import { useTheme } from "@/contexts/ThemeContext";
-import type { Theme } from "@/style/theme";
 import { StyleSheet, Text, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 
 export const CurrentMonthSummary = () => {
   const theme = useTheme();
@@ -20,7 +19,7 @@ export const CurrentMonthSummary = () => {
   );
 };
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
       width: "100%",
@@ -38,16 +37,16 @@ const makeStyle = (theme: Theme) =>
       justifyContent: "space-between",
     },
     currentMonthText: {
-      fontFamily: theme.typography.black,
-      fontSize: theme.fontSizes.xl,
+      fontFamily: theme.fonts.headlineLarge.fontFamily,
+      fontSize: theme.fonts.headlineLarge.fontSize,
     },
     budgetUsedText: {
-      fontFamily: theme.typography.bold,
-      fontSize: theme.fontSizes.xxl,
+      fontFamily: theme.fonts.headlineLarge.fontFamily,
+      fontSize: theme.fonts.headlineLarge.fontSize,
     },
     totalBudgetText: {
-      fontFamily: theme.typography.regular,
-      fontSize: theme.fontSizes.sm,
+      fontFamily: theme.fonts.headlineLarge.fontFamily,
+      fontSize: theme.fonts.headlineLarge.fontSize,
     },
     totalBudgetContainer: {
       display: "flex",

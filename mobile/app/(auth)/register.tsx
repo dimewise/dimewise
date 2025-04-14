@@ -1,14 +1,13 @@
 import { Button } from "@/components/Button";
 import { Input } from "@/components/Input";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { useAppSelector } from "@/store/store";
-import type { Theme } from "@/style/theme";
 import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
@@ -112,7 +111,7 @@ export default function Register() {
   );
 }
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     input: {
       width: "100%",
@@ -122,7 +121,7 @@ const makeStyle = (theme: Theme) =>
       height: 60,
     },
     greetings: {
-      fontSize: theme.fontSizes.xl,
+      fontSize: theme.fonts.headlineLarge.fontSize,
     },
     signUpText: {
       textDecorationLine: "underline",

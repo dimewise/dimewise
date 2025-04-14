@@ -1,6 +1,5 @@
-import { useTheme } from "@/contexts/ThemeContext";
-import type { Theme } from "@/style/theme";
 import { StyleSheet, Text, TextInput, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 
 type Props = {
   label?: string;
@@ -40,7 +39,7 @@ export const Input = ({
   );
 };
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     container: {
       marginBottom: 16,
@@ -53,7 +52,7 @@ const makeStyle = (theme: Theme) =>
     inputContainer: {
       flexDirection: "row",
       alignItems: "center",
-      borderColor: theme.color.primary,
+      borderColor: theme.colors.primary,
       borderWidth: 1,
       borderRadius: 8,
       paddingHorizontal: 8,

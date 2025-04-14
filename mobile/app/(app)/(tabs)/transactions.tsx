@@ -1,7 +1,6 @@
-import { useTheme } from "@/contexts/ThemeContext";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
-import type { Theme } from "@/style/theme";
 import { StyleSheet, Text, View } from "react-native";
+import { type MD3Theme, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Transactions() {
@@ -20,10 +19,10 @@ export default function Transactions() {
   );
 }
 
-const makeStyle = (theme: Theme) =>
+const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
     text: {
-      color: theme.color.text,
+      color: theme.colors.primary,
       textDecorationLine: "underline",
     },
   });
