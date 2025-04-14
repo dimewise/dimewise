@@ -1,13 +1,17 @@
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { useAppSelector } from "@/store/store";
 import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
-import { type MD3Theme, useTheme } from "react-native-paper";
+import { Alert, StyleSheet, View } from "react-native";
+import {
+  Button,
+  type MD3Theme,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
@@ -46,39 +50,71 @@ export default function Register() {
   return (
     <SafeAreaView style={gstyles.container}>
       <Image
-        style={styles.logo}
+        style={{
+          width: "80%",
+          height: 80,
+          marginBottom: 10,
+        }}
         source={require("../../assets/logo/logo_full_colored.svg")}
         contentFit="contain"
       />
-      <Text style={styles.greetings}>Sign Up</Text>
+      <Text
+        variant="headlineLarge"
+        style={{
+          marginBottom: 24, // Space between greetings and inputs
+        }}
+      >
+        Sign Up
+      </Text>
+
       {session.loading ? (
-        <Text>Loading...</Text>
+        <Text variant="bodyMedium">Loading...</Text>
       ) : signupComplete ? (
-        <>
-          <Text>Please check your inbox for email verification!</Text>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 24,
+          }}
+        >
+          <Text variant="bodyLarge">
+            Please check your inbox for email verification!
+          </Text>
           <Button
-            color="primary"
-            label="Go to Login"
+            mode="contained"
             onPress={handleComplete}
-          />
-        </>
+            style={{ width: "100%", maxWidth: 150 }}
+          >
+            Go to Login
+          </Button>
+        </View>
       ) : (
         <>
-          <View style={styles.input}>
-            <Input
+          <View
+            style={{
+              width: "100%",
+              gap: 5,
+            }}
+          >
+            <TextInput
+              mode="outlined"
               label="Email"
               onChangeText={(text) => setEmail(text)}
               value={email}
               placeholder="yamada.taro@email.com"
             />
-            <Input
+            <TextInput
+              mode="outlined"
               label="Password"
               onChangeText={(text) => setPassword(text)}
               value={password}
               secureTextEntry={true}
               placeholder="Password"
             />
-            <Input
+            <TextInput
+              mode="outlined"
               label="Confirm Password"
               onChangeText={(text) => setConfirmPassword(text)}
               value={confirmPassword}
@@ -86,16 +122,16 @@ export default function Register() {
               placeholder="Confirm Password"
             />
           </View>
+          <Button
+            mode="contained"
+            disabled={session.loading}
+            onPress={() => signUpWithEmail()}
+            style={{ width: "100%", maxWidth: 150 }}
+          >
+            Sign Up
+          </Button>
           <View>
-            <Button
-              color="primary"
-              label="Sign Up"
-              disabled={session.loading}
-              onPress={() => signUpWithEmail()}
-            />
-          </View>
-          <View>
-            <Text>
+            <Text variant="bodyMedium">
               Already have an account?&nbsp;
               <Link
                 style={styles.signUpText}
@@ -113,13 +149,6 @@ export default function Register() {
 
 const makeStyle = (theme: MD3Theme) =>
   StyleSheet.create({
-    input: {
-      width: "100%",
-    },
-    logo: {
-      width: "100%",
-      height: 60,
-    },
     greetings: {
       fontSize: theme.fonts.headlineLarge.fontSize,
     },
