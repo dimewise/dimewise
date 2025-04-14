@@ -1,5 +1,3 @@
-import { Button } from "@/components/Button";
-import { Input } from "@/components/Input";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { supabase } from "@/lib/supabase";
@@ -8,8 +6,8 @@ import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons"; // Social
 import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Alert, AppState, StyleSheet, Text, View } from "react-native";
-import { type MD3Theme, useTheme } from "react-native-paper";
+import { Alert, AppState, View } from "react-native";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
@@ -27,7 +25,6 @@ AppState.addEventListener("change", (state) => {
 export default function Login() {
   const theme = useTheme();
   const gstyles = useMakeGlobalStyles(theme);
-  const styles = makeStyle(theme);
   const { loginWithPassword } = useAuth();
   const session = useAppSelector((state) => state.session);
   const [email, setEmail] = useState("");
@@ -47,21 +44,39 @@ export default function Login() {
     <SafeAreaView style={gstyles.container}>
       {session.loading && <Text>Loading...</Text>}
       <Image
-        style={styles.logo}
+        style={{
+          width: "80%",
+          height: 80,
+          marginBottom: 10,
+        }}
         source={require("../../assets/logo/logo_full_colored.svg")}
         contentFit="contain"
       />
-      <Text style={styles.greetings}>Welcome back!</Text>
+      <Text
+        variant="headlineLarge"
+        style={{
+          marginBottom: 24, // Space between greetings and inputs
+        }}
+      >
+        Welcome back!
+      </Text>
 
       {/* Input Fields */}
-      <View style={styles.input}>
-        <Input
+      <View
+        style={{
+          width: "100%",
+          gap: 5,
+        }}
+      >
+        <TextInput
+          mode="outlined"
           label="Email"
           onChangeText={(text) => setEmail(text)}
           value={email}
           placeholder="yamada.taro@email.com"
         />
-        <Input
+        <TextInput
+          mode="outlined"
           label="Password"
           onChangeText={(text) => setPassword(text)}
           value={password}
@@ -72,23 +87,68 @@ export default function Login() {
 
       {/* Sign In Button */}
       <Button
-        color="primary"
-        label="Sign in"
-        fullWidth
+        mode="contained"
         disabled={session.loading}
         onPress={() => signInWithEmail()}
-      />
+        style={{ width: "100%", maxWidth: 150 }}
+      >
+        Sign In
+      </Button>
 
       {/* Horizontal line and social login options */}
-      <View style={styles.socialLoginWrapper}>
-        <View style={styles.dividerWrapper}>
-          <View style={styles.divider}></View>
-          <Text style={styles.orText}>Or sign in with</Text>
-          <View style={styles.divider}></View>
+      <View
+        style={{
+          width: "100%",
+          alignItems: "center",
+          gap: 24,
+          marginTop: 24,
+        }}
+      >
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 24,
+            width: "100%",
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.primary,
+              marginBottom: 16, // Space after divider
+            }}
+          />
+          <Text
+            variant="bodyMedium"
+            style={{
+              flex: 0,
+              color: theme.colors.primary,
+              marginBottom: 16,
+            }}
+          >
+            Or sign in with
+          </Text>
+          <View
+            style={{
+              flex: 1,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.primary,
+              marginBottom: 16, // Space after divider
+            }}
+          />
         </View>
 
         {/* TODO: Add socials login, on Press */}
-        <View style={styles.socialIcons}>
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 32,
+          }}
+        >
           <Ionicons
             name="logo-google"
             size={30}
@@ -108,11 +168,18 @@ export default function Login() {
       </View>
 
       {/* Sign Up Link */}
-      <View style={styles.signUpLink}>
-        <Text>
-          Don't have an account?{" "}
+      <View
+        style={{
+          marginTop: 20,
+        }}
+      >
+        <Text variant="bodyMedium">
+          Don't have an account?&nbsp;
           <Link
-            style={styles.signUpText}
+            style={{
+              textDecorationLine: "underline",
+              color: theme.colors.primary,
+            }}
             href={"/(auth)/register"}
           >
             Sign Up
@@ -122,57 +189,3 @@ export default function Login() {
     </SafeAreaView>
   );
 }
-
-const makeStyle = (theme: MD3Theme) =>
-  StyleSheet.create({
-    input: {
-      width: "100%",
-      gap: 5,
-    },
-    logo: {
-      width: "80%",
-      height: 80,
-      marginBottom: 10,
-    },
-    greetings: {
-      fontSize: theme.fonts.headlineLarge.fontSize,
-      fontFamily: theme.fonts.headlineLarge.fontFamily,
-      marginBottom: 24, // Space between greetings and inputs
-    },
-    signUpLink: {
-      marginTop: 20,
-    },
-    signUpText: {
-      textDecorationLine: "underline",
-      color: theme.colors.primary,
-    },
-    socialLoginWrapper: {
-      width: "100%",
-      marginTop: 32,
-      alignItems: "center",
-    },
-    divider: {
-      flex: 1,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.primary,
-      marginBottom: 16, // Space after divider
-    },
-    dividerWrapper: {
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 18,
-      width: "100%",
-    },
-    orText: {
-      flex: 0,
-      fontSize: theme.fonts.bodyMedium.fontSize,
-      color: theme.colors.secondary,
-      marginBottom: 16,
-    },
-    socialIcons: {
-      flexDirection: "row",
-      gap: 32,
-    },
-  });
