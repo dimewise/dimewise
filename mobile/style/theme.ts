@@ -1,13 +1,13 @@
-import { color } from "./styles/color.styles";
-import { fontSizes } from "./styles/font-sizes.styles";
-import { spacing } from "./styles/spacing.styles";
-import { typography } from "./styles/typography.styles";
+import { DefaultTheme } from "react-native-paper";
 
+// Custom theme declaration for react-native-paper
+// using MD3 default theme as base
 export const theme = {
-  color,
-  typography,
-  spacing,
-  fontSizes,
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: "#263455", // dark blue (logo stroke)
+    secondary: "#00ef98", // green (logo background)
+    background: "#FAFAFA", // soft off-white background
+  },
 };
-
-export type Theme = typeof theme;
