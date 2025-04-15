@@ -1,28 +1,22 @@
 import { ProfileOptionsList } from "@/components/profile/ProfileOptionsList";
 import type { OptionListItem } from "@/components/types";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Alert, ScrollView, Text, View } from "react-native";
-import { Avatar, useTheme } from "react-native-paper";
+import { Avatar } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { logout } = useAuth();
   const gstyles = useMakeGlobalStyles(theme);
 
   /* User Profile */
   const profileOptions: OptionListItem[] = [
     {
-      startIcon: (
-        <MaterialCommunityIcons
-          name="account-edit"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "account-edit",
       title: "Edit Profile (WIP)",
     },
   ];
@@ -30,33 +24,15 @@ export default function Profile() {
   /* User Preference */
   const preferencesOptions: OptionListItem[] = [
     {
-      startIcon: (
-        <MaterialCommunityIcons
-          name="palette"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "palette",
       title: "Theme Selection (WIP)",
     },
     {
-      startIcon: (
-        <Ionicons
-          name="language"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "translate",
       title: "Language (WIP)",
     },
     {
-      startIcon: (
-        <Ionicons
-          name="notifications"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "bell-ring",
       title: "Notification (WIP)",
     },
   ];
@@ -64,43 +40,19 @@ export default function Profile() {
   /* Customer Support/Legal */
   const supportOptions: OptionListItem[] = [
     {
-      startIcon: (
-        <Ionicons
-          name="help-circle"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "help-circle",
       title: "Help Center (WIP)",
     },
     {
-      startIcon: (
-        <Ionicons
-          name="chatbox-ellipses"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "chat-question",
       title: "Contact Support (WIP)",
     },
     {
-      startIcon: (
-        <Ionicons
-          name="lock-closed"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "lock-check",
       title: "Privacy Policy (WIP)",
     },
     {
-      startIcon: (
-        <Ionicons
-          name="document-text"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "file-certificate",
       title: "Terms of Service (WIP)",
     },
   ];
@@ -114,13 +66,7 @@ export default function Profile() {
   };
   const logoutOption: OptionListItem[] = [
     {
-      startIcon: (
-        <MaterialCommunityIcons
-          name="logout"
-          color={"#000000"}
-          size={24}
-        />
-      ),
+      startIcon: "logout",
       title: "Logout",
       onPress: handleLogout,
     },
@@ -141,32 +87,24 @@ export default function Profile() {
             },
           ]}
         >
-          <View
-            style={{
-              width: 150,
-              height: 150,
-              overflow: "hidden",
-              borderRadius: "100%",
-            }}
-          >
-            <Avatar.Image
-              size={200}
-              source={require("@/assets/images/background-image.png")}
-            />
-          </View>
+          <Avatar.Image
+            size={160}
+            source={require("@/assets/images/background-image.png")}
+          />
           <View
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "flex-start",
-              gap: 5,
+              gap: 3,
               marginBottom: 24,
             }}
           >
             <Text
               style={{
-                fontSize: theme.fonts.headlineLarge.fontSize,
+                fontSize: theme.fonts.displaySmall.fontSize,
+                fontWeight: "bold",
               }}
             >
               Dimewise
@@ -174,7 +112,6 @@ export default function Profile() {
             <Text
               style={{
                 fontSize: theme.fonts.bodyMedium.fontSize,
-                color: theme.colors.secondary,
               }}
             >
               no-reply@dimewise.com

@@ -1,3 +1,4 @@
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { useAppSelector } from "@/store/store";
@@ -5,11 +6,11 @@ import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, View } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { Button, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const gstyles = useMakeGlobalStyles(theme);
   const { register } = useAuth();
   const session = useAppSelector((state) => state.session);

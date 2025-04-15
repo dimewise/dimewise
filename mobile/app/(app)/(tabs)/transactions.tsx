@@ -1,10 +1,10 @@
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { Text, View } from "react-native";
-import { useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Transactions() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const gstyles = useMakeGlobalStyles(theme);
   return (
     <SafeAreaView

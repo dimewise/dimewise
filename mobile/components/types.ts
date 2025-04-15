@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 export type OptionListItem = {
-  startIcon?: ReactNode;
+  startIcon?: string;
   title: string;
   renderSecondaryAction?: ReactNode;
   onPress?: () => void;

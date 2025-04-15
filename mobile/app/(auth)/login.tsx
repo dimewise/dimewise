@@ -1,3 +1,4 @@
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { supabase } from "@/lib/supabase";
@@ -7,7 +8,7 @@ import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
 import { Alert, AppState, View } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { Button, Text, TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
@@ -23,7 +24,7 @@ AppState.addEventListener("change", (state) => {
 });
 
 export default function Login() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const gstyles = useMakeGlobalStyles(theme);
   const { loginWithPassword } = useAuth();
   const session = useAppSelector((state) => state.session);
