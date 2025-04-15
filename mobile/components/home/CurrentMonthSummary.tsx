@@ -1,8 +1,8 @@
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { Text, View } from "react-native";
-import { useTheme } from "react-native-paper";
 
 export const CurrentMonthSummary = () => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   return (
     <View
       style={{

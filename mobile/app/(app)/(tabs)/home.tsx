@@ -1,11 +1,11 @@
 import { CurrentMonthSummary } from "@/components/home/CurrentMonthSummary";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { ScrollView } from "react-native";
-import { useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const gstyles = useMakeGlobalStyles(theme);
 
   return (

@@ -1,5 +1,6 @@
-import { Pressable, Text, View } from "react-native";
-import { useTheme } from "react-native-paper";
+import { useAppTheme } from "@/hooks/useAppTheme";
+import { View } from "react-native";
+import { Button, Divider, Icon, Text } from "react-native-paper";
 import type { OptionListItem } from "../types";
 
 interface Props {
@@ -8,7 +9,7 @@ interface Props {
 }
 
 export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   return (
     <View
@@ -21,9 +22,10 @@ export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
       }}
     >
       <Text
+        variant="bodySmall"
         style={{
-          fontSize: theme.fonts.bodyMedium.fontSize,
-          color: theme.colors.secondary,
+          fontWeight: "bold",
+          color: theme.colors.textMuted,
           marginBottom: 8,
         }}
       >
@@ -32,33 +34,48 @@ export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
       <View
         style={{
           width: "100%",
-          paddingHorizontal: 16,
           borderRadius: 12,
+          backgroundColor: theme.colors.backgroundMuted,
         }}
       >
         {optionListItems.map((o, i) => (
-          <Pressable
-            key={o.title}
-            style={[
-              {
-                borderBottomWidth: 1,
-                borderBottomColor: theme.colors.outline,
-                paddingVertical: 16,
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "flex-start",
-                gap: 16,
-              },
-              i === optionListItems.length - 1 && {
-                borderBottomWidth: 0,
-              },
-            ]}
-            onPress={o.onPress}
-          >
-            {o.startIcon}
-            <Text>{o.title}</Text>
-          </Pressable>
+          <View key={o.title}>
+            <Button
+              mode="contained"
+              icon={() =>
+                o.startIcon ? (
+                  <Icon
+                    source={o.startIcon}
+                    size={20}
+                  />
+                ) : undefined
+              }
+              style={[
+                {
+                  paddingVertical: 8,
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "flex-start",
+                },
+              ]}
+              buttonColor={theme.colors.backgroundMuted}
+              textColor={theme.colors.text}
+              onPress={o.onPress}
+            >
+              <Text
+                variant="bodyMedium"
+                style={{ color: theme.colors.text }}
+              >
+                {o.title}
+              </Text>
+            </Button>
+            {i !== optionListItems.length - 1 && (
+              <Divider
+                bold
+                style={{ marginHorizontal: 16 }}
+              />
+            )}
+          </View>
         ))}
       </View>
     </View>

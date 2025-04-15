@@ -1,9 +1,9 @@
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { useTheme } from "react-native-paper";
 
 export default function TabLayout() {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   return (
     <Tabs
