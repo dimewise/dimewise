@@ -4,20 +4,13 @@ import { useAppSelector } from "@/store/store";
 import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
-import {
-  Button,
-  type MD3Theme,
-  Text,
-  TextInput,
-  useTheme,
-} from "react-native-paper";
+import { Alert, View } from "react-native";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Register() {
   const theme = useTheme();
   const gstyles = useMakeGlobalStyles(theme);
-  const styles = makeStyle(theme);
   const { register } = useAuth();
   const session = useAppSelector((state) => state.session);
   const [email, setEmail] = useState("");
@@ -134,7 +127,9 @@ export default function Register() {
             <Text variant="bodyMedium">
               Already have an account?&nbsp;
               <Link
-                style={styles.signUpText}
+                style={{
+                  textDecorationLine: "underline",
+                }}
                 href={"/login"}
               >
                 Sign In
@@ -146,13 +141,3 @@ export default function Register() {
     </SafeAreaView>
   );
 }
-
-const makeStyle = (theme: MD3Theme) =>
-  StyleSheet.create({
-    greetings: {
-      fontSize: theme.fonts.headlineLarge.fontSize,
-    },
-    signUpText: {
-      textDecorationLine: "underline",
-    },
-  });
