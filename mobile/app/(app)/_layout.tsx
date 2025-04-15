@@ -5,7 +5,7 @@ export default function AppLayout() {
   const { session } = useAppSelector((state) => state.session);
 
   if (!session) {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/login" />;
   }
 
   return (

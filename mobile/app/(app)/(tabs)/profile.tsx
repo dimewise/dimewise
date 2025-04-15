@@ -5,15 +5,14 @@ import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import { type MD3Theme, useTheme } from "react-native-paper";
+import { Alert, ScrollView, Text, View } from "react-native";
+import { useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
   const theme = useTheme();
   const { logout } = useAuth();
   const gstyles = useMakeGlobalStyles(theme);
-  const styles = makeStyle(theme);
 
   /* User Profile */
   const profileOptions: OptionListItem[] = [
@@ -134,16 +133,58 @@ export default function Profile() {
       style={gstyles.safeAreaContainer}
     >
       <ScrollView>
-        <View style={[gstyles.container, styles.containerOverride]}>
-          <View style={styles.pfpWrapper}>
+        <View
+          style={[
+            gstyles.container,
+            {
+              justifyContent: "flex-start",
+              paddingTop: 24,
+            },
+          ]}
+        >
+          <View
+            style={{
+              width: 150,
+              height: 150,
+              overflow: "hidden",
+              borderRadius: "100%",
+            }}
+          >
             <Image
-              style={styles.profilePicture}
+              style={{
+                width: 150,
+                height: 150,
+                overflow: "hidden",
+                borderRadius: "100%",
+              }}
               source={require("@/assets/images/background-image.png")}
             />
           </View>
-          <View style={styles.userInfoContainer}>
-            <Text style={styles.username}>Dimewise</Text>
-            <Text style={styles.email}>no-reply@dimewise.com</Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              gap: 5,
+              marginBottom: 24,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: theme.fonts.headlineLarge.fontSize,
+              }}
+            >
+              Dimewise
+            </Text>
+            <Text
+              style={{
+                fontSize: theme.fonts.bodyMedium.fontSize,
+                color: theme.colors.secondary,
+              }}
+            >
+              no-reply@dimewise.com
+            </Text>
           </View>
           <ProfileOptionsList
             title="Profile"
@@ -166,42 +207,3 @@ export default function Profile() {
     </SafeAreaView>
   );
 }
-
-const makeStyle = (theme: MD3Theme) =>
-  StyleSheet.create({
-    containerOverride: {
-      justifyContent: "flex-start",
-      paddingTop: 24,
-    },
-    button: {
-      color: theme.colors.primary,
-      textDecorationLine: "underline",
-    },
-    profilePicture: {
-      width: 150,
-      height: 150,
-      overflow: "hidden",
-      borderRadius: "100%",
-    },
-    pfpWrapper: {
-      width: 150,
-      height: 150,
-      overflow: "hidden",
-      borderRadius: "100%",
-    },
-    userInfoContainer: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "flex-start",
-      gap: 5,
-      marginBottom: 24,
-    },
-    username: {
-      fontSize: theme.fonts.headlineLarge.fontSize,
-    },
-    email: {
-      fontSize: theme.fonts.bodyMedium.fontSize,
-      color: theme.colors.secondary,
-    },
-  });
