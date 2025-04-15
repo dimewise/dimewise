@@ -3,10 +3,9 @@ import type { OptionListItem } from "@/components/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { Image } from "expo-image";
 import { router } from "expo-router";
 import { Alert, ScrollView, Text, View } from "react-native";
-import { useTheme } from "react-native-paper";
+import { Avatar, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
@@ -150,13 +149,8 @@ export default function Profile() {
               borderRadius: "100%",
             }}
           >
-            <Image
-              style={{
-                width: 150,
-                height: 150,
-                overflow: "hidden",
-                borderRadius: "100%",
-              }}
+            <Avatar.Image
+              size={200}
               source={require("@/assets/images/background-image.png")}
             />
           </View>
