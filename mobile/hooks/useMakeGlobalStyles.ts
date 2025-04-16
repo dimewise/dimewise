@@ -1,7 +1,7 @@
+import type { AppTheme } from "@/style/theme";
 import { StyleSheet } from "react-native";
-import type { MD3Theme } from "react-native-paper";
 
-export const useMakeGlobalStyles = (theme: MD3Theme) =>
+export const useMakeGlobalStyles = (theme: AppTheme) =>
   StyleSheet.create({
     container: {
       paddingHorizontal: 30,

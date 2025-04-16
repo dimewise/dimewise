@@ -1,4 +1,6 @@
+import { CategoryBreakdown } from "@/components/home/CategoryBreakdown";
 import { CurrentMonthSummary } from "@/components/home/CurrentMonthSummary";
+import { RecentTransactions } from "@/components/home/RecentTransactions";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { ScrollView } from "react-native";
@@ -15,6 +17,8 @@ export default function Home() {
     >
       <ScrollView>
         <CurrentMonthSummary />
+        <CategoryBreakdown />
+        <RecentTransactions />
       </ScrollView>
     </SafeAreaView>
   );
