@@ -23,6 +23,7 @@ export const CategoryListItem = () => {
           width: 40,
           alignItems: "center",
           justifyContent: "center",
+          borderRadius: 12,
         }}
       >
         <Text style={{ fontWeight: "bold" }}>GR</Text>
