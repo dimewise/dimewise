@@ -13,7 +13,7 @@ export const theme = {
 
     // background
     background: "#FAFAFA", // soft off-white background
-    backgroundMuted: "#E0E0E0",
+    backgroundMuted: "#F0F0F0",
 
     // text
     text: "#000000",

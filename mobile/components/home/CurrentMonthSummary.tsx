@@ -1,69 +1,59 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
-import { Text, View } from "react-native";
+import { View } from "react-native";
+import { ProgressBar, Text } from "react-native-paper";
 
 export const CurrentMonthSummary = () => {
   const theme = useAppTheme();
+
+  // TODO: add the necessary API calls and make the necessary calculations to display the progress bar
+  // also ensure that the colors being shown are correct
+
   return (
     <View
       style={{
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
+        flex: 1,
         padding: 24,
+        paddingBottom: 0,
+        gap: 24,
       }}
     >
       <Text
-        style={{
-          fontFamily: theme.fonts.headlineLarge.fontFamily,
-          fontSize: theme.fonts.headlineLarge.fontSize,
-        }}
+        variant="headlineMedium"
+        style={{ fontWeight: "bold" }}
       >
-        April
+        April 2025
       </Text>
-      <View
-        style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-        }}
-      >
-        <Text
-          style={{
-            fontFamily: theme.fonts.headlineLarge.fontFamily,
-            fontSize: theme.fonts.headlineLarge.fontSize,
-          }}
-        >
-          JPY 120,000
-        </Text>
+      <View style={{ gap: 8 }}>
         <View
           style={{
-            display: "flex",
             flexDirection: "row",
-            marginBottom: 15,
+            alignItems: "baseline",
+            justifyContent: "space-between",
           }}
         >
           <Text
-            style={{
-              fontFamily: theme.fonts.headlineLarge.fontFamily,
-              fontSize: theme.fonts.headlineLarge.fontSize,
-            }}
-          >
-            /&nbsp;
-          </Text>
-          <Text
-            style={{
-              fontFamily: theme.fonts.headlineLarge.fontFamily,
-              fontSize: theme.fonts.headlineLarge.fontSize,
-            }}
+            variant="headlineLarge"
+            style={{ fontWeight: "bold" }}
           >
             JPY 120,000
           </Text>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            <Text style={{ fontWeight: "bold" }}>/&nbsp;</Text>
+            <Text style={{ fontWeight: "bold" }}>JPY 120,000</Text>
+          </View>
         </View>
-        <View />
+        <ProgressBar
+          animatedValue={0.5}
+          style={{ height: 12, borderRadius: 24 }}
+        />
+        <Text style={{ color: theme.colors.error }}>
+          You have spent 10% of your monthly budget
+        </Text>
       </View>
     </View>
   );
