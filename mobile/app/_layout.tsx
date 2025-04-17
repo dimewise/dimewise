@@ -3,7 +3,9 @@ import { theme } from "@/style/theme";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { DateTime } from "luxon";
 import { useEffect } from "react";
+import { CalendarProvider } from "react-native-calendars";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
@@ -38,12 +40,17 @@ export default function RootLayout() {
         loading={null}
         persistor={persistor}
       >
-        <SafeAreaProvider>
-          <PaperProvider theme={theme}>
-            <Slot />
-            <StatusBar style="auto" />
-          </PaperProvider>
-        </SafeAreaProvider>
+        <CalendarProvider
+          date={DateTime.now().toFormat("yyyy-MM-dd")}
+          showTodayButton
+        >
+          <SafeAreaProvider>
+            <PaperProvider theme={theme}>
+              <Slot />
+              <StatusBar style="auto" />
+            </PaperProvider>
+          </SafeAreaProvider>
+        </CalendarProvider>
       </PersistGate>
     </Provider>
   );

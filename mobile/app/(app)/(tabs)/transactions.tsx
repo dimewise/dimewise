@@ -1,6 +1,8 @@
+import { TransactionListItem } from "@/components/home/TransactionListItem";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
-import { Text, View } from "react-native";
+import { ScrollView } from "react-native";
+import { ExpandableCalendar } from "react-native-calendars";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Transactions() {
@@ -11,16 +13,25 @@ export default function Transactions() {
       edges={["top", "left", "right"]}
       style={gstyles.safeAreaContainer}
     >
-      <View style={gstyles.container}>
-        <Text
-          style={{
-            color: theme.colors.primary,
-            textDecorationLine: "underline",
-          }}
-        >
-          About Screen
-        </Text>
-      </View>
+      <ExpandableCalendar />
+      <ScrollView>
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+        <TransactionListItem />
+      </ScrollView>
     </SafeAreaView>
   );
 }
