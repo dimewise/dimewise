@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { Text } from "react-native-paper";
-import { CategoryListItem } from "./CategoryListItem";
+import { CategoryListItem } from "../CategoryListItem";
 
 export const CategoryBreakdown = () => {
   return (
@@ -19,11 +19,11 @@ export const CategoryBreakdown = () => {
         Category Overview
       </Text>
       <View style={{ gap: 8 }}>
-        <CategoryListItem />
-        <CategoryListItem />
-        <CategoryListItem />
-        <CategoryListItem />
-        <CategoryListItem />
+        <CategoryListItem showProgress />
+        <CategoryListItem showProgress />
+        <CategoryListItem showProgress />
+        <CategoryListItem showProgress />
+        <CategoryListItem showProgress />
       </View>
     </View>
   );
