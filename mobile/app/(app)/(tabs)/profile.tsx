@@ -77,12 +77,11 @@ export default function Profile() {
       edges={["top", "left", "right"]}
       style={gstyles.safeAreaContainer}
     >
-      <ScrollView>
+      <ScrollView style={{ flex: 1 }}>
         <View
           style={[
             gstyles.container,
             {
-              justifyContent: "flex-start",
               paddingTop: 24,
             },
           ]}
@@ -93,7 +92,7 @@ export default function Profile() {
           />
           <View
             style={{
-              display: "flex",
+              flex: 1,
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "flex-start",
@@ -117,22 +116,24 @@ export default function Profile() {
               no-reply@dimewise.com
             </Text>
           </View>
-          <ProfileOptionsList
-            title="Profile"
-            optionListItems={profileOptions}
-          />
-          <ProfileOptionsList
-            title="Preferences"
-            optionListItems={preferencesOptions}
-          />
-          <ProfileOptionsList
-            title="Support"
-            optionListItems={supportOptions}
-          />
-          <ProfileOptionsList
-            title="Authentication"
-            optionListItems={logoutOption}
-          />
+          <View style={{ flex: 1, width: "100%" }}>
+            <ProfileOptionsList
+              title="Profile"
+              optionListItems={profileOptions}
+            />
+            <ProfileOptionsList
+              title="Preferences"
+              optionListItems={preferencesOptions}
+            />
+            <ProfileOptionsList
+              title="Support"
+              optionListItems={supportOptions}
+            />
+            <ProfileOptionsList
+              title="Authentication"
+              optionListItems={logoutOption}
+            />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
