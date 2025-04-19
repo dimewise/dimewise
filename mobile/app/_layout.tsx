@@ -43,6 +43,9 @@ export default function RootLayout() {
         <CalendarProvider
           date={DateTime.now().toFormat("yyyy-MM-dd")}
           showTodayButton
+          theme={{
+            todayButtonTextColor: theme.colors.primary,
+          }}
         >
           <SafeAreaProvider>
             <PaperProvider theme={theme}>

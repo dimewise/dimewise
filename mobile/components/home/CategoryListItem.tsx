@@ -15,20 +15,7 @@ export const CategoryListItem = () => {
         backgroundColor: theme.colors.backgroundMuted,
       }}
     >
-      <View
-        style={{
-          padding: 4,
-          backgroundColor: "red",
-          height: 40,
-          width: 40,
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: 12,
-        }}
-      >
-        <Text style={{ fontWeight: "bold" }}>GR</Text>
-      </View>
-      <View style={{ flex: 1, justifyContent: "space-between" }}>
+      <View style={{ flex: 1, gap: 8 }}>
         <View
           style={{
             flexDirection: "row",

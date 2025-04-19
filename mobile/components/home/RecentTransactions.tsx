@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { Text } from "react-native-paper";
-import { TransactionListItem } from "./TransactionListItem";
+import { TransactionListItem } from "../TransactionListItem";
 
 export const RecentTransactions = () => {
   return (

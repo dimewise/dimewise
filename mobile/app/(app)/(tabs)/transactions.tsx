@@ -1,4 +1,4 @@
-import { TransactionListItem } from "@/components/home/TransactionListItem";
+import { TransactionGroup } from "@/components/transactions/TransactionGroup";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
 import { ScrollView } from "react-native";
@@ -13,24 +13,22 @@ export default function Transactions() {
       edges={["top", "left", "right"]}
       style={gstyles.safeAreaContainer}
     >
-      <ExpandableCalendar />
+      <ExpandableCalendar
+        hideKnob={false}
+        allowShadow={false}
+        theme={{
+          backgroundColor: theme.colors.background,
+          calendarBackground: theme.colors.background,
+          todayTextColor: theme.colors.secondary,
+          selectedDayBackgroundColor: theme.colors.primary,
+          arrowColor: theme.colors.primary,
+        }}
+      />
       <ScrollView>
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
+        <TransactionGroup />
+        <TransactionGroup />
+        <TransactionGroup />
+        <TransactionGroup />
       </ScrollView>
     </SafeAreaView>
   );
