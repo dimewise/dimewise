@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 export const useMakeGlobalStyles = (theme: AppTheme) =>
   StyleSheet.create({
     container: {
+      flex: 1,
       paddingHorizontal: 30,
       height: "100%",
       backgroundColor: theme.colors.background,

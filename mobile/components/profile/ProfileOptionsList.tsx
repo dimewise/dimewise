@@ -15,9 +15,9 @@ export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
     <View
       style={{
         width: "100%",
-        display: "flex",
+        flex: 1,
         alignItems: "flex-start",
-        justifyContent: "center",
+        justifyContent: "flex-start",
         marginBottom: 16,
       }}
     >
@@ -33,13 +33,17 @@ export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
       </Text>
       <View
         style={{
+          flex: 1,
           width: "100%",
           borderRadius: 12,
           backgroundColor: theme.colors.backgroundMuted,
         }}
       >
         {optionListItems.map((o, i) => (
-          <View key={o.title}>
+          <View
+            key={o.title}
+            style={{ flex: 1, width: "100%" }}
+          >
             <Button
               mode="contained"
               icon={() =>
@@ -50,14 +54,20 @@ export const ProfileOptionsList = ({ title, optionListItems }: Props) => {
                   />
                 ) : undefined
               }
-              style={[
-                {
-                  paddingVertical: 8,
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "flex-start",
-                },
-              ]}
+              contentStyle={{
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                width: "100%",
+                paddingVertical: 8,
+              }}
+              style={{
+                width: "100%",
+                borderRadius: 12,
+              }}
+              labelStyle={{
+                flex: 1,
+                textAlign: "left",
+              }}
               buttonColor={theme.colors.backgroundMuted}
               textColor={theme.colors.text}
               onPress={o.onPress}
