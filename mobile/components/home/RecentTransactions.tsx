@@ -18,11 +18,12 @@ export const RecentTransactions = () => {
         Recent Transactions
       </Text>
       <View style={{ gap: 8 }}>
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
+        <TransactionListItem captionType="created_at" />
+        <TransactionListItem captionType="created_at" />
+        <TransactionListItem captionType="created_at" />
+        <TransactionListItem captionType="created_at" />
+        <TransactionListItem captionType="created_at" />
+        <TransactionListItem captionType="created_at" />
       </View>
     </View>
   );
