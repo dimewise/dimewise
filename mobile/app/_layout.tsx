@@ -6,6 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { DateTime } from "luxon";
 import { useEffect } from "react";
 import { CalendarProvider } from "react-native-calendars";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
@@ -40,20 +41,22 @@ export default function RootLayout() {
         loading={null}
         persistor={persistor}
       >
-        <CalendarProvider
-          date={DateTime.now().toFormat("yyyy-MM-dd")}
-          showTodayButton
-          theme={{
-            todayButtonTextColor: theme.colors.primary,
-          }}
-        >
-          <SafeAreaProvider>
-            <PaperProvider theme={theme}>
-              <Slot />
-              <StatusBar style="auto" />
-            </PaperProvider>
-          </SafeAreaProvider>
-        </CalendarProvider>
+        <GestureHandlerRootView>
+          <CalendarProvider
+            date={DateTime.now().toFormat("yyyy-MM-dd")}
+            showTodayButton
+            theme={{
+              todayButtonTextColor: theme.colors.primary,
+            }}
+          >
+            <SafeAreaProvider>
+              <PaperProvider theme={theme}>
+                <Slot />
+                <StatusBar style="auto" />
+              </PaperProvider>
+            </SafeAreaProvider>
+          </CalendarProvider>
+        </GestureHandlerRootView>
       </PersistGate>
     </Provider>
   );
