@@ -1,11 +1,10 @@
 import { persistor, store } from "@/store/store";
 import { theme } from "@/style/theme";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { useFonts } from "expo-font";
 import { Slot, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { DateTime } from "luxon";
 import { useEffect } from "react";
-import { CalendarProvider } from "react-native-calendars";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -42,20 +41,14 @@ export default function RootLayout() {
         persistor={persistor}
       >
         <GestureHandlerRootView>
-          <CalendarProvider
-            date={DateTime.now().toFormat("yyyy-MM-dd")}
-            showTodayButton
-            theme={{
-              todayButtonTextColor: theme.colors.primary,
-            }}
-          >
+          <BottomSheetModalProvider>
             <SafeAreaProvider>
               <PaperProvider theme={theme}>
                 <Slot />
                 <StatusBar style="auto" />
               </PaperProvider>
             </SafeAreaProvider>
-          </CalendarProvider>
+          </BottomSheetModalProvider>
         </GestureHandlerRootView>
       </PersistGate>
     </Provider>
