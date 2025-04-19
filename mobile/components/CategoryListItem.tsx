@@ -2,8 +2,13 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import { View } from "react-native";
 import { ProgressBar, Text } from "react-native-paper";
 
-export const CategoryListItem = () => {
+interface Props {
+  showProgress?: boolean;
+}
+
+export const CategoryListItem = ({ showProgress }: Props) => {
   const theme = useAppTheme();
+
   return (
     <View
       style={{
@@ -24,12 +29,18 @@ export const CategoryListItem = () => {
           }}
         >
           <Text variant="bodyMedium">Groceries</Text>
-          <Text variant="bodyMedium">JPY 10,000/JPY 120,000</Text>
+          {showProgress ? (
+            <Text variant="bodyMedium">JPY 10,000/JPY 120,000</Text>
+          ) : (
+            <Text variant="bodyMedium">JPY 120,000</Text>
+          )}
         </View>
-        <ProgressBar
-          animatedValue={0.5}
-          style={{ borderRadius: 20, height: 8 }}
-        />
+        {showProgress && (
+          <ProgressBar
+            animatedValue={0.5}
+            style={{ borderRadius: 20, height: 8 }}
+          />
+        )}
       </View>
     </View>
   );

@@ -46,6 +46,19 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="categories"
+        options={{
+          title: "Categories",
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons
+              name={focused ? "tag-multiple" : "tag-multiple-outline"}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
