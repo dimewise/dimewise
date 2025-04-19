@@ -16,21 +16,17 @@ export const TransactionGroup = () => {
         <Divider />
       </View>
       <View style={{ gap: 8 }}>
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
-        <TransactionListItem />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
+        <TransactionListItem captionType="description" />
       </View>
     </View>
   );

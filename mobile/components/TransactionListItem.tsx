@@ -2,7 +2,11 @@ import { useAppTheme } from "@/hooks/useAppTheme";
 import { View } from "react-native";
 import { Text } from "react-native-paper";
 
-export const TransactionListItem = () => {
+interface Props {
+  captionType: "created_at" | "description";
+}
+
+export const TransactionListItem = ({ captionType }: Props) => {
   const theme = useAppTheme();
   return (
     <View
@@ -23,14 +27,28 @@ export const TransactionListItem = () => {
             justifyContent: "space-between",
           }}
         >
-          <View>
+          <View style={{ flex: 1 }}>
             <Text
               variant="bodyMedium"
               style={{ fontWeight: "bold" }}
             >
               Groceries
             </Text>
-            <Text variant="bodySmall">12/04/2025</Text>
+            {captionType === "created_at" && (
+              <Text variant="bodySmall">12/04/2025</Text>
+            )}
+            {captionType === "description" && (
+              <Text
+                variant="bodySmall"
+                numberOfLines={1}
+              >
+                Bought weekly groceries like so Bought weekly groceries like so
+                Bought weekly groceries like so Bought weekly groceries like so
+                Bought weekly groceries like so Bought weekly groceries like so
+                Bought weekly groceries like so Bought weekly groceries like so
+                Bought weekly groceries like so
+              </Text>
+            )}
           </View>
           <Text
             variant="bodyMedium"
