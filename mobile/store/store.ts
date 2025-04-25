@@ -6,6 +6,7 @@ import {
   useSelector,
 } from "react-redux";
 import { persistReducer, persistStore } from "redux-persist";
+import { apiV1 } from "./api/rtk/server/v1";
 import { sessionReducer } from "./slice/session.slice";
 
 const persistConfig = {
@@ -18,6 +19,7 @@ const sessionPersistedReducer = persistReducer(persistConfig, sessionReducer);
 
 export const store = configureStore({
   reducer: {
+    [apiV1.reducerPath]: apiV1.reducer,
     session: sessionPersistedReducer,
   },
   middleware: (getDefaultMiddleware) =>
