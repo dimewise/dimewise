@@ -1,5 +1,7 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import type { Expense } from "@/store/api/rtk/server/v1";
+import { useLocales } from "expo-localization";
+import { DateTime } from "luxon";
 import { View } from "react-native";
 import { Text, TouchableRipple } from "react-native-paper";
 
@@ -11,6 +13,15 @@ interface Props {
 
 export const TransactionListItem = ({ captionType, tx, onPress }: Props) => {
   const theme = useAppTheme();
+  const locale = useLocales();
+
+  // datetime
+  const userLocale = locale[0].languageTag;
+  const displayDate = tx
+    ? DateTime.fromISO(tx.date)
+        .setLocale(userLocale)
+        .toLocaleString(DateTime.DATE_SHORT)
+    : "";
 
   return (
     <TouchableRipple onPress={() => onPress(tx)}>
@@ -37,21 +48,17 @@ export const TransactionListItem = ({ captionType, tx, onPress }: Props) => {
                 variant="bodyMedium"
                 style={{ fontWeight: "bold" }}
               >
-                Groceries
+                {tx.title}
               </Text>
               {captionType === "created_at" && (
-                <Text variant="bodySmall">12/04/2025</Text>
+                <Text variant="bodySmall">{displayDate}</Text>
               )}
-              {captionType === "description" && (
+              {captionType === "description" && tx.description && (
                 <Text
                   variant="bodySmall"
                   numberOfLines={1}
                 >
-                  Bought weekly groceries like so Bought weekly groceries like
-                  so Bought weekly groceries like so Bought weekly groceries
-                  like so Bought weekly groceries like so Bought weekly
-                  groceries like so Bought weekly groceries like so Bought
-                  weekly groceries like so Bought weekly groceries like so
+                  {tx.description}
                 </Text>
               )}
             </View>
@@ -59,7 +66,7 @@ export const TransactionListItem = ({ captionType, tx, onPress }: Props) => {
               variant="bodyMedium"
               style={{ color: theme.colors.error }}
             >
-              - JPY 120,000
+              {"- JPY" + tx.amount}
             </Text>
           </View>
         </View>
