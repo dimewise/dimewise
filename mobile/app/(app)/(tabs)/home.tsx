@@ -25,6 +25,7 @@ export default function Home() {
     txModalRef.current?.open();
   }, []);
 
+  // TODO: Switch to use API call
   const txs: Expense[] = [
     FakerExpense,
     FakerExpense,
