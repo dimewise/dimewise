@@ -50,6 +50,7 @@ export default function Home() {
       <TransactionBottomSheet
         ref={txModalRef}
         tx={selectedTx}
+        setTx={setSelectedTx}
       />
     </SafeAreaView>
   );
