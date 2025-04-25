@@ -32,6 +32,11 @@ export const TransactionBottomSheet = forwardRef<
 
   // datetime
   const userLocale = locale[0].languageTag;
+  const displayDate = tx
+    ? DateTime.fromISO(tx.date)
+        .setLocale(userLocale)
+        .toLocaleString(DateTime.DATE_MED)
+    : "";
 
   // Expose methods to parent component via ref
   useImperativeHandle(ref, () => ({
@@ -59,12 +64,6 @@ export const TransactionBottomSheet = forwardRef<
     ),
     [],
   );
-
-  const displayDate = tx
-    ? DateTime.fromISO(tx.date)
-        .setLocale(userLocale)
-        .toLocaleString(DateTime.DATE_MED)
-    : "";
 
   if (!tx) {
     return;

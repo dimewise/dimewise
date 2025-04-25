@@ -7,6 +7,7 @@ import { CurrentMonthSummary } from "@/components/home/CurrentMonthSummary";
 import { RecentTransactions } from "@/components/home/RecentTransactions";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
+import { FakerExpense } from "@/lib/util/faker";
 import type { Expense } from "@/store/api/rtk/server/v1";
 import { useCallback, useRef, useState } from "react";
 import { ScrollView } from "react-native";
@@ -24,6 +25,14 @@ export default function Home() {
     txModalRef.current?.open();
   }, []);
 
+  const txs: Expense[] = [
+    FakerExpense,
+    FakerExpense,
+    FakerExpense,
+    FakerExpense,
+    FakerExpense,
+  ];
+
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -32,7 +41,10 @@ export default function Home() {
       <ScrollView>
         <CurrentMonthSummary />
         <CategoryBreakdown />
-        <RecentTransactions onPress={onPressTransaction} />
+        <RecentTransactions
+          onPress={onPressTransaction}
+          txs={txs}
+        />
       </ScrollView>
       <TransactionBottomSheet
         ref={txModalRef}
