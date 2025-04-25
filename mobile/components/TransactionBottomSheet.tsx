@@ -20,12 +20,13 @@ export type TransactionBottomSheetHandle = {
 // Define props if needed
 type TransactionBottomSheetProps = {
   tx: Expense | null;
+  setTx: (tx: Expense | null) => void;
 };
 
 export const TransactionBottomSheet = forwardRef<
   TransactionBottomSheetHandle,
   TransactionBottomSheetProps
->(({ tx }, ref) => {
+>(({ tx, setTx }, ref) => {
   const theme = useAppTheme();
   const locale = useLocales();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -48,9 +49,9 @@ export const TransactionBottomSheet = forwardRef<
     },
   }));
 
-  // Handle sheet changes
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
+  const handleClose = useCallback(() => {
+    bottomSheetModalRef.current?.dismiss();
+    setTx(null);
   }, []);
 
   // Customize backdrop
@@ -73,11 +74,11 @@ export const TransactionBottomSheet = forwardRef<
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
-      onChange={handleSheetChanges}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: theme.colors.background }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.outline }}
       enableDynamicSizing
+      onDismiss={() => setTx(null)}
     >
       <BottomSheetView
         style={{
@@ -137,6 +138,7 @@ export const TransactionBottomSheet = forwardRef<
           <Button
             mode="outlined"
             style={{ flex: 1 }}
+            onPress={handleClose}
           >
             Close
           </Button>
