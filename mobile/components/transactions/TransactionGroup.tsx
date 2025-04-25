@@ -1,8 +1,14 @@
+import type { Expense } from "@/store/api/rtk/server/v1";
 import { View } from "react-native";
 import { Divider, Text } from "react-native-paper";
 import { TransactionListItem } from "../TransactionListItem";
 
-export const TransactionGroup = () => {
+interface Props {
+  onPress: (tx: Expense) => void;
+  txs: Expense[];
+}
+
+export const TransactionGroup = ({ txs, onPress }: Props) => {
   return (
     <View
       style={{
@@ -16,17 +22,14 @@ export const TransactionGroup = () => {
         <Divider />
       </View>
       <View style={{ gap: 8 }}>
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
-        <TransactionListItem captionType="description" />
+        {txs.map((tx, i) => (
+          <TransactionListItem
+            key={tx.id + i}
+            captionType="description"
+            tx={tx}
+            onPress={onPress}
+          />
+        ))}
       </View>
     </View>
   );
