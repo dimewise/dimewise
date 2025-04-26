@@ -1,5 +1,6 @@
 import type { Expense } from "@/store/api/rtk/server/v1";
 import { View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { Text } from "react-native-paper";
 import { TransactionListItem } from "../TransactionListItem";
 
@@ -23,16 +24,18 @@ export const RecentTransactions = ({ onPress, txs }: Props) => {
       >
         Recent Transactions
       </Text>
-      <View style={{ gap: 8 }}>
-        {txs.map((tx, i) => (
-          <TransactionListItem
-            key={tx.id + i}
-            captionType="created_at"
-            tx={tx}
-            onPress={onPress}
-          />
-        ))}
-      </View>
+      <ScrollView style={{ flex: 1 }}>
+        <View style={{ flex: 1, gap: 8 }}>
+          {txs.map((tx, i) => (
+            <TransactionListItem
+              key={tx.id + i}
+              captionType="created_at"
+              tx={tx}
+              onPress={onPress}
+            />
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 };

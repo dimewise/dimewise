@@ -1,8 +1,14 @@
+import type { CategoryFull } from "@/store/api/rtk/server/v1";
 import { View } from "react-native";
 import { Text } from "react-native-paper";
 import { CategoryListItem } from "../CategoryListItem";
 
-export const CategoryBreakdown = () => {
+interface Props {
+  categories: CategoryFull[];
+  onPress: (category: CategoryFull) => void;
+}
+
+export const CategoryBreakdown = ({ categories, onPress }: Props) => {
   return (
     <View
       style={{
@@ -19,11 +25,14 @@ export const CategoryBreakdown = () => {
         Category Overview
       </Text>
       <View style={{ gap: 8 }}>
-        <CategoryListItem showProgress />
-        <CategoryListItem showProgress />
-        <CategoryListItem showProgress />
-        <CategoryListItem showProgress />
-        <CategoryListItem showProgress />
+        {categories.map((c, i) => (
+          <CategoryListItem
+            key={c.id + i}
+            category={c}
+            showProgress
+            onPress={onPress}
+          />
+        ))}
       </View>
     </View>
   );

@@ -1,4 +1,8 @@
 import {
+  CategoryBottomSheet,
+  type CategoryBottomSheetHandle,
+} from "@/components/CategoryBottomSheet";
+import {
   TransactionBottomSheet,
   type TransactionBottomSheetHandle,
 } from "@/components/TransactionBottomSheet";
@@ -7,8 +11,8 @@ import { CurrentMonthSummary } from "@/components/home/CurrentMonthSummary";
 import { RecentTransactions } from "@/components/home/RecentTransactions";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
-import { FakerExpense } from "@/lib/util/faker";
-import type { Expense } from "@/store/api/rtk/server/v1";
+import { FakerCategoryFull, FakerExpense } from "@/lib/util/faker";
+import type { CategoryFull, Expense } from "@/store/api/rtk/server/v1";
 import { useCallback, useRef, useState } from "react";
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,11 +22,19 @@ export default function Home() {
   const gstyles = useMakeGlobalStyles(theme);
 
   const [selectedTx, setSelectedTx] = useState<Expense | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFull | null>(
+    null,
+  );
 
   const txModalRef = useRef<TransactionBottomSheetHandle>(null);
   const onPressTransaction = useCallback((tx: Expense) => {
     setSelectedTx(tx);
     txModalRef.current?.open();
+  }, []);
+  const categoryModalRef = useRef<CategoryBottomSheetHandle>(null);
+  const onPressCategory = useCallback((category: CategoryFull) => {
+    setSelectedCategory(category);
+    categoryModalRef.current?.open();
   }, []);
 
   // TODO: Switch to use API call
@@ -33,6 +45,14 @@ export default function Home() {
     FakerExpense,
     FakerExpense,
   ];
+  const categories: CategoryFull[] = [
+    FakerCategoryFull,
+    FakerCategoryFull,
+    FakerCategoryFull,
+    FakerCategoryFull,
+    FakerCategoryFull,
+    FakerCategoryFull,
+  ];
 
   return (
     <SafeAreaView
@@ -41,7 +61,10 @@ export default function Home() {
     >
       <ScrollView>
         <CurrentMonthSummary />
-        <CategoryBreakdown />
+        <CategoryBreakdown
+          onPress={onPressCategory}
+          categories={categories}
+        />
         <RecentTransactions
           onPress={onPressTransaction}
           txs={txs}
@@ -51,6 +74,11 @@ export default function Home() {
         ref={txModalRef}
         tx={selectedTx}
         setTx={setSelectedTx}
+      />
+      <CategoryBottomSheet
+        ref={categoryModalRef}
+        category={selectedCategory}
+        setCategory={setSelectedCategory}
       />
     </SafeAreaView>
   );
