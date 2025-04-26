@@ -24,7 +24,10 @@ export const TransactionListItem = ({ captionType, tx, onPress }: Props) => {
     : "";
 
   return (
-    <TouchableRipple onPress={() => onPress(tx)}>
+    <TouchableRipple
+      style={{ flex: 1, minHeight: 50 }}
+      onPress={() => onPress(tx)}
+    >
       <View
         style={{
           flex: 1,

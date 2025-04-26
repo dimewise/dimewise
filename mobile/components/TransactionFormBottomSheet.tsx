@@ -1,3 +1,4 @@
+import { useAppTheme } from "@/hooks/useAppTheme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   BottomSheetBackdrop,
@@ -12,7 +13,7 @@ import React, {
   useMemo,
 } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { Button, Text, TextInput } from "react-native-paper";
 
 // Define the handle methods that will be exposed
 export type TransactionBottomSheetHandle = {
@@ -50,7 +51,7 @@ export const TransactionFormBottomSheet = forwardRef<
   const [description, setDescription] = React.useState("");
   const [date, setDate] = React.useState(new Date());
 
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   // Expose methods to parent component via ref
   useImperativeHandle(ref, () => ({

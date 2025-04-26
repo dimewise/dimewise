@@ -139,12 +139,14 @@ export const TransactionBottomSheet = forwardRef<
             mode="outlined"
             style={{ flex: 1 }}
             onPress={handleClose}
+            textColor={theme.colors.primary}
           >
             Close
           </Button>
           <Button
             mode="contained"
             style={{ flex: 1 }}
+            buttonColor={theme.colors.primary}
           >
             Edit
           </Button>
