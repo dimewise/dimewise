@@ -11,6 +11,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
+if (__DEV__) {
+  require("../ReactotronConfig");
+}
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
