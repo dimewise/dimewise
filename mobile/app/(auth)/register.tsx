@@ -1,6 +1,10 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useAuth } from "@/hooks/useAuth";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
+import {
+  type UserCreate,
+  useApiV1UsersRegisterCreateUserMutation,
+} from "@/store/api/rtk/server/v1";
 import { useAppSelector } from "@/store/store";
 import { Image } from "expo-image";
 import { Link, router } from "expo-router";
@@ -18,6 +22,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signupComplete, setSignupComplete] = useState(false);
+  const [registerUser] = useApiV1UsersRegisterCreateUserMutation();
 
   const signUpWithEmail = async () => {
     if (password === confirmPassword) {
@@ -29,7 +34,22 @@ export default function Register() {
       // on error, show an alert
       if (registerErr) Alert.alert(registerErr.message);
       // on success, show success message and redirect button
-      if (data) setSignupComplete(true);
+      if (data) {
+        // create the user in our db as well for reference
+        const supaUser = data.data.user;
+        const userCreateForm: UserCreate = {
+          id: supaUser?.id ?? "",
+          email: supaUser?.email ?? "",
+          default_currency: "JPY",
+        };
+        registerUser({ userCreate: userCreateForm })
+          .then(() => {
+            setSignupComplete(true);
+          })
+          .catch((err) => {
+            console.error("error creating user in db", err);
+          });
+      }
     } else {
       Alert.alert("Password does not match");
     }
