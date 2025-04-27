@@ -3,6 +3,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const baseApiV1 = createApi({
   baseQuery: fetchBaseQuery({
+    // backend will be a different domain
+    baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "",
     credentials: "include",
     prepareHeaders: async (headers) => {
       // handle access token for backend to authenticate requests
