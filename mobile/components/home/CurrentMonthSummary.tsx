@@ -1,12 +1,57 @@
 import { useAppTheme } from "@/hooks/useAppTheme";
+import {
+  useApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery,
+  useApiV1UsersMeDetailGetMeDetailQuery,
+} from "@/store/api/rtk/server/v1";
+import { useLocales } from "expo-localization";
+import { DateTime } from "luxon";
 import { View } from "react-native";
 import { ProgressBar, Text } from "react-native-paper";
 
 export const CurrentMonthSummary = () => {
   const theme = useAppTheme();
+  const locale = useLocales();
+  const langCode = locale[0].languageCode ?? ""; // [0] is definite
 
-  // TODO: add the necessary API calls and make the necessary calculations to display the progress bar
-  // also ensure that the colors being shown are correct
+  // api call
+  const {
+    data: meData,
+    isLoading: meIsLoading,
+    error: meError,
+  } = useApiV1UsersMeDetailGetMeDetailQuery();
+  const start = DateTime.now().startOf("month");
+  const end = DateTime.now().endOf("month");
+  const {
+    data: overviewData,
+    isLoading: overviewIsLoading,
+    error: overviewError,
+  } = useApiV1CategoriesOverviewYearGetCategoriesPerMonthQuery({
+    fromDate: start.toISO(),
+    toDate: end.toISO(),
+  });
+
+  // data for display
+  // me
+  const currencyUsed = meData?.default_currency;
+  // overview
+  const currentMonth = DateTime.now().setLocale(langCode).toFormat("LLLL yyyy");
+  const totalBudget = overviewData?.budget ?? 0;
+  const totalSpent = Object.values(overviewData?.months ?? {})
+    .flat()
+    .reduce((sum, val) => sum + val, 0);
+  const percentageSpent =
+    totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 1000) / 10 : 0;
+  const spentSeverity =
+    percentageSpent > 75
+      ? theme.colors.error
+      : percentageSpent > 50
+        ? theme.colors.warning
+        : theme.colors.success;
+
+  // state handling
+  if (overviewIsLoading || overviewError || meIsLoading || meError) {
+    return <></>;
+  }
 
   return (
     <View
@@ -21,7 +66,7 @@ export const CurrentMonthSummary = () => {
         variant="headlineMedium"
         style={{ fontWeight: "bold" }}
       >
-        April 2025
+        {currentMonth}
       </Text>
       <View style={{ gap: 8 }}>
         <View
@@ -35,7 +80,7 @@ export const CurrentMonthSummary = () => {
             variant="headlineLarge"
             style={{ fontWeight: "bold" }}
           >
-            JPY 120,000
+            {`${currencyUsed} ${totalSpent}`}
           </Text>
           <View
             style={{
@@ -44,15 +89,18 @@ export const CurrentMonthSummary = () => {
             }}
           >
             <Text style={{ fontWeight: "bold" }}>/&nbsp;</Text>
-            <Text style={{ fontWeight: "bold" }}>JPY 120,000</Text>
+            <Text
+              style={{ fontWeight: "bold" }}
+            >{`${currencyUsed} ${totalBudget}`}</Text>
           </View>
         </View>
         <ProgressBar
-          animatedValue={0.5}
+          animatedValue={percentageSpent / 100}
           style={{ height: 12, borderRadius: 24 }}
+          color={spentSeverity}
         />
-        <Text style={{ color: theme.colors.error }}>
-          You have spent 10% of your monthly budget
+        <Text style={{ color: spentSeverity }}>
+          {`You have spent ${percentageSpent}% of your monthly budget`}
         </Text>
       </View>
     </View>

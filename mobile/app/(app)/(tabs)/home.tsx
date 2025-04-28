@@ -11,7 +11,6 @@ import { CurrentMonthSummary } from "@/components/home/CurrentMonthSummary";
 import { RecentTransactions } from "@/components/home/RecentTransactions";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import { useMakeGlobalStyles } from "@/hooks/useMakeGlobalStyles";
-import { FakerCategoryFull, FakerExpense } from "@/lib/util/faker";
 import type { CategoryFull, Expense } from "@/store/api/rtk/server/v1";
 import { useCallback, useRef, useState } from "react";
 import { ScrollView } from "react-native";
@@ -26,6 +25,7 @@ export default function Home() {
     null,
   );
 
+  /* BOTTOM SHEET */
   const txModalRef = useRef<TransactionBottomSheetHandle>(null);
   const onPressTransaction = useCallback((tx: Expense) => {
     setSelectedTx(tx);
@@ -37,23 +37,6 @@ export default function Home() {
     categoryModalRef.current?.open();
   }, []);
 
-  // TODO: Switch to use API call
-  const txs: Expense[] = [
-    FakerExpense,
-    FakerExpense,
-    FakerExpense,
-    FakerExpense,
-    FakerExpense,
-  ];
-  const categories: CategoryFull[] = [
-    FakerCategoryFull,
-    FakerCategoryFull,
-    FakerCategoryFull,
-    FakerCategoryFull,
-    FakerCategoryFull,
-    FakerCategoryFull,
-  ];
-
   return (
     <SafeAreaView
       edges={["top", "left", "right"]}
@@ -61,14 +44,8 @@ export default function Home() {
     >
       <ScrollView>
         <CurrentMonthSummary />
-        <CategoryBreakdown
-          onPress={onPressCategory}
-          categories={categories}
-        />
-        <RecentTransactions
-          onPress={onPressTransaction}
-          txs={txs}
-        />
+        <CategoryBreakdown onPress={onPressCategory} />
+        <RecentTransactions onPress={onPressTransaction} />
       </ScrollView>
       <TransactionBottomSheet
         ref={txModalRef}

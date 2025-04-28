@@ -18,6 +18,11 @@ export const theme = {
     // text
     text: "#000000",
     textMuted: "#A0A0A0",
+
+    // statuses
+    success: "#059669",
+    warning: "#f5a623",
+    error: "#ff4d4f",
   },
 };
 
