@@ -72,6 +72,7 @@ const injectedRtkApi = api
             from_date: queryArg.fromDate,
             to_date: queryArg.toDate,
             category_ids: queryArg.categoryIds,
+            limit: queryArg.limit,
           },
         }),
         providesTags: ["transactions"],
@@ -173,6 +174,7 @@ export type ApiV1ExpensesGetExpensesApiArg = {
   fromDate?: string | null;
   toDate?: string | null;
   categoryIds?: string[] | null;
+  limit?: number | null;
 };
 export type ApiV1ExpensesCreateExpenseApiResponse = unknown;
 export type ApiV1ExpensesCreateExpenseApiArg = {

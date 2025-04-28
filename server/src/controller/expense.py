@@ -27,12 +27,15 @@ class ExpenseController(Controller):
         from_date: datetime | None = None,
         to_date: datetime | None = None,
         category_ids: list[UUID] | None = None,
+        limit: int | None = None,
     ) -> list[ExpensePublic]:
         query = select(ExpenseModel).where(ExpenseModel.user_id == request.user.id).order_by(ExpenseModel.date.desc())
         if from_date and to_date:
             query = query.where(ExpenseModel.date.between(from_date, to_date))
         if category_ids:
             query = query.where(ExpenseModel.category_id.in_(category_ids))
+        if limit:
+            query = query.limit(limit)
         expenses = await expense_repo.list(statement=query)
         expenses = [{**e.__dict__, "category": CategoryExpense(**e.category.__dict__)} for e in expenses]
         return [ExpensePublic(**e) for e in expenses]

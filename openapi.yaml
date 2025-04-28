@@ -524,6 +524,16 @@ paths:
               type: string
             type: array
           - type: 'null'
+      - allowEmptyValue: false
+        allowReserved: false
+        deprecated: false
+        in: query
+        name: limit
+        required: false
+        schema:
+          oneOf:
+          - type: integer
+          - type: 'null'
       responses:
         '200':
           content:
