@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from uuid import UUID
 
 from src.schema.base import BaseModel
@@ -10,6 +10,7 @@ class ExpenseBase(BaseModel):
     description: str | None
     amount: int
     date: date
+    created_at: datetime
 
 
 class ExpensePublic(ExpenseBase):

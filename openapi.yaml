@@ -66,6 +66,9 @@ components:
         category_id:
           format: uuid
           type: string
+        created_at:
+          format: date-time
+          type: string
         date:
           format: date
           type: string
@@ -78,6 +81,7 @@ components:
       required:
       - amount
       - category_id
+      - created_at
       - date
       - title
       title: ExpenseCreate
@@ -88,6 +92,9 @@ components:
           type: integer
         category:
           $ref: '#/components/schemas/CategoryExpense'
+        created_at:
+          format: date-time
+          type: string
         date:
           format: date
           type: string
@@ -103,6 +110,7 @@ components:
       required:
       - amount
       - category
+      - created_at
       - date
       - id
       - title
