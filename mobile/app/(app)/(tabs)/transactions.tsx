@@ -28,18 +28,18 @@ export default function Transactions() {
   const userLocale = locale[0].languageCode ?? locale[0].languageTag;
 
   const [selectedTx, setSelectedTx] = useState<Expense | null>(null);
+  const [start, setStart] = useState(DateTime.now().startOf("month").toISO());
+  const [end, setEnd] = useState(DateTime.now().endOf("month").toISO());
   const txModalRef = useRef<TransactionBottomSheetHandle>(null);
 
   // api call
-  const start = DateTime.now().startOf("month");
-  const end = DateTime.now().endOf("month");
   const {
     data: txData,
     isLoading: txIsLoading,
     error: txError,
   } = useApiV1ExpensesGetExpensesQuery({
-    fromDate: start.toISO(),
-    toDate: end.toISO(),
+    fromDate: start,
+    toDate: end,
   });
 
   // data display
@@ -51,6 +51,19 @@ export default function Transactions() {
   const onPressTransaction = useCallback((tx: Expense) => {
     setSelectedTx(tx);
     txModalRef.current?.open();
+  }, []);
+
+  const onPressArrow = useCallback((_: () => void, month: any) => {
+    // TODO: revisit the month navigation, it might be giving the incorrect month
+    const dtMonth = DateTime.fromISO(month.toISOString);
+
+    const newStart = dtMonth.startOf("month").toISO();
+    const newEnd = dtMonth.endOf("month").toISO();
+
+    if (newStart && newEnd) {
+      setStart(newStart);
+      setEnd(newEnd);
+    }
   }, []);
 
   // unfortunately the generic typings dont get carried over in typescript
@@ -95,6 +108,8 @@ export default function Transactions() {
       <ExpandableCalendar
         hideKnob={false}
         allowShadow={false}
+        onPressArrowLeft={onPressArrow}
+        onPressArrowRight={onPressArrow}
         theme={{
           backgroundColor: theme.colors.background,
           calendarBackground: theme.colors.background,
