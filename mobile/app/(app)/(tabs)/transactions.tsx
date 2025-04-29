@@ -9,6 +9,7 @@ import {
   getAgendaItemsFromTransactions,
   getMarkedDatesFromAgendaItems,
 } from "@/lib/util/expense";
+import { FakerAgendaExpenses } from "@/lib/util/faker";
 import {
   type Expense,
   useApiV1ExpensesGetExpensesQuery,
@@ -45,7 +46,7 @@ export default function Transactions() {
   // data display
   const txs = txData ?? [];
   const dateBuckets = getAgendaItemsFromTransactions(txs);
-  const markedDates = getMarkedDatesFromAgendaItems(dateBuckets);
+  const markedDates = getMarkedDatesFromAgendaItems(FakerAgendaExpenses);
 
   // handlers
   const onPressTransaction = useCallback((tx: Expense) => {
@@ -81,11 +82,13 @@ export default function Transactions() {
   // }
   const renderAgendaItem = (info: any) => {
     return (
-      <TransactionListItem
-        captionType="description"
-        tx={info.item}
-        onPress={onPressTransaction}
-      />
+      <View style={{ marginVertical: 4, marginHorizontal: 8 }}>
+        <TransactionListItem
+          captionType="description"
+          tx={info.item}
+          onPress={onPressTransaction}
+        />
+      </View>
     );
   };
 
@@ -127,6 +130,9 @@ export default function Transactions() {
           renderItem={renderAgendaItem}
           dayFormatter={dayFormatter}
           markToday={false}
+          sectionStyle={{
+            backgroundColor: theme.colors.background,
+          }}
         />
       ) : (
         <View style={{ flex: 1, marginTop: 24 }}>
