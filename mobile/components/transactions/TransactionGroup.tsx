@@ -4,11 +4,12 @@ import { Divider, Text } from "react-native-paper";
 import { TransactionListItem } from "../TransactionListItem";
 
 interface Props {
+  groupTitle: string;
   onPress: (tx: Expense) => void;
   txs: Expense[];
 }
 
-export const TransactionGroup = ({ txs, onPress }: Props) => {
+export const TransactionGroup = ({ groupTitle, txs, onPress }: Props) => {
   return (
     <View
       style={{
@@ -18,7 +19,7 @@ export const TransactionGroup = ({ txs, onPress }: Props) => {
       }}
     >
       <View style={{ gap: 8 }}>
-        <Text variant="bodyMedium">3 April 2025</Text>
+        <Text variant="bodyMedium">{groupTitle}</Text>
         <Divider />
       </View>
       <View style={{ gap: 8 }}>

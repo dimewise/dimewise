@@ -32,7 +32,7 @@ export const TransactionBottomSheet = forwardRef<
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // datetime
-  const userLocale = locale[0].languageTag;
+  const userLocale = locale[0].languageCode ?? locale[0].languageTag;
   const displayDate = tx
     ? DateTime.fromISO(tx.date)
         .setLocale(userLocale)

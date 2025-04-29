@@ -224,6 +224,7 @@ export type CategoryExpense = {
 export type Expense = {
   amount: number;
   category: CategoryExpense;
+  created_at: string;
   date: string;
   description?: string | null;
   id: string;
@@ -232,6 +233,7 @@ export type Expense = {
 export type ExpenseCreate = {
   amount: number;
   category_id: string;
+  created_at: string;
   date: string;
   description?: string | null;
   title: string;
