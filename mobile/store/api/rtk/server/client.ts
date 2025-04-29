@@ -23,6 +23,7 @@ export const baseApiV1 = createApi({
       return headers;
     },
   }),
+  refetchOnMountOrArgChange: true,
   refetchOnFocus: true,
   refetchOnReconnect: true,
   endpoints: () => ({}),
