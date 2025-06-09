@@ -50,17 +50,17 @@ export default function ExpensesScreen() {
   return (
     <View flex={1} bg="$background">
       <ScrollView>
-        <YStack p="$4" pt={insets.top + 16} space="$4">
+        <YStack p="$4" pt={insets.top + 16} gap="$4">
           <H2>All Expenses</H2>
 
           {loading ? (
             <Text>Loading expenses...</Text>
           ) : expenses.length > 0 ? (
-            <YStack space="$3">
+            <YStack gap="$3">
               {expenses.map(expense => (
                 <Card key={expense.id} bordered p="$3">
-                  <YStack space="$2">
-                    <XStack space="$2">
+                  <YStack gap="$2">
+                    <XStack gap="$2">
                       <Text fontWeight="bold" flex={1}>{expense.title}</Text>
                       <Text fontWeight="bold">{formatAmount(expense.amount)}</Text>
                     </XStack>
@@ -74,7 +74,7 @@ export default function ExpensesScreen() {
               ))}
             </YStack>
           ) : (
-            <YStack space="$3">
+            <YStack gap="$3">
               <Text>No expenses yet</Text>
               <Button icon={<Plus size={16} />} onPress={() => setShowExpenseSheet(true)}>
                 Add Expense

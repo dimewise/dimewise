@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, H2, Input, ScrollView, Text, YStack, XStack, View } from 'tamagui';
+import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3 } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useToastController } from '@tamagui/toast';
 import { getCategories, getSettings, saveSettings, deleteCategory } from '../../utils/storage';
@@ -94,9 +94,9 @@ export default function ProfileScreen() {
           {loading ? (
             <Text>Loading...</Text>
           ) : (
-            <>
-              <YStack space="$4">
-                <H2>Settings</H2>
+            <YStack gap="$4">
+              <YStack gap="$4">
+                <H3>Settings</H3>
 
                 {error ? <Text color="$red10">{error}</Text> : null}
 
@@ -112,18 +112,18 @@ export default function ProfileScreen() {
                 </Button>
               </YStack>
 
-              <YStack space="$4">
-                <XStack justify="space-between">
-                  <H2>Categories</H2>
+              <YStack gap="$4">
+                <XStack justify="space-between" verticalAlign="center" >
+                  <H3>Categories</H3>
                   <Button icon={<Plus size={16} />} onPress={() => setShowCategorySheet(true)}>
                     Add Category
                   </Button>
                 </XStack>
 
                 {categories.length > 0 ? (
-                  <YStack space="$3">
+                  <YStack gap="$3">
                     {categories.map(category => (
-                      <XStack key={category.id} space="$3">
+                      <XStack key={category.id} gap="$3">
                         <YStack flex={1}>
                           <Text fontWeight="bold">{category.name}</Text>
                           <Text>{category.budget.toFixed(2)} {settings.currency}</Text>
@@ -141,7 +141,7 @@ export default function ProfileScreen() {
                   <Text>No categories yet. Add your first one above.</Text>
                 )}
               </YStack>
-            </>
+            </YStack>
           )}
         </YStack>
       </ScrollView>
