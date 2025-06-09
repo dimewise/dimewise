@@ -1,0 +1,181 @@
+import { useEffect, useState } from 'react';
+import { Button, Form, Input, Select, Text, TextArea, YStack, XStack, Sheet } from 'tamagui';
+import { useToastController } from '@tamagui/toast';
+import { getCategories, saveExpense, generateId } from '../utils/storage';
+import { Category } from '../utils/storage';
+
+interface ExpenseSheetProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onExpenseAdded?: () => void;
+}
+
+export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: ExpenseSheetProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const toast = useToastController();
+
+  useEffect(() => {
+    if (open) {
+      loadCategories();
+      // Reset form when opening
+      setTitle('');
+      setDescription('');
+      setAmount('');
+      setCategoryId('');
+      setError('');
+    }
+  }, [open]);
+
+  const loadCategories = async () => {
+    try {
+      const cats = await getCategories();
+      setCategories(cats);
+      if (cats.length > 0 && !categoryId) {
+        setCategoryId(cats[0].id);
+      }
+    } catch (e) {
+      console.error('Failed to load categories:', e);
+      setError('Failed to load categories. Please try again.');
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      setError('Title is required');
+      return;
+    }
+
+    if (!amount.trim() || isNaN(Number(amount)) || Number(amount) <= 0) {
+      setError('Please enter a valid amount');
+      return;
+    }
+
+    if (!categoryId) {
+      setError('Please select a category');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      await saveExpense({
+        id: generateId(),
+        title: title.trim(),
+        description: description.trim(),
+        amount: Number(amount),
+        categoryId,
+        date: new Date().toISOString(),
+      });
+
+      toast.show('Expense added successfully!', {
+        message: 'Your expense has been saved.',
+      });
+
+      onOpenChange(false);
+      onExpenseAdded?.();
+    } catch (e) {
+      console.error('Failed to save expense:', e);
+      setError('Failed to save expense. Please try again.');
+      toast.show('Error', {
+        message: 'Failed to save expense. Please try again.',
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Sheet
+      modal
+      open={open}
+      onOpenChange={onOpenChange}
+      snapPointsMode="fit"
+      dismissOnSnapToBottom
+    >
+      <Sheet.Overlay
+        animation="lazy"
+        enterStyle={{ opacity: 0 }}
+        exitStyle={{ opacity: 0 }}
+      />
+      <Sheet.Handle />
+      <Sheet.Frame p="$4" gap="$4">
+        <Text fontSize="$6" fontWeight="bold">
+          New Expense
+        </Text>
+
+        {error ? (
+          <Text color="$red10">
+            {error}
+          </Text>
+        ) : null}
+
+        <Form onSubmit={handleSubmit}>
+          <YStack space="$3">
+            <Input
+              placeholder="Title"
+              value={title}
+              onChangeText={setTitle}
+              autoCapitalize="sentences"
+            />
+
+            <TextArea
+              placeholder="Description (optional)"
+              value={description}
+              onChangeText={setDescription}
+              autoCapitalize="sentences"
+            />
+
+            <Input
+              placeholder="Amount"
+              value={amount}
+              onChangeText={setAmount}
+              keyboardType="numeric"
+            />
+
+            {categories.length > 0 ? (
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <Select.Trigger>
+                  <Select.Value placeholder="Select category" />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Viewport>
+                    <Select.Group>
+                      {categories.map((category, index) => (
+                        <Select.Item key={category.id} index={index} value={category.id}>
+                          <Select.ItemText>{category.name}</Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                  </Select.Viewport>
+                </Select.Content>
+              </Select>
+            ) : (
+              <Text color="$yellow10">No categories found. Please add categories in the Profile tab.</Text>
+            )}
+
+            <XStack space="$3" justify="flex-end">
+              <Button variant="outlined" onPress={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button
+                themeInverse
+                disabled={loading || categories.length === 0}
+                onPress={handleSubmit}
+              >
+                {loading ? 'Saving...' : 'Save Expense'}
+              </Button>
+            </XStack>
+          </YStack>
+        </Form>
+      </Sheet.Frame>
+    </Sheet>
+  );
+} 
