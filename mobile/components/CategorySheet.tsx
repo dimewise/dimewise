@@ -76,7 +76,8 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
       dismissOnSnapToBottom
     >
       <Sheet.Overlay
-        animation="lazy"
+        opacity={0.8}
+        animation="200ms"
         enterStyle={{ opacity: 0 }}
         exitStyle={{ opacity: 0 }}
       />
@@ -92,7 +93,7 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
           </Text>
         ) : null}
 
-        <YStack space="$3">
+        <YStack gap="$3">
           <Input
             placeholder="Category name"
             value={name}
@@ -107,7 +108,7 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
             keyboardType="numeric"
           />
 
-          <XStack space="$3" justify="flex-end">
+          <XStack gap="$3" justify="flex-end">
             <Button variant="outlined" onPress={() => onOpenChange(false)}>
               Cancel
             </Button>

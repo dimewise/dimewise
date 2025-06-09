@@ -102,7 +102,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
     >
       <Sheet.Overlay
         animation="lazy"
-        enterStyle={{ opacity: 0 }}
+        enterStyle={{ opacity: 30 }}
         exitStyle={{ opacity: 0 }}
       />
       <Sheet.Handle />
@@ -118,7 +118,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
         ) : null}
 
         <Form onSubmit={handleSubmit}>
-          <YStack space="$3">
+          <YStack gap="$3">
             <Input
               placeholder="Title"
               value={title}
@@ -161,7 +161,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
               <Text color="$yellow10">No categories found. Please add categories in the Profile tab.</Text>
             )}
 
-            <XStack space="$3" justify="flex-end">
+            <XStack gap="$3" justify="flex-end">
               <Button variant="outlined" onPress={() => onOpenChange(false)}>
                 Cancel
               </Button>
