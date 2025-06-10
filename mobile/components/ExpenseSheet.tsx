@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Form, Input, Select, Text, TextArea, YStack, XStack, Sheet, Adapt } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, saveExpense, generateId } from '../utils/storage';
-import { Category } from '../utils/storage';
+import { getCategories, saveExpense, generateId, getSettings, validateCurrencyInput } from '../utils/storage';
+import { Category, Settings } from '../utils/storage';
 import { ChevronDown } from '@tamagui/lucide-icons';
 
 interface ExpenseSheetProps {
@@ -14,6 +14,7 @@ interface ExpenseSheetProps {
 
 export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: ExpenseSheetProps) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [settings, setSettings] = useState<Settings>({ currency: 'JPY' });
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -24,7 +25,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
 
   useEffect(() => {
     if (open) {
-      loadCategories();
+      loadData();
       // Reset form when opening
       setTitle('');
       setDescription('');
@@ -37,16 +38,20 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
     }
   }, [open]);
 
-  const loadCategories = async () => {
+  const loadData = async () => {
     try {
-      const cats = await getCategories();
+      const [cats, appSettings] = await Promise.all([
+        getCategories(),
+        getSettings(),
+      ]);
       setCategories(cats);
+      setSettings(appSettings);
       if (cats.length > 0 && !categoryId) {
         setCategoryId(cats[0].id);
       }
     } catch (e) {
-      console.error('Failed to load categories:', e);
-      setError('Failed to load categories. Please try again.');
+      console.error('Failed to load data:', e);
+      setError('Failed to load data. Please try again.');
     }
   };
 
@@ -56,8 +61,10 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       return;
     }
 
-    if (!amount.trim() || isNaN(Number(amount)) || Number(amount) <= 0) {
-      setError('Please enter a valid amount');
+    // Use currency-aware validation
+    const validation = validateCurrencyInput(amount, settings.currency);
+    if (!validation.isValid) {
+      setError(validation.error || 'Please enter a valid amount');
       return;
     }
 
@@ -74,10 +81,10 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
         id: generateId(),
         title: title.trim(),
         description: description.trim(),
-        amount: Number(amount),
+        amount: Number(amount), // Will be converted to base units in saveExpense
         categoryId,
         date: new Date().toISOString(),
-      });
+      }, settings.currency);
 
       toast.show('Expense added successfully!', {
         message: 'Your expense has been saved.',
@@ -141,7 +148,9 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
             />
 
             <Input
-              placeholder="Amount"
+              placeholder={settings.currency === 'JPY' || settings.currency === 'KRW' ?
+                `Amount (no decimals for ${settings.currency})` :
+                `Amount (e.g. 10.50 for ${settings.currency})`}
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"

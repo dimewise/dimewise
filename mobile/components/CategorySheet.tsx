@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Input, Text, YStack, XStack, Sheet } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { saveCategory, generateId } from '../utils/storage';
-import { Category } from '../utils/storage';
+import { saveCategory, generateId, getSettings, validateCurrencyInput } from '../utils/storage';
+import { Category, Settings } from '../utils/storage';
 
 interface CategorySheetProps {
   open: boolean;
@@ -14,12 +14,14 @@ interface CategorySheetProps {
 export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: CategorySheetProps) {
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
+  const [settings, setSettings] = useState<Settings>({ currency: 'JPY' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const toast = useToastController();
 
   useEffect(() => {
     if (open) {
+      loadSettings();
       // Reset form when opening
       setName('');
       setBudget('');
@@ -30,14 +32,25 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
     }
   }, [open]);
 
+  const loadSettings = async () => {
+    try {
+      const appSettings = await getSettings();
+      setSettings(appSettings);
+    } catch (e) {
+      console.error('Failed to load settings:', e);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!name.trim()) {
       setError('Category name is required');
       return;
     }
 
-    if (!budget.trim() || isNaN(Number(budget)) || Number(budget) <= 0) {
-      setError('Please enter a valid budget amount');
+    // Use currency-aware validation
+    const validation = validateCurrencyInput(budget, settings.currency);
+    if (!validation.isValid) {
+      setError(validation.error || 'Please enter a valid budget amount');
       return;
     }
 
@@ -48,10 +61,10 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
       const newCategory: Category = {
         id: generateId(),
         name: name.trim(),
-        budget: Number(budget),
+        budget: Number(budget), // Will be converted to base units in saveCategory
       };
 
-      await saveCategory(newCategory);
+      await saveCategory(newCategory, settings.currency);
 
       toast.show('Category added successfully!', {
         message: 'Your category has been saved.',
@@ -107,7 +120,9 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
           />
 
           <Input
-            placeholder="Monthly budget"
+            placeholder={settings.currency === 'JPY' || settings.currency === 'KRW' ?
+              `Monthly budget (no decimals for ${settings.currency})` :
+              `Monthly budget (e.g. 1000.00 for ${settings.currency})`}
             value={budget}
             onChangeText={setBudget}
             keyboardType="numeric"
