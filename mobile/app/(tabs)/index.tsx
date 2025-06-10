@@ -59,13 +59,6 @@ export default function HomePage() {
         <YStack p="$4" pt={insets.top + 16} gap="$4" flex={1}>
           <H2>Budget Overview</H2>
 
-          <Button
-            icon={<Plus />}
-            onPress={handleNewExpensePress}
-          >
-            New Expense
-          </Button>
-
           {loading ? (
             <Text>Loading...</Text>
           ) : (
@@ -73,7 +66,7 @@ export default function HomePage() {
           )}
         </YStack>
       </ScrollView>
-      <YStack p="$4" borderTopWidth={1} borderColor="$borderColor" gap="$2">
+      <YStack p="$4" borderTopWidth={1} borderColor="$borderColor" gap="$3">
         <XStack gap="$2" justify="space-between">
           <Text>Total Budget:</Text>
           <MiddleDotSpacer />
@@ -89,6 +82,15 @@ export default function HomePage() {
           <MiddleDotSpacer />
           <Text fontWeight="bold">{formatAmount(totalBudget - totalSpent)}</Text>
         </XStack>
+
+        <Button
+          icon={<Plus />}
+          onPress={handleNewExpensePress}
+          themeInverse
+          mt="$2"
+        >
+          New Expense
+        </Button>
       </YStack>
 
       <ExpenseSheet

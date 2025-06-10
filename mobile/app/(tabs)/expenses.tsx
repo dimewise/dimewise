@@ -84,6 +84,16 @@ export default function ExpensesScreen() {
         </YStack>
       </ScrollView>
 
+      <YStack p="$4" borderTopWidth={1} borderColor="$borderColor">
+        <Button
+          icon={<Plus />}
+          onPress={() => setShowExpenseSheet(true)}
+          themeInverse
+        >
+          New Expense
+        </Button>
+      </YStack>
+
       <ExpenseSheet
         open={showExpenseSheet}
         onOpenChange={setShowExpenseSheet}
