@@ -82,7 +82,7 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
         exitStyle={{ opacity: 0 }}
       />
       <Sheet.Handle />
-      <Sheet.Frame p="$4" gap="$4">
+      <Sheet.Frame pt="$5" pb="$8" px="$4" gap="$4" bg="$black2">
         <Text fontSize="$6" fontWeight="bold">
           Add Category
         </Text>

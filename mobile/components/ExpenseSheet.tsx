@@ -101,12 +101,13 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       dismissOnSnapToBottom
     >
       <Sheet.Overlay
-        animation="lazy"
-        enterStyle={{ opacity: 30 }}
+        opacity={0.8}
+        animation="200ms"
+        enterStyle={{ opacity: 0 }}
         exitStyle={{ opacity: 0 }}
       />
       <Sheet.Handle />
-      <Sheet.Frame p="$4" gap="$4">
+      <Sheet.Frame pt="$5" pb="$8" px="$4" gap="$4" bg="$black2">
         <Text fontSize="$6" fontWeight="bold">
           New Expense
         </Text>
