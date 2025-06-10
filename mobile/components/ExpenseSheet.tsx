@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Button, Form, Input, Select, Text, TextArea, YStack, XStack, Sheet } from 'tamagui';
+import { Keyboard } from 'react-native';
+import { Button, Form, Input, Select, Text, TextArea, YStack, XStack, Sheet, Adapt } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
 import { getCategories, saveExpense, generateId } from '../utils/storage';
 import { Category } from '../utils/storage';
+import { ChevronDown } from '@tamagui/lucide-icons';
 
 interface ExpenseSheetProps {
   open: boolean;
@@ -29,6 +31,9 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       setAmount('');
       setCategoryId('');
       setError('');
+    } else {
+      // Reset focus/keyboard when sheet closes
+      Keyboard.dismiss();
     }
   }, [open]);
 
@@ -93,12 +98,13 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
   };
 
   return (
-    <Sheet
+    < Sheet
       modal
       open={open}
       onOpenChange={onOpenChange}
       snapPointsMode="fit"
       dismissOnSnapToBottom
+      moveOnKeyboardChange={true}
     >
       <Sheet.Overlay
         opacity={0.8}
@@ -141,26 +147,43 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
               keyboardType="numeric"
             />
 
-            {categories.length > 0 ? (
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <Select.Trigger>
-                  <Select.Value placeholder="Select category" />
-                </Select.Trigger>
-                <Select.Content>
-                  <Select.Viewport>
-                    <Select.Group>
-                      {categories.map((category, index) => (
-                        <Select.Item key={category.id} index={index} value={category.id}>
-                          <Select.ItemText>{category.name}</Select.ItemText>
-                        </Select.Item>
-                      ))}
-                    </Select.Group>
-                  </Select.Viewport>
-                </Select.Content>
-              </Select>
-            ) : (
-              <Text color="$yellow10">No categories found. Please add categories in the Profile tab.</Text>
-            )}
+            <Select value={categoryId} onValueChange={setCategoryId}>
+              <Select.Trigger iconAfter={<ChevronDown />}>
+                <Select.Value placeholder="Select category" />
+              </Select.Trigger>
+
+              <Adapt when="maxMd" platform="touch">
+                <Sheet native={false} modal dismissOnSnapToBottom animation="medium">
+                  <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
+                    <Sheet.ScrollView>
+                      <Adapt.Contents />
+                    </Sheet.ScrollView>
+                  </Sheet.Frame>
+                  <Sheet.Overlay
+                    opacity={0.8}
+                    animation="200ms"
+                    enterStyle={{ opacity: 0 }}
+                    exitStyle={{ opacity: 0 }}
+                  />
+                </Sheet>
+              </Adapt>
+
+              <Select.Content zIndex={200000}>
+                <Select.Viewport>
+                  <Select.Group>
+                    {categories.length > 0 ? categories.map((category, index) => (
+                      <Select.Item key={category.id} index={index} value={category.id} bg={"$black2"}>
+                        <Select.ItemText fontSize="$5">{category.name}</Select.ItemText>
+                      </Select.Item>
+                    )) : (
+                      <Select.Item key="no-categories" index={0} value="no-categories">
+                        <Select.ItemText>No categories found. Please add categories in the Profile tab.</Select.ItemText>
+                      </Select.Item>
+                    )}
+                  </Select.Group>
+                </Select.Viewport>
+              </Select.Content>
+            </Select>
 
             <XStack gap="$3" justify="flex-end">
               <Button variant="outlined" onPress={() => onOpenChange(false)}>
@@ -177,6 +200,6 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
           </YStack>
         </Form>
       </Sheet.Frame>
-    </Sheet>
+    </Sheet >
   );
 } 
