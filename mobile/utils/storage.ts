@@ -1,5 +1,42 @@
 import * as SQLite from 'expo-sqlite';
 
+// Currency enum - major currencies in alphabetical order
+export const SUPPORTED_CURRENCIES = [
+  'AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'EUR', 'GBP', 'HKD', 'INR', 'JPY',
+  'KRW', 'MXN', 'NOK', 'NZD', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR'
+] as const;
+
+export type Currency = typeof SUPPORTED_CURRENCIES[number];
+
+// Currency formatting configuration
+export const CURRENCY_CONFIG: Record<Currency, {
+  hasDecimals: boolean;
+  symbol?: string;
+  decimalPlaces: number;
+}> = {
+  AUD: { hasDecimals: true, symbol: 'A$', decimalPlaces: 2 },
+  BRL: { hasDecimals: true, symbol: 'R$', decimalPlaces: 2 },
+  CAD: { hasDecimals: true, symbol: 'C$', decimalPlaces: 2 },
+  CHF: { hasDecimals: true, decimalPlaces: 2 },
+  CNY: { hasDecimals: true, symbol: '¥', decimalPlaces: 2 },
+  EUR: { hasDecimals: true, symbol: '€', decimalPlaces: 2 },
+  GBP: { hasDecimals: true, symbol: '£', decimalPlaces: 2 },
+  HKD: { hasDecimals: true, symbol: 'HK$', decimalPlaces: 2 },
+  INR: { hasDecimals: true, symbol: '₹', decimalPlaces: 2 },
+  JPY: { hasDecimals: false, symbol: '¥', decimalPlaces: 0 },
+  KRW: { hasDecimals: false, symbol: '₩', decimalPlaces: 0 },
+  MXN: { hasDecimals: true, symbol: '$', decimalPlaces: 2 },
+  NOK: { hasDecimals: true, decimalPlaces: 2 },
+  NZD: { hasDecimals: true, symbol: 'NZ$', decimalPlaces: 2 },
+  RUB: { hasDecimals: true, symbol: '₽', decimalPlaces: 2 },
+  SEK: { hasDecimals: true, decimalPlaces: 2 },
+  SGD: { hasDecimals: true, symbol: 'S$', decimalPlaces: 2 },
+  THB: { hasDecimals: true, symbol: '฿', decimalPlaces: 2 },
+  TRY: { hasDecimals: true, symbol: '₺', decimalPlaces: 2 },
+  USD: { hasDecimals: true, symbol: '$', decimalPlaces: 2 },
+  ZAR: { hasDecimals: true, symbol: 'R', decimalPlaces: 2 },
+};
+
 // Data models
 export interface Category {
   id: string;
@@ -17,12 +54,12 @@ export interface Expense {
 }
 
 export interface Settings {
-  currency: string;
+  currency: Currency;
 }
 
 // Default settings
 const DEFAULT_SETTINGS: Settings = {
-  currency: 'USD',
+  currency: 'JPY',
 };
 
 let db: SQLite.SQLiteDatabase | null = null;
@@ -62,7 +99,7 @@ export const initDatabase = async (): Promise<void> => {
         
         CREATE TABLE IF NOT EXISTS settings (
           id INTEGER PRIMARY KEY NOT NULL,
-          currency TEXT NOT NULL
+          currency TEXT NOT NULL CHECK (currency IN ('${SUPPORTED_CURRENCIES.join("','")}'))
         );
         
         INSERT OR IGNORE INTO settings (id, currency) VALUES (1, '${DEFAULT_SETTINGS.currency}');
@@ -258,4 +295,18 @@ export const getCategorySpending = async (categoryId: string): Promise<number> =
     console.error('Error getting category spending:', error);
     return 0;
   }
+};
+
+// Currency formatting utility
+export const formatAmount = (amount: number, currency: Currency): string => {
+  const config = CURRENCY_CONFIG[currency];
+
+  // Format number with comma separators and appropriate decimal places
+  const formattedNumber = amount.toLocaleString('en-US', {
+    minimumFractionDigits: config.decimalPlaces,
+    maximumFractionDigits: config.decimalPlaces,
+  });
+
+  // Always return with 3-letter currency code
+  return `${formattedNumber} ${currency}`;
 }; 

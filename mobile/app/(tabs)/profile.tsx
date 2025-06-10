@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4 } from 'tamagui';
+import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4, Select, Adapt, Sheet } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, getSettings, saveSettings, deleteCategory } from '../../utils/storage';
-import { Category, Settings } from '../../utils/storage';
-import { Trash, Plus } from '@tamagui/lucide-icons';
+import { getCategories, getSettings, saveSettings, deleteCategory, SUPPORTED_CURRENCIES, formatAmount } from '../../utils/storage';
+import { Category, Settings, Currency } from '../../utils/storage';
+import { Trash, Plus, ChevronDown } from '@tamagui/lucide-icons';
 import CategorySheet from '../../components/CategorySheet';
 
 export default function ProfileScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [settings, setSettings] = useState<Settings>({ currency: 'USD' });
-  const [currency, setCurrency] = useState('');
+  const [settings, setSettings] = useState<Settings>({ currency: 'JPY' });
+  const [currency, setCurrency] = useState<Currency>('JPY');
   const [loading, setLoading] = useState(true);
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [error, setError] = useState('');
@@ -31,7 +31,7 @@ export default function ProfileScreen() {
 
       setCategories(allCategories);
       setSettings(appSettings);
-      setCurrency(appSettings.currency);
+      setCurrency(appSettings.currency as Currency);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -61,13 +61,13 @@ export default function ProfileScreen() {
   };
 
   const handleSaveSettings = async () => {
-    if (!currency.trim()) {
+    if (!currency) {
       setError('Currency is required');
       return;
     }
 
     try {
-      await saveSettings({ currency: currency.trim() });
+      await saveSettings({ currency });
       setError('');
       toast.show('Settings saved successfully!', {
         message: 'Your currency has been updated.',
@@ -87,31 +87,60 @@ export default function ProfileScreen() {
 
   return (
     <View flex={1} bg="$background">
-      <ScrollView>
-        <YStack p="$4" pt={insets.top + 16} space="$6">
-          <H3 fontWeight="600">Profile</H3>
-
+      <YStack p="$4" pt={insets.top + 16}>
+        <H3 fontWeight="600">Profile</H3>
+      </YStack>
+      <ScrollView flex={1}>
+        <YStack p="$4" gap="$7">
           {loading ? (
             <Text>Loading...</Text>
           ) : (
-            <YStack gap="$7">
+            <>
               <YStack gap="$4">
                 <H4>Settings</H4>
 
                 {error ? <Text color="$red10">{error}</Text> : null}
 
                 <Text>Currency</Text>
-                <Input
-                  value={currency}
-                  onChangeText={setCurrency}
-                  placeholder="e.g. USD, EUR, JPY"
-                />
+                <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+                  <Select.Trigger iconAfter={<ChevronDown />}>
+                    <Select.Value placeholder="Select currency">
+                      {currency || "Select currency"}
+                    </Select.Value>
+                  </Select.Trigger>
 
+                  <Adapt when="maxMd" platform="touch">
+                    <Sheet native={false} modal dismissOnSnapToBottom animation="medium">
+                      <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
+                        <Sheet.ScrollView>
+                          <Adapt.Contents />
+                        </Sheet.ScrollView>
+                      </Sheet.Frame>
+                      <Sheet.Overlay
+                        opacity={0.8}
+                        animation="200ms"
+                        enterStyle={{ opacity: 0 }}
+                        exitStyle={{ opacity: 0 }}
+                      />
+                    </Sheet>
+                  </Adapt>
+
+                  <Select.Content zIndex={200000}>
+                    <Select.Viewport>
+                      <Select.Group>
+                        {SUPPORTED_CURRENCIES.map((curr, index) => (
+                          <Select.Item key={curr} index={index} value={curr} bg="$black2">
+                            <Select.ItemText fontSize="$5">{curr}</Select.ItemText>
+                          </Select.Item>
+                        ))}
+                      </Select.Group>
+                    </Select.Viewport>
+                  </Select.Content>
+                </Select>
                 <Button onPress={handleSaveSettings}>
                   Save Settings
                 </Button>
               </YStack>
-
               <YStack gap="$4">
                 <XStack justify="space-between" verticalAlign="center" >
                   <H4>Categories</H4>
@@ -119,14 +148,13 @@ export default function ProfileScreen() {
                     Add Category
                   </Button>
                 </XStack>
-
                 {categories.length > 0 ? (
                   <YStack gap="$3">
                     {categories.map(category => (
                       <XStack key={category.id} gap="$3">
                         <YStack flex={1}>
                           <Text fontWeight="bold">{category.name}</Text>
-                          <Text>{category.budget.toFixed(2)} {settings.currency}</Text>
+                          <Text>{formatAmount(category.budget, settings.currency)}</Text>
                         </YStack>
                         <Button
                           size="$2"
@@ -141,11 +169,10 @@ export default function ProfileScreen() {
                   <Text>No categories yet. Add your first one above.</Text>
                 )}
               </YStack>
-            </YStack>
+            </>
           )}
         </YStack>
       </ScrollView>
-
       <CategorySheet
         open={showCategorySheet}
         onOpenChange={setShowCategorySheet}

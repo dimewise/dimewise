@@ -1,7 +1,7 @@
 import { Button, H2, ScrollView, Text, YStack, View, XStack, H3 } from 'tamagui';
 import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getCurrentMonthExpenses, getTotalBudget, getTotalSpent, getSettings } from '../../utils/storage';
+import { getCurrentMonthExpenses, getTotalBudget, getTotalSpent, getSettings, formatAmount } from '../../utils/storage';
 import { Expense, Settings } from '../../utils/storage';
 import { Plus } from '@tamagui/lucide-icons';
 import ExpenseSheet from '../../components/ExpenseSheet';
@@ -41,8 +41,8 @@ export default function HomePage() {
     }
   };
 
-  const formatAmount = (amount: number) => {
-    return `${amount.toFixed(2)} ${settings.currency}`;
+  const formatAmountLocal = (amount: number) => {
+    return formatAmount(amount, settings.currency);
   };
 
   const handleExpenseAdded = () => {
@@ -55,10 +55,11 @@ export default function HomePage() {
 
   return (
     <View flex={1} bg="$background">
+      <YStack p="$4" pt={insets.top + 16}>
+        <H3 fontWeight="600">Budget Overview</H3>
+      </YStack>
       <ScrollView flex={1}>
-        <YStack p="$4" pt={insets.top + 16} gap="$4" flex={1}>
-          <H3 fontWeight="600">Budget Overview</H3>
-
+        <YStack p="$4" gap="$4">
           {loading ? (
             <Text>Loading...</Text>
           ) : (
@@ -70,19 +71,18 @@ export default function HomePage() {
         <XStack gap="$2" justify="space-between">
           <Text>Total Budget:</Text>
           <MiddleDotSpacer />
-          <Text fontWeight="bold">{formatAmount(totalBudget)}</Text>
+          <Text fontWeight="bold">{formatAmountLocal(totalBudget)}</Text>
         </XStack>
         <XStack gap="$2" justify="space-between">
           <Text>Spent:</Text>
           <MiddleDotSpacer />
-          <Text fontWeight="bold">{formatAmount(totalSpent)}</Text>
+          <Text fontWeight="bold">{formatAmountLocal(totalSpent)}</Text>
         </XStack>
         <XStack gap="$2" justify="space-between">
           <Text>Remaining:</Text>
           <MiddleDotSpacer />
-          <Text fontWeight="bold">{formatAmount(totalBudget - totalSpent)}</Text>
+          <Text fontWeight="bold">{formatAmountLocal(totalBudget - totalSpent)}</Text>
         </XStack>
-
         <Button
           icon={<Plus />}
           onPress={handleNewExpensePress}
@@ -92,7 +92,6 @@ export default function HomePage() {
           New Expense
         </Button>
       </YStack>
-
       <ExpenseSheet
         open={showExpenseSheet}
         onOpenChange={setShowExpenseSheet}

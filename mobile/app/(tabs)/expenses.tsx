@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, H2, ScrollView, Text, YStack, Card, XStack, View, H3 } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getExpenses, getSettings } from '../../utils/storage';
+import { getExpenses, getSettings, formatAmount } from '../../utils/storage';
 import { Expense, Settings } from '../../utils/storage';
 import { format } from 'date-fns';
 import { Plus } from '@tamagui/lucide-icons';
@@ -35,8 +35,8 @@ export default function ExpensesScreen() {
     }
   };
 
-  const formatAmount = (amount: number) => {
-    return `${amount.toFixed(2)} ${settings.currency}`;
+  const formatAmountLocal = (amount: number) => {
+    return formatAmount(amount, settings.currency);
   };
 
   const formatDate = (dateString: string) => {
@@ -49,10 +49,11 @@ export default function ExpensesScreen() {
 
   return (
     <View flex={1} bg="$background">
-      <ScrollView>
-        <YStack p="$4" pt={insets.top + 16} gap="$4">
-          <H3 fontWeight="600">All Expenses</H3>
-
+      <YStack p="$4" pt={insets.top + 16}>
+        <H3 fontWeight="600">All Expenses</H3>
+      </YStack>
+      <ScrollView flex={1}>
+        <YStack p="$4" gap="$4">
           {loading ? (
             <Text>Loading expenses...</Text>
           ) : expenses.length > 0 ? (
@@ -62,9 +63,8 @@ export default function ExpensesScreen() {
                   <YStack gap="$2">
                     <XStack gap="$2">
                       <Text fontWeight="bold" flex={1}>{expense.title}</Text>
-                      <Text fontWeight="bold">{formatAmount(expense.amount)}</Text>
+                      <Text fontWeight="bold">{formatAmountLocal(expense.amount)}</Text>
                     </XStack>
-
                     {expense.description ? (
                       <Text>{expense.description}</Text>
                     ) : null}
@@ -83,7 +83,6 @@ export default function ExpensesScreen() {
           )}
         </YStack>
       </ScrollView>
-
       <YStack p="$4" borderTopWidth={1} borderColor="$borderColor">
         <Button
           icon={<Plus />}
@@ -93,7 +92,6 @@ export default function ExpensesScreen() {
           New Expense
         </Button>
       </YStack>
-
       <ExpenseSheet
         open={showExpenseSheet}
         onOpenChange={setShowExpenseSheet}
