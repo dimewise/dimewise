@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3 } from 'tamagui';
+import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4 } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useToastController } from '@tamagui/toast';
 import { getCategories, getSettings, saveSettings, deleteCategory } from '../../utils/storage';
@@ -89,14 +89,14 @@ export default function ProfileScreen() {
     <View flex={1} bg="$background">
       <ScrollView>
         <YStack p="$4" pt={insets.top + 16} space="$6">
-          <H2>Profile</H2>
+          <H3 fontWeight="600">Profile</H3>
 
           {loading ? (
             <Text>Loading...</Text>
           ) : (
-            <YStack gap="$4">
+            <YStack gap="$7">
               <YStack gap="$4">
-                <H3>Settings</H3>
+                <H4>Settings</H4>
 
                 {error ? <Text color="$red10">{error}</Text> : null}
 
@@ -114,7 +114,7 @@ export default function ProfileScreen() {
 
               <YStack gap="$4">
                 <XStack justify="space-between" verticalAlign="center" >
-                  <H3>Categories</H3>
+                  <H4>Categories</H4>
                   <Button icon={<Plus size={16} />} onPress={() => setShowCategorySheet(true)}>
                     Add Category
                   </Button>

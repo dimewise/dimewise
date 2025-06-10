@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Keyboard } from 'react-native';
 import { Button, Input, Text, YStack, XStack, Sheet } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
 import { saveCategory, generateId } from '../utils/storage';
@@ -23,6 +24,9 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
       setName('');
       setBudget('');
       setError('');
+    } else {
+      // Reset focus/keyboard when sheet closes
+      Keyboard.dismiss();
     }
   }, [open]);
 
@@ -74,6 +78,7 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
       onOpenChange={onOpenChange}
       snapPointsMode="fit"
       dismissOnSnapToBottom
+      moveOnKeyboardChange={true}
     >
       <Sheet.Overlay
         opacity={0.8}

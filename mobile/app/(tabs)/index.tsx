@@ -1,4 +1,4 @@
-import { Button, H2, ScrollView, Text, YStack, View, XStack } from 'tamagui';
+import { Button, H2, ScrollView, Text, YStack, View, XStack, H3 } from 'tamagui';
 import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getCurrentMonthExpenses, getTotalBudget, getTotalSpent, getSettings } from '../../utils/storage';
@@ -57,7 +57,7 @@ export default function HomePage() {
     <View flex={1} bg="$background">
       <ScrollView flex={1}>
         <YStack p="$4" pt={insets.top + 16} gap="$4" flex={1}>
-          <H2>Budget Overview</H2>
+          <H3 fontWeight="600">Budget Overview</H3>
 
           {loading ? (
             <Text>Loading...</Text>

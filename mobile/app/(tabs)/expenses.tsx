@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, H2, ScrollView, Text, YStack, Card, XStack, View } from 'tamagui';
+import { Button, H2, ScrollView, Text, YStack, Card, XStack, View, H3 } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getExpenses, getSettings } from '../../utils/storage';
 import { Expense, Settings } from '../../utils/storage';
@@ -51,7 +51,7 @@ export default function ExpensesScreen() {
     <View flex={1} bg="$background">
       <ScrollView>
         <YStack p="$4" pt={insets.top + 16} gap="$4">
-          <H2>All Expenses</H2>
+          <H3 fontWeight="600">All Expenses</H3>
 
           {loading ? (
             <Text>Loading expenses...</Text>
