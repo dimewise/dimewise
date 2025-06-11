@@ -1,17 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4, Select, Adapt, Sheet } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, deleteCategory, SUPPORTED_CURRENCIES, formatAmount } from '../../utils/storage';
-import { Category, Currency } from '../../utils/storage';
-import { Trash, Plus, ChevronDown } from '@tamagui/lucide-icons';
+import { getCategories, deleteCategory, SUPPORTED_CURRENCIES, formatAmount, getPaymentMethods, deletePaymentMethod, resetDatabase } from '../../utils/storage';
+import { Category, Currency, PaymentMethod } from '../../utils/storage';
+import { Trash, Plus, ChevronDown, Edit3 } from '@tamagui/lucide-icons';
 import CategorySheet from '../../components/CategorySheet';
+import EditCategorySheet from '../../components/EditCategorySheet';
+import PaymentMethodSheet from '../../components/PaymentMethodSheet';
 import { useCurrency } from '../../utils/CurrencyContext';
 
 export default function ProfileScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCategorySheet, setShowCategorySheet] = useState(false);
+  const [showEditCategorySheet, setShowEditCategorySheet] = useState(false);
+  const [showPaymentMethodSheet, setShowPaymentMethodSheet] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [error, setError] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('JPY');
   const insets = useSafeAreaInsets();
@@ -27,11 +34,22 @@ export default function ProfileScreen() {
     loadData();
   }, []);
 
+  // Reload data when page comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
+
   const loadData = async () => {
     try {
       setLoading(true);
-      const allCategories = await getCategories();
+      const [allCategories, allPaymentMethods] = await Promise.all([
+        getCategories(),
+        getPaymentMethods(),
+      ]);
       setCategories(allCategories);
+      setPaymentMethods(allPaymentMethods);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -41,6 +59,36 @@ export default function ProfileScreen() {
 
   const handleCategoryAdded = () => {
     loadData(); // Refresh data when category is added
+  };
+
+  const handleEditCategory = (category: Category) => {
+    setEditingCategory(category);
+    setShowEditCategorySheet(true);
+  };
+
+  const handleCategoryUpdated = () => {
+    loadData(); // Refresh data when category is updated
+  };
+
+  const handlePaymentMethodAdded = () => {
+    loadData(); // Refresh data when payment method is added
+  };
+
+  const handleDeletePaymentMethod = async (paymentMethodId: string) => {
+    try {
+      await deletePaymentMethod(paymentMethodId);
+      toast.show('Payment method deleted successfully!', {
+        message: 'Your payment method has been removed.',
+      });
+      // Refresh payment methods
+      loadData();
+    } catch (error) {
+      console.error('Error deleting payment method:', error);
+      toast.show('Error', {
+        message: 'Failed to delete payment method. Please try again.',
+        type: 'error',
+      });
+    }
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
@@ -82,6 +130,24 @@ export default function ProfileScreen() {
     }
   };
 
+  // DEVELOPMENT ONLY - Comment out for production
+  const handleResetDatabase = async () => {
+    try {
+      await resetDatabase();
+      toast.show('Database reset successfully!', {
+        message: 'All data has been cleared and fresh database created.',
+      });
+      // Refresh all data
+      loadData();
+    } catch (error) {
+      console.error('Error resetting database:', error);
+      toast.show('Error', {
+        message: 'Failed to reset database. Please try again.',
+        type: 'error',
+      });
+    }
+  };
+
   return (
     <View flex={1} bg="$background">
       <YStack p="$4" pt={insets.top + 16}>
@@ -107,7 +173,7 @@ export default function ProfileScreen() {
                   </Select.Trigger>
 
                   <Adapt when="maxMd" platform="touch">
-                    <Sheet native={false} modal dismissOnSnapToBottom animation="medium">
+                    <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000}>
                       <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
                         <Sheet.ScrollView>
                           <Adapt.Contents />
@@ -122,7 +188,7 @@ export default function ProfileScreen() {
                     </Sheet>
                   </Adapt>
 
-                  <Select.Content zIndex={200000}>
+                  <Select.Content zIndex={400000}>
                     <Select.Viewport>
                       <Select.Group>
                         {SUPPORTED_CURRENCIES.map((curr, index) => (
@@ -136,6 +202,11 @@ export default function ProfileScreen() {
                 </Select>
                 <Button onPress={handleSaveSettings}>
                   Save Settings
+                </Button>
+
+                {/* DEVELOPMENT ONLY - Comment out for production */}
+                <Button variant="outlined" color="$red10" onPress={handleResetDatabase}>
+                  Reset Database (DEV)
                 </Button>
               </YStack>
               <YStack gap="$4">
@@ -153,17 +224,56 @@ export default function ProfileScreen() {
                           <Text fontWeight="bold">{category.name}</Text>
                           <Text>{formatAmount(category.budget, currency)}</Text>
                         </YStack>
+                        <XStack gap="$2">
+                          <Button
+                            size="$2"
+                            circular
+                            onPress={() => handleEditCategory(category)}
+                            icon={<Edit3 size={16} />}
+                            variant="outlined"
+                          />
+                          <Button
+                            size="$2"
+                            circular
+                            onPress={() => handleDeleteCategory(category.id)}
+                            icon={<Trash size={16} />}
+                          />
+                        </XStack>
+                      </XStack>
+                    ))}
+                  </YStack>
+                ) : (
+                  <Text>No categories yet. Add your first one above.</Text>
+                )}
+              </YStack>
+              <YStack gap="$4">
+                <XStack justify="space-between" verticalAlign="center" >
+                  <H4>Payment Methods</H4>
+                  <Button icon={<Plus size={16} />} onPress={() => setShowPaymentMethodSheet(true)}>
+                    Add Method
+                  </Button>
+                </XStack>
+                {paymentMethods.length > 0 ? (
+                  <YStack gap="$3">
+                    {paymentMethods.map(paymentMethod => (
+                      <XStack key={paymentMethod.id} gap="$3">
+                        <YStack flex={1}>
+                          <Text fontWeight="bold">{paymentMethod.name}</Text>
+                          <Text opacity={0.7}>
+                            {paymentMethod.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </Text>
+                        </YStack>
                         <Button
                           size="$2"
                           circular
-                          onPress={() => handleDeleteCategory(category.id)}
+                          onPress={() => handleDeletePaymentMethod(paymentMethod.id)}
                           icon={<Trash size={16} />}
                         />
                       </XStack>
                     ))}
                   </YStack>
                 ) : (
-                  <Text>No categories yet. Add your first one above.</Text>
+                  <Text>No payment methods yet. Add your first one above.</Text>
                 )}
               </YStack>
             </>
@@ -174,6 +284,17 @@ export default function ProfileScreen() {
         open={showCategorySheet}
         onOpenChange={setShowCategorySheet}
         onCategoryAdded={handleCategoryAdded}
+      />
+      <EditCategorySheet
+        open={showEditCategorySheet}
+        onOpenChange={setShowEditCategorySheet}
+        category={editingCategory}
+        onCategoryUpdated={handleCategoryUpdated}
+      />
+      <PaymentMethodSheet
+        open={showPaymentMethodSheet}
+        onOpenChange={setShowPaymentMethodSheet}
+        onPaymentMethodAdded={handlePaymentMethodAdded}
       />
     </View>
   );

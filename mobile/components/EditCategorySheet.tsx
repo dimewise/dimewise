@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Input, Text, YStack, XStack, Sheet } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { saveCategory, generateId, validateCurrencyInput } from '../utils/storage';
+import { updateCategoryBudget, validateCurrencyInput } from '../utils/storage';
 import { Category } from '../utils/storage';
 import { useCurrency } from '../utils/CurrencyContext';
 
-interface CategorySheetProps {
+interface EditCategorySheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCategoryAdded?: () => void;
+  category: Category | null;
+  onCategoryUpdated?: () => void;
 }
 
-export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: CategorySheetProps) {
-  const [name, setName] = useState('');
+export default function EditCategorySheet({ open, onOpenChange, category, onCategoryUpdated }: EditCategorySheetProps) {
   const [budget, setBudget] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,22 +21,18 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
   const { currency } = useCurrency();
 
   useEffect(() => {
-    if (open) {
-      // Reset form when opening
-      setName('');
-      setBudget('');
+    if (open && category) {
+      // Set the current budget value when opening
+      setBudget(category.budget.toString());
       setError('');
     } else {
       // Reset focus/keyboard when sheet closes
       Keyboard.dismiss();
     }
-  }, [open]);
+  }, [open, category]);
 
   const handleSubmit = async () => {
-    if (!name.trim()) {
-      setError('Category name is required');
-      return;
-    }
+    if (!category) return;
 
     // Use currency-aware validation
     const validation = validateCurrencyInput(budget, currency);
@@ -49,26 +45,19 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
     setError('');
 
     try {
-      const newCategory: Category = {
-        id: generateId(),
-        name: name.trim(),
-        budget: Number(budget),
-        currency: currency
-      };
+      await updateCategoryBudget(category.id, Number(budget), currency);
 
-      await saveCategory(newCategory);
-
-      toast.show('Category added successfully!', {
-        message: 'Your category has been saved.',
+      toast.show('Category updated successfully!', {
+        message: 'Budget has been updated.',
       });
 
       onOpenChange(false);
-      onCategoryAdded?.();
+      onCategoryUpdated?.();
     } catch (e) {
-      console.error('Failed to save category:', e);
-      setError('Failed to save category. Please try again.');
+      console.error('Failed to update category:', e);
+      setError('Failed to update category. Please try again.');
       toast.show('Error', {
-        message: 'Failed to save category. Please try again.',
+        message: 'Failed to update category. Please try again.',
         type: 'error',
       });
     } finally {
@@ -94,8 +83,14 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
       <Sheet.Handle />
       <Sheet.Frame pt="$5" pb="$8" px="$4" gap="$4" bg="$black2">
         <Text fontSize="$6" fontWeight="bold">
-          Add Category
+          Edit Category
         </Text>
+
+        {category && (
+          <Text fontSize="$4" opacity={0.7}>
+            {category.name}
+          </Text>
+        )}
 
         {error ? (
           <Text color="$red10">
@@ -104,13 +99,6 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
         ) : null}
 
         <YStack gap="$3">
-          <Input
-            placeholder="Category name"
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-          />
-
           <Input
             placeholder={currency === 'JPY' || currency === 'KRW' ?
               `Monthly budget (no decimals for ${currency})` :
@@ -129,7 +117,7 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
               disabled={loading}
               onPress={handleSubmit}
             >
-              {loading ? 'Saving...' : 'Add Category'}
+              {loading ? 'Updating...' : 'Update Budget'}
             </Button>
           </XStack>
         </YStack>

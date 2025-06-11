@@ -2,81 +2,90 @@ import * as SQLite from 'expo-sqlite';
 
 // Currency enum - major currencies in alphabetical order
 export const SUPPORTED_CURRENCIES = [
-  'AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'EUR', 'GBP', 'HKD', 'INR', 'JPY',
-  'KRW', 'MXN', 'NOK', 'NZD', 'RUB', 'SEK', 'SGD', 'THB', 'TRY', 'USD', 'ZAR'
+  'USD', 'EUR', 'GBP', 'JPY', 'KRW', 'CAD', 'AUD', 'CHF', 'CNY', 'SEK',
+  'NOK', 'MXN', 'NZD', 'SGD', 'HKD', 'INR', 'RUB', 'ZAR', 'TRY', 'BRL', 'PLN'
 ] as const;
 
 export type Currency = typeof SUPPORTED_CURRENCIES[number];
 
 // Currency formatting configuration
-export const CURRENCY_CONFIG: Record<Currency, {
-  hasDecimals: boolean;
-  symbol?: string;
-  decimalPlaces: number;
-}> = {
-  AUD: { hasDecimals: true, symbol: 'A$', decimalPlaces: 2 },
-  BRL: { hasDecimals: true, symbol: 'R$', decimalPlaces: 2 },
-  CAD: { hasDecimals: true, symbol: 'C$', decimalPlaces: 2 },
-  CHF: { hasDecimals: true, decimalPlaces: 2 },
-  CNY: { hasDecimals: true, symbol: '¥', decimalPlaces: 2 },
-  EUR: { hasDecimals: true, symbol: '€', decimalPlaces: 2 },
-  GBP: { hasDecimals: true, symbol: '£', decimalPlaces: 2 },
-  HKD: { hasDecimals: true, symbol: 'HK$', decimalPlaces: 2 },
-  INR: { hasDecimals: true, symbol: '₹', decimalPlaces: 2 },
-  JPY: { hasDecimals: false, symbol: '¥', decimalPlaces: 0 },
-  KRW: { hasDecimals: false, symbol: '₩', decimalPlaces: 0 },
-  MXN: { hasDecimals: true, symbol: '$', decimalPlaces: 2 },
-  NOK: { hasDecimals: true, decimalPlaces: 2 },
-  NZD: { hasDecimals: true, symbol: 'NZ$', decimalPlaces: 2 },
-  RUB: { hasDecimals: true, symbol: '₽', decimalPlaces: 2 },
-  SEK: { hasDecimals: true, decimalPlaces: 2 },
-  SGD: { hasDecimals: true, symbol: 'S$', decimalPlaces: 2 },
-  THB: { hasDecimals: true, symbol: '฿', decimalPlaces: 2 },
-  TRY: { hasDecimals: true, symbol: '₺', decimalPlaces: 2 },
-  USD: { hasDecimals: true, symbol: '$', decimalPlaces: 2 },
-  ZAR: { hasDecimals: true, symbol: 'R', decimalPlaces: 2 },
+export const CURRENCY_CONFIG: Record<Currency, { symbol: string; name: string; decimalPlaces: number }> = {
+  USD: { symbol: '$', name: 'US Dollar', decimalPlaces: 2 },
+  EUR: { symbol: '€', name: 'Euro', decimalPlaces: 2 },
+  GBP: { symbol: '£', name: 'British Pound', decimalPlaces: 2 },
+  JPY: { symbol: '¥', name: 'Japanese Yen', decimalPlaces: 0 },
+  KRW: { symbol: '₩', name: 'South Korean Won', decimalPlaces: 0 },
+  CAD: { symbol: 'C$', name: 'Canadian Dollar', decimalPlaces: 2 },
+  AUD: { symbol: 'A$', name: 'Australian Dollar', decimalPlaces: 2 },
+  CHF: { symbol: 'CHF', name: 'Swiss Franc', decimalPlaces: 2 },
+  CNY: { symbol: '¥', name: 'Chinese Yuan', decimalPlaces: 2 },
+  SEK: { symbol: 'kr', name: 'Swedish Krona', decimalPlaces: 2 },
+  NOK: { symbol: 'kr', name: 'Norwegian Krone', decimalPlaces: 2 },
+  MXN: { symbol: '$', name: 'Mexican Peso', decimalPlaces: 2 },
+  NZD: { symbol: 'NZ$', name: 'New Zealand Dollar', decimalPlaces: 2 },
+  SGD: { symbol: 'S$', name: 'Singapore Dollar', decimalPlaces: 2 },
+  HKD: { symbol: 'HK$', name: 'Hong Kong Dollar', decimalPlaces: 2 },
+  INR: { symbol: '₹', name: 'Indian Rupee', decimalPlaces: 2 },
+  RUB: { symbol: '₽', name: 'Russian Ruble', decimalPlaces: 2 },
+  ZAR: { symbol: 'R', name: 'South African Rand', decimalPlaces: 2 },
+  TRY: { symbol: '₺', name: 'Turkish Lira', decimalPlaces: 2 },
+  BRL: { symbol: 'R$', name: 'Brazilian Real', decimalPlaces: 2 },
+  PLN: { symbol: 'zł', name: 'Polish Zloty', decimalPlaces: 2 }
 };
 
-// Simplified currency exchange rates (in a real app, fetch from API)
-// All rates are relative to USD (1 USD = X currency)
-export const EXCHANGE_RATES: Record<Currency, number> = {
-  USD: 1.00,
-  EUR: 0.92,
-  JPY: 149.50,
-  GBP: 0.79,
-  AUD: 1.52,
-  CAD: 1.35,
-  CHF: 0.88,
-  CNY: 7.24,
-  SEK: 10.87,
-  NZD: 1.64,
-  NOK: 10.75,
-  KRW: 1327.50,
-  INR: 83.25,
-  BRL: 4.95,
-  RUB: 92.50,
-  ZAR: 18.75,
-  TRY: 28.50,
+// For display conversion when currencies don't match (keeping for backward compatibility)
+const EXCHANGE_RATES: Record<Currency, number> = {
+  USD: 1,
+  EUR: 0.85,
+  GBP: 0.75,
+  JPY: 110,
+  KRW: 1200,
+  CAD: 1.25,
+  AUD: 1.35,
+  CHF: 0.92,
+  CNY: 6.45,
+  SEK: 8.75,
+  NOK: 8.65,
   MXN: 17.25,
-  SGD: 1.34,
-  HKD: 7.82,
-  THB: 35.75,
+  NZD: 1.42,
+  SGD: 1.35,
+  HKD: 7.80,
+  INR: 74.50,
+  RUB: 73.25,
+  ZAR: 14.75,
+  TRY: 8.45,
+  BRL: 5.15,
+  PLN: 3.85
 };
 
 // Data models
 export interface Category {
   id: string;
   name: string;
-  budget: number; // Always stored in USD cents, converted for display
+  budget: number; // Always in display units (e.g., 1000 JPY, 10.50 USD)
+  currency: Currency;
+}
+
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  type: 'credit_card' | 'debit_card' | 'cash' | 'bank_transfer' | 'digital_wallet' | 'other';
 }
 
 export interface Expense {
   id: string;
   title: string;
   description: string;
-  amount: number; // Always stored in USD cents, converted for display
+  amount: number; // Always in display units (e.g., 1000 JPY, 10.50 USD)
+  currency: Currency;
   categoryId: string;
+  paymentMethodId: string;
   date: string; // ISO string
+}
+
+export interface CategoryWithSpending extends Category {
+  spent: number;
+  percentage: number;
 }
 
 export interface Settings {
@@ -85,7 +94,7 @@ export interface Settings {
 
 // Default settings
 const DEFAULT_SETTINGS: Settings = {
-  currency: 'JPY',
+  currency: 'JPY'
 };
 
 let db: SQLite.SQLiteDatabase | null = null;
@@ -101,7 +110,7 @@ export const initDatabase = async (): Promise<void> => {
     try {
       console.log('Initializing database...');
       // Open database
-      db = await SQLite.openDatabaseAsync('budgetApp.db');
+      db = await SQLite.openDatabaseAsync('dimewise.db');
 
       // Enable foreign keys and create tables
       await db.execAsync(`
@@ -110,7 +119,14 @@ export const initDatabase = async (): Promise<void> => {
         CREATE TABLE IF NOT EXISTS categories (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT NOT NULL,
-          budget INTEGER NOT NULL
+          budget INTEGER NOT NULL,
+          currency TEXT NOT NULL
+        );
+        
+        CREATE TABLE IF NOT EXISTS payment_methods (
+          id TEXT PRIMARY KEY NOT NULL,
+          name TEXT NOT NULL,
+          type TEXT NOT NULL CHECK (type IN ('credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'))
         );
         
         CREATE TABLE IF NOT EXISTS expenses (
@@ -118,9 +134,12 @@ export const initDatabase = async (): Promise<void> => {
           title TEXT NOT NULL,
           description TEXT,
           amount INTEGER NOT NULL,
+          currency TEXT NOT NULL,
           categoryId TEXT NOT NULL,
+          paymentMethodId TEXT,
           date TEXT NOT NULL,
-          FOREIGN KEY (categoryId) REFERENCES categories (id) ON DELETE CASCADE
+          FOREIGN KEY (categoryId) REFERENCES categories (id) ON DELETE CASCADE,
+          FOREIGN KEY (paymentMethodId) REFERENCES payment_methods (id) ON DELETE SET NULL
         );
         
         CREATE TABLE IF NOT EXISTS settings (
@@ -129,7 +148,29 @@ export const initDatabase = async (): Promise<void> => {
         );
         
         INSERT OR IGNORE INTO settings (id, currency) VALUES (1, '${DEFAULT_SETTINGS.currency}');
+        
+        -- Seed default payment method
+        INSERT OR IGNORE INTO payment_methods (id, name, type) VALUES ('default-cash', 'Cash', 'cash');
       `);
+
+      // Handle database migrations for existing installations
+      try {
+        // Check if paymentMethodId column exists in expenses table
+        const tableInfo = await db.getAllAsync("PRAGMA table_info(expenses)");
+        const hasPaymentMethodId = tableInfo.some((column: any) => column.name === 'paymentMethodId');
+
+        if (!hasPaymentMethodId) {
+          console.log('Adding paymentMethodId column to expenses table');
+          await db.execAsync(`
+            ALTER TABLE expenses ADD COLUMN paymentMethodId TEXT;
+            -- Update existing expenses to use the default cash payment method
+            UPDATE expenses SET paymentMethodId = 'default-cash' WHERE paymentMethodId IS NULL;
+          `);
+        }
+      } catch (migrationError) {
+        console.error('Migration error:', migrationError);
+        // Don't throw here - let the app continue, the column might already exist
+      }
 
       console.log('Database initialized successfully');
     } catch (error) {
@@ -152,37 +193,70 @@ const ensureDbInitialized = async (): Promise<SQLite.SQLiteDatabase> => {
   return db;
 };
 
-// Currency conversion functions
-export const convertFromUSDCents = (usdCents: number, toCurrency: Currency): number => {
-  const usdAmount = usdCents / 100; // Convert cents to dollars
-  const rate = EXCHANGE_RATES[toCurrency];
-  const convertedAmount = usdAmount * rate;
+// Clean monetary conversion functions - INTEGERS ONLY
+const toStorageUnits = (displayAmount: number, currency: Currency): number => {
+  if (!displayAmount || isNaN(displayAmount) || !isFinite(displayAmount)) {
+    return 0;
+  }
 
-  const config = CURRENCY_CONFIG[toCurrency];
+  const config = CURRENCY_CONFIG[currency];
   if (config.decimalPlaces === 0) {
-    return Math.round(convertedAmount);
+    // JPY, KRW: store as-is (whole numbers)
+    return Math.round(displayAmount);
   } else {
-    return Math.round(convertedAmount * Math.pow(10, config.decimalPlaces)) / Math.pow(10, config.decimalPlaces);
+    // USD, EUR: convert to cents and store as integer
+    return Math.round(displayAmount * Math.pow(10, config.decimalPlaces));
   }
 };
 
-export const convertToUSDCents = (amount: number, fromCurrency: Currency): number => {
-  const rate = EXCHANGE_RATES[fromCurrency];
-  const usdAmount = amount / rate;
-  return Math.round(usdAmount * 100); // Convert to cents and round
+const fromStorageUnits = (storageAmount: number, currency: Currency): number => {
+  if (!storageAmount || isNaN(storageAmount) || !isFinite(storageAmount)) {
+    return 0;
+  }
+
+  // Ensure we have an integer from storage
+  const integerAmount = Math.round(storageAmount);
+
+  const config = CURRENCY_CONFIG[currency];
+  if (config.decimalPlaces === 0) {
+    // JPY, KRW: return as-is
+    return integerAmount;
+  } else {
+    // USD, EUR: convert from cents
+    return integerAmount / Math.pow(10, config.decimalPlaces);
+  }
+};
+
+// Cross-currency conversion for display totals only
+const convertForDisplay = (amount: number, fromCurrency: Currency, toCurrency: Currency): number => {
+  if (fromCurrency === toCurrency) {
+    return amount;
+  }
+
+  const fromRate = EXCHANGE_RATES[fromCurrency];
+  const toRate = EXCHANGE_RATES[toCurrency];
+  const usdAmount = amount / fromRate;
+  const convertedAmount = usdAmount * toRate;
+
+  const toConfig = CURRENCY_CONFIG[toCurrency];
+  if (toConfig.decimalPlaces === 0) {
+    return Math.round(convertedAmount);
+  } else {
+    return Math.round(convertedAmount * Math.pow(10, toConfig.decimalPlaces)) / Math.pow(10, toConfig.decimalPlaces);
+  }
 };
 
 // Category operations
 export const getCategories = async (): Promise<Category[]> => {
   try {
     const database = await ensureDbInitialized();
-    const categories = await database.getAllAsync<{ id: string, name: string, budget: number }>('SELECT * FROM categories ORDER BY name');
-    const settings = await getSettings();
+    const rows = await database.getAllAsync<{ id: string, name: string, budget: number, currency: string }>('SELECT * FROM categories ORDER BY name');
 
-    // Convert USD cents to display currency
-    return categories.map(category => ({
-      ...category,
-      budget: convertFromUSDCents(category.budget, settings.currency)
+    return rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      budget: fromStorageUnits(row.budget, row.currency as Currency),
+      currency: row.currency as Currency
     }));
   } catch (error) {
     console.error('Error getting categories:', error);
@@ -190,17 +264,34 @@ export const getCategories = async (): Promise<Category[]> => {
   }
 };
 
-export const saveCategory = async (category: Category, inputCurrency: Currency): Promise<void> => {
+export const saveCategory = async (category: Category): Promise<void> => {
   try {
     const database = await ensureDbInitialized();
-    // Convert input amount to USD cents for storage
-    const budgetInUSDCents = convertToUSDCents(category.budget, inputCurrency);
+    const storageAmount = toStorageUnits(category.budget, category.currency);
+
+    console.log(`Saving category: ${category.name}, ${category.budget} ${category.currency} -> ${storageAmount} storage units`);
+
     await database.runAsync(
-      'INSERT OR REPLACE INTO categories (id, name, budget) VALUES (?, ?, ?)',
-      [category.id, category.name, budgetInUSDCents]
+      'INSERT OR REPLACE INTO categories (id, name, budget, currency) VALUES (?, ?, ?, ?)',
+      [category.id, category.name, storageAmount, category.currency]
     );
   } catch (error) {
     console.error('Error saving category:', error);
+    throw error;
+  }
+};
+
+export const updateCategoryBudget = async (categoryId: string, newBudget: number, currency: Currency): Promise<void> => {
+  try {
+    const database = await ensureDbInitialized();
+    const storageAmount = toStorageUnits(newBudget, currency);
+
+    await database.runAsync(
+      'UPDATE categories SET budget = ?, currency = ? WHERE id = ?',
+      [storageAmount, currency, categoryId]
+    );
+  } catch (error) {
+    console.error('Error updating category budget:', error);
   }
 };
 
@@ -213,36 +304,77 @@ export const deleteCategory = async (categoryId: string): Promise<void> => {
   }
 };
 
+// Payment method operations
+export const getPaymentMethods = async (): Promise<PaymentMethod[]> => {
+  try {
+    const database = await ensureDbInitialized();
+    return await database.getAllAsync<PaymentMethod>('SELECT * FROM payment_methods ORDER BY name');
+  } catch (error) {
+    console.error('Error getting payment methods:', error);
+    return [];
+  }
+};
+
+export const savePaymentMethod = async (paymentMethod: PaymentMethod): Promise<void> => {
+  try {
+    const database = await ensureDbInitialized();
+    await database.runAsync(
+      'INSERT OR REPLACE INTO payment_methods (id, name, type) VALUES (?, ?, ?)',
+      [paymentMethod.id, paymentMethod.name, paymentMethod.type]
+    );
+  } catch (error) {
+    console.error('Error saving payment method:', error);
+  }
+};
+
+export const deletePaymentMethod = async (paymentMethodId: string): Promise<void> => {
+  try {
+    const database = await ensureDbInitialized();
+    await database.runAsync('DELETE FROM payment_methods WHERE id = ?', [paymentMethodId]);
+  } catch (error) {
+    console.error('Error deleting payment method:', error);
+  }
+};
+
 // Expense operations
 export const getExpenses = async (): Promise<Expense[]> => {
   try {
     const database = await ensureDbInitialized();
-    const expenses = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, categoryId: string, date: string }>('SELECT * FROM expenses ORDER BY date DESC');
-    const settings = await getSettings();
+    const rows = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, currency: string, categoryId: string, paymentMethodId: string | null, date: string }>('SELECT * FROM expenses ORDER BY date DESC');
 
-    // Convert USD cents to display currency
-    return expenses.map(expense => ({
-      ...expense,
-      amount: convertFromUSDCents(expense.amount, settings.currency)
-    }));
+    return rows
+      .filter(row => row.paymentMethodId !== null)
+      .map(row => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        amount: fromStorageUnits(row.amount, row.currency as Currency),
+        currency: row.currency as Currency,
+        categoryId: row.categoryId,
+        paymentMethodId: row.paymentMethodId as string,
+        date: row.date
+      }));
   } catch (error) {
     console.error('Error getting expenses:', error);
     return [];
   }
 };
 
-export const saveExpense = async (expense: Expense, inputCurrency: Currency): Promise<void> => {
+export const saveExpense = async (expense: Expense): Promise<void> => {
   try {
     const database = await ensureDbInitialized();
-    // Convert input amount to USD cents for storage
-    const amountInUSDCents = convertToUSDCents(expense.amount, inputCurrency);
+    const storageAmount = toStorageUnits(expense.amount, expense.currency);
+
+    console.log(`Saving expense: ${expense.title}, ${expense.amount} ${expense.currency} -> ${storageAmount} storage units`);
+
     await database.runAsync(
-      `INSERT OR REPLACE INTO expenses (id, title, description, amount, categoryId, date)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [expense.id, expense.title, expense.description, amountInUSDCents, expense.categoryId, expense.date]
+      `INSERT OR REPLACE INTO expenses (id, title, description, amount, currency, categoryId, paymentMethodId, date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [expense.id, expense.title, expense.description, storageAmount, expense.currency, expense.categoryId, expense.paymentMethodId, expense.date]
     );
   } catch (error) {
     console.error('Error saving expense:', error);
+    throw error;
   }
 };
 
@@ -260,10 +392,7 @@ export const getSettings = async (): Promise<Settings> => {
   try {
     const database = await ensureDbInitialized();
     const result = await database.getFirstAsync<Settings>('SELECT currency FROM settings WHERE id = 1');
-    if (result) {
-      return result;
-    }
-    return DEFAULT_SETTINGS;
+    return result || DEFAULT_SETTINGS;
   } catch (error) {
     console.error('Error getting settings:', error);
     return DEFAULT_SETTINGS;
@@ -291,17 +420,23 @@ export const getCurrentMonthExpenses = async (): Promise<Expense[]> => {
 
   try {
     const database = await ensureDbInitialized();
-    const expenses = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, categoryId: string, date: string }>(
+    const rows = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, currency: string, categoryId: string, paymentMethodId: string | null, date: string }>(
       'SELECT * FROM expenses WHERE date >= ? AND date <= ? ORDER BY date DESC',
       [startOfMonth, endOfMonth]
     );
-    const settings = await getSettings();
 
-    // Convert USD cents to display currency
-    return expenses.map(expense => ({
-      ...expense,
-      amount: convertFromUSDCents(expense.amount, settings.currency)
-    }));
+    return rows
+      .filter(row => row.paymentMethodId !== null)
+      .map(row => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        amount: fromStorageUnits(row.amount, row.currency as Currency),
+        currency: row.currency as Currency,
+        categoryId: row.categoryId,
+        paymentMethodId: row.paymentMethodId as string,
+        date: row.date
+      }));
   } catch (error) {
     console.error('Error getting current month expenses:', error);
     return [];
@@ -310,12 +445,18 @@ export const getCurrentMonthExpenses = async (): Promise<Expense[]> => {
 
 export const getTotalBudget = async (): Promise<number> => {
   try {
-    const database = await ensureDbInitialized();
-    const result = await database.getFirstAsync<{ total: number }>('SELECT SUM(budget) as total FROM categories');
+    const categories = await getCategories();
     const settings = await getSettings();
 
-    const totalInUSDCents = result?.total || 0;
-    return convertFromUSDCents(totalInUSDCents, settings.currency);
+    let total = 0;
+    for (const category of categories) {
+      if (category.currency === settings.currency) {
+        total += category.budget;
+      } else {
+        total += convertForDisplay(category.budget, category.currency, settings.currency);
+      }
+    }
+    return total;
   } catch (error) {
     console.error('Error getting total budget:', error);
     return 0;
@@ -323,20 +464,19 @@ export const getTotalBudget = async (): Promise<number> => {
 };
 
 export const getTotalSpent = async (): Promise<number> => {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
-
   try {
-    const database = await ensureDbInitialized();
-    const result = await database.getFirstAsync<{ total: number }>(
-      'SELECT SUM(amount) as total FROM expenses WHERE date >= ? AND date <= ?',
-      [startOfMonth, endOfMonth]
-    );
+    const expenses = await getCurrentMonthExpenses();
     const settings = await getSettings();
 
-    const totalInUSDCents = result?.total || 0;
-    return convertFromUSDCents(totalInUSDCents, settings.currency);
+    let total = 0;
+    for (const expense of expenses) {
+      if (expense.currency === settings.currency) {
+        total += expense.amount;
+      } else {
+        total += convertForDisplay(expense.amount, expense.currency, settings.currency);
+      }
+    }
+    return total;
   } catch (error) {
     console.error('Error getting total spent:', error);
     return 0;
@@ -346,17 +486,23 @@ export const getTotalSpent = async (): Promise<number> => {
 export const getExpensesByCategory = async (categoryId: string): Promise<Expense[]> => {
   try {
     const database = await ensureDbInitialized();
-    const expenses = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, categoryId: string, date: string }>(
+    const rows = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, currency: string, categoryId: string, paymentMethodId: string | null, date: string }>(
       'SELECT * FROM expenses WHERE categoryId = ? ORDER BY date DESC',
       [categoryId]
     );
-    const settings = await getSettings();
 
-    // Convert USD cents to display currency
-    return expenses.map(expense => ({
-      ...expense,
-      amount: convertFromUSDCents(expense.amount, settings.currency)
-    }));
+    return rows
+      .filter(row => row.paymentMethodId !== null)
+      .map(row => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        amount: fromStorageUnits(row.amount, row.currency as Currency),
+        currency: row.currency as Currency,
+        categoryId: row.categoryId,
+        paymentMethodId: row.paymentMethodId as string,
+        date: row.date
+      }));
   } catch (error) {
     console.error('Error getting expenses by category:', error);
     return [];
@@ -370,79 +516,142 @@ export const getCategorySpending = async (categoryId: string): Promise<number> =
 
   try {
     const database = await ensureDbInitialized();
-    const result = await database.getFirstAsync<{ total: number }>(
-      'SELECT SUM(amount) as total FROM expenses WHERE categoryId = ? AND date >= ? AND date <= ?',
+    const rows = await database.getAllAsync<{ amount: number, currency: string }>(
+      'SELECT amount, currency FROM expenses WHERE categoryId = ? AND date >= ? AND date <= ?',
       [categoryId, startOfMonth, endOfMonth]
     );
     const settings = await getSettings();
 
-    const totalInUSDCents = result?.total || 0;
-    return convertFromUSDCents(totalInUSDCents, settings.currency);
+    let total = 0;
+    for (const row of rows) {
+      const amount = fromStorageUnits(row.amount, row.currency as Currency);
+      if (row.currency === settings.currency) {
+        total += amount;
+      } else {
+        total += convertForDisplay(amount, row.currency as Currency, settings.currency);
+      }
+    }
+    return total;
   } catch (error) {
     console.error('Error getting category spending:', error);
     return 0;
   }
 };
 
-// Legacy functions - keeping for backward compatibility but they now work with the new system
+// Legacy compatibility functions
 export const toBaseUnits = (displayAmount: number, currency: Currency): number => {
-  // Convert to USD cents for storage
-  return convertToUSDCents(displayAmount, currency);
+  return toStorageUnits(displayAmount, currency);
 };
 
 export const fromBaseUnits = (baseAmount: number, currency: Currency): number => {
-  // Convert from USD cents to display currency
-  return convertFromUSDCents(baseAmount, currency);
+  return fromStorageUnits(baseAmount, currency);
 };
 
-// Currency-aware input validation
+// Input validation
 export const validateCurrencyInput = (input: string, currency: Currency): { isValid: boolean; error?: string } => {
-  if (!input.trim()) {
-    return { isValid: false, error: 'Amount is required' };
+  const cleanInput = input.replace(/[^\d.-]/g, '');
+  const number = parseFloat(cleanInput);
+
+  if (isNaN(number)) {
+    return { isValid: false, error: 'Please enter a valid number' };
+  }
+
+  if (number < 0) {
+    return { isValid: false, error: 'Amount cannot be negative' };
+  }
+
+  if (number === 0) {
+    return { isValid: false, error: 'Amount must be greater than zero' };
   }
 
   const config = CURRENCY_CONFIG[currency];
-
-  // Check for valid number format based on currency
-  let regex: RegExp;
   if (config.decimalPlaces === 0) {
-    // JPY, KRW - only allow whole numbers
-    regex = /^\d+$/;
-    if (!regex.test(input)) {
-      return { isValid: false, error: `${currency} does not support decimal places` };
+    if (number % 1 !== 0) {
+      return { isValid: false, error: `${currency} amounts cannot have decimal places` };
     }
   } else {
-    // USD, EUR, etc - allow up to specified decimal places
-    regex = new RegExp(`^\\d+(\\.\\d{1,${config.decimalPlaces}})?$`);
-    if (!regex.test(input)) {
-      return { isValid: false, error: `Please enter a valid amount (up to ${config.decimalPlaces} decimal places)` };
+    const decimalPart = cleanInput.split('.')[1];
+    if (decimalPart && decimalPart.length > config.decimalPlaces) {
+      return { isValid: false, error: `${currency} amounts can have at most ${config.decimalPlaces} decimal places` };
     }
   }
 
-  const numValue = Number(input);
-  if (isNaN(numValue) || numValue <= 0) {
-    return { isValid: false, error: 'Please enter a positive amount' };
-  }
-
-  // Check reasonable limits
-  const maxValue = config.decimalPlaces === 0 ? 999999999 : 9999999.99;
-  if (numValue > maxValue) {
+  if (number > 1000000000) {
     return { isValid: false, error: 'Amount is too large' };
   }
 
   return { isValid: true };
 };
 
-// Currency formatting utility
+// Amount formatting with currency code suffix
 export const formatAmount = (amount: number, currency: Currency): string => {
   const config = CURRENCY_CONFIG[currency];
 
-  // Format number with comma separators and appropriate decimal places
-  const formattedNumber = amount.toLocaleString('en-US', {
-    minimumFractionDigits: config.decimalPlaces,
-    maximumFractionDigits: config.decimalPlaces,
-  });
+  try {
+    const formatted = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: config.decimalPlaces,
+      maximumFractionDigits: config.decimalPlaces,
+    }).format(amount);
 
-  // Always return with 3-letter currency code
-  return `${formattedNumber} ${currency}`;
-}; 
+    return `${formatted} ${currency}`;
+  } catch (error) {
+    console.error('Error formatting amount:', error);
+    return `${amount.toFixed(config.decimalPlaces)} ${currency}`;
+  }
+};
+
+export const getPaymentMethodById = async (paymentMethodId: string): Promise<PaymentMethod | null> => {
+  try {
+    const database = await ensureDbInitialized();
+    const paymentMethod = await database.getFirstAsync<PaymentMethod>(
+      'SELECT * FROM payment_methods WHERE id = ?',
+      [paymentMethodId]
+    );
+    return paymentMethod || null;
+  } catch (error) {
+    console.error('Error getting payment method:', error);
+    return null;
+  }
+};
+
+export const resetDatabase = async (): Promise<void> => {
+  try {
+    console.log('Starting database reset...');
+
+    if (!db) {
+      await initDatabase();
+    }
+
+    if (!db) {
+      throw new Error('Failed to initialize database');
+    }
+
+    console.log('Dropping existing tables...');
+    try {
+      await db.runAsync('DROP TABLE IF EXISTS expenses');
+      await db.runAsync('DROP TABLE IF EXISTS categories');
+      await db.runAsync('DROP TABLE IF EXISTS payment_methods');
+      await db.runAsync('DROP TABLE IF EXISTS settings');
+      console.log('All tables dropped successfully');
+    } catch (dropError) {
+      console.warn('Some tables may not exist, continuing...', dropError);
+    }
+
+    try {
+      await db.closeAsync();
+      console.log('Database connection closed');
+    } catch (closeError) {
+      console.warn('Error closing database:', closeError);
+    }
+
+    db = null;
+    initPromise = null;
+    console.log('Reinitializing database...');
+    await initDatabase();
+
+    console.log('Database reset and reinitialized successfully');
+  } catch (error) {
+    console.error('Error resetting database:', error);
+    throw error;
+  }
+};
