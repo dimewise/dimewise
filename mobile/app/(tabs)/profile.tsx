@@ -2,20 +2,26 @@ import { useEffect, useState } from 'react';
 import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4, Select, Adapt, Sheet } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, getSettings, saveSettings, deleteCategory, SUPPORTED_CURRENCIES, formatAmount } from '../../utils/storage';
-import { Category, Settings, Currency } from '../../utils/storage';
+import { getCategories, deleteCategory, SUPPORTED_CURRENCIES, formatAmount } from '../../utils/storage';
+import { Category, Currency } from '../../utils/storage';
 import { Trash, Plus, ChevronDown } from '@tamagui/lucide-icons';
 import CategorySheet from '../../components/CategorySheet';
+import { useCurrency } from '../../utils/CurrencyContext';
 
 export default function ProfileScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [settings, setSettings] = useState<Settings>({ currency: 'JPY' });
-  const [currency, setCurrency] = useState<Currency>('JPY');
   const [loading, setLoading] = useState(true);
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [error, setError] = useState('');
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('JPY');
   const insets = useSafeAreaInsets();
   const toast = useToastController();
+  const { currency, setCurrency } = useCurrency();
+
+  useEffect(() => {
+    // Sync selected currency with context
+    setSelectedCurrency(currency);
+  }, [currency]);
 
   useEffect(() => {
     loadData();
@@ -24,14 +30,8 @@ export default function ProfileScreen() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [allCategories, appSettings] = await Promise.all([
-        getCategories(),
-        getSettings(),
-      ]);
-
+      const allCategories = await getCategories();
       setCategories(allCategories);
-      setSettings(appSettings);
-      setCurrency(appSettings.currency as Currency);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -61,20 +61,17 @@ export default function ProfileScreen() {
   };
 
   const handleSaveSettings = async () => {
-    if (!currency) {
+    if (!selectedCurrency) {
       setError('Currency is required');
       return;
     }
 
     try {
-      await saveSettings({ currency });
+      await setCurrency(selectedCurrency);
       setError('');
       toast.show('Settings saved successfully!', {
         message: 'Your currency has been updated.',
       });
-      // Refresh settings
-      const updatedSettings = await getSettings();
-      setSettings(updatedSettings);
     } catch (error) {
       console.error('Error saving settings:', error);
       setError('Failed to save settings');
@@ -102,10 +99,10 @@ export default function ProfileScreen() {
                 {error ? <Text color="$red10">{error}</Text> : null}
 
                 <Text>Currency</Text>
-                <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+                <Select value={selectedCurrency} onValueChange={(value) => setSelectedCurrency(value as Currency)}>
                   <Select.Trigger iconAfter={<ChevronDown />}>
                     <Select.Value placeholder="Select currency">
-                      {currency || "Select currency"}
+                      {selectedCurrency || "Select currency"}
                     </Select.Value>
                   </Select.Trigger>
 
@@ -154,7 +151,7 @@ export default function ProfileScreen() {
                       <XStack key={category.id} gap="$3">
                         <YStack flex={1}>
                           <Text fontWeight="bold">{category.name}</Text>
-                          <Text>{formatAmount(category.budget, settings.currency)}</Text>
+                          <Text>{formatAmount(category.budget, currency)}</Text>
                         </YStack>
                         <Button
                           size="$2"

@@ -1,39 +1,39 @@
 import { Button, H2, ScrollView, Text, YStack, View, XStack, H3 } from 'tamagui';
 import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getCurrentMonthExpenses, getTotalBudget, getTotalSpent, getSettings, formatAmount } from '../../utils/storage';
-import { Expense, Settings } from '../../utils/storage';
+import { getCurrentMonthExpenses, getTotalBudget, getTotalSpent, formatAmount } from '../../utils/storage';
+import { Expense } from '../../utils/storage';
 import { Plus } from '@tamagui/lucide-icons';
 import ExpenseSheet from '../../components/ExpenseSheet';
 import { MiddleDotSpacer } from 'components/MiddleDotSpacer';
+import { useCurrency, useCurrencyRefresh } from '../../utils/CurrencyContext';
 
 export default function HomePage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
-  const [settings, setSettings] = useState<Settings>({ currency: 'USD' });
   const [loading, setLoading] = useState(true);
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
   const insets = useSafeAreaInsets();
+  const { currency } = useCurrency();
+  const refreshKey = useCurrencyRefresh();
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [refreshKey]); // Re-load data when currency changes
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [currentExpenses, budget, spent, appSettings] = await Promise.all([
+      const [currentExpenses, budget, spent] = await Promise.all([
         getCurrentMonthExpenses(),
         getTotalBudget(),
         getTotalSpent(),
-        getSettings(),
       ]);
 
       setExpenses(currentExpenses.slice(0, 5)); // Show only 5 most recent expenses
       setTotalBudget(budget);
       setTotalSpent(spent);
-      setSettings(appSettings);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -42,7 +42,7 @@ export default function HomePage() {
   };
 
   const formatAmountLocal = (amount: number) => {
-    return formatAmount(amount, settings.currency);
+    return formatAmount(amount, currency);
   };
 
   const handleExpenseAdded = () => {

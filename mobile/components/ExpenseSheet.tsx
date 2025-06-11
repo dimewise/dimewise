@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Form, Input, Select, Text, TextArea, YStack, XStack, Sheet, Adapt } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, saveExpense, generateId, getSettings, validateCurrencyInput } from '../utils/storage';
-import { Category, Settings } from '../utils/storage';
+import { getCategories, saveExpense, generateId, validateCurrencyInput } from '../utils/storage';
+import { Category } from '../utils/storage';
 import { ChevronDown } from '@tamagui/lucide-icons';
+import { useCurrency } from '../utils/CurrencyContext';
 
 interface ExpenseSheetProps {
   open: boolean;
@@ -14,7 +15,6 @@ interface ExpenseSheetProps {
 
 export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: ExpenseSheetProps) {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [settings, setSettings] = useState<Settings>({ currency: 'JPY' });
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
@@ -22,6 +22,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const toast = useToastController();
+  const { currency } = useCurrency();
 
   useEffect(() => {
     if (open) {
@@ -40,12 +41,8 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
 
   const loadData = async () => {
     try {
-      const [cats, appSettings] = await Promise.all([
-        getCategories(),
-        getSettings(),
-      ]);
+      const cats = await getCategories();
       setCategories(cats);
-      setSettings(appSettings);
       if (cats.length > 0 && !categoryId) {
         setCategoryId(cats[0].id);
       }
@@ -62,7 +59,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
     }
 
     // Use currency-aware validation
-    const validation = validateCurrencyInput(amount, settings.currency);
+    const validation = validateCurrencyInput(amount, currency);
     if (!validation.isValid) {
       setError(validation.error || 'Please enter a valid amount');
       return;
@@ -84,7 +81,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
         amount: Number(amount), // Will be converted to base units in saveExpense
         categoryId,
         date: new Date().toISOString(),
-      }, settings.currency);
+      }, currency);
 
       toast.show('Expense added successfully!', {
         message: 'Your expense has been saved.',
@@ -148,9 +145,9 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
             />
 
             <Input
-              placeholder={settings.currency === 'JPY' || settings.currency === 'KRW' ?
-                `Amount (no decimals for ${settings.currency})` :
-                `Amount (e.g. 10.50 for ${settings.currency})`}
+              placeholder={currency === 'JPY' || currency === 'KRW' ?
+                `Amount (no decimals for ${currency})` :
+                `Amount (e.g. 10.50 for ${currency})`}
               value={amount}
               onChangeText={setAmount}
               keyboardType="numeric"
