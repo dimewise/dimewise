@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button, H2, ScrollView, Text, YStack, Card, XStack, View, H3 } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 import { getExpenses, formatAmount } from '../../utils/storage';
 import { Expense } from '../../utils/storage';
 import { format } from 'date-fns';
@@ -19,6 +20,13 @@ export default function ExpensesScreen() {
   useEffect(() => {
     loadData();
   }, [refreshKey]); // Re-load data when currency changes
+
+  // Reload data when page comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [refreshKey])
+  );
 
   const loadData = async () => {
     try {

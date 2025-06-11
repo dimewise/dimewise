@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Form, Input, Select, Text, TextArea, YStack, XStack, Sheet, Adapt } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, saveExpense, generateId, validateCurrencyInput } from '../utils/storage';
-import { Category } from '../utils/storage';
+import { getCategories, saveExpense, generateId, validateCurrencyInput, getPaymentMethods } from '../utils/storage';
+import { Category, PaymentMethod } from '../utils/storage';
 import { ChevronDown } from '@tamagui/lucide-icons';
 import { useCurrency } from '../utils/CurrencyContext';
 
@@ -15,10 +15,12 @@ interface ExpenseSheetProps {
 
 export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: ExpenseSheetProps) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [paymentMethodId, setPaymentMethodId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const toast = useToastController();
@@ -32,6 +34,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       setDescription('');
       setAmount('');
       setCategoryId('');
+      setPaymentMethodId('');
       setError('');
     } else {
       // Reset focus/keyboard when sheet closes
@@ -41,10 +44,24 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
 
   const loadData = async () => {
     try {
-      const cats = await getCategories();
+      const [cats, payMethods] = await Promise.all([
+        getCategories(),
+        getPaymentMethods(),
+      ]);
       setCategories(cats);
+      setPaymentMethods(payMethods);
       if (cats.length > 0 && !categoryId) {
         setCategoryId(cats[0].id);
+      }
+      // Set default payment method to Cash if available and no method is selected
+      if (payMethods.length > 0 && !paymentMethodId) {
+        const cashMethod = payMethods.find(pm => pm.type === 'cash');
+        if (cashMethod) {
+          setPaymentMethodId(cashMethod.id);
+        } else {
+          // Fallback to first payment method if Cash is not available
+          setPaymentMethodId(payMethods[0].id);
+        }
       }
     } catch (e) {
       console.error('Failed to load data:', e);
@@ -70,6 +87,11 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       return;
     }
 
+    if (!paymentMethodId) {
+      setError('Please select a payment method');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -78,10 +100,12 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
         id: generateId(),
         title: title.trim(),
         description: description.trim(),
-        amount: Number(amount), // Will be converted to base units in saveExpense
+        amount: Number(amount),
+        currency: currency,
         categoryId,
+        paymentMethodId,
         date: new Date().toISOString(),
-      }, currency);
+      });
 
       toast.show('Expense added successfully!', {
         message: 'Your expense has been saved.',
@@ -109,6 +133,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       snapPointsMode="fit"
       dismissOnSnapToBottom
       moveOnKeyboardChange={true}
+      zIndex={100000}
     >
       <Sheet.Overlay
         opacity={0.8}
@@ -159,7 +184,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
               </Select.Trigger>
 
               <Adapt when="maxMd" platform="touch">
-                <Sheet native={false} modal dismissOnSnapToBottom animation="medium">
+                <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000}>
                   <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
                     <Sheet.ScrollView>
                       <Adapt.Contents />
@@ -174,7 +199,7 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
                 </Sheet>
               </Adapt>
 
-              <Select.Content zIndex={200000}>
+              <Select.Content zIndex={400000}>
                 <Select.Viewport>
                   <Select.Group>
                     {categories.length > 0 ? categories.map((category, index) => (
@@ -186,6 +211,40 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
                         <Select.ItemText>No categories found. Please add categories in the Profile tab.</Select.ItemText>
                       </Select.Item>
                     )}
+                  </Select.Group>
+                </Select.Viewport>
+              </Select.Content>
+            </Select>
+
+            <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
+              <Select.Trigger iconAfter={<ChevronDown />}>
+                <Select.Value placeholder="Select payment method" />
+              </Select.Trigger>
+
+              <Adapt when="maxMd" platform="touch">
+                <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000}>
+                  <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
+                    <Sheet.ScrollView>
+                      <Adapt.Contents />
+                    </Sheet.ScrollView>
+                  </Sheet.Frame>
+                  <Sheet.Overlay
+                    opacity={0.8}
+                    animation="200ms"
+                    enterStyle={{ opacity: 0 }}
+                    exitStyle={{ opacity: 0 }}
+                  />
+                </Sheet>
+              </Adapt>
+
+              <Select.Content zIndex={400000}>
+                <Select.Viewport>
+                  <Select.Group>
+                    {paymentMethods.map((paymentMethod, index) => (
+                      <Select.Item key={paymentMethod.id} index={index} value={paymentMethod.id} bg="$black2">
+                        <Select.ItemText fontSize="$5">{paymentMethod.name}</Select.ItemText>
+                      </Select.Item>
+                    ))}
                   </Select.Group>
                 </Select.Viewport>
               </Select.Content>
