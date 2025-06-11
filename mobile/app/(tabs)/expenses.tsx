@@ -1,33 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Button, H2, ScrollView, Text, YStack, Card, XStack, View, H3 } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getExpenses, getSettings, formatAmount } from '../../utils/storage';
-import { Expense, Settings } from '../../utils/storage';
+import { getExpenses, formatAmount } from '../../utils/storage';
+import { Expense } from '../../utils/storage';
 import { format } from 'date-fns';
 import { Plus } from '@tamagui/lucide-icons';
 import ExpenseSheet from '../../components/ExpenseSheet';
+import { useCurrency, useCurrencyRefresh } from '../../utils/CurrencyContext';
 
 export default function ExpensesScreen() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [settings, setSettings] = useState<Settings>({ currency: 'USD' });
   const [loading, setLoading] = useState(true);
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
   const insets = useSafeAreaInsets();
+  const { currency } = useCurrency();
+  const refreshKey = useCurrencyRefresh();
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [refreshKey]); // Re-load data when currency changes
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [allExpenses, appSettings] = await Promise.all([
-        getExpenses(),
-        getSettings(),
-      ]);
-
+      const allExpenses = await getExpenses();
       setExpenses(allExpenses);
-      setSettings(appSettings);
     } catch (error) {
       console.error('Error loading expenses:', error);
     } finally {
@@ -36,7 +33,7 @@ export default function ExpensesScreen() {
   };
 
   const formatAmountLocal = (amount: number) => {
-    return formatAmount(amount, settings.currency);
+    return formatAmount(amount, currency);
   };
 
   const formatDate = (dateString: string) => {

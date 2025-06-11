@@ -37,18 +37,44 @@ export const CURRENCY_CONFIG: Record<Currency, {
   ZAR: { hasDecimals: true, symbol: 'R', decimalPlaces: 2 },
 };
 
+// Simplified currency exchange rates (in a real app, fetch from API)
+// All rates are relative to USD (1 USD = X currency)
+export const EXCHANGE_RATES: Record<Currency, number> = {
+  USD: 1.00,
+  EUR: 0.92,
+  JPY: 149.50,
+  GBP: 0.79,
+  AUD: 1.52,
+  CAD: 1.35,
+  CHF: 0.88,
+  CNY: 7.24,
+  SEK: 10.87,
+  NZD: 1.64,
+  NOK: 10.75,
+  KRW: 1327.50,
+  INR: 83.25,
+  BRL: 4.95,
+  RUB: 92.50,
+  ZAR: 18.75,
+  TRY: 28.50,
+  MXN: 17.25,
+  SGD: 1.34,
+  HKD: 7.82,
+  THB: 35.75,
+};
+
 // Data models
 export interface Category {
   id: string;
   name: string;
-  budget: number;
+  budget: number; // Always stored in USD cents, converted for display
 }
 
 export interface Expense {
   id: string;
   title: string;
   description: string;
-  amount: number;
+  amount: number; // Always stored in USD cents, converted for display
   categoryId: string;
   date: string; // ISO string
 }
@@ -84,14 +110,14 @@ export const initDatabase = async (): Promise<void> => {
         CREATE TABLE IF NOT EXISTS categories (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT NOT NULL,
-          budget REAL NOT NULL
+          budget INTEGER NOT NULL
         );
         
         CREATE TABLE IF NOT EXISTS expenses (
           id TEXT PRIMARY KEY NOT NULL,
           title TEXT NOT NULL,
           description TEXT,
-          amount REAL NOT NULL,
+          amount INTEGER NOT NULL,
           categoryId TEXT NOT NULL,
           date TEXT NOT NULL,
           FOREIGN KEY (categoryId) REFERENCES categories (id) ON DELETE CASCADE
@@ -126,19 +152,37 @@ const ensureDbInitialized = async (): Promise<SQLite.SQLiteDatabase> => {
   return db;
 };
 
+// Currency conversion functions
+export const convertFromUSDCents = (usdCents: number, toCurrency: Currency): number => {
+  const usdAmount = usdCents / 100; // Convert cents to dollars
+  const rate = EXCHANGE_RATES[toCurrency];
+  const convertedAmount = usdAmount * rate;
+
+  const config = CURRENCY_CONFIG[toCurrency];
+  if (config.decimalPlaces === 0) {
+    return Math.round(convertedAmount);
+  } else {
+    return Math.round(convertedAmount * Math.pow(10, config.decimalPlaces)) / Math.pow(10, config.decimalPlaces);
+  }
+};
+
+export const convertToUSDCents = (amount: number, fromCurrency: Currency): number => {
+  const rate = EXCHANGE_RATES[fromCurrency];
+  const usdAmount = amount / rate;
+  return Math.round(usdAmount * 100); // Convert to cents and round
+};
+
 // Category operations
 export const getCategories = async (): Promise<Category[]> => {
   try {
     const database = await ensureDbInitialized();
-    const categories = await database.getAllAsync<Category>('SELECT * FROM categories ORDER BY name');
-    // Get current currency to convert base units back to display amounts
+    const categories = await database.getAllAsync<{ id: string, name: string, budget: number }>('SELECT * FROM categories ORDER BY name');
     const settings = await getSettings();
-    const currency = settings.currency;
 
-    // Convert base units back to display amounts
+    // Convert USD cents to display currency
     return categories.map(category => ({
       ...category,
-      budget: fromBaseUnits(category.budget, currency)
+      budget: convertFromUSDCents(category.budget, settings.currency)
     }));
   } catch (error) {
     console.error('Error getting categories:', error);
@@ -146,14 +190,14 @@ export const getCategories = async (): Promise<Category[]> => {
   }
 };
 
-export const saveCategory = async (category: Category, currency: Currency): Promise<void> => {
+export const saveCategory = async (category: Category, inputCurrency: Currency): Promise<void> => {
   try {
     const database = await ensureDbInitialized();
-    // Convert display budget to base units before storing
-    const baseBudget = toBaseUnits(category.budget, currency);
+    // Convert input amount to USD cents for storage
+    const budgetInUSDCents = convertToUSDCents(category.budget, inputCurrency);
     await database.runAsync(
       'INSERT OR REPLACE INTO categories (id, name, budget) VALUES (?, ?, ?)',
-      [category.id, category.name, baseBudget]
+      [category.id, category.name, budgetInUSDCents]
     );
   } catch (error) {
     console.error('Error saving category:', error);
@@ -173,15 +217,13 @@ export const deleteCategory = async (categoryId: string): Promise<void> => {
 export const getExpenses = async (): Promise<Expense[]> => {
   try {
     const database = await ensureDbInitialized();
-    const expenses = await database.getAllAsync<Expense>('SELECT * FROM expenses ORDER BY date DESC');
-    // Get current currency to convert base units back to display amounts
+    const expenses = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, categoryId: string, date: string }>('SELECT * FROM expenses ORDER BY date DESC');
     const settings = await getSettings();
-    const currency = settings.currency;
 
-    // Convert base units back to display amounts
+    // Convert USD cents to display currency
     return expenses.map(expense => ({
       ...expense,
-      amount: fromBaseUnits(expense.amount, currency)
+      amount: convertFromUSDCents(expense.amount, settings.currency)
     }));
   } catch (error) {
     console.error('Error getting expenses:', error);
@@ -189,15 +231,15 @@ export const getExpenses = async (): Promise<Expense[]> => {
   }
 };
 
-export const saveExpense = async (expense: Expense, currency: Currency): Promise<void> => {
+export const saveExpense = async (expense: Expense, inputCurrency: Currency): Promise<void> => {
   try {
     const database = await ensureDbInitialized();
-    // Convert display amount to base units before storing
-    const baseAmount = toBaseUnits(expense.amount, currency);
+    // Convert input amount to USD cents for storage
+    const amountInUSDCents = convertToUSDCents(expense.amount, inputCurrency);
     await database.runAsync(
       `INSERT OR REPLACE INTO expenses (id, title, description, amount, categoryId, date)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [expense.id, expense.title, expense.description, baseAmount, expense.categoryId, expense.date]
+      [expense.id, expense.title, expense.description, amountInUSDCents, expense.categoryId, expense.date]
     );
   } catch (error) {
     console.error('Error saving expense:', error);
@@ -249,18 +291,16 @@ export const getCurrentMonthExpenses = async (): Promise<Expense[]> => {
 
   try {
     const database = await ensureDbInitialized();
-    const expenses = await database.getAllAsync<Expense>(
+    const expenses = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, categoryId: string, date: string }>(
       'SELECT * FROM expenses WHERE date >= ? AND date <= ? ORDER BY date DESC',
       [startOfMonth, endOfMonth]
     );
-    // Get current currency to convert base units back to display amounts
     const settings = await getSettings();
-    const currency = settings.currency;
 
-    // Convert base units back to display amounts
+    // Convert USD cents to display currency
     return expenses.map(expense => ({
       ...expense,
-      amount: fromBaseUnits(expense.amount, currency)
+      amount: convertFromUSDCents(expense.amount, settings.currency)
     }));
   } catch (error) {
     console.error('Error getting current month expenses:', error);
@@ -272,12 +312,10 @@ export const getTotalBudget = async (): Promise<number> => {
   try {
     const database = await ensureDbInitialized();
     const result = await database.getFirstAsync<{ total: number }>('SELECT SUM(budget) as total FROM categories');
-    // Get current currency to convert base units back to display amount
     const settings = await getSettings();
-    const currency = settings.currency;
 
-    const baseTotal = result?.total || 0;
-    return fromBaseUnits(baseTotal, currency);
+    const totalInUSDCents = result?.total || 0;
+    return convertFromUSDCents(totalInUSDCents, settings.currency);
   } catch (error) {
     console.error('Error getting total budget:', error);
     return 0;
@@ -295,12 +333,10 @@ export const getTotalSpent = async (): Promise<number> => {
       'SELECT SUM(amount) as total FROM expenses WHERE date >= ? AND date <= ?',
       [startOfMonth, endOfMonth]
     );
-    // Get current currency to convert base units back to display amount
     const settings = await getSettings();
-    const currency = settings.currency;
 
-    const baseTotal = result?.total || 0;
-    return fromBaseUnits(baseTotal, currency);
+    const totalInUSDCents = result?.total || 0;
+    return convertFromUSDCents(totalInUSDCents, settings.currency);
   } catch (error) {
     console.error('Error getting total spent:', error);
     return 0;
@@ -310,18 +346,16 @@ export const getTotalSpent = async (): Promise<number> => {
 export const getExpensesByCategory = async (categoryId: string): Promise<Expense[]> => {
   try {
     const database = await ensureDbInitialized();
-    const expenses = await database.getAllAsync<Expense>(
+    const expenses = await database.getAllAsync<{ id: string, title: string, description: string, amount: number, categoryId: string, date: string }>(
       'SELECT * FROM expenses WHERE categoryId = ? ORDER BY date DESC',
       [categoryId]
     );
-    // Get current currency to convert base units back to display amounts
     const settings = await getSettings();
-    const currency = settings.currency;
 
-    // Convert base units back to display amounts
+    // Convert USD cents to display currency
     return expenses.map(expense => ({
       ...expense,
-      amount: fromBaseUnits(expense.amount, currency)
+      amount: convertFromUSDCents(expense.amount, settings.currency)
     }));
   } catch (error) {
     console.error('Error getting expenses by category:', error);
@@ -340,35 +374,25 @@ export const getCategorySpending = async (categoryId: string): Promise<number> =
       'SELECT SUM(amount) as total FROM expenses WHERE categoryId = ? AND date >= ? AND date <= ?',
       [categoryId, startOfMonth, endOfMonth]
     );
-    // Get current currency to convert base units back to display amount
     const settings = await getSettings();
-    const currency = settings.currency;
 
-    const baseTotal = result?.total || 0;
-    return fromBaseUnits(baseTotal, currency);
+    const totalInUSDCents = result?.total || 0;
+    return convertFromUSDCents(totalInUSDCents, settings.currency);
   } catch (error) {
     console.error('Error getting category spending:', error);
     return 0;
   }
 };
 
-// Conversion utilities for base units (smallest denomination)
+// Legacy functions - keeping for backward compatibility but they now work with the new system
 export const toBaseUnits = (displayAmount: number, currency: Currency): number => {
-  const config = CURRENCY_CONFIG[currency];
-  if (config.decimalPlaces === 0) {
-    return Math.round(displayAmount); // JPY: 1000 -> 1000
-  } else {
-    return Math.round(displayAmount * Math.pow(10, config.decimalPlaces)); // USD: 12.34 -> 1234
-  }
+  // Convert to USD cents for storage
+  return convertToUSDCents(displayAmount, currency);
 };
 
 export const fromBaseUnits = (baseAmount: number, currency: Currency): number => {
-  const config = CURRENCY_CONFIG[currency];
-  if (config.decimalPlaces === 0) {
-    return baseAmount; // JPY: 1000 -> 1000
-  } else {
-    return baseAmount / Math.pow(10, config.decimalPlaces); // USD: 1234 -> 12.34
-  }
+  // Convert from USD cents to display currency
+  return convertFromUSDCents(baseAmount, currency);
 };
 
 // Currency-aware input validation
@@ -409,13 +433,12 @@ export const validateCurrencyInput = (input: string, currency: Currency): { isVa
   return { isValid: true };
 };
 
-// Currency formatting utility (now works with base units)
-export const formatAmount = (baseAmount: number, currency: Currency): string => {
+// Currency formatting utility
+export const formatAmount = (amount: number, currency: Currency): string => {
   const config = CURRENCY_CONFIG[currency];
-  const displayAmount = fromBaseUnits(baseAmount, currency);
 
   // Format number with comma separators and appropriate decimal places
-  const formattedNumber = displayAmount.toLocaleString('en-US', {
+  const formattedNumber = amount.toLocaleString('en-US', {
     minimumFractionDigits: config.decimalPlaces,
     maximumFractionDigits: config.decimalPlaces,
   });
