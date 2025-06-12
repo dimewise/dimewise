@@ -127,47 +127,63 @@ export default function HomePage() {
     }
 
     // Regular category rendering with budget/progress
-    return (
-      <Card key={category.id} bordered p="$4" bg="$background">
-        <YStack gap="$3">
-          {/* Header with category name and amounts */}
-          <XStack justify="space-between">
-            <Text fontSize="$5" fontWeight="600">{category.name}</Text>
-            <Text
-              fontSize="$4"
-              fontWeight="500"
-              style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
-            >
-              {formatAmountLocal(category.spent)} / {formatAmountLocal(category.budget)}
-            </Text>
-          </XStack>
+    try {
+      const spentFormatted = formatAmountLocal(category.spent);
+      const budgetFormatted = formatAmountLocal(category.budget);
+      const remaining = category.budget - category.spent;
+      const overBudget = category.spent - category.budget;
+      const remainingFormatted = remaining >= 0 ? formatAmountLocal(remaining) : null;
+      const overBudgetFormatted = remaining < 0 ? formatAmountLocal(overBudget) : null;
 
-          {/* Progress bar */}
-          <YStack gap="$2">
-            <Progress value={category.percentage}>
-              <Progress.Indicator animation="bouncy" />
-            </Progress>
-
-            {/* Percentage and status */}
+      return (
+        <Card key={category.id} bordered p="$4" bg="$background">
+          <YStack gap="$3">
+            {/* Header with category name and amounts */}
             <XStack justify="space-between">
-              <Text fontSize="$3" opacity={0.7}>
-                {category.percentage.toFixed(1)}% used
-              </Text>
+              <Text fontSize="$5" fontWeight="600">{category.name}</Text>
               <Text
-                fontSize="$3"
+                fontSize="$4"
                 fontWeight="500"
                 style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
               >
-                {category.budget - category.spent >= 0 ?
-                  `${formatAmountLocal(category.budget - category.spent)} remaining` :
-                  `${formatAmountLocal(category.spent - category.budget)} over budget`
-                }
+                {spentFormatted} / {budgetFormatted}
               </Text>
             </XStack>
+
+            {/* Progress bar */}
+            <YStack gap="$2">
+              <Progress value={Math.round(category.percentage)}>
+                <Progress.Indicator animation="bouncy" />
+              </Progress>
+
+              {/* Percentage and status */}
+              <XStack justify="space-between">
+                <Text fontSize="$3" opacity={0.7}>
+                  {category.percentage.toFixed(2)}% used
+                </Text>
+                <Text
+                  fontSize="$3"
+                  fontWeight="500"
+                  style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
+                >
+                  {remaining >= 0 ?
+                    `${remainingFormatted} remaining` :
+                    `${overBudgetFormatted} over budget`
+                  }
+                </Text>
+              </XStack>
+            </YStack>
           </YStack>
-        </YStack>
-      </Card>
-    );
+        </Card>
+      );
+    } catch (error) {
+      console.error('Error in renderCategory:', error);
+      return (
+        <Card key={category.id} bordered p="$4" bg="$background">
+          <Text>Error rendering category: {category.name}</Text>
+        </Card>
+      );
+    }
   };
 
   return (
