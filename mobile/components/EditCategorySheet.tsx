@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Input, Text, YStack, XStack, Sheet } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { updateCategoryBudget, validateCurrencyInput } from '../utils/storage';
-import { Category } from '../utils/storage';
+import { useCategories, validateCurrencyInput } from '../storage';
+import { Category } from '../storage';
 import { useCurrency } from '../utils/CurrencyContext';
 
 interface EditCategorySheetProps {
@@ -19,6 +19,9 @@ export default function EditCategorySheet({ open, onOpenChange, category, onCate
   const [error, setError] = useState('');
   const toast = useToastController();
   const { currency } = useCurrency();
+
+  // Storage hooks
+  const categoryOps = useCategories();
 
   useEffect(() => {
     if (open && category) {
@@ -45,7 +48,7 @@ export default function EditCategorySheet({ open, onOpenChange, category, onCate
     setError('');
 
     try {
-      await updateCategoryBudget(category.id, Number(budget), currency);
+      await categoryOps.updateCategoryBudget(category.id, Number(budget), currency);
 
       toast.show('Category updated successfully!', {
         message: 'Budget has been updated.',

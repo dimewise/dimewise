@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { getCurrentMonthExpenses, getTotalBudget, getTotalSpent, formatAmount, getCategories, getCategorySpending } from '../../utils/storage';
-import { Expense, Category } from '../../utils/storage';
+import { useExpenses, useCategories, formatAmount } from '../../storage';
+import { Expense, Category } from '../../storage';
 import { Plus } from '@tamagui/lucide-icons';
 import ExpenseSheet from '../../components/ExpenseSheet';
 import { MiddleDotSpacer } from 'components/MiddleDotSpacer';
@@ -26,6 +26,10 @@ export default function HomePage() {
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
 
+  // Storage hooks
+  const expenseOps = useExpenses();
+  const categoryOps = useCategories();
+
   useEffect(() => {
     loadData();
   }, [refreshKey]); // Re-load data when currency changes
@@ -41,16 +45,16 @@ export default function HomePage() {
     try {
       setLoading(true);
       const [currentExpenses, budget, spent, allCategories] = await Promise.all([
-        getCurrentMonthExpenses(),
-        getTotalBudget(),
-        getTotalSpent(),
-        getCategories(),
+        expenseOps.getCurrentMonthExpenses(),
+        categoryOps.getTotalBudget(),
+        expenseOps.getTotalSpent(),
+        categoryOps.getCategories(),
       ]);
 
       // Load spending data for each category
       const categoriesWithSpending = await Promise.all(
         allCategories.map(async (category) => {
-          const categorySpent = await getCategorySpending(category.id);
+          const categorySpent = await categoryOps.getCategorySpending(category.id);
           const percentage = category.budget > 0 ? (categorySpent / category.budget) * 100 : 0;
           return {
             ...category,

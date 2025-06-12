@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { Button, H2, ScrollView, Text, YStack, Card, XStack, View, H3 } from 'tamagui';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { getExpenses, formatAmount } from '../../utils/storage';
-import { Expense } from '../../utils/storage';
+import { useExpenses, formatAmount } from '../../storage';
+import { Expense } from '../../storage';
 import { format } from 'date-fns';
 import { Plus } from '@tamagui/lucide-icons';
 import ExpenseSheet from '../../components/ExpenseSheet';
@@ -16,6 +16,9 @@ export default function ExpensesScreen() {
   const insets = useSafeAreaInsets();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
+
+  // Storage hooks
+  const expenseOps = useExpenses();
 
   useEffect(() => {
     loadData();
@@ -31,7 +34,7 @@ export default function ExpensesScreen() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const allExpenses = await getExpenses();
+      const allExpenses = await expenseOps.getExpenses();
       setExpenses(allExpenses);
     } catch (error) {
       console.error('Error loading expenses:', error);

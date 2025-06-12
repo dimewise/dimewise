@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Form, Input, Select, Text, TextArea, YStack, XStack, Sheet, Adapt } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, saveExpense, generateId, validateCurrencyInput, getPaymentMethods } from '../utils/storage';
-import { Category, PaymentMethod } from '../utils/storage';
+import { useCategories, useExpenses, usePaymentMethods, generateId, validateCurrencyInput } from '../storage';
+import { Category, PaymentMethod } from '../storage';
 import { ChevronDown } from '@tamagui/lucide-icons';
 import { useCurrency } from '../utils/CurrencyContext';
 
@@ -26,6 +26,11 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
   const toast = useToastController();
   const { currency } = useCurrency();
 
+  // Storage hooks
+  const categoryOps = useCategories();
+  const expenseOps = useExpenses();
+  const paymentMethodOps = usePaymentMethods();
+
   useEffect(() => {
     if (open) {
       loadData();
@@ -45,8 +50,8 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
   const loadData = async () => {
     try {
       const [cats, payMethods] = await Promise.all([
-        getCategories(),
-        getPaymentMethods(),
+        categoryOps.getCategories(),
+        paymentMethodOps.getPaymentMethods(),
       ]);
       setCategories(cats);
       setPaymentMethods(payMethods);
@@ -96,16 +101,15 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
     setError('');
 
     try {
-      await saveExpense({
-        id: generateId(),
-        title: title.trim(),
-        description: description.trim(),
-        amount: Number(amount),
-        currency: currency,
+      await expenseOps.createExpense(
+        title.trim(),
+        description.trim(),
+        Number(amount),
+        currency,
         categoryId,
         paymentMethodId,
-        date: new Date().toISOString(),
-      });
+        new Date().toISOString()
+      );
 
       toast.show('Expense added successfully!', {
         message: 'Your expense has been saved.',

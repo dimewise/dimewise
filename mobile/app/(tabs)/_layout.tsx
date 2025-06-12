@@ -1,18 +1,9 @@
 import { Tabs } from 'expo-router'
 import { useTheme } from 'tamagui'
 import { BarChart2, Home, Settings } from '@tamagui/lucide-icons'
-import { useEffect } from 'react'
-import { initDatabase } from '../../utils/storage'
 
 export default function TabLayout() {
   const theme = useTheme()
-
-  // Initialize database when app starts
-  useEffect(() => {
-    initDatabase().catch(error => {
-      console.error('Failed to initialize database:', error)
-    })
-  }, [])
 
   return (
     <Tabs
