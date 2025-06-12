@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
-import { useExpenses, useCategories, formatAmount } from '../../storage';
+import { useExpenses, useCategories, formatAmount, SYSTEM_CATEGORIES } from '../../storage';
 import { Expense, Category } from '../../storage';
 import { Plus } from '@tamagui/lucide-icons';
 import ExpenseSheet from '../../components/ExpenseSheet';
@@ -64,8 +64,16 @@ export default function HomePage() {
         })
       );
 
+      // Filter out uncategorized if it has no spending
+      const filteredCategories = categoriesWithSpending.filter(category => {
+        if (category.id === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+          return category.spent > 0; // Only show uncategorized if there's spending
+        }
+        return true; // Show all other categories
+      });
+
       setExpenses(currentExpenses.slice(0, 5)); // Show only 5 most recent expenses
-      setCategories(categoriesWithSpending);
+      setCategories(filteredCategories);
       setTotalBudget(budget);
       setTotalSpent(spent);
     } catch (error) {
@@ -101,6 +109,67 @@ export default function HomePage() {
     setShowExpenseSheet(true);
   };
 
+  const renderCategory = (category: CategoryWithSpending) => {
+    const isUncategorized = category.id === SYSTEM_CATEGORIES.UNCATEGORIZED;
+
+    if (isUncategorized) {
+      // Special rendering for uncategorized - just show the spent amount
+      return (
+        <Card key={category.id} bordered p="$4" bg="$background">
+          <XStack justify="space-between">
+            <Text fontSize="$5" fontWeight="600">{category.name}</Text>
+            <Text fontSize="$4" fontWeight="500" opacity={0.8}>
+              {formatAmountLocal(category.spent)}
+            </Text>
+          </XStack>
+        </Card>
+      );
+    }
+
+    // Regular category rendering with budget/progress
+    return (
+      <Card key={category.id} bordered p="$4" bg="$background">
+        <YStack gap="$3">
+          {/* Header with category name and amounts */}
+          <XStack justify="space-between">
+            <Text fontSize="$5" fontWeight="600">{category.name}</Text>
+            <Text
+              fontSize="$4"
+              fontWeight="500"
+              style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
+            >
+              {formatAmountLocal(category.spent)} / {formatAmountLocal(category.budget)}
+            </Text>
+          </XStack>
+
+          {/* Progress bar */}
+          <YStack gap="$2">
+            <Progress value={category.percentage}>
+              <Progress.Indicator animation="bouncy" />
+            </Progress>
+
+            {/* Percentage and status */}
+            <XStack justify="space-between">
+              <Text fontSize="$3" opacity={0.7}>
+                {category.percentage.toFixed(1)}% used
+              </Text>
+              <Text
+                fontSize="$3"
+                fontWeight="500"
+                style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
+              >
+                {category.budget - category.spent >= 0 ?
+                  `${formatAmountLocal(category.budget - category.spent)} remaining` :
+                  `${formatAmountLocal(category.spent - category.budget)} over budget`
+                }
+              </Text>
+            </XStack>
+          </YStack>
+        </YStack>
+      </Card>
+    );
+  };
+
   return (
     <View flex={1} bg="$background">
       <YStack p="$4" pt={insets.top + 16}>
@@ -114,47 +183,7 @@ export default function HomePage() {
             <>
               <H4>Category Breakdown</H4>
               <YStack gap="$3">
-                {categories.map((category) => (
-                  <Card key={category.id} bordered p="$4" bg="$background">
-                    <YStack gap="$3">
-                      {/* Header with category name and amounts */}
-                      <XStack justify="space-between">
-                        <Text fontSize="$5" fontWeight="600">{category.name}</Text>
-                        <Text
-                          fontSize="$4"
-                          fontWeight="500"
-                          style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
-                        >
-                          {formatAmountLocal(category.spent)} / {formatAmountLocal(category.budget)}
-                        </Text>
-                      </XStack>
-
-                      {/* Progress bar */}
-                      <YStack gap="$2">
-                        <Progress value={category.percentage}>
-                          <Progress.Indicator animation="bouncy" />
-                        </Progress>
-
-                        {/* Percentage and status */}
-                        <XStack justify="space-between">
-                          <Text fontSize="$3" opacity={0.7}>
-                            {category.percentage.toFixed(1)}% used
-                          </Text>
-                          <Text
-                            fontSize="$3"
-                            fontWeight="500"
-                            style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
-                          >
-                            {category.budget - category.spent >= 0 ?
-                              `${formatAmountLocal(category.budget - category.spent)} remaining` :
-                              `${formatAmountLocal(category.spent - category.budget)} over budget`
-                            }
-                          </Text>
-                        </XStack>
-                      </YStack>
-                    </YStack>
-                  </Card>
-                ))}
+                {categories.map(renderCategory)}
               </YStack>
             </>
           ) : (
