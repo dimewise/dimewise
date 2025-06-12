@@ -6,9 +6,9 @@ import { StatusBar } from 'expo-status-bar'
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
 import { SplashScreen, Stack } from 'expo-router'
-import { Provider } from './Provider'
 import { useTheme } from 'tamagui'
 import { CurrencyProvider } from '../utils/CurrencyContext'
+import { Provider } from 'components/Provider'
 
 export {
   // Catch any errors thrown by the Layout component.
