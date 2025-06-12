@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Input, Text, YStack, XStack, Sheet } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { useCategories, validateCurrencyInput } from '../storage';
+import { useCategories, validateCurrencyInput, SYSTEM_CATEGORIES } from '../storage';
 import { Category } from '../storage';
 import { useCurrency } from '../utils/CurrencyContext';
 
@@ -25,6 +25,16 @@ export default function EditCategorySheet({ open, onOpenChange, category, onCate
 
   useEffect(() => {
     if (open && category) {
+      // Check if trying to edit a system category
+      if (category.id === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+        toast.show('Error', {
+          message: 'System categories cannot be edited.',
+          type: 'error',
+        });
+        onOpenChange(false);
+        return;
+      }
+
       // Set the current budget value when opening
       setBudget(category.budget.toString());
       setError('');
@@ -36,6 +46,12 @@ export default function EditCategorySheet({ open, onOpenChange, category, onCate
 
   const handleSubmit = async () => {
     if (!category) return;
+
+    // Extra safety check
+    if (category.id === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+      setError('System categories cannot be edited.');
+      return;
+    }
 
     // Use currency-aware validation
     const validation = validateCurrencyInput(budget, currency);

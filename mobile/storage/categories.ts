@@ -112,6 +112,11 @@ export const createCategory = async (db: SQLiteDatabase, name: string, budget: n
 // Update existing category
 export const updateCategory = async (db: SQLiteDatabase, category: Category): Promise<void> => {
   try {
+    // Don't allow updating system categories
+    if (category.id === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+      throw new Error('Cannot update system categories');
+    }
+
     const storageAmount = toStorageUnits(category.budget, category.currency);
 
     console.log(`Updating category: ${category.name}, ${category.budget} ${category.currency} -> ${storageAmount} storage units`);
@@ -129,6 +134,11 @@ export const updateCategory = async (db: SQLiteDatabase, category: Category): Pr
 // Update category budget only
 export const updateCategoryBudget = async (db: SQLiteDatabase, categoryId: string, newBudget: number, currency: Currency): Promise<void> => {
   try {
+    // Don't allow updating system categories
+    if (categoryId === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+      throw new Error('Cannot update system categories');
+    }
+
     const storageAmount = toStorageUnits(newBudget, currency);
 
     await db.runAsync(

@@ -3,7 +3,7 @@ import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4, Sele
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useToastController } from '@tamagui/toast';
-import { useCategories, usePaymentMethods, SUPPORTED_CURRENCIES, formatAmount } from '../../storage';
+import { useCategories, usePaymentMethods, SUPPORTED_CURRENCIES, SYSTEM_CATEGORIES, formatAmount } from '../../storage';
 import { Category, Currency, PaymentMethod } from '../../storage';
 import { Trash, Plus, ChevronDown, Edit3 } from '@tamagui/lucide-icons';
 import CategorySheet from '../../components/CategorySheet';
@@ -52,7 +52,13 @@ export default function ProfileScreen() {
         categoryOps.getCategories(),
         paymentMethodOps.getPaymentMethods(),
       ]);
-      setCategories(allCategories);
+
+      // Filter out system categories (like Uncategorized) from the profile view
+      const userCategories = allCategories.filter(category =>
+        category.id !== SYSTEM_CATEGORIES.UNCATEGORIZED
+      );
+
+      setCategories(userCategories);
       setPaymentMethods(allPaymentMethods);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -66,6 +72,15 @@ export default function ProfileScreen() {
   };
 
   const handleEditCategory = (category: Category) => {
+    // Extra safety check - prevent editing system categories
+    if (category.id === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+      toast.show('Error', {
+        message: 'System categories cannot be edited.',
+        type: 'error',
+      });
+      return;
+    }
+
     setEditingCategory(category);
     setShowEditCategorySheet(true);
   };
@@ -96,6 +111,15 @@ export default function ProfileScreen() {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
+    // Extra safety check - prevent deleting system categories
+    if (categoryId === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+      toast.show('Error', {
+        message: 'System categories cannot be deleted.',
+        type: 'error',
+      });
+      return;
+    }
+
     try {
       await categoryOps.deleteCategory(categoryId);
       toast.show('Category deleted successfully!', {
