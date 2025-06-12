@@ -3,8 +3,8 @@ import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4, Sele
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useToastController } from '@tamagui/toast';
-import { getCategories, deleteCategory, SUPPORTED_CURRENCIES, formatAmount, getPaymentMethods, deletePaymentMethod, resetDatabase } from '../../utils/storage';
-import { Category, Currency, PaymentMethod } from '../../utils/storage';
+import { useCategories, usePaymentMethods, SUPPORTED_CURRENCIES, formatAmount } from '../../storage';
+import { Category, Currency, PaymentMethod } from '../../storage';
 import { Trash, Plus, ChevronDown, Edit3 } from '@tamagui/lucide-icons';
 import CategorySheet from '../../components/CategorySheet';
 import EditCategorySheet from '../../components/EditCategorySheet';
@@ -24,6 +24,10 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const toast = useToastController();
   const { currency, setCurrency } = useCurrency();
+
+  // Storage hooks
+  const categoryOps = useCategories();
+  const paymentMethodOps = usePaymentMethods();
 
   useEffect(() => {
     // Sync selected currency with context
@@ -45,8 +49,8 @@ export default function ProfileScreen() {
     try {
       setLoading(true);
       const [allCategories, allPaymentMethods] = await Promise.all([
-        getCategories(),
-        getPaymentMethods(),
+        categoryOps.getCategories(),
+        paymentMethodOps.getPaymentMethods(),
       ]);
       setCategories(allCategories);
       setPaymentMethods(allPaymentMethods);
@@ -76,7 +80,7 @@ export default function ProfileScreen() {
 
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
     try {
-      await deletePaymentMethod(paymentMethodId);
+      await paymentMethodOps.deletePaymentMethod(paymentMethodId);
       toast.show('Payment method deleted successfully!', {
         message: 'Your payment method has been removed.',
       });
@@ -93,7 +97,7 @@ export default function ProfileScreen() {
 
   const handleDeleteCategory = async (categoryId: string) => {
     try {
-      await deleteCategory(categoryId);
+      await categoryOps.deleteCategory(categoryId);
       toast.show('Category deleted successfully!', {
         message: 'Your category has been removed.',
       });
@@ -133,9 +137,9 @@ export default function ProfileScreen() {
   // DEVELOPMENT ONLY - Comment out for production
   const handleResetDatabase = async () => {
     try {
-      await resetDatabase();
-      toast.show('Database reset successfully!', {
-        message: 'All data has been cleared and fresh database created.',
+      // TODO: Implement database reset with new storage system
+      toast.show('Reset Database', {
+        message: 'Database reset functionality needs to be implemented with new storage system.',
       });
       // Refresh all data
       loadData();

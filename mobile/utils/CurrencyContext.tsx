@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Currency, getSettings, saveSettings } from './storage';
+import { Currency, useSettings } from '../storage';
 
 interface CurrencyContextType {
   currency: Currency;
@@ -10,14 +10,17 @@ interface CurrencyContextType {
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currency, setCurrencyState] = useState<Currency>('JPY');
+  const [currency, setCurrencyState] = useState<Currency>('USD');
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Storage hooks
+  const settingsOps = useSettings();
 
   useEffect(() => {
     // Load initial currency setting
     const loadCurrency = async () => {
       try {
-        const settings = await getSettings();
+        const settings = await settingsOps.getSettings();
         setCurrencyState(settings.currency);
       } catch (error) {
         console.error('Error loading currency setting:', error);
@@ -25,12 +28,12 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     loadCurrency();
-  }, []);
+  }, [settingsOps]);
 
   const setCurrency = async (newCurrency: Currency) => {
     try {
       // Save the new currency setting
-      await saveSettings({ currency: newCurrency });
+      await settingsOps.updateCurrency(newCurrency);
 
       // Update local state
       setCurrencyState(newCurrency);

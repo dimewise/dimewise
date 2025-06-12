@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Input, Text, YStack, XStack, Sheet, Select, Adapt } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { savePaymentMethod, generateId } from '../utils/storage';
-import { PaymentMethod } from '../utils/storage';
+import { usePaymentMethods, generateId } from '../storage';
+import { PaymentMethod } from '../storage';
 import { ChevronDown } from '@tamagui/lucide-icons';
 
 interface PaymentMethodSheetProps {
@@ -27,6 +27,9 @@ export default function PaymentMethodSheet({ open, onOpenChange, onPaymentMethod
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const toast = useToastController();
+
+  // Storage hooks
+  const paymentMethodOps = usePaymentMethods();
 
   useEffect(() => {
     if (open) {
@@ -56,7 +59,7 @@ export default function PaymentMethodSheet({ open, onOpenChange, onPaymentMethod
         type,
       };
 
-      await savePaymentMethod(newPaymentMethod);
+      await paymentMethodOps.createPaymentMethod(newPaymentMethod.name, newPaymentMethod.type);
 
       toast.show('Payment method added successfully!', {
         message: 'Your payment method has been saved.',

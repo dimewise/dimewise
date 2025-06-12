@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
 import { Button, Input, Text, YStack, XStack, Sheet } from 'tamagui';
 import { useToastController } from '@tamagui/toast';
-import { saveCategory, generateId, validateCurrencyInput } from '../utils/storage';
-import { Category } from '../utils/storage';
+import { useCategories, generateId, validateCurrencyInput } from '../storage';
+import { Category } from '../storage';
 import { useCurrency } from '../utils/CurrencyContext';
 
 interface CategorySheetProps {
@@ -19,6 +19,9 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
   const [error, setError] = useState('');
   const toast = useToastController();
   const { currency } = useCurrency();
+
+  // Storage hooks
+  const categoryOps = useCategories();
 
   useEffect(() => {
     if (open) {
@@ -56,7 +59,7 @@ export default function CategorySheet({ open, onOpenChange, onCategoryAdded }: C
         currency: currency
       };
 
-      await saveCategory(newCategory);
+      await categoryOps.createCategory(newCategory.name, newCategory.budget, newCategory.currency);
 
       toast.show('Category added successfully!', {
         message: 'Your category has been saved.',
