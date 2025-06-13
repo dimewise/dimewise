@@ -115,7 +115,7 @@ export default function PaymentMethodSheet({ open, onOpenChange, onPaymentMethod
             autoCapitalize="words"
           />
 
-          <Select value={type} onValueChange={(value) => setType(value as PaymentMethod['type'])}>
+          <Select value={type} onValueChange={(value) => setType(value as PaymentMethod['type'])} onOpenChange={() => Keyboard.dismiss()}>
             <Select.Trigger iconAfter={<ChevronDown />}>
               <Select.Value placeholder="Select type">
                 {PAYMENT_METHOD_TYPES.find(t => t.value === type)?.label}
@@ -123,7 +123,7 @@ export default function PaymentMethodSheet({ open, onOpenChange, onPaymentMethod
             </Select.Trigger>
 
             <Adapt when="maxMd" platform="touch">
-              <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000}>
+              <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000} snapPointsMode="fit">
                 <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
                   <Sheet.ScrollView>
                     <Adapt.Contents />
