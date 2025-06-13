@@ -34,6 +34,9 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
   useEffect(() => {
     if (open) {
       loadData();
+    } else {
+      // Reset focus/keyboard when sheet closes
+      Keyboard.dismiss();
       // Reset form when opening
       setTitle('');
       setDescription('');
@@ -41,9 +44,6 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       setCategoryId('');
       setPaymentMethodId('');
       setError('');
-    } else {
-      // Reset focus/keyboard when sheet closes
-      Keyboard.dismiss();
     }
   }, [open]);
 
@@ -55,19 +55,6 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
       ]);
       setCategories(cats);
       setPaymentMethods(payMethods);
-      if (cats.length > 0 && !categoryId) {
-        setCategoryId(cats[0].id);
-      }
-      // Set default payment method to Cash if available and no method is selected
-      if (payMethods.length > 0 && !paymentMethodId) {
-        const cashMethod = payMethods.find(pm => pm.type === 'cash');
-        if (cashMethod) {
-          setPaymentMethodId(cashMethod.id);
-        } else {
-          // Fallback to first payment method if Cash is not available
-          setPaymentMethodId(payMethods[0].id);
-        }
-      }
     } catch (e) {
       console.error('Failed to load data:', e);
       setError('Failed to load data. Please try again.');
@@ -182,13 +169,13 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
               keyboardType="numeric"
             />
 
-            <Select value={categoryId} onValueChange={setCategoryId}>
+            <Select value={categoryId} onValueChange={setCategoryId} onOpenChange={() => Keyboard.dismiss()}>
               <Select.Trigger iconAfter={<ChevronDown />}>
                 <Select.Value placeholder="Select category" />
               </Select.Trigger>
 
               <Adapt when="maxMd" platform="touch">
-                <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000}>
+                <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000} snapPointsMode="fit">
                   <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
                     <Sheet.ScrollView>
                       <Adapt.Contents />
@@ -220,13 +207,13 @@ export default function ExpenseSheet({ open, onOpenChange, onExpenseAdded }: Exp
               </Select.Content>
             </Select>
 
-            <Select value={paymentMethodId} onValueChange={setPaymentMethodId}>
+            <Select value={paymentMethodId} onValueChange={setPaymentMethodId} onOpenChange={() => Keyboard.dismiss()}>
               <Select.Trigger iconAfter={<ChevronDown />}>
                 <Select.Value placeholder="Select payment method" />
               </Select.Trigger>
 
               <Adapt when="maxMd" platform="touch">
-                <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000}>
+                <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000} snapPointsMode="fit">
                   <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
                     <Sheet.ScrollView>
                       <Adapt.Contents />
