@@ -9,8 +9,11 @@ import {
   Divider,
   Menu
 } from 'react-native-paper';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePaymentMethods } from '../storage';
+
+const PAYMENT_METHOD_TYPES = ['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer', 'Digital Wallet', 'Other'];
 
 interface PaymentMethodBottomSheetProps {
   visible: boolean;
@@ -18,21 +21,7 @@ interface PaymentMethodBottomSheetProps {
   onPaymentMethodAdded?: () => void;
 }
 
-const PAYMENT_METHOD_TYPES = [
-  'Credit Card',
-  'Debit Card',
-  'Cash',
-  'Bank Transfer',
-  'Digital Wallet',
-  'Check',
-  'Other'
-];
-
-export default function PaymentMethodBottomSheet({
-  visible,
-  onDismiss,
-  onPaymentMethodAdded
-}: PaymentMethodBottomSheetProps) {
+export default function PaymentMethodBottomSheet({ visible, onDismiss, onPaymentMethodAdded }: PaymentMethodBottomSheetProps) {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,19 +29,19 @@ export default function PaymentMethodBottomSheet({
   const [showTypeMenu, setShowTypeMenu] = useState(false);
 
   const theme = useTheme();
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // Storage hooks
   const paymentMethodOps = usePaymentMethods();
 
-  // Bottom sheet snap points
-  const snapPoints = useMemo(() => ['50%'], []);
+  // Bottom sheet snap points - using dynamic sizing
+  const snapPoints = useMemo(() => ['40%'], []);
 
   useEffect(() => {
     if (visible) {
-      bottomSheetRef.current?.expand();
+      bottomSheetModalRef.current?.present();
     } else {
-      bottomSheetRef.current?.close();
+      bottomSheetModalRef.current?.dismiss();
       resetForm();
     }
   }, [visible]);
@@ -79,10 +68,7 @@ export default function PaymentMethodBottomSheet({
     setError('');
 
     try {
-      await paymentMethodOps.createPaymentMethod(
-        name.trim(),
-        type
-      );
+      await paymentMethodOps.createPaymentMethod(name.trim(), type);
 
       onDismiss();
       onPaymentMethodAdded?.();
@@ -99,6 +85,20 @@ export default function PaymentMethodBottomSheet({
       onDismiss();
     }
   }, [onDismiss]);
+
+  // Backdrop component for tap-to-dismiss
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        onPress={onDismiss}
+      />
+    ),
+    [onDismiss]
+  );
 
   const renderTypeMenu = () => (
     <Menu
@@ -128,71 +128,65 @@ export default function PaymentMethodBottomSheet({
   );
 
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={visible ? 0 : -1}
+    <BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
+      enableDynamicSizing
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
+      backdropComponent={renderBackdrop}
     >
-      <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text variant="headlineSmall" style={{ marginBottom: 24, fontWeight: '600' }}>
-          New Payment Method
-        </Text>
+      <BottomSheetView style={{ padding: 16, paddingBottom: 16 }}>
+        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+          <Text variant="headlineSmall" style={{ marginBottom: 24, fontWeight: '600' }}>
+            Add Payment Method
+          </Text>
 
-        {error ? (
-          <Surface style={{
-            padding: 12,
-            marginBottom: 16,
-            backgroundColor: theme.colors.errorContainer,
-            borderRadius: 8
-          }}>
-            <Text style={{ color: theme.colors.onErrorContainer }}>
+          {error ? (
+            <Text variant="bodyMedium" style={{ color: theme.colors.error, marginBottom: 16 }}>
               {error}
             </Text>
-          </Surface>
-        ) : null}
+          ) : null}
 
-        <View style={{ gap: 16 }}>
-          <TextInput
-            label="Payment Method Name"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            autoCapitalize="words"
-            placeholder="e.g., My Credit Card, Cash Wallet"
-          />
-
-          <View>
-            <Text variant="bodyMedium" style={{ marginBottom: 8 }}>Type</Text>
-            {renderTypeMenu()}
-          </View>
-
-          <Divider style={{ marginVertical: 8 }} />
-
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <Button
+          <View style={{ gap: 16 }}>
+            <TextInput
+              label="Payment Method Name"
+              value={name}
+              onChangeText={setName}
               mode="outlined"
-              onPress={onDismiss}
-              style={{ flex: 1 }}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              style={{ flex: 1 }}
-              loading={loading}
-              disabled={loading}
-            >
-              Add Payment Method
-            </Button>
+              placeholder="e.g., Credit Card, Cash, Bank Transfer"
+            />
+
+            <View style={{ gap: 8 }}>
+              <Text variant="bodyMedium">Type</Text>
+              {renderTypeMenu()}
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <Button
+                mode="outlined"
+                onPress={onDismiss}
+                style={{ flex: 1 }}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
+                style={{ flex: 1 }}
+                loading={loading}
+                disabled={loading}
+              >
+                Add Method
+              </Button>
+            </View>
           </View>
-        </View>
-      </BottomSheetScrollView>
-    </BottomSheet>
+        </SafeAreaView>
+      </BottomSheetView>
+    </BottomSheetModal>
   );
 } 

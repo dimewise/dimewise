@@ -8,6 +8,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { PaperProvider, MD3LightTheme, MD3DarkTheme, adaptNavigationTheme } from 'react-native-paper';
 import { DefaultTheme, DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Import providers
 import { DatabaseProvider } from '../storage/provider';
@@ -128,23 +129,29 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <PaperProvider theme={paperTheme}>
-        <ThemeProvider value={navigationTheme}>
-          <DatabaseProvider>
-            <CurrencyProvider>
-              <BottomSheetModalProvider>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                  }}
-                />
-                <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-              </BottomSheetModalProvider>
-            </CurrencyProvider>
-          </DatabaseProvider>
-        </ThemeProvider>
-      </PaperProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PaperProvider theme={paperTheme}>
+          <ThemeProvider value={navigationTheme}>
+            <DatabaseProvider>
+              <CurrencyProvider>
+                <BottomSheetModalProvider>
+                  <Stack
+                    screenOptions={{
+                      headerShown: false,
+                    }}
+                  />
+                  <StatusBar
+                    style={colorScheme === 'dark' ? 'light' : 'dark'}
+                    translucent={true}
+                    backgroundColor={paperTheme.colors.surface}
+                  />
+                </BottomSheetModalProvider>
+              </CurrencyProvider>
+            </DatabaseProvider>
+          </ThemeProvider>
+        </PaperProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 } 

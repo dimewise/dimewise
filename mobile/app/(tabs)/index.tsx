@@ -9,7 +9,7 @@ import {
   Divider,
   Button
 } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { useExpenses, useCategories, formatAmount, SYSTEM_CATEGORIES } from '../../storage';
 import { Expense, Category } from '../../storage';
@@ -28,7 +28,6 @@ export default function HomePage() {
   const [totalSpent, setTotalSpent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
-  const insets = useSafeAreaInsets();
   const theme = useTheme();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
@@ -179,12 +178,12 @@ export default function HomePage() {
   const remaining = totalBudget - totalSpent;
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Surface style={{ paddingTop: insets.top + 16, paddingHorizontal: 16, paddingBottom: 16 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.surface }} edges={['top', 'left', 'right']}>
+      <Surface style={{ paddingTop: 16, paddingHorizontal: 16, paddingBottom: 16, backgroundColor: theme.colors.surface }}>
         <Text variant="headlineSmall" style={{ fontWeight: '600' }}>Budget Overview</Text>
       </Surface>
 
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 200 }}>
+      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 16, paddingBottom: 200 }}>
         {loading ? (
           <Surface style={{ padding: 16, alignItems: 'center' }}>
             <Text>Loading...</Text>
@@ -198,87 +197,109 @@ export default function HomePage() {
               <>
                 <Divider style={{ marginVertical: 16 }} />
                 <Text variant="titleLarge" style={{ marginBottom: 16 }}>Recent Expenses</Text>
-                {expenses.map((expense) => (
-                  <Card key={expense.id} style={{ marginVertical: 2 }}>
-                    <Card.Content>
-                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <View style={{ flex: 1 }}>
-                          <Text variant="bodyLarge">{expense.title}</Text>
-                          {expense.description && (
-                            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                              {expense.description}
-                            </Text>
-                          )}
+                {expenses.map((expense) => {
+                  const category = categories.find(c => c.id === expense.categoryId);
+                  return (
+                    <Card key={expense.id} style={{ marginVertical: 4 }}>
+                      <Card.Content>
+                        <View style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start'
+                        }}>
+                          <View style={{ flex: 1, marginRight: 12 }}>
+                            <Text variant="titleMedium">{expense.title}</Text>
+                            {expense.description && (
+                              <Text
+                                variant="bodySmall"
+                                style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}
+                              >
+                                {expense.description}
+                              </Text>
+                            )}
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 12 }}>
+                              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                                {category?.name || 'Unknown'}
+                              </Text>
+                              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                                {new Date(expense.date).toLocaleDateString()}
+                              </Text>
+                            </View>
+                          </View>
+                          <Text variant="titleMedium" style={{ fontWeight: '600' }}>
+                            {formatAmountLocal(expense.amount)}
+                          </Text>
                         </View>
-                        <Text variant="bodyLarge" style={{ fontWeight: '600' }}>
-                          {formatAmountLocal(expense.amount)}
-                        </Text>
-                      </View>
-                    </Card.Content>
-                  </Card>
-                ))}
+                      </Card.Content>
+                    </Card>
+                  );
+                })}
               </>
             )}
           </>
         ) : (
           <Surface style={{ padding: 24, alignItems: 'center' }}>
             <Text variant="titleMedium" style={{ textAlign: 'center', marginBottom: 16 }}>
-              No categories found
+              No budget categories found
             </Text>
-            <Text variant="bodyMedium" style={{ textAlign: 'center', color: theme.colors.onSurfaceVariant }}>
-              Create your first budget category to get started
+            <Text variant="bodyMedium" style={{
+              textAlign: 'center',
+              color: theme.colors.onSurfaceVariant,
+              marginBottom: 24
+            }}>
+              Set up budget categories in your profile to start tracking expenses.
             </Text>
           </Surface>
         )}
       </ScrollView>
 
-      {/* Budget Summary Section - Fixed at bottom */}
-      <Surface
-        style={{
-          padding: 16,
-          paddingBottom: insets.bottom + 16,
-          borderTopWidth: 1,
-          borderTopColor: theme.colors.outline
-        }}
-        elevation={3}
-      >
-        <View style={{ gap: 12 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text variant="bodyMedium">Total Budget:</Text>
-            <Text variant="bodyMedium" style={{ fontWeight: '600' }}>
+      {/* Budget Summary - Fixed Bottom Section */}
+      <Surface style={{
+        padding: 16,
+        backgroundColor: theme.colors.surface,
+        elevation: 8,
+      }}>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 16
+        }}>
+          <View style={{ flex: 1 }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              Total Budget
+            </Text>
+            <Text variant="titleMedium" style={{ fontWeight: '600' }}>
               {formatAmountLocal(totalBudget)}
             </Text>
           </View>
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text variant="bodyMedium">Spent:</Text>
-            <Text variant="bodyMedium" style={{ fontWeight: '600', color: theme.colors.error }}>
+          <View style={{ flex: 1, alignItems: 'center' }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              Spent
+            </Text>
+            <Text variant="titleMedium" style={{ fontWeight: '600' }}>
               {formatAmountLocal(totalSpent)}
             </Text>
           </View>
-
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text variant="bodyMedium">Remaining:</Text>
-            <Text
-              variant="bodyMedium"
-              style={{
-                fontWeight: '600',
-                color: remaining >= 0 ? theme.colors.primary : theme.colors.error
-              }}
-            >
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              Remaining
+            </Text>
+            <Text variant="titleMedium" style={{
+              fontWeight: '600',
+              color: remaining >= 0 ? theme.colors.secondary : theme.colors.error
+            }}>
               {formatAmountLocal(remaining)}
             </Text>
           </View>
-
-          <Button
-            mode="contained"
-            icon="plus"
-            onPress={() => setShowExpenseSheet(true)}
-            style={{ marginTop: 8 }}
-          >
-            New Expense
-          </Button>
         </View>
+        <Button
+          mode="contained"
+          onPress={() => setShowExpenseSheet(true)}
+          style={{ marginTop: 8 }}
+        >
+          New Expense
+        </Button>
       </Surface>
 
       <ExpenseBottomSheet
@@ -286,6 +307,6 @@ export default function HomePage() {
         onDismiss={() => setShowExpenseSheet(false)}
         onExpenseAdded={handleExpenseAdded}
       />
-    </View>
+    </SafeAreaView>
   );
 } 
