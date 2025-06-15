@@ -217,74 +217,178 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-          <Text variant="headlineSmall" style={{ marginBottom: 24, fontWeight: '600' }}>
-            Add New Expense
-          </Text>
-
-          {error ? (
-            <Text variant="bodyMedium" style={{ color: theme.colors.error, marginBottom: 16 }}>
-              {error}
+          <View style={{
+            padding: 32,
+            paddingBottom: 24,
+            backgroundColor: theme.colors.surface,
+          }}>
+            <Text variant="headlineMedium" style={{
+              marginBottom: 32,
+              fontWeight: '700',
+              color: theme.colors.onSurface,
+              textAlign: 'center'
+            }}>
+              New Expense
             </Text>
-          ) : null}
 
-          <View style={{ gap: 16 }}>
-            <TextInput
-              label="Title"
-              value={title}
-              onChangeText={setTitle}
-              mode="outlined"
-              placeholder="Enter expense title"
-            />
+            {error ? (
+              <View style={{
+                padding: 16,
+                backgroundColor: theme.colors.errorContainer,
+                borderRadius: 6,
+                marginBottom: 24,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
+                  {error}
+                </Text>
+              </View>
+            ) : null}
 
-            <TextInput
-              label="Description (Optional)"
-              value={description}
-              onChangeText={setDescription}
-              mode="outlined"
-              placeholder="Enter description"
-              multiline
-              numberOfLines={3}
-            />
-
-            <TextInput
-              label={`Amount (${currency})`}
-              value={amount}
-              onChangeText={setAmount}
-              mode="outlined"
-              placeholder="0.00"
-              keyboardType="numeric"
-            />
-
-            <View style={{ gap: 8 }}>
-              <Text variant="bodyMedium">Category</Text>
-              {renderCategoryMenu()}
-            </View>
-
-            <View style={{ gap: 8 }}>
-              <Text variant="bodyMedium">Payment Method</Text>
-              {renderPaymentMethodMenu()}
-            </View>
-
-            <Divider style={{ marginVertical: 8 }} />
-
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <Button
+            <View style={{ gap: 24 }}>
+              <TextInput
+                label="Title"
+                value={title}
+                onChangeText={setTitle}
                 mode="outlined"
-                onPress={onDismiss}
-                style={{ flex: 1 }}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handleSubmit}
-                style={{ flex: 1 }}
-                loading={loading}
-                disabled={loading}
-              >
-                Add Expense
-              </Button>
+                style={{ backgroundColor: theme.colors.surface }}
+                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
+                contentStyle={{ fontWeight: '500' }}
+              />
+
+              <TextInput
+                label="Description (optional)"
+                value={description}
+                onChangeText={setDescription}
+                mode="outlined"
+                multiline
+                numberOfLines={3}
+                style={{ backgroundColor: theme.colors.surface }}
+                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
+                contentStyle={{ fontWeight: '500' }}
+              />
+
+              <TextInput
+                label={`Amount (${currency})`}
+                value={amount}
+                onChangeText={setAmount}
+                mode="outlined"
+                keyboardType="numeric"
+                style={{ backgroundColor: theme.colors.surface }}
+                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
+                contentStyle={{ fontWeight: '600', fontSize: 16 }}
+              />
+
+              <View style={{ gap: 16 }}>
+                <View style={{
+                  padding: 20,
+                  backgroundColor: theme.colors.surfaceVariant,
+                  borderRadius: 6,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                }}>
+                  <Text variant="bodySmall" style={{
+                    marginBottom: 12,
+                    fontWeight: '600',
+                    color: theme.colors.onSurfaceVariant,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5
+                  }}>
+                    Category
+                  </Text>
+                  <Text
+                    variant="titleMedium"
+                    style={{
+                      color: theme.colors.onSurface,
+                      fontWeight: '600'
+                    }}
+                    onPress={() => setShowCategoryMenu(true)}
+                  >
+                    {selectedCategory ? selectedCategory.name : 'Select Category'}
+                  </Text>
+                </View>
+
+                <View style={{
+                  padding: 20,
+                  backgroundColor: theme.colors.surfaceVariant,
+                  borderRadius: 6,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                }}>
+                  <Text variant="bodySmall" style={{
+                    marginBottom: 12,
+                    fontWeight: '600',
+                    color: theme.colors.onSurfaceVariant,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5
+                  }}>
+                    Payment Method
+                  </Text>
+                  <Text
+                    variant="titleMedium"
+                    style={{
+                      color: theme.colors.onSurface,
+                      fontWeight: '600'
+                    }}
+                    onPress={() => setShowPaymentMethodMenu(true)}
+                  >
+                    {selectedPaymentMethod ? selectedPaymentMethod.name : 'Select Payment Method'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
+                <View style={{
+                  flex: 1,
+                  backgroundColor: theme.colors.surfaceVariant,
+                  borderRadius: 6,
+                  paddingVertical: 16,
+                  paddingHorizontal: 24,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                }}>
+                  <Text
+                    variant="titleMedium"
+                    style={{
+                      color: theme.colors.onSurfaceVariant,
+                      fontWeight: '600',
+                      letterSpacing: 0.25
+                    }}
+                    onPress={onDismiss}
+                  >
+                    Cancel
+                  </Text>
+                </View>
+                <View style={{
+                  flex: 1,
+                  backgroundColor: theme.colors.primary,
+                  borderRadius: 6,
+                  paddingVertical: 16,
+                  paddingHorizontal: 24,
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: theme.colors.primary,
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}>
+                  <Text
+                    variant="titleMedium"
+                    style={{
+                      color: theme.colors.onPrimary,
+                      fontWeight: '600',
+                      letterSpacing: 0.25
+                    }}
+                    onPress={handleSubmit}
+                  >
+                    Save Expense
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
         </SafeAreaView>

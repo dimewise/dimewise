@@ -22,47 +22,47 @@ const { LightTheme, DarkTheme: NavigationDarkTheme } = adaptNavigationTheme({
   reactNavigationDark: DarkTheme,
 });
 
-// Custom DimeWise Finance Theme
+// Custom DimeWise Finance Theme - Pure Monochrome
 const lightTheme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
-    // Primary: Trust-worthy blue for main actions
-    primary: '#1B5E20', // Deep forest green for financial growth
-    primaryContainer: '#C8E6C9', // Light green container
-    // Secondary: Professional blue for secondary actions  
-    secondary: '#1565C0', // Professional blue
-    secondaryContainer: '#E3F2FD', // Light blue container
-    // Tertiary: Warning amber for budget alerts
-    tertiary: '#E65100', // Warning orange for over-budget
-    tertiaryContainer: '#FFE0B2', // Light orange container
-    // Surfaces
-    surface: '#FAFAFA', // Clean light surface
-    surfaceVariant: '#F5F5F5', // Slightly darker surface
+    // Primary: Pure black for maximum contrast
+    primary: '#000000', // Pure black
+    primaryContainer: '#F5F5F5', // Light gray container
+    // Secondary: Medium gray (no blue hints)
+    secondary: '#6B7280', // Pure medium gray
+    secondaryContainer: '#E5E7EB', // Light gray container
+    // Tertiary: Only for critical alerts
+    tertiary: '#DC2626', // Clean red for errors only
+    tertiaryContainer: '#FEF2F2', // Very light red container
+    // Surfaces - Pure monochrome
+    surface: '#FFFFFF', // Pure white
+    surfaceVariant: '#FAFAFA', // Barely-there gray
     background: '#FFFFFF', // Pure white background
-    // Error colors for over-budget scenarios
-    error: '#D32F2F', // Strong red for errors/over-budget
-    errorContainer: '#FFEBEE', // Light red container
-    // Success green for positive financial states
+    // Error colors - Minimal red
+    error: '#DC2626', // Clean red
+    errorContainer: '#FEF2F2', // Light red container
+    // Text colors - Pure monochrome hierarchy
     onPrimary: '#FFFFFF',
-    onPrimaryContainer: '#1B5E20',
+    onPrimaryContainer: '#000000',
     onSecondary: '#FFFFFF',
-    onSecondaryContainer: '#0D47A1',
+    onSecondaryContainer: '#374151',
     onTertiary: '#FFFFFF',
-    onTertiaryContainer: '#BF360C',
-    onSurface: '#212121',
-    onSurfaceVariant: '#424242',
-    onBackground: '#212121',
+    onTertiaryContainer: '#DC2626',
+    onSurface: '#111827', // Near black
+    onSurfaceVariant: '#6B7280', // Medium gray
+    onBackground: '#111827',
     onError: '#FFFFFF',
-    onErrorContainer: '#B71C1C',
-    outline: '#BDBDBD',
-    outlineVariant: '#E0E0E0',
-    inverseSurface: '#303030',
-    inverseOnSurface: '#F5F5F5',
-    inversePrimary: '#81C784',
+    onErrorContainer: '#DC2626',
+    outline: '#E5E7EB', // Very light gray border
+    outlineVariant: '#F3F4F6', // Even lighter gray border
+    inverseSurface: '#111827',
+    inverseOnSurface: '#F9FAFB',
+    inversePrimary: '#9CA3AF', // Light gray
     shadow: '#000000',
     scrim: '#000000',
-    surfaceTint: '#1B5E20',
+    surfaceTint: '#000000',
   },
 };
 
@@ -70,42 +70,42 @@ const darkTheme = {
   ...MD3DarkTheme,
   colors: {
     ...MD3DarkTheme.colors,
-    // Primary: Softer green for dark mode
-    primary: '#81C784', // Light green for dark mode
-    primaryContainer: '#2E7D32', // Darker green container
-    // Secondary: Calming blue for dark mode
-    secondary: '#64B5F6', // Light blue for dark mode  
-    secondaryContainer: '#1976D2', // Darker blue container
-    // Tertiary: Softer warning for dark mode
-    tertiary: '#FFB74D', // Softer orange for dark mode
-    tertiaryContainer: '#F57C00', // Darker orange container
-    // Dark surfaces
-    surface: '#1E1E1E', // Dark surface
-    surfaceVariant: '#2D2D2D', // Darker variant
-    background: '#121212', // Material dark background
+    // Primary: Soft white for dark mode
+    primary: '#F5F5F5', // Pure light gray
+    primaryContainer: '#2D2D2D', // Pure dark gray container
+    // Secondary: Pure neutral grays
+    secondary: '#9E9E9E', // Pure medium gray
+    secondaryContainer: '#424242', // Pure dark gray
+    // Tertiary: Only for critical alerts
+    tertiary: '#E53E3E', // Pure red for dark mode
+    tertiaryContainer: '#7F1D1D', // Dark red container
+    // Dark surfaces - Pure neutral grays (no blue undertones)
+    surface: '#1A1A1A', // Pure dark gray (not blue-tinted)
+    surfaceVariant: '#2D2D2D', // Slightly lighter pure gray
+    background: '#121212', // Pure dark background (Material Design standard)
     // Error colors
-    error: '#FF5252', // Softer red for dark mode
-    errorContainer: '#B71C1C', // Dark red container
-    // On colors for dark theme
-    onPrimary: '#1B5E20',
-    onPrimaryContainer: '#C8E6C9',
-    onSecondary: '#0D47A1',
-    onSecondaryContainer: '#E3F2FD',
-    onTertiary: '#BF360C',
-    onTertiaryContainer: '#FFE0B2',
-    onSurface: '#E0E0E0',
-    onSurfaceVariant: '#BDBDBD',
-    onBackground: '#E0E0E0',
-    onError: '#FFEBEE',
-    onErrorContainer: '#FFCDD2',
-    outline: '#616161',
-    outlineVariant: '#424242',
-    inverseSurface: '#E0E0E0',
-    inverseOnSurface: '#212121',
-    inversePrimary: '#1B5E20',
+    error: '#E53E3E', // Pure red
+    errorContainer: '#7F1D1D', // Dark red container
+    // Text colors - Pure monochrome
+    onPrimary: '#121212', // Dark text on light primary
+    onPrimaryContainer: '#E0E0E0', // Light gray text
+    onSecondary: '#121212', // Dark text on light secondary
+    onSecondaryContainer: '#E0E0E0', // Light gray text
+    onTertiary: '#FFFFFF',
+    onTertiaryContainer: '#FEF2F2',
+    onSurface: '#E0E0E0', // Pure light gray (no blue tint)
+    onSurfaceVariant: '#9E9E9E', // Pure medium gray
+    onBackground: '#E0E0E0', // Pure light gray
+    onError: '#FEF2F2',
+    onErrorContainer: '#FECACA',
+    outline: '#424242', // Pure gray borders
+    outlineVariant: '#2D2D2D', // Darker pure gray
+    inverseSurface: '#F5F5F5',
+    inverseOnSurface: '#121212',
+    inversePrimary: '#121212',
     shadow: '#000000',
     scrim: '#000000',
-    surfaceTint: '#81C784',
+    surfaceTint: '#F5F5F5',
   },
 };
 

@@ -129,57 +129,105 @@ export default function EditCategoryBottomSheet({
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetView style={{ padding: 16, paddingBottom: 16 }}>
-        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-          <Text variant="headlineSmall" style={{ marginBottom: 24, fontWeight: '600' }}>
-            Edit Category
-          </Text>
+      <BottomSheetView style={{
+        padding: 32,
+        paddingBottom: 24,
+        backgroundColor: theme.colors.surface,
+      }}>
+        <Text variant="headlineMedium" style={{
+          marginBottom: 32,
+          fontWeight: '700',
+          color: theme.colors.onSurface,
+          textAlign: 'center'
+        }}>
+          Edit Category
+        </Text>
 
-          {error ? (
-            <Text variant="bodyMedium" style={{ color: theme.colors.error, marginBottom: 16 }}>
+        {error ? (
+          <View style={{
+            padding: 16,
+            backgroundColor: theme.colors.errorContainer,
+            borderRadius: 6,
+            marginBottom: 24,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+          }}>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
               {error}
             </Text>
-          ) : null}
+          </View>
+        ) : null}
 
-          <View style={{ gap: 16 }}>
-            <TextInput
-              label="Category Name"
-              value={name}
-              onChangeText={setName}
-              mode="outlined"
-              placeholder="Enter category name"
-            />
+        <View style={{ gap: 24 }}>
+          <TextInput
+            label="Category Name"
+            value={name}
+            onChangeText={setName}
+            mode="outlined"
+            style={{ backgroundColor: theme.colors.surface }}
+            outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
+            contentStyle={{ fontWeight: '500' }}
+          />
 
-            <TextInput
-              label={`Budget Amount (${currency})`}
-              value={budget}
-              onChangeText={setBudget}
-              mode="outlined"
-              placeholder="0.00"
-              keyboardType="numeric"
-            />
+          <TextInput
+            label={`Budget Amount (${currency})`}
+            value={budget}
+            onChangeText={setBudget}
+            mode="outlined"
+            keyboardType="numeric"
+            style={{ backgroundColor: theme.colors.surface }}
+            outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1 }}
+            contentStyle={{ fontWeight: '600', fontSize: 16 }}
+          />
 
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <Button
-                mode="outlined"
+          <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
+            <View style={{
+              flex: 1,
+              backgroundColor: theme.colors.surfaceVariant,
+              borderRadius: 25,
+              paddingVertical: 16,
+              paddingHorizontal: 24,
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: theme.colors.outline,
+            }}>
+              <Text
+                variant="titleMedium"
+                style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontWeight: '600'
+                }}
                 onPress={onDismiss}
-                style={{ flex: 1 }}
-                disabled={loading}
               >
                 Cancel
-              </Button>
-              <Button
-                mode="contained"
+              </Text>
+            </View>
+            <View style={{
+              flex: 1,
+              backgroundColor: theme.colors.primary,
+              borderRadius: 25,
+              paddingVertical: 16,
+              paddingHorizontal: 24,
+              alignItems: 'center',
+              shadowColor: theme.colors.primary,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              elevation: 3,
+            }}>
+              <Text
+                variant="titleMedium"
+                style={{
+                  color: theme.colors.onPrimary,
+                  fontWeight: '600'
+                }}
                 onPress={handleSubmit}
-                style={{ flex: 1 }}
-                loading={loading}
-                disabled={loading}
               >
-                Update Category
-              </Button>
+                Save Changes
+              </Text>
             </View>
           </View>
-        </SafeAreaView>
+        </View>
       </BottomSheetView>
     </BottomSheetModal>
   );

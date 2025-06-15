@@ -115,25 +115,41 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetView style={{ padding: 16, paddingBottom: 16 }}>
+      <BottomSheetView style={{ padding: 32, paddingBottom: 24, backgroundColor: theme.colors.surface }}>
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-          <Text variant="headlineSmall" style={{ marginBottom: 24, fontWeight: '600' }}>
-            Add New Category
+          <Text variant="headlineMedium" style={{
+            marginBottom: 32,
+            fontWeight: '700',
+            color: theme.colors.onSurface,
+            textAlign: 'center'
+          }}>
+            New Category
           </Text>
 
           {error ? (
-            <Text variant="bodyMedium" style={{ color: theme.colors.error, marginBottom: 16 }}>
-              {error}
-            </Text>
+            <View style={{
+              padding: 16,
+              backgroundColor: theme.colors.errorContainer,
+              borderRadius: 6,
+              marginBottom: 24,
+              borderWidth: 1,
+              borderColor: theme.colors.outline,
+            }}>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
+                {error}
+              </Text>
+            </View>
           ) : null}
 
-          <View style={{ gap: 16 }}>
+          <View style={{ gap: 24 }}>
             <TextInput
               label="Category Name"
               value={name}
               onChangeText={setName}
               mode="outlined"
-              placeholder="Enter category name"
+              style={{ backgroundColor: theme.colors.surface }}
+              outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
+              contentStyle={{ fontWeight: '500' }}
             />
 
             <TextInput
@@ -141,28 +157,62 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
               value={budget}
               onChangeText={setBudget}
               mode="outlined"
-              placeholder="0.00"
               keyboardType="numeric"
+              style={{ backgroundColor: theme.colors.surface }}
+              outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
+              contentStyle={{ fontWeight: '600', fontSize: 16 }}
             />
 
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <Button
-                mode="outlined"
-                onPress={onDismiss}
-                style={{ flex: 1 }}
-                disabled={loading}
-              >
-                Cancel
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handleSubmit}
-                style={{ flex: 1 }}
-                loading={loading}
-                disabled={loading}
-              >
-                Add Category
-              </Button>
+            <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
+              <View style={{
+                flex: 1,
+                backgroundColor: theme.colors.surfaceVariant,
+                borderRadius: 6,
+                paddingVertical: 16,
+                paddingHorizontal: 24,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}>
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                    letterSpacing: 0.25
+                  }}
+                  onPress={onDismiss}
+                >
+                  Cancel
+                </Text>
+              </View>
+              <View style={{
+                flex: 1,
+                backgroundColor: theme.colors.primary,
+                borderRadius: 6,
+                paddingVertical: 16,
+                paddingHorizontal: 24,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: theme.colors.primary,
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    color: theme.colors.onPrimary,
+                    fontWeight: '600',
+                    letterSpacing: 0.25
+                  }}
+                  onPress={handleSubmit}
+                >
+                  Add Category
+                </Text>
+              </View>
             </View>
           </View>
         </SafeAreaView>
