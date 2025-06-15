@@ -1,14 +1,20 @@
-import { Button, H2, ScrollView, Text, YStack, View, XStack, H3, H4, Card, Progress } from 'tamagui';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { ScrollView, View } from 'react-native';
+import {
+  Text,
+  Card,
+  ProgressBar,
+  useTheme,
+  Surface,
+  Divider,
+  Button
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
 import { useExpenses, useCategories, formatAmount, SYSTEM_CATEGORIES } from '../../storage';
 import { Expense, Category } from '../../storage';
-import { Plus } from '@tamagui/lucide-icons';
-import ExpenseSheet from '../../components/ExpenseSheet';
-import { MiddleDotSpacer } from 'components/MiddleDotSpacer';
 import { useCurrency, useCurrencyRefresh } from '../../utils/CurrencyContext';
+import ExpenseBottomSheet from '../../components/ExpenseBottomSheet';
 
 interface CategoryWithSpending extends Category {
   spent: number;
@@ -23,6 +29,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
   const insets = useSafeAreaInsets();
+  const theme = useTheme();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
 
@@ -32,12 +39,13 @@ export default function HomePage() {
 
   useEffect(() => {
     loadData();
-  }, [refreshKey]); // Re-load data when currency changes
+  }, [refreshKey]);
 
-  // Reload data when page comes into focus
   useFocusEffect(
     useCallback(() => {
       loadData();
+      // Close bottom sheet when navigating to this tab
+      setShowExpenseSheet(false);
     }, [refreshKey])
   );
 
@@ -51,7 +59,6 @@ export default function HomePage() {
         categoryOps.getCategories(),
       ]);
 
-      // Load spending data for each category
       const categoriesWithSpending = await Promise.all(
         allCategories.map(async (category) => {
           const categorySpent = await categoryOps.getCategorySpending(category.id);
@@ -59,20 +66,19 @@ export default function HomePage() {
           return {
             ...category,
             spent: categorySpent,
-            percentage: Math.min(percentage, 100), // Cap at 100% for display
+            percentage: Math.min(percentage, 100),
           };
         })
       );
 
-      // Filter out uncategorized if it has no spending
       const filteredCategories = categoriesWithSpending.filter(category => {
         if (category.id === SYSTEM_CATEGORIES.UNCATEGORIZED) {
-          return category.spent > 0; // Only show uncategorized if there's spending
+          return category.spent > 0;
         }
-        return true; // Show all other categories
+        return true;
       });
 
-      setExpenses(currentExpenses.slice(0, 5)); // Show only 5 most recent expenses
+      setExpenses(currentExpenses.slice(0, 5));
       setCategories(filteredCategories);
       setTotalBudget(budget);
       setTotalSpent(spent);
@@ -88,160 +94,198 @@ export default function HomePage() {
   };
 
   const getProgressColor = (percentage: number): string => {
-    if (percentage >= 90) return '$red10';
-    if (percentage >= 75) return '$orange10';
-    if (percentage >= 50) return '$yellow10';
-    return '$green10';
-  };
-
-  const getProgressBgColor = (percentage: number): string => {
-    if (percentage >= 90) return '$red2';
-    if (percentage >= 75) return '$orange2';
-    if (percentage >= 50) return '$yellow2';
-    return '$green2';
+    if (percentage >= 90) return theme.colors.error;
+    if (percentage >= 75) return theme.colors.tertiary;
+    if (percentage >= 50) return theme.colors.primary;
+    return theme.colors.secondary;
   };
 
   const handleExpenseAdded = () => {
-    loadData(); // Refresh data when expense is added
-  };
-
-  const handleNewExpensePress = () => {
-    setShowExpenseSheet(true);
+    loadData();
   };
 
   const renderCategory = (category: CategoryWithSpending) => {
     const isUncategorized = category.id === SYSTEM_CATEGORIES.UNCATEGORIZED;
 
     if (isUncategorized) {
-      // Special rendering for uncategorized - just show the spent amount
       return (
-        <Card key={category.id} bordered p="$4" bg="$background">
-          <XStack justify="space-between">
-            <Text fontSize="$5" fontWeight="600">{category.name}</Text>
-            <Text fontSize="$4" fontWeight="500" opacity={0.8}>
-              {formatAmountLocal(category.spent)}
-            </Text>
-          </XStack>
+        <Card key={category.id} style={{ marginVertical: 4 }}>
+          <Card.Content>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text variant="titleMedium">{category.name}</Text>
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                {formatAmountLocal(category.spent)}
+              </Text>
+            </View>
+          </Card.Content>
         </Card>
       );
     }
 
-    // Regular category rendering with budget/progress
-    try {
-      const spentFormatted = formatAmountLocal(category.spent);
-      const budgetFormatted = formatAmountLocal(category.budget);
-      const remaining = category.budget - category.spent;
-      const overBudget = category.spent - category.budget;
-      const remainingFormatted = remaining >= 0 ? formatAmountLocal(remaining) : null;
-      const overBudgetFormatted = remaining < 0 ? formatAmountLocal(overBudget) : null;
+    const spentFormatted = formatAmountLocal(category.spent);
+    const budgetFormatted = formatAmountLocal(category.budget);
+    const remaining = category.budget - category.spent;
+    const overBudget = category.spent - category.budget;
+    const remainingFormatted = remaining >= 0 ? formatAmountLocal(remaining) : null;
+    const overBudgetFormatted = remaining < 0 ? formatAmountLocal(overBudget) : null;
 
-      return (
-        <Card key={category.id} bordered p="$4" bg="$background">
-          <YStack gap="$3">
-            {/* Header with category name and amounts */}
-            <XStack justify="space-between">
-              <Text fontSize="$5" fontWeight="600">{category.name}</Text>
+    return (
+      <Card key={category.id} style={{ marginVertical: 4 }}>
+        <Card.Content>
+          <View style={{ gap: 12 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text variant="titleMedium">{category.name}</Text>
               <Text
-                fontSize="$4"
-                fontWeight="500"
-                style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
+                variant="bodyMedium"
+                style={{
+                  color: category.percentage >= 90 ? theme.colors.error :
+                    category.percentage >= 75 ? theme.colors.tertiary :
+                      theme.colors.secondary
+                }}
               >
                 {spentFormatted} / {budgetFormatted}
               </Text>
-            </XStack>
+            </View>
 
-            {/* Progress bar */}
-            <YStack gap="$2">
-              <Progress value={Math.round(category.percentage)}>
-                <Progress.Indicator animation="bouncy" />
-              </Progress>
+            <View style={{ gap: 8 }}>
+              <ProgressBar
+                progress={category.percentage / 100}
+                color={getProgressColor(category.percentage)}
+              />
 
-              {/* Percentage and status */}
-              <XStack justify="space-between">
-                <Text fontSize="$3" opacity={0.7}>
-                  {category.percentage.toFixed(2)}% used
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                  {category.percentage.toFixed(1)}% used
                 </Text>
                 <Text
-                  fontSize="$3"
-                  fontWeight="500"
-                  style={{ color: category.percentage >= 90 ? '#ff4444' : category.percentage >= 75 ? '#ff8800' : '#44aa44' }}
+                  variant="bodySmall"
+                  style={{
+                    color: remaining >= 0 ? theme.colors.secondary : theme.colors.error
+                  }}
                 >
                   {remaining >= 0 ?
                     `${remainingFormatted} remaining` :
                     `${overBudgetFormatted} over budget`
                   }
                 </Text>
-              </XStack>
-            </YStack>
-          </YStack>
-        </Card>
-      );
-    } catch (error) {
-      console.error('Error in renderCategory:', error);
-      return (
-        <Card key={category.id} bordered p="$4" bg="$background">
-          <Text>Error rendering category: {category.name}</Text>
-        </Card>
-      );
-    }
+              </View>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+    );
   };
 
+  const remaining = totalBudget - totalSpent;
+
   return (
-    <View flex={1} bg="$background">
-      <YStack p="$4" pt={insets.top + 16}>
-        <H3 fontWeight="600">Budget Overview</H3>
-      </YStack>
-      <ScrollView flex={1}>
-        <YStack p="$4" gap="$4">
-          {loading ? (
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Surface style={{ paddingTop: insets.top + 16, paddingHorizontal: 16, paddingBottom: 16 }}>
+        <Text variant="headlineSmall" style={{ fontWeight: '600' }}>Budget Overview</Text>
+      </Surface>
+
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 200 }}>
+        {loading ? (
+          <Surface style={{ padding: 16, alignItems: 'center' }}>
             <Text>Loading...</Text>
-          ) : categories.length > 0 ? (
-            <>
-              <H4>Category Breakdown</H4>
-              <YStack gap="$3">
-                {categories.map(renderCategory)}
-              </YStack>
-            </>
-          ) : (
-            <YStack gap="$3" py="$8">
-              <Text opacity={0.7}>No categories yet</Text>
-              <Text opacity={0.5}>
-                Add categories in the Profile tab to see your budget breakdown
-              </Text>
-            </YStack>
-          )}
-        </YStack>
+          </Surface>
+        ) : categories.length > 0 ? (
+          <>
+            <Text variant="titleLarge" style={{ marginBottom: 16 }}>Category Breakdown</Text>
+            {categories.map(renderCategory)}
+
+            {expenses.length > 0 && (
+              <>
+                <Divider style={{ marginVertical: 16 }} />
+                <Text variant="titleLarge" style={{ marginBottom: 16 }}>Recent Expenses</Text>
+                {expenses.map((expense) => (
+                  <Card key={expense.id} style={{ marginVertical: 2 }}>
+                    <Card.Content>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flex: 1 }}>
+                          <Text variant="bodyLarge">{expense.title}</Text>
+                          {expense.description && (
+                            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                              {expense.description}
+                            </Text>
+                          )}
+                        </View>
+                        <Text variant="bodyLarge" style={{ fontWeight: '600' }}>
+                          {formatAmountLocal(expense.amount)}
+                        </Text>
+                      </View>
+                    </Card.Content>
+                  </Card>
+                ))}
+              </>
+            )}
+          </>
+        ) : (
+          <Surface style={{ padding: 24, alignItems: 'center' }}>
+            <Text variant="titleMedium" style={{ textAlign: 'center', marginBottom: 16 }}>
+              No categories found
+            </Text>
+            <Text variant="bodyMedium" style={{ textAlign: 'center', color: theme.colors.onSurfaceVariant }}>
+              Create your first budget category to get started
+            </Text>
+          </Surface>
+        )}
       </ScrollView>
-      <YStack p="$4" borderTopWidth={1} borderColor="$borderColor" gap="$3">
-        <XStack gap="$2" justify="space-between">
-          <Text>Total Budget:</Text>
-          <MiddleDotSpacer />
-          <Text fontWeight="bold">{formatAmountLocal(totalBudget)}</Text>
-        </XStack>
-        <XStack gap="$2" justify="space-between">
-          <Text>Spent:</Text>
-          <MiddleDotSpacer />
-          <Text fontWeight="bold">{formatAmountLocal(totalSpent)}</Text>
-        </XStack>
-        <XStack gap="$2" justify="space-between">
-          <Text>Remaining:</Text>
-          <MiddleDotSpacer />
-          <Text fontWeight="bold">{formatAmountLocal(totalBudget - totalSpent)}</Text>
-        </XStack>
-        <Button
-          icon={<Plus />}
-          onPress={handleNewExpensePress}
-          themeInverse
-          mt="$2"
-        >
-          New Expense
-        </Button>
-      </YStack>
-      <ExpenseSheet
-        open={showExpenseSheet}
-        onOpenChange={setShowExpenseSheet}
+
+      {/* Budget Summary Section - Fixed at bottom */}
+      <Surface
+        style={{
+          padding: 16,
+          paddingBottom: insets.bottom + 16,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.outline
+        }}
+        elevation={3}
+      >
+        <View style={{ gap: 12 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text variant="bodyMedium">Total Budget:</Text>
+            <Text variant="bodyMedium" style={{ fontWeight: '600' }}>
+              {formatAmountLocal(totalBudget)}
+            </Text>
+          </View>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text variant="bodyMedium">Spent:</Text>
+            <Text variant="bodyMedium" style={{ fontWeight: '600', color: theme.colors.error }}>
+              {formatAmountLocal(totalSpent)}
+            </Text>
+          </View>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text variant="bodyMedium">Remaining:</Text>
+            <Text
+              variant="bodyMedium"
+              style={{
+                fontWeight: '600',
+                color: remaining >= 0 ? theme.colors.primary : theme.colors.error
+              }}
+            >
+              {formatAmountLocal(remaining)}
+            </Text>
+          </View>
+
+          <Button
+            mode="contained"
+            icon="plus"
+            onPress={() => setShowExpenseSheet(true)}
+            style={{ marginTop: 8 }}
+          >
+            New Expense
+          </Button>
+        </View>
+      </Surface>
+
+      <ExpenseBottomSheet
+        visible={showExpenseSheet}
+        onDismiss={() => setShowExpenseSheet(false)}
         onExpenseAdded={handleExpenseAdded}
       />
     </View>
   );
-}
+} 
