@@ -46,9 +46,6 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
   // Storage hooks
   const paymentMethodOps = usePaymentMethods();
 
-  // Bottom sheet snap points - using dynamic sizing
-  const snapPoints = useMemo(() => ['60%'], []);
-
   useEffect(() => {
     if (visible) {
       bottomSheetModalRef.current?.present();
@@ -143,136 +140,141 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
-      snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
-      enableDynamicSizing={true}
+      enableDynamicSizing
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetView style={{
+      <BottomSheetScrollView contentContainerStyle={{
         padding: 16,
         paddingBottom: 32,
-        backgroundColor: theme.colors.surface,
       }}>
-        <Text variant="headlineMedium" style={{
-          marginBottom: 32,
-          fontWeight: '700',
-          color: theme.colors.onSurface,
-          textAlign: 'center'
-        }}>
-          New Payment Method
-        </Text>
-
-        {error ? (
+        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <View style={{
-            padding: 16,
-            backgroundColor: theme.colors.errorContainer,
-            borderRadius: 6,
-            marginBottom: 24,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
+            padding: 8,
+            backgroundColor: theme.colors.surface,
           }}>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
-              {error}
-            </Text>
-          </View>
-        ) : null}
-
-        <View style={{ gap: 24 }}>
-          <TextInput
-            label="Payment Method Name"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            style={{ backgroundColor: theme.colors.surface }}
-            outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1 }}
-            contentStyle={{ fontWeight: '500' }}
-          />
-
-          <View style={{
-            padding: 16,
-            backgroundColor: theme.colors.surfaceVariant,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
-          }}>
-            <Text variant="bodyMedium" style={{
-              marginBottom: 12,
-              fontWeight: '600',
-              color: theme.colors.onSurfaceVariant
+            <Text variant="headlineMedium" style={{
+              marginBottom: 32,
+              fontWeight: '700',
+              color: theme.colors.onSurface,
+              textAlign: 'center'
             }}>
-              Payment Type
+              New Payment Method
             </Text>
-            <View style={{ gap: 8 }}>
-              {PAYMENT_METHOD_TYPES.map((paymentType: string) => (
+
+            {error ? (
+              <View style={{
+                padding: 16,
+                backgroundColor: theme.colors.errorContainer,
+                borderRadius: 6,
+                marginBottom: 24,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
+                  {error}
+                </Text>
+              </View>
+            ) : null}
+
+            <View style={{ gap: 24 }}>
+              <TextInput
+                label="Payment Method Name"
+                value={name}
+                onChangeText={setName}
+                mode="outlined"
+                style={{ backgroundColor: theme.colors.surface }}
+                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1 }}
+                contentStyle={{ fontWeight: '500' }}
+              />
+
+              <View style={{
+                padding: 16,
+                backgroundColor: theme.colors.surfaceVariant,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}>
+                <Text variant="bodyMedium" style={{
+                  marginBottom: 12,
+                  fontWeight: '600',
+                  color: theme.colors.onSurfaceVariant
+                }}>
+                  Payment Type
+                </Text>
+                <View style={{ gap: 8 }}>
+                  {PAYMENT_METHOD_TYPES.map((paymentType: string) => (
+                    <Button
+                      key={paymentType}
+                      mode={type === paymentType ? "contained" : "outlined"}
+                      onPress={() => setType(paymentType)}
+                      contentStyle={{
+                        paddingVertical: 8,
+                      }}
+                      labelStyle={{
+                        fontSize: 14,
+                        fontWeight: '600',
+                      }}
+                      style={{
+                        borderRadius: 6,
+                      }}
+                    >
+                      {formatPaymentTypeForDisplay(paymentType)}
+                    </Button>
+                  ))}
+                </View>
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
                 <Button
-                  key={paymentType}
-                  mode={type === paymentType ? "contained" : "outlined"}
-                  onPress={() => setType(paymentType)}
+                  mode="outlined"
+                  onPress={onDismiss}
                   contentStyle={{
                     paddingVertical: 8,
                   }}
                   labelStyle={{
-                    fontSize: 14,
-                    fontWeight: '600',
+                    fontSize: 16,
+                    fontWeight: '600'
                   }}
                   style={{
-                    borderRadius: 6,
+                    flex: 1,
+                    borderRadius: 25,
                   }}
                 >
-                  {formatPaymentTypeForDisplay(paymentType)}
+                  Cancel
                 </Button>
-              ))}
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
+                  loading={loading}
+                  contentStyle={{
+                    paddingVertical: 8,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    letterSpacing: 0.25
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 6,
+                    shadowColor: '#000000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  Add Method
+                </Button>
+              </View>
             </View>
           </View>
-
-          <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
-            <Button
-              mode="outlined"
-              onPress={onDismiss}
-              contentStyle={{
-                paddingVertical: 8,
-              }}
-              labelStyle={{
-                fontSize: 16,
-                fontWeight: '600'
-              }}
-              style={{
-                flex: 1,
-                borderRadius: 25,
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              loading={loading}
-              contentStyle={{
-                paddingVertical: 8,
-              }}
-              labelStyle={{
-                fontSize: 16,
-                fontWeight: '600',
-                letterSpacing: 0.25
-              }}
-              style={{
-                flex: 1,
-                borderRadius: 6,
-                shadowColor: '#000000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            >
-              Add Method
-            </Button>
-          </View>
-        </View>
-      </BottomSheetView>
+        </SafeAreaView>
+      </BottomSheetScrollView>
     </BottomSheetModal>
   );
 } 

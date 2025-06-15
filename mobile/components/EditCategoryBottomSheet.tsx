@@ -39,9 +39,6 @@ export default function EditCategoryBottomSheet({
   // Storage hooks
   const categoryOps = useCategories();
 
-  // Bottom sheet snap points - using dynamic sizing
-  const snapPoints = useMemo(() => ['50%'], []);
-
   useEffect(() => {
     if (visible && category) {
       bottomSheetModalRef.current?.present();
@@ -121,108 +118,113 @@ export default function EditCategoryBottomSheet({
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
-      snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
-      enableDynamicSizing={true}
+      enableDynamicSizing
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetView style={{
+      <BottomSheetScrollView contentContainerStyle={{
         padding: 16,
-        backgroundColor: theme.colors.surface,
       }}>
-        <Text variant="headlineMedium" style={{
-          marginBottom: 32,
-          fontWeight: '700',
-          color: theme.colors.onSurface,
-          textAlign: 'center'
-        }}>
-          Edit Category
-        </Text>
-
-        {error ? (
+        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <View style={{
-            padding: 16,
-            backgroundColor: theme.colors.errorContainer,
-            borderRadius: 6,
-            marginBottom: 24,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
+            padding: 8,
+            backgroundColor: theme.colors.surface,
           }}>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
-              {error}
+            <Text variant="headlineMedium" style={{
+              marginBottom: 32,
+              fontWeight: '700',
+              color: theme.colors.onSurface,
+              textAlign: 'center'
+            }}>
+              Edit Category
             </Text>
+
+            {error ? (
+              <View style={{
+                padding: 16,
+                backgroundColor: theme.colors.errorContainer,
+                borderRadius: 6,
+                marginBottom: 24,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}>
+                <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
+                  {error}
+                </Text>
+              </View>
+            ) : null}
+
+            <View style={{ gap: 24 }}>
+              <TextInput
+                label="Category Name"
+                value={name}
+                onChangeText={setName}
+                mode="outlined"
+                style={{ backgroundColor: theme.colors.surface }}
+                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
+                contentStyle={{ fontWeight: '500' }}
+              />
+
+              <TextInput
+                label={`Budget Amount (${currency})`}
+                value={budget}
+                onChangeText={setBudget}
+                mode="outlined"
+                keyboardType="numeric"
+                style={{ backgroundColor: theme.colors.surface }}
+                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1 }}
+                contentStyle={{ fontWeight: '600', fontSize: 16 }}
+              />
+
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
+                <Button
+                  mode="outlined"
+                  onPress={onDismiss}
+                  contentStyle={{
+                    paddingVertical: 8,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600'
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 25,
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
+                  loading={loading}
+                  contentStyle={{
+                    paddingVertical: 8,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600'
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 25,
+                    shadowColor: theme.colors.primary,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  Save Changes
+                </Button>
+              </View>
+            </View>
           </View>
-        ) : null}
-
-        <View style={{ gap: 24 }}>
-          <TextInput
-            label="Category Name"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            style={{ backgroundColor: theme.colors.surface }}
-            outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
-            contentStyle={{ fontWeight: '500' }}
-          />
-
-          <TextInput
-            label={`Budget Amount (${currency})`}
-            value={budget}
-            onChangeText={setBudget}
-            mode="outlined"
-            keyboardType="numeric"
-            style={{ backgroundColor: theme.colors.surface }}
-            outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1 }}
-            contentStyle={{ fontWeight: '600', fontSize: 16 }}
-          />
-
-          <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
-            <Button
-              mode="outlined"
-              onPress={onDismiss}
-              contentStyle={{
-                paddingVertical: 8,
-              }}
-              labelStyle={{
-                fontSize: 16,
-                fontWeight: '600'
-              }}
-              style={{
-                flex: 1,
-                borderRadius: 25,
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              loading={loading}
-              contentStyle={{
-                paddingVertical: 8,
-              }}
-              labelStyle={{
-                fontSize: 16,
-                fontWeight: '600'
-              }}
-              style={{
-                flex: 1,
-                borderRadius: 25,
-                shadowColor: theme.colors.primary,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-            >
-              Save Changes
-            </Button>
-          </View>
-        </View>
-      </BottomSheetView>
+        </SafeAreaView>
+      </BottomSheetScrollView>
     </BottomSheetModal>
   );
 } 
