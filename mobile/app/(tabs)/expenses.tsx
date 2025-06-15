@@ -212,20 +212,18 @@ export default function ExpensesScreen() {
         </ScrollView>
 
         {/* Add Expense Button - Fixed Bottom Section */}
-        <SafeAreaView style={{ backgroundColor: theme.colors.surface }} edges={['bottom']}>
-          <Surface style={{
-            padding: 16,
-            backgroundColor: theme.colors.surface,
-            elevation: 8,
-          }}>
-            <Button
-              mode="contained"
-              onPress={() => setShowExpenseSheet(true)}
-            >
-              Add Expense
-            </Button>
-          </Surface>
-        </SafeAreaView>
+        <Surface style={{
+          padding: 16,
+          backgroundColor: theme.colors.surface,
+          elevation: 8,
+        }}>
+          <Button
+            mode="contained"
+            onPress={() => setShowExpenseSheet(true)}
+          >
+            Add Expense
+          </Button>
+        </Surface>
       </SafeAreaView>
 
       <ExpenseBottomSheet
