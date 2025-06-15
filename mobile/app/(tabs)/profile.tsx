@@ -157,142 +157,140 @@ export default function ProfileScreen() {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.surface }} edges={['top', 'bottom']}>
-        <Surface style={{
-          paddingTop: 16,
-          paddingHorizontal: 16,
-          paddingBottom: 16,
-          backgroundColor: theme.colors.surface
-        }} elevation={1}>
-          <Text variant="headlineSmall" style={{ fontWeight: '600' }}>Profile</Text>
-        </Surface>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.surface }} edges={['top']}>
+      <Surface style={{
+        paddingTop: 16,
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        backgroundColor: theme.colors.surface
+      }} elevation={1}>
+        <Text variant="headlineSmall" style={{ fontWeight: '600' }}>Profile</Text>
+      </Surface>
 
-        <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 16 }}>
-          {loading ? (
-            <Surface style={{ padding: 16, alignItems: 'center' }}>
-              <Text>Loading...</Text>
-            </Surface>
-          ) : (
-            <>
-              {/* Settings Section */}
-              <Card style={{ marginBottom: 16 }}>
-                <Card.Content>
-                  <Text variant="titleLarge" style={{ marginBottom: 16 }}>Settings</Text>
+      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 16 }}>
+        {loading ? (
+          <Surface style={{ padding: 16, alignItems: 'center' }}>
+            <Text>Loading...</Text>
+          </Surface>
+        ) : (
+          <>
+            {/* Settings Section */}
+            <Card style={{ marginBottom: 16 }}>
+              <Card.Content>
+                <Text variant="titleLarge" style={{ marginBottom: 16 }}>Settings</Text>
 
-                  <Text variant="bodyMedium" style={{ marginBottom: 8 }}>Currency</Text>
-                  {renderCurrencyMenu()}
+                <Text variant="bodyMedium" style={{ marginBottom: 8 }}>Currency</Text>
+                {renderCurrencyMenu()}
 
-                  {selectedCurrency !== currency && (
-                    <Button
-                      mode="contained"
-                      onPress={handleSaveSettings}
-                      style={{ marginTop: 16 }}
-                    >
-                      Save Settings
-                    </Button>
-                  )}
-                </Card.Content>
-              </Card>
+                {selectedCurrency !== currency && (
+                  <Button
+                    mode="contained"
+                    onPress={handleSaveSettings}
+                    style={{ marginTop: 16 }}
+                  >
+                    Save Settings
+                  </Button>
+                )}
+              </Card.Content>
+            </Card>
 
-              {/* Categories Section */}
-              <Card style={{ marginBottom: 16 }}>
-                <Card.Content>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <Text variant="titleLarge">Categories</Text>
-                    <Button
-                      mode="contained"
-                      icon="plus"
-                      onPress={() => setShowCategorySheet(true)}
-                    >
-                      Add
-                    </Button>
-                  </View>
+            {/* Categories Section */}
+            <Card style={{ marginBottom: 16 }}>
+              <Card.Content>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text variant="titleLarge">Categories</Text>
+                  <Button
+                    mode="contained"
+                    icon="plus"
+                    onPress={() => setShowCategorySheet(true)}
+                  >
+                    Add
+                  </Button>
+                </View>
 
-                  {categories.length > 0 ? (
-                    categories.map((category) => (
-                      <List.Item
-                        key={category.id}
-                        title={category.name}
-                        description={`Budget: ${formatAmount(category.budget, currency)}`}
-                        right={(props) => (
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            <Button
-                              {...props}
-                              mode="text"
-                              icon="pencil"
-                              onPress={() => handleEditCategory(category)}
-                              compact
-                            >
-                              Edit
-                            </Button>
-                            <Button
-                              {...props}
-                              mode="text"
-                              icon="delete"
-                              onPress={() => handleDeleteCategory(category.id)}
-                              textColor={theme.colors.error}
-                              compact
-                            >
-                              Delete
-                            </Button>
-                          </View>
-                        )}
-                      />
-                    ))
-                  ) : (
-                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', padding: 16 }}>
-                      No categories found. Add your first category to get started.
-                    </Text>
-                  )}
-                </Card.Content>
-              </Card>
-
-              {/* Payment Methods Section */}
-              <Card style={{ marginBottom: 16 }}>
-                <Card.Content>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <Text variant="titleLarge">Payment Methods</Text>
-                    <Button
-                      mode="contained"
-                      icon="plus"
-                      onPress={() => setShowPaymentMethodSheet(true)}
-                    >
-                      Add
-                    </Button>
-                  </View>
-
-                  {paymentMethods.length > 0 ? (
-                    paymentMethods.map((method) => (
-                      <List.Item
-                        key={method.id}
-                        title={method.name}
-                        description={method.type}
-                        right={(props) => (
+                {categories.length > 0 ? (
+                  categories.map((category) => (
+                    <List.Item
+                      key={category.id}
+                      title={category.name}
+                      description={`Budget: ${formatAmount(category.budget, currency)}`}
+                      right={(props) => (
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                          <Button
+                            {...props}
+                            mode="text"
+                            icon="pencil"
+                            onPress={() => handleEditCategory(category)}
+                            compact
+                          >
+                            Edit
+                          </Button>
                           <Button
                             {...props}
                             mode="text"
                             icon="delete"
-                            onPress={() => handleDeletePaymentMethod(method.id)}
+                            onPress={() => handleDeleteCategory(category.id)}
                             textColor={theme.colors.error}
                             compact
                           >
                             Delete
                           </Button>
-                        )}
-                      />
-                    ))
-                  ) : (
-                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', padding: 16 }}>
-                      No payment methods found. Add your first payment method to get started.
-                    </Text>
-                  )}
-                </Card.Content>
-              </Card>
-            </>
-          )}
-        </ScrollView>
-      </SafeAreaView>
+                        </View>
+                      )}
+                    />
+                  ))
+                ) : (
+                  <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', padding: 16 }}>
+                    No categories found. Add your first category to get started.
+                  </Text>
+                )}
+              </Card.Content>
+            </Card>
+
+            {/* Payment Methods Section */}
+            <Card style={{ marginBottom: 16 }}>
+              <Card.Content>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text variant="titleLarge">Payment Methods</Text>
+                  <Button
+                    mode="contained"
+                    icon="plus"
+                    onPress={() => setShowPaymentMethodSheet(true)}
+                  >
+                    Add
+                  </Button>
+                </View>
+
+                {paymentMethods.length > 0 ? (
+                  paymentMethods.map((method) => (
+                    <List.Item
+                      key={method.id}
+                      title={method.name}
+                      description={method.type}
+                      right={(props) => (
+                        <Button
+                          {...props}
+                          mode="text"
+                          icon="delete"
+                          onPress={() => handleDeletePaymentMethod(method.id)}
+                          textColor={theme.colors.error}
+                          compact
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    />
+                  ))
+                ) : (
+                  <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', padding: 16 }}>
+                    No payment methods found. Add your first payment method to get started.
+                  </Text>
+                )}
+              </Card.Content>
+            </Card>
+          </>
+        )}
+      </ScrollView>
 
       <CategoryBottomSheet
         visible={showCategorySheet}
@@ -315,6 +313,6 @@ export default function ProfileScreen() {
         onDismiss={() => setShowPaymentMethodSheet(false)}
         onPaymentMethodAdded={handlePaymentMethodAdded}
       />
-    </View>
+    </SafeAreaView>
   );
 } 
