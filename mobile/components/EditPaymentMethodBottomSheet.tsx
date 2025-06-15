@@ -4,73 +4,82 @@ import {
   Text,
   Button,
   TextInput,
-  useTheme,
-  Surface,
-  Divider
+  useTheme
 } from 'react-native-paper';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCategories, validateCurrencyInput } from '../storage';
-import { Category } from '../storage';
-import { useCurrency } from '../utils/CurrencyContext';
+import { usePaymentMethods } from '../storage';
+import { PaymentMethod } from '../storage';
 
-interface EditCategoryBottomSheetProps {
+const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
+
+const formatPaymentTypeForDisplay = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    'credit_card': 'Credit Card',
+    'debit_card': 'Debit Card',
+    'cash': 'Cash',
+    'bank_transfer': 'Bank Transfer',
+    'digital_wallet': 'Digital Wallet',
+    'other': 'Other'
+  };
+  return typeMap[type] || type;
+};
+
+interface EditPaymentMethodBottomSheetProps {
   visible: boolean;
   onDismiss: () => void;
-  category: Category | null;
-  onCategoryUpdated?: () => void;
+  paymentMethod: PaymentMethod | null;
+  onPaymentMethodUpdated?: () => void;
 }
 
-export default function EditCategoryBottomSheet({
+export default function EditPaymentMethodBottomSheet({
   visible,
   onDismiss,
-  category,
-  onCategoryUpdated
-}: EditCategoryBottomSheetProps) {
+  paymentMethod,
+  onPaymentMethodUpdated
+}: EditPaymentMethodBottomSheetProps) {
   const [name, setName] = useState('');
-  const [budget, setBudget] = useState('');
+  const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const theme = useTheme();
-  const { currency } = useCurrency();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // Storage hooks
-  const categoryOps = useCategories();
+  const paymentMethodOps = usePaymentMethods();
 
   // Bottom sheet snap points - using dynamic sizing
-  const snapPoints = useMemo(() => ['50%'], []);
+  const snapPoints = useMemo(() => ['60%'], []);
 
   useEffect(() => {
-    if (visible && category) {
+    if (visible && paymentMethod) {
       bottomSheetModalRef.current?.present();
-      setName(category.name);
-      setBudget(category.budget.toString());
+      setName(paymentMethod.name);
+      setType(paymentMethod.type);
     } else {
       bottomSheetModalRef.current?.dismiss();
       resetForm();
     }
-  }, [visible, category]);
+  }, [visible, paymentMethod]);
 
   const resetForm = () => {
     setName('');
-    setBudget('');
+    setType('');
     setError('');
     Keyboard.dismiss();
   };
 
   const handleSubmit = async () => {
-    if (!category) return;
+    if (!paymentMethod) return;
 
     if (!name.trim()) {
-      setError('Category name is required');
+      setError('Payment method name is required');
       return;
     }
 
-    const validation = validateCurrencyInput(budget, currency);
-    if (!validation.isValid) {
-      setError(validation.error || 'Please enter a valid budget amount');
+    if (!type) {
+      setError('Payment method type is required');
       return;
     }
 
@@ -78,20 +87,19 @@ export default function EditCategoryBottomSheet({
     setError('');
 
     try {
-      const updatedCategory: Category = {
-        ...category,
+      const updatedPaymentMethod: PaymentMethod = {
+        ...paymentMethod,
         name: name.trim(),
-        budget: Number(budget),
-        currency: currency,
+        type: type as PaymentMethod['type'],
       };
 
-      await categoryOps.updateCategory(updatedCategory);
+      await paymentMethodOps.updatePaymentMethod(updatedPaymentMethod);
 
       onDismiss();
-      onCategoryUpdated?.();
+      onPaymentMethodUpdated?.();
     } catch (e) {
-      console.error('Failed to update category:', e);
-      setError('Failed to update category. Please try again.');
+      console.error('Failed to update payment method:', e);
+      setError('Failed to update payment method. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -139,7 +147,7 @@ export default function EditCategoryBottomSheet({
           color: theme.colors.onSurface,
           textAlign: 'center'
         }}>
-          Edit Category
+          Edit Payment Method
         </Text>
 
         {error ? (
@@ -159,7 +167,7 @@ export default function EditCategoryBottomSheet({
 
         <View style={{ gap: 24 }}>
           <TextInput
-            label="Category Name"
+            label="Payment Method Name"
             value={name}
             onChangeText={setName}
             mode="outlined"
@@ -168,16 +176,42 @@ export default function EditCategoryBottomSheet({
             contentStyle={{ fontWeight: '500' }}
           />
 
-          <TextInput
-            label={`Budget Amount (${currency})`}
-            value={budget}
-            onChangeText={setBudget}
-            mode="outlined"
-            keyboardType="numeric"
-            style={{ backgroundColor: theme.colors.surface }}
-            outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1 }}
-            contentStyle={{ fontWeight: '600', fontSize: 16 }}
-          />
+          <View style={{
+            padding: 16,
+            backgroundColor: theme.colors.surfaceVariant,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+          }}>
+            <Text variant="bodyMedium" style={{
+              marginBottom: 12,
+              fontWeight: '600',
+              color: theme.colors.onSurfaceVariant
+            }}>
+              Payment Type
+            </Text>
+            <View style={{ gap: 8 }}>
+              {PAYMENT_METHOD_TYPES.map((paymentType: string) => (
+                <Button
+                  key={paymentType}
+                  mode={type === paymentType ? "contained" : "outlined"}
+                  onPress={() => setType(paymentType)}
+                  contentStyle={{
+                    paddingVertical: 8,
+                  }}
+                  labelStyle={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                  }}
+                  style={{
+                    borderRadius: 6,
+                  }}
+                >
+                  {formatPaymentTypeForDisplay(paymentType)}
+                </Button>
+              ))}
+            </View>
+          </View>
 
           <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
             <Button

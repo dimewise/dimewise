@@ -365,32 +365,28 @@ export default function HomePage() {
             </Text>
           </View>
         </View>
-        <View style={{
-          backgroundColor: theme.colors.primary,
-          borderRadius: 6,
-          paddingVertical: 16,
-          paddingHorizontal: 24,
-          alignItems: 'center',
-          borderWidth: 1,
-          borderColor: theme.colors.primary,
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 2,
-        }}>
-          <Text
-            variant="titleMedium"
-            style={{
-              color: theme.colors.onPrimary,
-              fontWeight: '600',
-              letterSpacing: 0.25
-            }}
-            onPress={() => setShowExpenseSheet(true)}
-          >
-            New Expense
-          </Text>
-        </View>
+        <Button
+          mode="contained"
+          onPress={() => setShowExpenseSheet(true)}
+          contentStyle={{
+            paddingVertical: 8,
+          }}
+          labelStyle={{
+            fontSize: 16,
+            fontWeight: '600',
+            letterSpacing: 0.25
+          }}
+          style={{
+            borderRadius: 6,
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          New Expense
+        </Button>
       </View>
 
       <ExpenseBottomSheet

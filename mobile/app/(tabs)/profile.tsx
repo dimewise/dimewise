@@ -2,12 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { ScrollView, View } from 'react-native';
 import {
   Text,
-  Card,
   Button,
   useTheme,
-  Surface,
-  List,
-  Menu
+  Menu,
+  Dialog,
+  Portal
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -17,6 +16,19 @@ import { useCurrency } from '../../utils/CurrencyContext';
 import CategoryBottomSheet from '../../components/CategoryBottomSheet';
 import EditCategoryBottomSheet from '../../components/EditCategoryBottomSheet';
 import PaymentMethodBottomSheet from '../../components/PaymentMethodBottomSheet';
+import EditPaymentMethodBottomSheet from '../../components/EditPaymentMethodBottomSheet';
+
+const formatPaymentTypeForDisplay = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    'credit_card': 'Credit Card',
+    'debit_card': 'Debit Card',
+    'cash': 'Cash',
+    'bank_transfer': 'Bank Transfer',
+    'digital_wallet': 'Digital Wallet',
+    'other': 'Other'
+  };
+  return typeMap[type] || type;
+};
 
 export default function ProfileScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -25,9 +37,13 @@ export default function ProfileScreen() {
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const [showEditCategorySheet, setShowEditCategorySheet] = useState(false);
   const [showPaymentMethodSheet, setShowPaymentMethodSheet] = useState(false);
+  const [showEditPaymentMethodSheet, setShowEditPaymentMethodSheet] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('JPY');
   const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ type: 'category' | 'paymentMethod', id: string, name: string } | null>(null);
   const theme = useTheme();
   const { currency, setCurrency } = useCurrency();
 
@@ -51,6 +67,7 @@ export default function ProfileScreen() {
       setShowEditCategorySheet(false);
       setShowPaymentMethodSheet(false);
       setShowCurrencyMenu(false);
+      setShowEditPaymentMethodSheet(false);
     }, [])
   );
 
@@ -95,6 +112,10 @@ export default function ProfileScreen() {
     loadData();
   };
 
+  const handlePaymentMethodUpdated = () => {
+    loadData();
+  };
+
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
     try {
       await paymentMethodOps.deletePaymentMethod(paymentMethodId);
@@ -127,6 +148,28 @@ export default function ProfileScreen() {
     } catch (error) {
       console.error('Error saving settings:', error);
     }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      if (itemToDelete.type === 'category') {
+        await handleDeleteCategory(itemToDelete.id);
+      } else {
+        await handleDeletePaymentMethod(itemToDelete.id);
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    } finally {
+      setShowDeleteDialog(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const showDeleteConfirmation = (type: 'category' | 'paymentMethod', id: string, name: string) => {
+    setItemToDelete({ type, id, name });
+    setShowDeleteDialog(true);
   };
 
   const renderCurrencyMenu = () => (
@@ -198,30 +241,54 @@ export default function ProfileScreen() {
                     Budget: {formatAmount(category.budget, currency)}
                   </Text>
                 </View>
-                <View style={{
-                  backgroundColor: theme.colors.primaryContainer,
-                  borderRadius: 4,
-                  paddingVertical: 8,
-                  paddingHorizontal: 16,
-                  borderWidth: 1,
-                  borderColor: theme.colors.outline,
-                }}>
-                  <Text
-                    variant="bodyMedium"
-                    style={{
-                      color: theme.colors.onPrimaryContainer,
-                      fontWeight: '600',
-                      fontSize: 12,
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5
-                    }}
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <Button
+                    mode="outlined"
+                    compact
                     onPress={() => {
                       setEditingCategory(category);
                       setShowEditCategorySheet(true);
                     }}
+                    labelStyle={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5
+                    }}
+                    contentStyle={{
+                      paddingVertical: 2,
+                      paddingHorizontal: 8,
+                    }}
+                    style={{
+                      borderRadius: 4,
+                      minWidth: 60,
+                    }}
                   >
                     Edit
-                  </Text>
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    compact
+                    onPress={() => showDeleteConfirmation('category', category.id, category.name)}
+                    labelStyle={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      color: theme.colors.error
+                    }}
+                    contentStyle={{
+                      paddingVertical: 2,
+                      paddingHorizontal: 8,
+                    }}
+                    style={{
+                      borderRadius: 4,
+                      minWidth: 60,
+                      borderColor: theme.colors.error,
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </View>
               </View>
             </View>
@@ -248,33 +315,29 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        <View style={{
-          backgroundColor: theme.colors.primary,
-          borderRadius: 6,
-          paddingVertical: 16,
-          paddingHorizontal: 24,
-          alignItems: 'center',
-          marginTop: 32,
-          borderWidth: 1,
-          borderColor: theme.colors.primary,
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 2,
-        }}>
-          <Text
-            variant="titleMedium"
-            style={{
-              color: theme.colors.onPrimary,
-              fontWeight: '600',
-              letterSpacing: 0.25
-            }}
-            onPress={() => setShowCategorySheet(true)}
-          >
-            New Category
-          </Text>
-        </View>
+        <Button
+          mode="contained"
+          onPress={() => setShowCategorySheet(true)}
+          contentStyle={{
+            paddingVertical: 8,
+          }}
+          labelStyle={{
+            fontSize: 16,
+            fontWeight: '600',
+            letterSpacing: 0.25
+          }}
+          style={{
+            borderRadius: 6,
+            marginTop: 32,
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          New Category
+        </Button>
 
         <View style={{ marginVertical: 40, height: 1, backgroundColor: theme.colors.outline }} />
 
@@ -303,29 +366,57 @@ export default function ProfileScreen() {
                 <View style={{ flex: 1 }}>
                   <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 6, color: theme.colors.onSurface }}>{method.name}</Text>
                   <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
-                    {method.type}
+                    {formatPaymentTypeForDisplay(method.type)}
                   </Text>
                 </View>
-                <View style={{
-                  backgroundColor: theme.colors.surfaceVariant,
-                  borderRadius: 4,
-                  paddingVertical: 8,
-                  paddingHorizontal: 16,
-                  borderWidth: 1,
-                  borderColor: theme.colors.outline,
-                }}>
-                  <Text
-                    variant="bodyMedium"
-                    style={{
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '600',
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <Button
+                    mode="outlined"
+                    compact
+                    onPress={() => {
+                      setEditingPaymentMethod(method);
+                      setShowEditPaymentMethodSheet(true);
+                    }}
+                    labelStyle={{
                       fontSize: 12,
+                      fontWeight: '600',
                       textTransform: 'uppercase',
                       letterSpacing: 0.5
                     }}
+                    contentStyle={{
+                      paddingVertical: 2,
+                      paddingHorizontal: 8,
+                    }}
+                    style={{
+                      borderRadius: 4,
+                      minWidth: 60,
+                    }}
                   >
                     Edit
-                  </Text>
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    compact
+                    onPress={() => showDeleteConfirmation('paymentMethod', method.id, method.name)}
+                    labelStyle={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      color: theme.colors.error
+                    }}
+                    contentStyle={{
+                      paddingVertical: 2,
+                      paddingHorizontal: 8,
+                    }}
+                    style={{
+                      borderRadius: 4,
+                      minWidth: 60,
+                      borderColor: theme.colors.error,
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </View>
               </View>
             </View>
@@ -352,33 +443,29 @@ export default function ProfileScreen() {
           </View>
         )}
 
-        <View style={{
-          backgroundColor: theme.colors.primary,
-          borderRadius: 6,
-          paddingVertical: 16,
-          paddingHorizontal: 24,
-          alignItems: 'center',
-          marginTop: 32,
-          borderWidth: 1,
-          borderColor: theme.colors.primary,
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 2,
-        }}>
-          <Text
-            variant="titleMedium"
-            style={{
-              color: theme.colors.onPrimary,
-              fontWeight: '600',
-              letterSpacing: 0.25
-            }}
-            onPress={() => setShowPaymentMethodSheet(true)}
-          >
-            New Payment Method
-          </Text>
-        </View>
+        <Button
+          mode="contained"
+          onPress={() => setShowPaymentMethodSheet(true)}
+          contentStyle={{
+            paddingVertical: 8,
+          }}
+          labelStyle={{
+            fontSize: 16,
+            fontWeight: '600',
+            letterSpacing: 0.25
+          }}
+          style={{
+            borderRadius: 6,
+            marginTop: 32,
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          New Payment Method
+        </Button>
       </ScrollView>
 
       <CategoryBottomSheet
@@ -402,6 +489,45 @@ export default function ProfileScreen() {
         onDismiss={() => setShowPaymentMethodSheet(false)}
         onPaymentMethodAdded={handlePaymentMethodAdded}
       />
+
+      <EditPaymentMethodBottomSheet
+        visible={showEditPaymentMethodSheet}
+        onDismiss={() => {
+          setShowEditPaymentMethodSheet(false);
+          setEditingPaymentMethod(null);
+        }}
+        paymentMethod={editingPaymentMethod}
+        onPaymentMethodUpdated={handlePaymentMethodUpdated}
+      />
+
+      <Portal>
+        <Dialog
+          visible={showDeleteDialog}
+          onDismiss={() => setShowDeleteDialog(false)}
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderRadius: 8,
+          }}
+        >
+          <Dialog.Title style={{ color: theme.colors.onSurface }}>
+            Confirm Delete
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+              Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button
+              onPress={handleConfirmDelete}
+              textColor={theme.colors.error}
+            >
+              Delete
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </SafeAreaView>
   );
 } 

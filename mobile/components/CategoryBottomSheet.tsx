@@ -110,12 +110,12 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
-      enableDynamicSizing
+      enableDynamicSizing={true}
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetView style={{ padding: 32, paddingBottom: 24, backgroundColor: theme.colors.surface }}>
+      <BottomSheetView style={{ padding: 16, backgroundColor: theme.colors.surface }}>
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <Text variant="headlineMedium" style={{
             marginBottom: 32,
@@ -164,55 +164,48 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
             />
 
             <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
-              <View style={{
-                flex: 1,
-                backgroundColor: theme.colors.surfaceVariant,
-                borderRadius: 6,
-                paddingVertical: 16,
-                paddingHorizontal: 24,
-                alignItems: 'center',
-                borderWidth: 1,
-                borderColor: theme.colors.outline,
-              }}>
-                <Text
-                  variant="titleMedium"
-                  style={{
-                    color: theme.colors.onSurfaceVariant,
-                    fontWeight: '600',
-                    letterSpacing: 0.25
-                  }}
-                  onPress={onDismiss}
-                >
-                  Cancel
-                </Text>
-              </View>
-              <View style={{
-                flex: 1,
-                backgroundColor: theme.colors.primary,
-                borderRadius: 6,
-                paddingVertical: 16,
-                paddingHorizontal: 24,
-                alignItems: 'center',
-                borderWidth: 1,
-                borderColor: theme.colors.primary,
-                shadowColor: '#000000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 2,
-              }}>
-                <Text
-                  variant="titleMedium"
-                  style={{
-                    color: theme.colors.onPrimary,
-                    fontWeight: '600',
-                    letterSpacing: 0.25
-                  }}
-                  onPress={handleSubmit}
-                >
-                  Add Category
-                </Text>
-              </View>
+              <Button
+                mode="outlined"
+                onPress={onDismiss}
+                contentStyle={{
+                  paddingVertical: 8,
+                }}
+                labelStyle={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  letterSpacing: 0.25
+                }}
+                style={{
+                  flex: 1,
+                  borderRadius: 6,
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
+                loading={loading}
+                contentStyle={{
+                  paddingVertical: 8,
+                }}
+                labelStyle={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  letterSpacing: 0.25
+                }}
+                style={{
+                  flex: 1,
+                  borderRadius: 6,
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
+                Add Category
+              </Button>
             </View>
           </View>
         </SafeAreaView>
