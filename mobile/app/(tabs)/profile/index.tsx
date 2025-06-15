@@ -1,0 +1,120 @@
+import React, { useCallback } from 'react';
+import { ScrollView, View } from 'react-native';
+import {
+  Text,
+  List,
+  useTheme,
+} from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, router } from 'expo-router';
+
+export default function ProfileScreen() {
+  const theme = useTheme();
+
+  useFocusEffect(
+    useCallback(() => {
+      // Any cleanup when focusing on this tab can go here
+    }, [])
+  );
+
+  const handleNavigateToSettings = () => {
+    router.push('/(tabs)/profile/settings');
+  };
+
+  const handleNavigateToBudgetCategories = () => {
+    router.push('/(tabs)/profile/budget-categories');
+  };
+
+  const handleNavigateToPaymentMethods = () => {
+    router.push('/(tabs)/profile/payment-methods');
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
+        <View style={{
+          paddingTop: 16,
+          paddingHorizontal: 24,
+          paddingBottom: 16,
+          backgroundColor: theme.colors.background
+        }}>
+          <Text variant="headlineMedium" style={{ fontWeight: '700', marginBottom: 16, color: theme.colors.onBackground }}>
+            Profile
+          </Text>
+        </View>
+
+        <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <View style={{
+            marginHorizontal: 24,
+            backgroundColor: theme.colors.surface,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+            overflow: 'hidden'
+          }}>
+            <List.Item
+              title="Settings"
+              description="Currency and app preferences"
+              left={(props) => <List.Icon {...props} icon="cog" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={handleNavigateToSettings}
+              style={{
+                backgroundColor: theme.colors.surface,
+                paddingVertical: 8,
+              }}
+              titleStyle={{
+                fontWeight: '600',
+                color: theme.colors.onSurface
+              }}
+              descriptionStyle={{
+                color: theme.colors.onSurfaceVariant
+              }}
+            />
+
+            <View style={{ height: 1, backgroundColor: theme.colors.outline, marginHorizontal: 16 }} />
+
+            <List.Item
+              title="Budget Categories"
+              description="Manage spending categories and budgets"
+              left={(props) => <List.Icon {...props} icon="wallet" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={handleNavigateToBudgetCategories}
+              style={{
+                backgroundColor: theme.colors.surface,
+                paddingVertical: 8,
+              }}
+              titleStyle={{
+                fontWeight: '600',
+                color: theme.colors.onSurface
+              }}
+              descriptionStyle={{
+                color: theme.colors.onSurfaceVariant
+              }}
+            />
+
+            <View style={{ height: 1, backgroundColor: theme.colors.outline, marginHorizontal: 16 }} />
+
+            <List.Item
+              title="Payment Methods"
+              description="Manage your payment sources"
+              left={(props) => <List.Icon {...props} icon="credit-card" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={handleNavigateToPaymentMethods}
+              style={{
+                backgroundColor: theme.colors.surface,
+                paddingVertical: 8,
+              }}
+              titleStyle={{
+                fontWeight: '600',
+                color: theme.colors.onSurface
+              }}
+              descriptionStyle={{
+                color: theme.colors.onSurfaceVariant
+              }}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
+  );
+} 

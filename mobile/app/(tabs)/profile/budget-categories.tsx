@@ -1,0 +1,281 @@
+import React, { useEffect, useState, useCallback } from 'react';
+import { ScrollView, View } from 'react-native';
+import {
+  Text,
+  Button,
+  useTheme,
+  Dialog,
+  Portal,
+  Appbar,
+  FAB
+} from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, router } from 'expo-router';
+import { useCategories, SYSTEM_CATEGORIES, formatAmount } from '../../../storage';
+import { Category } from '../../../storage';
+import { useCurrency, useCurrencyRefresh } from '../../../utils/CurrencyContext';
+import CategoryBottomSheet from '../../../components/CategoryBottomSheet';
+import EditCategoryBottomSheet from '../../../components/EditCategoryBottomSheet';
+
+export default function BudgetCategoriesScreen() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showCategorySheet, setShowCategorySheet] = useState(false);
+  const [showEditCategorySheet, setShowEditCategorySheet] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string, name: string } | null>(null);
+  const theme = useTheme();
+  const { currency } = useCurrency();
+  const refreshKey = useCurrencyRefresh();
+
+  // Storage hooks
+  const categoryOps = useCategories();
+
+  useEffect(() => {
+    loadData();
+  }, [refreshKey]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+      // Close all bottom sheets when navigating to this screen
+      setShowCategorySheet(false);
+      setShowEditCategorySheet(false);
+    }, [refreshKey])
+  );
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const allCategories = await categoryOps.getCategories();
+
+      const userCategories = allCategories.filter(category =>
+        category.id !== SYSTEM_CATEGORIES.UNCATEGORIZED
+      );
+
+      setCategories(userCategories);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCategoryAdded = () => {
+    loadData();
+  };
+
+  const handleCategoryUpdated = () => {
+    loadData();
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (categoryId === SYSTEM_CATEGORIES.UNCATEGORIZED) {
+      return;
+    }
+
+    try {
+      await categoryOps.deleteCategory(categoryId);
+      loadData();
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      await handleDeleteCategory(itemToDelete.id);
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    } finally {
+      setShowDeleteDialog(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const showDeleteConfirmation = (id: string, name: string) => {
+    setItemToDelete({ id, name });
+    setShowDeleteDialog(true);
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
+      <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
+        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.Content title="Budget Categories" titleStyle={{ fontWeight: '700' }} />
+      </Appbar.Header>
+
+      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
+        {loading ? (
+          <View style={{
+            padding: 32,
+            alignItems: 'center',
+            backgroundColor: theme.colors.surface,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+          }}>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>Loading categories...</Text>
+          </View>
+        ) : categories.length > 0 ? (
+          categories.map((category) => (
+            <View key={category.id} style={{
+              marginVertical: 4,
+              padding: 24,
+              backgroundColor: theme.colors.surface,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: theme.colors.outline,
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 1,
+            }}>
+              <View style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <View style={{ flex: 1 }}>
+                  <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 6, color: theme.colors.onSurface }}>{category.name}</Text>
+                  <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
+                    Budget: {formatAmount(category.budget, currency)}
+                  </Text>
+                </View>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <Button
+                    mode="outlined"
+                    compact
+                    onPress={() => {
+                      setEditingCategory(category);
+                      setShowEditCategorySheet(true);
+                    }}
+                    labelStyle={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5
+                    }}
+                    contentStyle={{
+                      paddingVertical: 2,
+                      paddingHorizontal: 8,
+                    }}
+                    style={{
+                      borderRadius: 4,
+                      minWidth: 60,
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    compact
+                    onPress={() => showDeleteConfirmation(category.id, category.name)}
+                    labelStyle={{
+                      fontSize: 12,
+                      fontWeight: '600',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5,
+                      color: theme.colors.error
+                    }}
+                    contentStyle={{
+                      paddingVertical: 2,
+                      paddingHorizontal: 8,
+                    }}
+                    style={{
+                      borderRadius: 4,
+                      minWidth: 60,
+                      borderColor: theme.colors.error,
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </View>
+              </View>
+            </View>
+          ))
+        ) : (
+          <View style={{
+            padding: 48,
+            alignItems: 'center',
+            backgroundColor: theme.colors.surface,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+          }}>
+            <Text variant="titleLarge" style={{ textAlign: 'center', marginBottom: 16, fontWeight: '600', color: theme.colors.onSurface }}>
+              No categories found
+            </Text>
+            <Text variant="bodyMedium" style={{
+              textAlign: 'center',
+              color: theme.colors.onSurfaceVariant,
+              lineHeight: 24,
+            }}>
+              Create your first budget category to start tracking expenses.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+
+      <FAB
+        icon="plus"
+        label="New Category"
+        onPress={() => setShowCategorySheet(true)}
+        style={{
+          position: 'absolute',
+          bottom: 16,
+          right: 16,
+        }}
+      />
+
+      <CategoryBottomSheet
+        visible={showCategorySheet}
+        onDismiss={() => setShowCategorySheet(false)}
+        onCategoryAdded={handleCategoryAdded}
+      />
+
+      <EditCategoryBottomSheet
+        visible={showEditCategorySheet}
+        onDismiss={() => {
+          setShowEditCategorySheet(false);
+          setEditingCategory(null);
+        }}
+        category={editingCategory}
+        onCategoryUpdated={handleCategoryUpdated}
+      />
+
+      <Portal>
+        <Dialog
+          visible={showDeleteDialog}
+          onDismiss={() => setShowDeleteDialog(false)}
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderRadius: 8,
+          }}
+        >
+          <Dialog.Title style={{ color: theme.colors.onSurface }}>
+            Confirm Delete
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+              Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button
+              onPress={handleConfirmDelete}
+              textColor={theme.colors.error}
+            >
+              Delete
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    </SafeAreaView>
+  );
+} 
