@@ -267,7 +267,7 @@ export default function ExpensesScreen() {
 
         <FAB
           icon="plus"
-          label="Add Expense"
+          label="New Expense"
           onPress={() => setShowExpenseSheet(true)}
           style={{
             position: 'absolute',
