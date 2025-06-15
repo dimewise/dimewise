@@ -32,8 +32,6 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
   // Storage hooks
   const categoryOps = useCategories();
 
-  // Bottom sheet snap points - using dynamic sizing
-  const snapPoints = useMemo(() => ['50%'], []);
 
   useEffect(() => {
     if (visible) {
@@ -107,15 +105,16 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
-      snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
-      enableDynamicSizing={true}
+      enableDynamicSizing
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetView style={{ padding: 16, backgroundColor: theme.colors.surface }}>
+      <BottomSheetScrollView contentContainerStyle={{
+        padding: 16,
+      }}>
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <Text variant="headlineMedium" style={{
             marginBottom: 32,
@@ -209,7 +208,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
             </View>
           </View>
         </SafeAreaView>
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheetModal>
   );
 } 

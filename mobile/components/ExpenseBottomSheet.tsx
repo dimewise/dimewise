@@ -43,9 +43,6 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   const expenseOps = useExpenses();
   const paymentMethodOps = usePaymentMethods();
 
-  // Bottom sheet snap points - using dynamic sizing
-  const snapPoints = useMemo(() => ['90%'], []);
-
   useEffect(() => {
     if (visible) {
       bottomSheetModalRef.current?.present();
@@ -237,7 +234,6 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
-      snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
       enableDynamicSizing
