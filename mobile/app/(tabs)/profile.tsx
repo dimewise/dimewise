@@ -1,15 +1,22 @@
-import { useEffect, useState, useCallback } from 'react';
-import { Button, H2, Input, ScrollView, Text, YStack, XStack, View, H3, H4, Select, Adapt, Sheet } from 'tamagui';
+import React, { useEffect, useState, useCallback } from 'react';
+import { ScrollView, View } from 'react-native';
+import {
+  Text,
+  Card,
+  Button,
+  useTheme,
+  Surface,
+  List,
+  Menu
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { useToastController } from '@tamagui/toast';
 import { useCategories, usePaymentMethods, SUPPORTED_CURRENCIES, SYSTEM_CATEGORIES, formatAmount } from '../../storage';
 import { Category, Currency, PaymentMethod } from '../../storage';
-import { Trash, Plus, ChevronDown, Edit3 } from '@tamagui/lucide-icons';
-import CategorySheet from '../../components/CategorySheet';
-import EditCategorySheet from '../../components/EditCategorySheet';
-import PaymentMethodSheet from '../../components/PaymentMethodSheet';
 import { useCurrency } from '../../utils/CurrencyContext';
+import CategoryBottomSheet from '../../components/CategoryBottomSheet';
+import EditCategoryBottomSheet from '../../components/EditCategoryBottomSheet';
+import PaymentMethodBottomSheet from '../../components/PaymentMethodBottomSheet';
 
 export default function ProfileScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -19,10 +26,10 @@ export default function ProfileScreen() {
   const [showEditCategorySheet, setShowEditCategorySheet] = useState(false);
   const [showPaymentMethodSheet, setShowPaymentMethodSheet] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [error, setError] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('JPY');
+  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
   const insets = useSafeAreaInsets();
-  const toast = useToastController();
+  const theme = useTheme();
   const { currency, setCurrency } = useCurrency();
 
   // Storage hooks
@@ -30,7 +37,6 @@ export default function ProfileScreen() {
   const paymentMethodOps = usePaymentMethods();
 
   useEffect(() => {
-    // Sync selected currency with context
     setSelectedCurrency(currency);
   }, [currency]);
 
@@ -38,10 +44,14 @@ export default function ProfileScreen() {
     loadData();
   }, []);
 
-  // Reload data when page comes into focus
   useFocusEffect(
     useCallback(() => {
       loadData();
+      // Close all bottom sheets when navigating to this tab
+      setShowCategorySheet(false);
+      setShowEditCategorySheet(false);
+      setShowPaymentMethodSheet(false);
+      setShowCurrencyMenu(false);
     }, [])
   );
 
@@ -53,7 +63,6 @@ export default function ProfileScreen() {
         paymentMethodOps.getPaymentMethods(),
       ]);
 
-      // Filter out system categories (like Uncategorized) from the profile view
       const userCategories = allCategories.filter(category =>
         category.id !== SYSTEM_CATEGORIES.UNCATEGORIZED
       );
@@ -68,260 +77,238 @@ export default function ProfileScreen() {
   };
 
   const handleCategoryAdded = () => {
-    loadData(); // Refresh data when category is added
+    loadData();
   };
 
   const handleEditCategory = (category: Category) => {
-    // Extra safety check - prevent editing system categories
     if (category.id === SYSTEM_CATEGORIES.UNCATEGORIZED) {
-      toast.show('Error', {
-        message: 'System categories cannot be edited.',
-        type: 'error',
-      });
       return;
     }
-
     setEditingCategory(category);
     setShowEditCategorySheet(true);
   };
 
   const handleCategoryUpdated = () => {
-    loadData(); // Refresh data when category is updated
+    loadData();
   };
 
   const handlePaymentMethodAdded = () => {
-    loadData(); // Refresh data when payment method is added
+    loadData();
   };
 
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
     try {
       await paymentMethodOps.deletePaymentMethod(paymentMethodId);
-      toast.show('Payment method deleted successfully!', {
-        message: 'Your payment method has been removed.',
-      });
-      // Refresh payment methods
       loadData();
     } catch (error) {
       console.error('Error deleting payment method:', error);
-      toast.show('Error', {
-        message: 'Failed to delete payment method. Please try again.',
-        type: 'error',
-      });
     }
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    // Extra safety check - prevent deleting system categories
     if (categoryId === SYSTEM_CATEGORIES.UNCATEGORIZED) {
-      toast.show('Error', {
-        message: 'System categories cannot be deleted.',
-        type: 'error',
-      });
       return;
     }
 
     try {
       await categoryOps.deleteCategory(categoryId);
-      toast.show('Category deleted successfully!', {
-        message: 'Your category has been removed.',
-      });
-      // Refresh categories
       loadData();
     } catch (error) {
       console.error('Error deleting category:', error);
-      toast.show('Error', {
-        message: 'Failed to delete category. Please try again.',
-        type: 'error',
-      });
     }
   };
 
   const handleSaveSettings = async () => {
     if (!selectedCurrency) {
-      setError('Currency is required');
       return;
     }
 
     try {
       await setCurrency(selectedCurrency);
-      setError('');
-      toast.show('Settings saved successfully!', {
-        message: 'Your currency has been updated.',
-      });
     } catch (error) {
       console.error('Error saving settings:', error);
-      setError('Failed to save settings');
-      toast.show('Error', {
-        message: 'Failed to save settings. Please try again.',
-        type: 'error',
-      });
     }
   };
 
-  // DEVELOPMENT ONLY - Comment out for production
-  const handleResetDatabase = async () => {
-    try {
-      // TODO: Implement database reset with new storage system
-      toast.show('Reset Database', {
-        message: 'Database reset functionality needs to be implemented with new storage system.',
-      });
-      // Refresh all data
-      loadData();
-    } catch (error) {
-      console.error('Error resetting database:', error);
-      toast.show('Error', {
-        message: 'Failed to reset database. Please try again.',
-        type: 'error',
-      });
-    }
-  };
+  const renderCurrencyMenu = () => (
+    <Menu
+      visible={showCurrencyMenu}
+      onDismiss={() => setShowCurrencyMenu(false)}
+      anchor={
+        <Button
+          mode="outlined"
+          onPress={() => setShowCurrencyMenu(true)}
+          contentStyle={{ justifyContent: 'flex-start' }}
+        >
+          {selectedCurrency || "Select currency"}
+        </Button>
+      }
+    >
+      {SUPPORTED_CURRENCIES.map((curr) => (
+        <Menu.Item
+          key={curr}
+          onPress={() => {
+            setSelectedCurrency(curr);
+            setShowCurrencyMenu(false);
+          }}
+          title={curr}
+        />
+      ))}
+    </Menu>
+  );
 
   return (
-    <View flex={1} bg="$background">
-      <YStack p="$4" pt={insets.top + 16}>
-        <H3 fontWeight="600">Profile</H3>
-      </YStack>
-      <ScrollView flex={1}>
-        <YStack p="$4" gap="$7">
-          {loading ? (
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <Surface style={{ paddingTop: insets.top + 16, paddingHorizontal: 16, paddingBottom: 16 }}>
+        <Text variant="headlineSmall" style={{ fontWeight: '600' }}>Profile</Text>
+      </Surface>
+
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+        {loading ? (
+          <Surface style={{ padding: 16, alignItems: 'center' }}>
             <Text>Loading...</Text>
-          ) : (
-            <>
-              <YStack gap="$4">
-                <H4>Settings</H4>
+          </Surface>
+        ) : (
+          <>
+            {/* Settings Section */}
+            <Card style={{ marginBottom: 16 }}>
+              <Card.Content>
+                <Text variant="titleLarge" style={{ marginBottom: 16 }}>Settings</Text>
 
-                {error ? <Text color="$red10">{error}</Text> : null}
+                <Text variant="bodyMedium" style={{ marginBottom: 8 }}>Currency</Text>
+                {renderCurrencyMenu()}
 
-                <Text>Currency</Text>
-                <Select value={selectedCurrency} onValueChange={(value) => setSelectedCurrency(value as Currency)}>
-                  <Select.Trigger iconAfter={<ChevronDown />}>
-                    <Select.Value placeholder="Select currency">
-                      {selectedCurrency || "Select currency"}
-                    </Select.Value>
-                  </Select.Trigger>
-
-                  <Adapt when="maxMd" platform="touch">
-                    <Sheet native={false} modal dismissOnSnapToBottom animation="medium" zIndex={300000}>
-                      <Sheet.Frame bg="$black2" pt="$5" pb="$8" px="$4" gap="$4">
-                        <Sheet.ScrollView>
-                          <Adapt.Contents />
-                        </Sheet.ScrollView>
-                      </Sheet.Frame>
-                      <Sheet.Overlay
-                        opacity={0.8}
-                        animation="200ms"
-                        enterStyle={{ opacity: 0 }}
-                        exitStyle={{ opacity: 0 }}
-                      />
-                    </Sheet>
-                  </Adapt>
-
-                  <Select.Content zIndex={400000}>
-                    <Select.Viewport>
-                      <Select.Group>
-                        {SUPPORTED_CURRENCIES.map((curr, index) => (
-                          <Select.Item key={curr} index={index} value={curr} bg="$black2">
-                            <Select.ItemText fontSize="$5">{curr}</Select.ItemText>
-                          </Select.Item>
-                        ))}
-                      </Select.Group>
-                    </Select.Viewport>
-                  </Select.Content>
-                </Select>
-                <Button onPress={handleSaveSettings}>
-                  Save Settings
-                </Button>
-
-                {/* DEVELOPMENT ONLY - Comment out for production */}
-                <Button variant="outlined" color="$red10" onPress={handleResetDatabase}>
-                  Reset Database (DEV)
-                </Button>
-              </YStack>
-              <YStack gap="$4">
-                <XStack justify="space-between" verticalAlign="center" >
-                  <H4>Categories</H4>
-                  <Button icon={<Plus size={16} />} onPress={() => setShowCategorySheet(true)}>
-                    Add Category
+                {selectedCurrency !== currency && (
+                  <Button
+                    mode="contained"
+                    onPress={handleSaveSettings}
+                    style={{ marginTop: 16 }}
+                  >
+                    Save Settings
                   </Button>
-                </XStack>
+                )}
+              </Card.Content>
+            </Card>
+
+            {/* Categories Section */}
+            <Card style={{ marginBottom: 16 }}>
+              <Card.Content>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text variant="titleLarge">Categories</Text>
+                  <Button
+                    mode="contained"
+                    icon="plus"
+                    onPress={() => setShowCategorySheet(true)}
+                    compact
+                  >
+                    Add
+                  </Button>
+                </View>
+
                 {categories.length > 0 ? (
-                  <YStack gap="$3">
-                    {categories.map(category => (
-                      <XStack key={category.id} gap="$3">
-                        <YStack flex={1}>
-                          <Text fontWeight="bold">{category.name}</Text>
-                          <Text>{formatAmount(category.budget, currency)}</Text>
-                        </YStack>
-                        <XStack gap="$2">
+                  categories.map((category) => (
+                    <List.Item
+                      key={category.id}
+                      title={category.name}
+                      description={`Budget: ${formatAmount(category.budget, currency)}`}
+                      left={props => <List.Icon {...props} icon="tag" />}
+                      right={props => (
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <Button
-                            size="$2"
-                            circular
                             onPress={() => handleEditCategory(category)}
-                            icon={<Edit3 size={16} />}
-                            variant="outlined"
-                          />
+                            icon="pencil"
+                            compact
+                            mode="text"
+                          >
+                            Edit
+                          </Button>
                           <Button
-                            size="$2"
-                            circular
                             onPress={() => handleDeleteCategory(category.id)}
-                            icon={<Trash size={16} />}
-                          />
-                        </XStack>
-                      </XStack>
-                    ))}
-                  </YStack>
+                            icon="delete"
+                            compact
+                            mode="text"
+                            textColor={theme.colors.error}
+                          >
+                            Delete
+                          </Button>
+                        </View>
+                      )}
+                    />
+                  ))
                 ) : (
-                  <Text>No categories yet. Add your first one above.</Text>
+                  <Surface style={{ padding: 16, alignItems: 'center' }}>
+                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                      No categories yet. Add your first category to get started.
+                    </Text>
+                  </Surface>
                 )}
-              </YStack>
-              <YStack gap="$4">
-                <XStack justify="space-between" verticalAlign="center" >
-                  <H4>Payment Methods</H4>
-                  <Button icon={<Plus size={16} />} onPress={() => setShowPaymentMethodSheet(true)}>
-                    Add Method
+              </Card.Content>
+            </Card>
+
+            {/* Payment Methods Section */}
+            <Card style={{ marginBottom: 16 }}>
+              <Card.Content>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                  <Text variant="titleLarge">Payment Methods</Text>
+                  <Button
+                    mode="contained"
+                    icon="plus"
+                    onPress={() => setShowPaymentMethodSheet(true)}
+                    compact
+                  >
+                    Add
                   </Button>
-                </XStack>
+                </View>
+
                 {paymentMethods.length > 0 ? (
-                  <YStack gap="$3">
-                    {paymentMethods.map(paymentMethod => (
-                      <XStack key={paymentMethod.id} gap="$3">
-                        <YStack flex={1}>
-                          <Text fontWeight="bold">{paymentMethod.name}</Text>
-                          <Text opacity={0.7}>
-                            {paymentMethod.type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </Text>
-                        </YStack>
+                  paymentMethods.map((paymentMethod) => (
+                    <List.Item
+                      key={paymentMethod.id}
+                      title={paymentMethod.name}
+                      description={paymentMethod.type}
+                      left={props => <List.Icon {...props} icon="credit-card" />}
+                      right={props => (
                         <Button
-                          size="$2"
-                          circular
                           onPress={() => handleDeletePaymentMethod(paymentMethod.id)}
-                          icon={<Trash size={16} />}
-                        />
-                      </XStack>
-                    ))}
-                  </YStack>
+                          icon="delete"
+                          compact
+                          mode="text"
+                          textColor={theme.colors.error}
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    />
+                  ))
                 ) : (
-                  <Text>No payment methods yet. Add your first one above.</Text>
+                  <Surface style={{ padding: 16, alignItems: 'center' }}>
+                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                      No payment methods yet. Add your first payment method to get started.
+                    </Text>
+                  </Surface>
                 )}
-              </YStack>
-            </>
-          )}
-        </YStack>
+              </Card.Content>
+            </Card>
+          </>
+        )}
       </ScrollView>
-      <CategorySheet
-        open={showCategorySheet}
-        onOpenChange={setShowCategorySheet}
+
+      <CategoryBottomSheet
+        visible={showCategorySheet}
+        onDismiss={() => setShowCategorySheet(false)}
         onCategoryAdded={handleCategoryAdded}
       />
-      <EditCategorySheet
-        open={showEditCategorySheet}
-        onOpenChange={setShowEditCategorySheet}
+
+      <EditCategoryBottomSheet
+        visible={showEditCategorySheet}
+        onDismiss={() => setShowEditCategorySheet(false)}
         category={editingCategory}
         onCategoryUpdated={handleCategoryUpdated}
       />
-      <PaymentMethodSheet
-        open={showPaymentMethodSheet}
-        onOpenChange={setShowPaymentMethodSheet}
+
+      <PaymentMethodBottomSheet
+        visible={showPaymentMethodSheet}
+        onDismiss={() => setShowPaymentMethodSheet(false)}
         onPaymentMethodAdded={handlePaymentMethodAdded}
       />
     </View>
