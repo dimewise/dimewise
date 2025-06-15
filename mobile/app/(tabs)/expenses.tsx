@@ -265,35 +265,16 @@ export default function ExpensesScreen() {
           )}
         </ScrollView>
 
-        {/* Add Expense Button */}
-        <View style={{
-          position: 'absolute',
-          bottom: 100,
-          right: 24,
-        }}>
-          <Button
-            mode="contained"
-            onPress={() => setShowExpenseSheet(true)}
-            contentStyle={{
-              paddingVertical: 8,
-            }}
-            labelStyle={{
-              fontSize: 16,
-              fontWeight: '600',
-              letterSpacing: 0.25
-            }}
-            style={{
-              borderRadius: 6,
-              shadowColor: '#000000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 8,
-              elevation: 4,
-            }}
-          >
-            Add Expense
-          </Button>
-        </View>
+        <FAB
+          icon="plus"
+          label="Add Expense"
+          onPress={() => setShowExpenseSheet(true)}
+          style={{
+            position: 'absolute',
+            bottom: 16,
+            right: 16,
+          }}
+        />
       </SafeAreaView>
 
       <ExpenseBottomSheet
