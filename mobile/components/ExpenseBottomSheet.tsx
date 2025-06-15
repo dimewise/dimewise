@@ -77,6 +77,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     setCategoryId('');
     setPaymentMethodId('');
     setError('');
+    setShowCategoryMenu(false);
+    setShowPaymentMethodMenu(false);
     Keyboard.dismiss();
   };
 
@@ -157,9 +159,23 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
         <Button
           mode="outlined"
           onPress={() => setShowCategoryMenu(true)}
-          contentStyle={{ justifyContent: 'flex-start' }}
+          contentStyle={{
+            justifyContent: 'flex-start',
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+          }}
+          labelStyle={{
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.colors.onSurface,
+          }}
+          style={{
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+          }}
         >
-          {selectedCategory ? selectedCategory.name : "Select category"}
+          {selectedCategory ? selectedCategory.name : 'Select Category'}
         </Button>
       }
     >
@@ -184,9 +200,23 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
         <Button
           mode="outlined"
           onPress={() => setShowPaymentMethodMenu(true)}
-          contentStyle={{ justifyContent: 'flex-start' }}
+          contentStyle={{
+            justifyContent: 'flex-start',
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+          }}
+          labelStyle={{
+            fontSize: 16,
+            fontWeight: '600',
+            color: theme.colors.onSurface,
+          }}
+          style={{
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+          }}
         >
-          {selectedPaymentMethod ? selectedPaymentMethod.name : "Select payment method"}
+          {selectedPaymentMethod ? selectedPaymentMethod.name : 'Select Payment Method'}
         </Button>
       }
     >
@@ -218,8 +248,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
       <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <View style={{
-            padding: 32,
-            paddingBottom: 24,
+            padding: 8,
             backgroundColor: theme.colors.surface,
           }}>
             <Text variant="headlineMedium" style={{
@@ -281,113 +310,52 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
               />
 
               <View style={{ gap: 16 }}>
-                <View style={{
-                  padding: 20,
-                  backgroundColor: theme.colors.surfaceVariant,
-                  borderRadius: 6,
-                  borderWidth: 1,
-                  borderColor: theme.colors.outline,
-                }}>
-                  <Text variant="bodySmall" style={{
-                    marginBottom: 12,
-                    fontWeight: '600',
-                    color: theme.colors.onSurfaceVariant,
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5
-                  }}>
-                    Category
-                  </Text>
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      color: theme.colors.onSurface,
-                      fontWeight: '600'
-                    }}
-                    onPress={() => setShowCategoryMenu(true)}
-                  >
-                    {selectedCategory ? selectedCategory.name : 'Select Category'}
-                  </Text>
-                </View>
-
-                <View style={{
-                  padding: 20,
-                  backgroundColor: theme.colors.surfaceVariant,
-                  borderRadius: 6,
-                  borderWidth: 1,
-                  borderColor: theme.colors.outline,
-                }}>
-                  <Text variant="bodySmall" style={{
-                    marginBottom: 12,
-                    fontWeight: '600',
-                    color: theme.colors.onSurfaceVariant,
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5
-                  }}>
-                    Payment Method
-                  </Text>
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      color: theme.colors.onSurface,
-                      fontWeight: '600'
-                    }}
-                    onPress={() => setShowPaymentMethodMenu(true)}
-                  >
-                    {selectedPaymentMethod ? selectedPaymentMethod.name : 'Select Payment Method'}
-                  </Text>
-                </View>
+                {renderCategoryMenu()}
+                {renderPaymentMethodMenu()}
               </View>
 
               <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
-                <View style={{
-                  flex: 1,
-                  backgroundColor: theme.colors.surfaceVariant,
-                  borderRadius: 6,
-                  paddingVertical: 16,
-                  paddingHorizontal: 24,
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: theme.colors.outline,
-                }}>
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '600',
-                      letterSpacing: 0.25
-                    }}
-                    onPress={onDismiss}
-                  >
-                    Cancel
-                  </Text>
-                </View>
-                <View style={{
-                  flex: 1,
-                  backgroundColor: theme.colors.primary,
-                  borderRadius: 6,
-                  paddingVertical: 16,
-                  paddingHorizontal: 24,
-                  alignItems: 'center',
-                  borderWidth: 1,
-                  borderColor: theme.colors.primary,
-                  shadowColor: '#000000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 4,
-                  elevation: 2,
-                }}>
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      color: theme.colors.onPrimary,
-                      fontWeight: '600',
-                      letterSpacing: 0.25
-                    }}
-                    onPress={handleSubmit}
-                  >
-                    Save Expense
-                  </Text>
-                </View>
+                <Button
+                  mode="outlined"
+                  onPress={onDismiss}
+                  contentStyle={{
+                    paddingVertical: 8,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    letterSpacing: 0.25
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 6,
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
+                  contentStyle={{
+                    paddingVertical: 8,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    letterSpacing: 0.25
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 6,
+                    shadowColor: '#000000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  Save Expense
+                </Button>
               </View>
             </View>
           </View>

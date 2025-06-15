@@ -154,8 +154,8 @@ export default function ExpensesScreen() {
             }}>
               <Text style={{ color: theme.colors.onSurfaceVariant }}>Loading expenses...</Text>
             </View>
-          ) : expenses.length > 0 ? (
-            expenses.map((expense) => {
+          ) : filteredExpenses.length > 0 ? (
+            filteredExpenses.map((expense) => {
               const category = categories.find(c => c.id === expense.categoryId);
               const paymentMethod = paymentMethods.find(p => p.id === expense.paymentMethodId);
 
@@ -249,47 +249,50 @@ export default function ExpensesScreen() {
               borderColor: theme.colors.outline,
             }}>
               <Text variant="titleLarge" style={{ textAlign: 'center', marginBottom: 16, fontWeight: '600', color: theme.colors.onSurface }}>
-                No expenses found
+                {searchQuery || selectedCategory ? 'No matching expenses found' : 'No expenses found'}
               </Text>
               <Text variant="bodyMedium" style={{
                 textAlign: 'center',
                 color: theme.colors.onSurfaceVariant,
                 lineHeight: 24,
               }}>
-                Start tracking your expenses by adding your first expense.
+                {searchQuery || selectedCategory
+                  ? 'Try adjusting your search or filter criteria.'
+                  : 'Start tracking your expenses by adding your first expense.'
+                }
               </Text>
             </View>
           )}
         </ScrollView>
 
-        {/* Floating Action Button */}
+        {/* Add Expense Button */}
         <View style={{
           position: 'absolute',
           bottom: 100,
           right: 24,
-          backgroundColor: theme.colors.primary,
-          borderRadius: 6,
-          paddingVertical: 16,
-          paddingHorizontal: 24,
-          borderWidth: 1,
-          borderColor: theme.colors.primary,
-          shadowColor: '#000000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 8,
-          elevation: 4,
         }}>
-          <Text
-            variant="titleMedium"
-            style={{
-              color: theme.colors.onPrimary,
+          <Button
+            mode="contained"
+            onPress={() => setShowExpenseSheet(true)}
+            contentStyle={{
+              paddingVertical: 8,
+            }}
+            labelStyle={{
+              fontSize: 16,
               fontWeight: '600',
               letterSpacing: 0.25
             }}
-            onPress={() => setShowExpenseSheet(true)}
+            style={{
+              borderRadius: 6,
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
           >
             Add Expense
-          </Text>
+          </Button>
         </View>
       </SafeAreaView>
 

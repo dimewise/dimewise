@@ -13,7 +13,19 @@ import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBa
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePaymentMethods } from '../storage';
 
-const PAYMENT_METHOD_TYPES = ['Credit Card', 'Debit Card', 'Cash', 'Bank Transfer', 'Digital Wallet', 'Other'];
+const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
+
+const formatPaymentTypeForDisplay = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    'credit_card': 'Credit Card',
+    'debit_card': 'Debit Card',
+    'cash': 'Cash',
+    'bank_transfer': 'Bank Transfer',
+    'digital_wallet': 'Digital Wallet',
+    'other': 'Other'
+  };
+  return typeMap[type] || type;
+};
 
 interface PaymentMethodBottomSheetProps {
   visible: boolean;
@@ -35,7 +47,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
   const paymentMethodOps = usePaymentMethods();
 
   // Bottom sheet snap points - using dynamic sizing
-  const snapPoints = useMemo(() => ['40%'], []);
+  const snapPoints = useMemo(() => ['60%'], []);
 
   useEffect(() => {
     if (visible) {
@@ -134,14 +146,14 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
-      enableDynamicSizing
+      enableDynamicSizing={true}
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
       <BottomSheetView style={{
-        padding: 32,
-        paddingBottom: 24,
+        padding: 16,
+        paddingBottom: 32,
         backgroundColor: theme.colors.surface,
       }}>
         <Text variant="headlineMedium" style={{
@@ -194,84 +206,70 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
               Payment Type
             </Text>
             <View style={{ gap: 8 }}>
-              {PAYMENT_METHOD_TYPES.map((paymentType) => (
-                <View
+              {PAYMENT_METHOD_TYPES.map((paymentType: string) => (
+                <Button
                   key={paymentType}
+                  mode={type === paymentType ? "contained" : "outlined"}
+                  onPress={() => setType(paymentType)}
+                  contentStyle={{
+                    paddingVertical: 8,
+                  }}
+                  labelStyle={{
+                    fontSize: 14,
+                    fontWeight: '600',
+                  }}
                   style={{
-                    padding: 16,
-                    backgroundColor: type === paymentType ?
-                      theme.colors.primaryContainer : theme.colors.surface,
                     borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: type === paymentType ?
-                      theme.colors.primary : theme.colors.outline,
                   }}
                 >
-                  <Text
-                    variant="bodyMedium"
-                    style={{
-                      fontWeight: '600',
-                      color: type === paymentType ?
-                        theme.colors.onPrimaryContainer : theme.colors.onSurface
-                    }}
-                    onPress={() => setType(paymentType)}
-                  >
-                    {paymentType}
-                  </Text>
-                </View>
+                  {formatPaymentTypeForDisplay(paymentType)}
+                </Button>
               ))}
             </View>
           </View>
 
           <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
-            <View style={{
-              flex: 1,
-              backgroundColor: theme.colors.surfaceVariant,
-              borderRadius: 25,
-              paddingVertical: 16,
-              paddingHorizontal: 24,
-              alignItems: 'center',
-              borderWidth: 1,
-              borderColor: theme.colors.outline,
-            }}>
-              <Text
-                variant="titleMedium"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontWeight: '600'
-                }}
-                onPress={onDismiss}
-              >
-                Cancel
-              </Text>
-            </View>
-            <View style={{
-              flex: 1,
-              backgroundColor: theme.colors.primary,
-              borderRadius: 6,
-              paddingVertical: 16,
-              paddingHorizontal: 24,
-              alignItems: 'center',
-              borderWidth: 1,
-              borderColor: theme.colors.primary,
-              shadowColor: '#000000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 2,
-            }}>
-              <Text
-                variant="titleMedium"
-                style={{
-                  color: theme.colors.onPrimary,
-                  fontWeight: '600',
-                  letterSpacing: 0.25
-                }}
-                onPress={handleSubmit}
-              >
-                Add Method
-              </Text>
-            </View>
+            <Button
+              mode="outlined"
+              onPress={onDismiss}
+              contentStyle={{
+                paddingVertical: 8,
+              }}
+              labelStyle={{
+                fontSize: 16,
+                fontWeight: '600'
+              }}
+              style={{
+                flex: 1,
+                borderRadius: 25,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleSubmit}
+              loading={loading}
+              contentStyle={{
+                paddingVertical: 8,
+              }}
+              labelStyle={{
+                fontSize: 16,
+                fontWeight: '600',
+                letterSpacing: 0.25
+              }}
+              style={{
+                flex: 1,
+                borderRadius: 6,
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 2,
+              }}
+            >
+              Add Method
+            </Button>
           </View>
         </View>
       </BottomSheetView>
