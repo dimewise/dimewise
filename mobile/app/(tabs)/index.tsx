@@ -7,7 +7,8 @@ import {
   useTheme,
   Surface,
   Divider,
-  Button
+  Button,
+  FAB
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -207,10 +208,213 @@ export default function HomePage() {
   };
 
   const remaining = totalBudget - totalSpent;
+  const budgetPercentage = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top', 'left', 'right']}>
-      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 24 }}>
+      <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
+        {/* Hero Section - Budget Overview */}
+        <View style={{ marginBottom: 32 }}>
+          <View style={{ paddingVertical: 32 }}>
+            {/* Header */}
+            <View style={{
+              alignItems: 'center',
+              marginBottom: 32
+            }}>
+              <Text variant="headlineSmall" style={{
+                fontWeight: '800',
+                color: theme.colors.onSurface,
+                letterSpacing: -0.5,
+                marginBottom: 4
+              }}>
+                Monthly Budget
+              </Text>
+              <Text variant="bodyMedium" style={{
+                color: theme.colors.onSurfaceVariant,
+                fontWeight: '500',
+                opacity: 0.8
+              }}>
+                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </Text>
+            </View>
+
+            {/* Progress Section */}
+            <View style={{ marginBottom: 28 }}>
+              {/* Custom Progress Bar Container */}
+              <View style={{
+                height: 16,
+                backgroundColor: theme.colors.surfaceVariant,
+                borderRadius: 8,
+                overflow: 'hidden',
+                marginBottom: 16,
+                shadowColor: '#000000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+                elevation: 2,
+              }}>
+                {/* Progress Fill */}
+                <View style={{
+                  height: '100%',
+                  width: `${Math.min(budgetPercentage, 100)}%`,
+                  backgroundColor: budgetPercentage >= 95 ? '#FF4444' :
+                    budgetPercentage >= 80 ? '#FF8800' :
+                      '#00BF63',
+                  borderRadius: 8,
+                  shadowColor: budgetPercentage >= 95 ? '#FF4444' :
+                    budgetPercentage >= 80 ? '#FF8800' :
+                      '#00BF63',
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }} />
+              </View>
+
+              {/* Percentage Display */}
+              <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 4
+              }}>
+                <Text style={{
+                  fontSize: 36,
+                  fontWeight: '900',
+                  color: budgetPercentage >= 90 ? '#FF4444' : theme.colors.onSurface,
+                  letterSpacing: -1,
+                  textAlign: 'center'
+                }}>
+                  {budgetPercentage.toFixed(0)}%
+                </Text>
+                <Text style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: theme.colors.onSurfaceVariant,
+                  marginLeft: 4,
+                  marginTop: 8
+                }}>
+                  used
+                </Text>
+              </View>
+            </View>
+
+            {/* Stats Row */}
+            <View style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              paddingHorizontal: 8,
+              marginBottom: 20
+            }}>
+              {/* Spent */}
+              <View style={{
+                alignItems: 'center',
+                flex: 1
+              }}>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 4
+                }}>
+                  <View style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: '#FF6B6B',
+                    marginRight: 8
+                  }} />
+                  <Text variant="labelMedium" style={{
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5
+                  }}>
+                    Spent
+                  </Text>
+                </View>
+                <Text variant="titleMedium" style={{
+                  fontWeight: '700',
+                  color: theme.colors.onSurface
+                }}>
+                  {formatAmountLocal(totalSpent)}
+                </Text>
+              </View>
+
+              {/* Divider */}
+              <View style={{
+                width: 1,
+                height: 32,
+                backgroundColor: theme.colors.outline,
+                opacity: 0.3,
+                marginHorizontal: 16
+              }} />
+
+              {/* Remaining */}
+              <View style={{
+                alignItems: 'center',
+                flex: 1
+              }}>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 4
+                }}>
+                  <View style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: remaining >= 0 ? '#00BF63' : '#FF4444',
+                    marginRight: 8
+                  }} />
+                  <Text variant="labelMedium" style={{
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5
+                  }}>
+                    {remaining >= 0 ? 'Left' : 'Over'}
+                  </Text>
+                </View>
+                <Text variant="titleMedium" style={{
+                  fontWeight: '700',
+                  color: remaining >= 0 ? theme.colors.onSurface : '#FF4444'
+                }}>
+                  {formatAmountLocal(Math.abs(remaining))}
+                </Text>
+              </View>
+            </View>
+
+            {/* Status Message */}
+            <View style={{
+              padding: 16,
+              backgroundColor: budgetPercentage >= 90 ? '#FFF5F5' :
+                budgetPercentage >= 75 ? '#FFF8F0' :
+                  '#F0FFF4',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: budgetPercentage >= 90 ? '#FFE5E5' :
+                budgetPercentage >= 75 ? '#FFF0E0' :
+                  '#E5FFE5',
+              alignItems: 'center'
+            }}>
+              <Text variant="bodyMedium" style={{
+                color: budgetPercentage >= 90 ? '#D32F2F' :
+                  budgetPercentage >= 75 ? '#F57C00' :
+                    '#2E7D32',
+                fontWeight: '600',
+                textAlign: 'center',
+                lineHeight: 20
+              }}>
+                {budgetPercentage >= 95 ? ' Budget exceeded! Consider reviewing expenses.' :
+                  budgetPercentage >= 85 ? 'Nearing budget limit. Monitor spending.' :
+                    budgetPercentage >= 60 ? 'On track with your budget.' :
+                      'Great! You have plenty of budget remaining.'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
         {loading ? (
           <View style={{
             padding: 32,
@@ -224,7 +428,7 @@ export default function HomePage() {
           </View>
         ) : categories.length > 0 ? (
           <>
-            <Text variant="headlineMedium" style={{ marginBottom: 24, fontWeight: '700', color: theme.colors.onBackground }}>Budget Overview</Text>
+            <Text variant="headlineMedium" style={{ marginBottom: 24, fontWeight: '700', color: theme.colors.onBackground }}>Budget Categories</Text>
             {categories.map(renderCategory)}
 
             {expenses.length > 0 && (
@@ -319,75 +523,16 @@ export default function HomePage() {
         )}
       </ScrollView>
 
-      {/* Budget Summary - Fixed Bottom Section */}
-      <View style={{
-        padding: 24,
-        backgroundColor: theme.colors.surface,
-        borderTopWidth: 1,
-        borderTopColor: theme.colors.outline,
-        shadowColor: '#000000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      }}>
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 24
-        }}>
-          <View style={{ flex: 1 }}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Total Budget
-            </Text>
-            <Text variant="titleLarge" style={{ fontWeight: '700', color: theme.colors.onSurface }}>
-              {formatAmountLocal(totalBudget)}
-            </Text>
-          </View>
-          <View style={{ flex: 1, alignItems: 'center' }}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Spent
-            </Text>
-            <Text variant="titleLarge" style={{ fontWeight: '700', color: theme.colors.onSurface }}>
-              {formatAmountLocal(totalSpent)}
-            </Text>
-          </View>
-          <View style={{ flex: 1, alignItems: 'flex-end' }}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-              Remaining
-            </Text>
-            <Text variant="titleLarge" style={{
-              fontWeight: '700',
-              color: remaining >= 0 ? theme.colors.onSurface : theme.colors.error
-            }}>
-              {formatAmountLocal(remaining)}
-            </Text>
-          </View>
-        </View>
-        <Button
-          mode="contained"
-          onPress={() => setShowExpenseSheet(true)}
-          contentStyle={{
-            paddingVertical: 8,
-          }}
-          labelStyle={{
-            fontSize: 16,
-            fontWeight: '600',
-            letterSpacing: 0.25
-          }}
-          style={{
-            borderRadius: 6,
-            shadowColor: '#000000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 2,
-          }}
-        >
-          New Expense
-        </Button>
-      </View>
+      <FAB
+        icon="plus"
+        label="New Expense"
+        onPress={() => setShowExpenseSheet(true)}
+        style={{
+          position: 'absolute',
+          bottom: 16,
+          right: 16,
+        }}
+      />
 
       <ExpenseBottomSheet
         visible={showExpenseSheet}
