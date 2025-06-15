@@ -9,7 +9,8 @@ import {
   Surface,
   Divider
 } from 'react-native-paper';
-import BottomSheet, { BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput } from '../storage';
 import { Category, PaymentMethod } from '../storage';
 import { useCurrency } from '../utils/CurrencyContext';
@@ -35,22 +36,22 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
 
   const theme = useTheme();
   const { currency } = useCurrency();
-  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // Storage hooks
   const categoryOps = useCategories();
   const expenseOps = useExpenses();
   const paymentMethodOps = usePaymentMethods();
 
-  // Bottom sheet snap points
+  // Bottom sheet snap points - using dynamic sizing
   const snapPoints = useMemo(() => ['90%'], []);
 
   useEffect(() => {
     if (visible) {
-      bottomSheetRef.current?.expand();
+      bottomSheetModalRef.current?.present();
       loadData();
     } else {
-      bottomSheetRef.current?.close();
+      bottomSheetModalRef.current?.dismiss();
       resetForm();
     }
   }, [visible]);
@@ -131,6 +132,20 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     }
   }, [onDismiss]);
 
+  // Backdrop component for tap-to-dismiss
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        onPress={onDismiss}
+      />
+    ),
+    [onDismiss]
+  );
+
   const selectedCategory = categories.find(cat => cat.id === categoryId);
   const selectedPaymentMethod = paymentMethods.find(pm => pm.id === paymentMethodId);
 
@@ -189,95 +204,91 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   );
 
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={visible ? 0 : -1}
+    <BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
       enablePanDownToClose
+      enableDynamicSizing
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
+      backdropComponent={renderBackdrop}
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text variant="headlineSmall" style={{ marginBottom: 24, fontWeight: '600' }}>
-          New Expense
-        </Text>
+        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+          <Text variant="headlineSmall" style={{ marginBottom: 24, fontWeight: '600' }}>
+            Add New Expense
+          </Text>
 
-        {error ? (
-          <Surface style={{
-            padding: 12,
-            marginBottom: 16,
-            backgroundColor: theme.colors.errorContainer,
-            borderRadius: 8
-          }}>
-            <Text style={{ color: theme.colors.onErrorContainer }}>
+          {error ? (
+            <Text variant="bodyMedium" style={{ color: theme.colors.error, marginBottom: 16 }}>
               {error}
             </Text>
-          </Surface>
-        ) : null}
+          ) : null}
 
-        <View style={{ gap: 16 }}>
-          <TextInput
-            label="Title"
-            value={title}
-            onChangeText={setTitle}
-            mode="outlined"
-            autoCapitalize="sentences"
-          />
-
-          <TextInput
-            label="Description (optional)"
-            value={description}
-            onChangeText={setDescription}
-            mode="outlined"
-            multiline
-            numberOfLines={3}
-            autoCapitalize="sentences"
-          />
-
-          <TextInput
-            label={currency === 'JPY' || currency === 'KRW' ?
-              `Amount (no decimals for ${currency})` :
-              `Amount (e.g. 10.50 for ${currency})`}
-            value={amount}
-            onChangeText={setAmount}
-            mode="outlined"
-            keyboardType="numeric"
-          />
-
-          <View>
-            <Text variant="bodyMedium" style={{ marginBottom: 8 }}>Category</Text>
-            {renderCategoryMenu()}
-          </View>
-
-          <View>
-            <Text variant="bodyMedium" style={{ marginBottom: 8 }}>Payment Method</Text>
-            {renderPaymentMethodMenu()}
-          </View>
-
-          <Divider style={{ marginVertical: 8 }} />
-
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <Button
+          <View style={{ gap: 16 }}>
+            <TextInput
+              label="Title"
+              value={title}
+              onChangeText={setTitle}
               mode="outlined"
-              onPress={onDismiss}
-              style={{ flex: 1 }}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              style={{ flex: 1 }}
-              loading={loading}
-              disabled={loading}
-            >
-              Add Expense
-            </Button>
+              placeholder="Enter expense title"
+            />
+
+            <TextInput
+              label="Description (Optional)"
+              value={description}
+              onChangeText={setDescription}
+              mode="outlined"
+              placeholder="Enter description"
+              multiline
+              numberOfLines={3}
+            />
+
+            <TextInput
+              label={`Amount (${currency})`}
+              value={amount}
+              onChangeText={setAmount}
+              mode="outlined"
+              placeholder="0.00"
+              keyboardType="numeric"
+            />
+
+            <View style={{ gap: 8 }}>
+              <Text variant="bodyMedium">Category</Text>
+              {renderCategoryMenu()}
+            </View>
+
+            <View style={{ gap: 8 }}>
+              <Text variant="bodyMedium">Payment Method</Text>
+              {renderPaymentMethodMenu()}
+            </View>
+
+            <Divider style={{ marginVertical: 8 }} />
+
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <Button
+                mode="outlined"
+                onPress={onDismiss}
+                style={{ flex: 1 }}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
+                style={{ flex: 1 }}
+                loading={loading}
+                disabled={loading}
+              >
+                Add Expense
+              </Button>
+            </View>
           </View>
-        </View>
+        </SafeAreaView>
       </BottomSheetScrollView>
-    </BottomSheet>
+    </BottomSheetModal>
   );
 } 
