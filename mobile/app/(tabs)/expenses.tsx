@@ -16,6 +16,9 @@ import { useExpenses, useCategories, usePaymentMethods, formatAmount } from '../
 import { Expense, Category, PaymentMethod } from '../../storage';
 import { useCurrency, useCurrencyRefresh } from '../../utils/CurrencyContext';
 import ExpenseBottomSheet from '../../components/ExpenseBottomSheet';
+import ExpenseListItem from '../../components/ExpenseListItem';
+import ExpenseDetailBottomSheet from '../../components/ExpenseDetailBottomSheet';
+import EditExpenseBottomSheet from '../../components/EditExpenseBottomSheet';
 
 export default function ExpensesScreen() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -25,6 +28,10 @@ export default function ExpensesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
+  const [showDetailSheet, setShowDetailSheet] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
   const theme = useTheme();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
@@ -41,8 +48,12 @@ export default function ExpensesScreen() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-      // Close bottom sheet when navigating to this tab
+      // Close bottom sheets when navigating to this tab
       setShowExpenseSheet(false);
+      setShowDetailSheet(false);
+      setShowEditSheet(false);
+      setSelectedExpense(null);
+      setIsTransitioningToEdit(false);
     }, [refreshKey])
   );
 
@@ -67,6 +78,30 @@ export default function ExpensesScreen() {
 
   const handleExpenseAdded = () => {
     loadData();
+  };
+
+  const handleExpensePress = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setShowDetailSheet(true);
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    setIsTransitioningToEdit(true);
+    setShowDetailSheet(false);
+    setShowEditSheet(true);
+  };
+
+  const handleExpenseUpdated = () => {
+    loadData();
+    setShowEditSheet(false);
+    setSelectedExpense(null);
+    setIsTransitioningToEdit(false);
+  };
+
+  const handleExpenseDeleted = () => {
+    loadData();
+    setShowDetailSheet(false);
+    setSelectedExpense(null);
   };
 
   const filteredExpenses = expenses.filter(expense => {
@@ -160,83 +195,13 @@ export default function ExpensesScreen() {
               const paymentMethod = paymentMethods.find(p => p.id === expense.paymentMethodId);
 
               return (
-                <View key={expense.id} style={{
-                  marginVertical: 4,
-                  padding: 24,
-                  backgroundColor: theme.colors.surface,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: theme.colors.outline,
-                  shadowColor: '#000000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 2,
-                  elevation: 1,
-                }}>
-                  <View style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start'
-                  }}>
-                    <View style={{ flex: 1, marginRight: 20 }}>
-                      <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 6, color: theme.colors.onSurface }}>{expense.title}</Text>
-                      {expense.description && (
-                        <Text
-                          variant="bodySmall"
-                          style={{ color: theme.colors.onSurfaceVariant, marginBottom: 16, lineHeight: 20 }}
-                        >
-                          {expense.description}
-                        </Text>
-                      )}
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                        <View style={{
-                          paddingHorizontal: 12,
-                          paddingVertical: 6,
-                          backgroundColor: theme.colors.primaryContainer,
-                          borderRadius: 4,
-                          borderWidth: 1,
-                          borderColor: theme.colors.outline,
-                        }}>
-                          <Text variant="bodySmall" style={{
-                            color: theme.colors.onPrimaryContainer,
-                            fontWeight: '500',
-                            fontSize: 11,
-                            textTransform: 'uppercase',
-                            letterSpacing: 0.5
-                          }}>
-                            {category?.name || 'Unknown'}
-                          </Text>
-                        </View>
-                        {paymentMethod && (
-                          <View style={{
-                            paddingHorizontal: 12,
-                            paddingVertical: 6,
-                            backgroundColor: theme.colors.surfaceVariant,
-                            borderRadius: 4,
-                            borderWidth: 1,
-                            borderColor: theme.colors.outline,
-                          }}>
-                            <Text variant="bodySmall" style={{
-                              color: theme.colors.onSurfaceVariant,
-                              fontWeight: '500',
-                              fontSize: 11,
-                              textTransform: 'uppercase',
-                              letterSpacing: 0.5
-                            }}>
-                              {paymentMethod.name}
-                            </Text>
-                          </View>
-                        )}
-                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
-                          {new Date(expense.date).toLocaleDateString()}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text variant="titleMedium" style={{ fontWeight: '700', color: theme.colors.onSurface }}>
-                      {formatAmountLocal(expense.amount)}
-                    </Text>
-                  </View>
-                </View>
+                <ExpenseListItem
+                  key={expense.id}
+                  expense={expense}
+                  category={category}
+                  paymentMethod={paymentMethod}
+                  onPress={handleExpensePress}
+                />
               );
             })
           ) : (
@@ -281,6 +246,32 @@ export default function ExpensesScreen() {
         visible={showExpenseSheet}
         onDismiss={() => setShowExpenseSheet(false)}
         onExpenseAdded={handleExpenseAdded}
+      />
+
+      <ExpenseDetailBottomSheet
+        visible={showDetailSheet}
+        expense={selectedExpense}
+        category={selectedExpense ? categories.find(c => c.id === selectedExpense.categoryId) : undefined}
+        paymentMethod={selectedExpense ? paymentMethods.find(p => p.id === selectedExpense.paymentMethodId) : undefined}
+        onDismiss={() => {
+          setShowDetailSheet(false);
+          if (!isTransitioningToEdit) {
+            setSelectedExpense(null);
+          }
+        }}
+        onEdit={handleEditExpense}
+        onDeleted={handleExpenseDeleted}
+      />
+
+      <EditExpenseBottomSheet
+        visible={showEditSheet}
+        expense={selectedExpense}
+        onDismiss={() => {
+          setShowEditSheet(false);
+          setSelectedExpense(null);
+          setIsTransitioningToEdit(false);
+        }}
+        onExpenseUpdated={handleExpenseUpdated}
       />
     </View>
   );

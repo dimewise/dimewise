@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Keyboard, Platform } from 'react-native';
 import {
   Text,
@@ -13,16 +13,22 @@ import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownB
 import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput } from '../storage';
-import { Category, PaymentMethod } from '../storage';
+import { Category, PaymentMethod, Expense } from '../storage';
 import { useCurrency } from '../utils/CurrencyContext';
 
-interface ExpenseBottomSheetProps {
+interface EditExpenseBottomSheetProps {
   visible: boolean;
+  expense: Expense | null;
   onDismiss: () => void;
-  onExpenseAdded?: () => void;
+  onExpenseUpdated?: () => void;
 }
 
-export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded }: ExpenseBottomSheetProps) {
+export default function EditExpenseBottomSheet({
+  visible,
+  expense,
+  onDismiss,
+  onExpenseUpdated
+}: EditExpenseBottomSheetProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [title, setTitle] = useState('');
@@ -47,14 +53,34 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   const paymentMethodOps = usePaymentMethods();
 
   useEffect(() => {
-    if (visible) {
+    if (visible && expense) {
       bottomSheetModalRef.current?.present();
       loadData();
     } else {
       bottomSheetModalRef.current?.dismiss();
-      resetForm();
+      if (!visible) {
+        resetForm();
+      }
     }
-  }, [visible]);
+  }, [visible, expense]);
+
+  // Separate effect to populate form after data is loaded
+  useEffect(() => {
+    if (visible && expense && categories.length > 0 && paymentMethods.length > 0) {
+      populateForm();
+    }
+  }, [visible, expense, categories, paymentMethods]);
+
+  const populateForm = () => {
+    if (expense) {
+      setTitle(expense.title);
+      setDescription(expense.description || '');
+      setAmount(expense.amount.toString());
+      setCategoryId(expense.categoryId);
+      setPaymentMethodId(expense.paymentMethodId);
+      setDate(new Date(expense.date));
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -85,6 +111,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   };
 
   const handleSubmit = async () => {
+    if (!expense) return;
+
     if (!title.trim()) {
       setError('Title is required');
       return;
@@ -110,21 +138,24 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     setError('');
 
     try {
-      await expenseOps.createExpense(
-        title.trim(),
-        description.trim(),
-        Number(amount),
-        currency,
+      const updatedExpense: Expense = {
+        ...expense,
+        title: title.trim(),
+        description: description.trim(),
+        amount: Number(amount),
         categoryId,
         paymentMethodId,
-        date.toISOString()
-      );
+        date: date.toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      await expenseOps.updateExpense(updatedExpense);
 
       onDismiss();
-      onExpenseAdded?.();
+      onExpenseUpdated?.();
     } catch (e) {
-      console.error('Failed to save expense:', e);
-      setError('Failed to save expense. Please try again.');
+      console.error('Failed to update expense:', e);
+      setError('Failed to update expense. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -136,7 +167,6 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     }
   }, [onDismiss]);
 
-  // Backdrop component for tap-to-dismiss
   const renderBackdrop = useCallback(
     (props: any) => (
       <BottomSheetBackdrop
@@ -167,9 +197,6 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
       day: 'numeric'
     });
   };
-
-  const selectedCategory = categories.find(cat => cat.id === categoryId);
-  const selectedPaymentMethod = paymentMethods.find(pm => pm.id === paymentMethodId);
 
   // Convert categories to dropdown options
   const categoryOptions: DropdownOption[] = categories.map(category => ({
@@ -259,6 +286,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     </>
   );
 
+  if (!expense) return null;
+
   return (
     <BottomSheetModal
       ref={bottomSheetModalRef}
@@ -282,7 +311,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
               color: theme.colors.onSurface,
               textAlign: 'center'
             }}>
-              New Expense
+              Update Expense
             </Text>
 
             {error ? (
@@ -372,6 +401,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
                 <Button
                   mode="contained"
                   onPress={handleSubmit}
+                  loading={loading}
+                  disabled={loading}
                   contentStyle={{
                     paddingVertical: 8,
                   }}
@@ -390,7 +421,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
                     elevation: 2,
                   }}
                 >
-                  Save Expense
+                  Update Expense
                 </Button>
               </View>
             </View>

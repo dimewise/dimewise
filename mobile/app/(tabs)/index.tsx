@@ -12,10 +12,13 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { useExpenses, useCategories, formatAmount, SYSTEM_CATEGORIES } from '../../storage';
-import { Expense, Category } from '../../storage';
+import { useExpenses, useCategories, usePaymentMethods, formatAmount, SYSTEM_CATEGORIES } from '../../storage';
+import { Expense, Category, PaymentMethod } from '../../storage';
 import { useCurrency, useCurrencyRefresh } from '../../utils/CurrencyContext';
 import ExpenseBottomSheet from '../../components/ExpenseBottomSheet';
+import ExpenseListItem from '../../components/ExpenseListItem';
+import ExpenseDetailBottomSheet from '../../components/ExpenseDetailBottomSheet';
+import EditExpenseBottomSheet from '../../components/EditExpenseBottomSheet';
 
 interface CategoryWithSpending extends Category {
   spent: number;
@@ -25,10 +28,15 @@ interface CategoryWithSpending extends Category {
 export default function HomePage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [categories, setCategories] = useState<CategoryWithSpending[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
+  const [showDetailSheet, setShowDetailSheet] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
   const theme = useTheme();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
@@ -36,6 +44,7 @@ export default function HomePage() {
   // Storage hooks
   const expenseOps = useExpenses();
   const categoryOps = useCategories();
+  const paymentMethodOps = usePaymentMethods();
 
   useEffect(() => {
     loadData();
@@ -44,19 +53,24 @@ export default function HomePage() {
   useFocusEffect(
     useCallback(() => {
       loadData();
-      // Close bottom sheet when navigating to this tab
+      // Close bottom sheets when navigating to this tab
       setShowExpenseSheet(false);
+      setShowDetailSheet(false);
+      setShowEditSheet(false);
+      setSelectedExpense(null);
+      setIsTransitioningToEdit(false);
     }, [refreshKey])
   );
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [currentExpenses, budget, spent, allCategories] = await Promise.all([
+      const [currentExpenses, budget, spent, allCategories, allPaymentMethods] = await Promise.all([
         expenseOps.getCurrentMonthExpenses(),
         categoryOps.getTotalBudget(),
         expenseOps.getTotalSpent(),
         categoryOps.getCategories(),
+        paymentMethodOps.getPaymentMethods(),
       ]);
 
       const categoriesWithSpending = await Promise.all(
@@ -80,6 +94,7 @@ export default function HomePage() {
 
       setExpenses(currentExpenses.slice(0, 5));
       setCategories(filteredCategories);
+      setPaymentMethods(allPaymentMethods);
       setTotalBudget(budget);
       setTotalSpent(spent);
     } catch (error) {
@@ -105,6 +120,30 @@ export default function HomePage() {
 
   const handleExpenseAdded = () => {
     loadData();
+  };
+
+  const handleExpensePress = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setShowDetailSheet(true);
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    setIsTransitioningToEdit(true);
+    setShowDetailSheet(false);
+    setShowEditSheet(true);
+  };
+
+  const handleExpenseUpdated = () => {
+    loadData();
+    setShowEditSheet(false);
+    setSelectedExpense(null);
+    setIsTransitioningToEdit(false);
+  };
+
+  const handleExpenseDeleted = () => {
+    loadData();
+    setShowDetailSheet(false);
+    setSelectedExpense(null);
   };
 
   const renderCategory = (category: CategoryWithSpending) => {
@@ -437,64 +476,15 @@ export default function HomePage() {
                 <Text variant="headlineMedium" style={{ marginBottom: 24, fontWeight: '700', color: theme.colors.onBackground }}>Recent Expenses</Text>
                 {expenses.map((expense) => {
                   const category = categories.find(c => c.id === expense.categoryId);
+                  const paymentMethod = paymentMethods.find(p => p.id === expense.paymentMethodId);
                   return (
-                    <View key={expense.id} style={{
-                      marginVertical: 4,
-                      padding: 24,
-                      backgroundColor: theme.colors.surface,
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      borderColor: theme.colors.outline,
-                      shadowColor: '#000000',
-                      shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.05,
-                      shadowRadius: 2,
-                      elevation: 1,
-                    }}>
-                      <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start'
-                      }}>
-                        <View style={{ flex: 1, marginRight: 20 }}>
-                          <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 6, color: theme.colors.onSurface }}>{expense.title}</Text>
-                          {expense.description && (
-                            <Text
-                              variant="bodySmall"
-                              style={{ color: theme.colors.onSurfaceVariant, marginBottom: 12, lineHeight: 20 }}
-                            >
-                              {expense.description}
-                            </Text>
-                          )}
-                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                            <View style={{
-                              paddingHorizontal: 12,
-                              paddingVertical: 6,
-                              backgroundColor: theme.colors.primaryContainer,
-                              borderRadius: 4,
-                              borderWidth: 1,
-                              borderColor: theme.colors.outline,
-                            }}>
-                              <Text variant="bodySmall" style={{
-                                color: theme.colors.onPrimaryContainer,
-                                fontWeight: '500',
-                                fontSize: 11,
-                                textTransform: 'uppercase',
-                                letterSpacing: 0.5
-                              }}>
-                                {category?.name || 'Unknown'}
-                              </Text>
-                            </View>
-                            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
-                              {new Date(expense.date).toLocaleDateString()}
-                            </Text>
-                          </View>
-                        </View>
-                        <Text variant="titleMedium" style={{ fontWeight: '700', color: theme.colors.onSurface }}>
-                          {formatAmountLocal(expense.amount)}
-                        </Text>
-                      </View>
-                    </View>
+                    <ExpenseListItem
+                      key={expense.id}
+                      expense={expense}
+                      category={category}
+                      paymentMethod={paymentMethod}
+                      onPress={handleExpensePress}
+                    />
                   );
                 })}
               </>
@@ -538,6 +528,32 @@ export default function HomePage() {
         visible={showExpenseSheet}
         onDismiss={() => setShowExpenseSheet(false)}
         onExpenseAdded={handleExpenseAdded}
+      />
+
+      <ExpenseDetailBottomSheet
+        visible={showDetailSheet}
+        expense={selectedExpense}
+        category={selectedExpense ? categories.find(c => c.id === selectedExpense.categoryId) : undefined}
+        paymentMethod={selectedExpense ? paymentMethods.find(p => p.id === selectedExpense.paymentMethodId) : undefined}
+        onDismiss={() => {
+          setShowDetailSheet(false);
+          if (!isTransitioningToEdit) {
+            setSelectedExpense(null);
+          }
+        }}
+        onEdit={handleEditExpense}
+        onDeleted={handleExpenseDeleted}
+      />
+
+      <EditExpenseBottomSheet
+        visible={showEditSheet}
+        expense={selectedExpense}
+        onDismiss={() => {
+          setShowEditSheet(false);
+          setSelectedExpense(null);
+          setIsTransitioningToEdit(false);
+        }}
+        onExpenseUpdated={handleExpenseUpdated}
       />
     </SafeAreaView>
   );
