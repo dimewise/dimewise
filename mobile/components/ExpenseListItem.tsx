@@ -1,0 +1,131 @@
+import React from 'react';
+import { View, TouchableOpacity } from 'react-native';
+import { Text, useTheme } from 'react-native-paper';
+import { Expense, Category, PaymentMethod } from '../storage';
+import { formatAmount } from '../storage';
+import { useCurrency } from '../utils/CurrencyContext';
+
+interface ExpenseListItemProps {
+  expense: Expense;
+  category?: Category;
+  paymentMethod?: PaymentMethod;
+  onPress: (expense: Expense) => void;
+}
+
+export default function ExpenseListItem({
+  expense,
+  category,
+  paymentMethod,
+  onPress
+}: ExpenseListItemProps) {
+  const theme = useTheme();
+  const { currency } = useCurrency();
+
+  const formatAmountLocal = (amount: number) => {
+    return formatAmount(amount, currency);
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={() => onPress(expense)}
+      style={{
+        marginVertical: 4,
+        padding: 24,
+        backgroundColor: theme.colors.surface,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: theme.colors.outline,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+      }}
+    >
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start'
+      }}>
+        <View style={{ flex: 1, marginRight: 20 }}>
+          <Text variant="titleMedium" style={{
+            fontWeight: '600',
+            marginBottom: 6,
+            color: theme.colors.onSurface
+          }}>
+            {expense.title}
+          </Text>
+          {expense.description && (
+            <Text
+              variant="bodySmall"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                marginBottom: expense.description ? 16 : 12,
+                lineHeight: 20
+              }}
+            >
+              {expense.description}
+            </Text>
+          )}
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap'
+          }}>
+            <View style={{
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              backgroundColor: theme.colors.primaryContainer,
+              borderRadius: 4,
+              borderWidth: 1,
+              borderColor: theme.colors.outline,
+            }}>
+              <Text variant="bodySmall" style={{
+                color: theme.colors.onPrimaryContainer,
+                fontWeight: '500',
+                fontSize: 11,
+                textTransform: 'uppercase',
+                letterSpacing: 0.5
+              }}>
+                {category?.name || 'Unknown'}
+              </Text>
+            </View>
+            {paymentMethod && (
+              <View style={{
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                backgroundColor: theme.colors.surfaceVariant,
+                borderRadius: 4,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}>
+                <Text variant="bodySmall" style={{
+                  color: theme.colors.onSurfaceVariant,
+                  fontWeight: '500',
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5
+                }}>
+                  {paymentMethod.name}
+                </Text>
+              </View>
+            )}
+            <Text variant="bodySmall" style={{
+              color: theme.colors.onSurfaceVariant,
+              fontWeight: '500'
+            }}>
+              {new Date(expense.date).toLocaleDateString()}
+            </Text>
+          </View>
+        </View>
+        <Text variant="titleMedium" style={{
+          fontWeight: '700',
+          color: theme.colors.onSurface
+        }}>
+          {formatAmountLocal(expense.amount)}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+} 
