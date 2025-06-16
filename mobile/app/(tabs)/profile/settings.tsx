@@ -4,7 +4,6 @@ import {
   Text,
   Button,
   useTheme,
-  Menu,
   Appbar,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,10 +11,11 @@ import { router } from 'expo-router';
 import { SUPPORTED_CURRENCIES } from '../../../storage';
 import { Currency } from '../../../storage';
 import { useCurrency } from '../../../utils/CurrencyContext';
+import DropdownBottomSheet, { DropdownButton, DropdownOption } from '../../../components/DropdownBottomSheet';
 
 export default function SettingsScreen() {
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('JPY');
-  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false);
   const theme = useTheme();
   const { currency, setCurrency } = useCurrency();
 
@@ -35,31 +35,31 @@ export default function SettingsScreen() {
     }
   };
 
-  const renderCurrencyMenu = () => (
-    <Menu
-      visible={showCurrencyMenu}
-      onDismiss={() => setShowCurrencyMenu(false)}
-      anchor={
-        <Button
-          mode="outlined"
-          onPress={() => setShowCurrencyMenu(true)}
-          contentStyle={{ justifyContent: 'flex-start' }}
-        >
-          {selectedCurrency || "Select currency"}
-        </Button>
-      }
-    >
-      {SUPPORTED_CURRENCIES.map((curr) => (
-        <Menu.Item
-          key={curr}
-          onPress={() => {
-            setSelectedCurrency(curr);
-            setShowCurrencyMenu(false);
-          }}
-          title={curr}
-        />
-      ))}
-    </Menu>
+  // Convert currencies to dropdown options
+  const currencyOptions: DropdownOption[] = SUPPORTED_CURRENCIES.map(curr => ({
+    label: curr,
+    value: curr,
+    id: curr
+  }));
+
+  const renderCurrencyDropdown = () => (
+    <>
+      <DropdownButton
+        onPress={() => setShowCurrencyDropdown(true)}
+        selectedValue={selectedCurrency}
+        options={currencyOptions}
+        placeholder="Select Currency"
+        label="Currency"
+      />
+      <DropdownBottomSheet
+        visible={showCurrencyDropdown}
+        onDismiss={() => setShowCurrencyDropdown(false)}
+        options={currencyOptions}
+        onSelect={(value) => setSelectedCurrency(value as Currency)}
+        selectedValue={selectedCurrency}
+        title="Select Currency"
+      />
+    </>
   );
 
   return (
@@ -87,7 +87,7 @@ export default function SettingsScreen() {
             Default Currency
           </Text>
           <View style={{ gap: 16 }}>
-            {renderCurrencyMenu()}
+            {renderCurrencyDropdown()}
             <Button
               mode="contained"
               onPress={handleSaveSettings}
