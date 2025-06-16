@@ -10,6 +10,7 @@ import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, BottomSheetScro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePaymentMethods } from '../storage';
 import { PaymentMethod } from '../storage';
+import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 
 const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
 
@@ -42,6 +43,7 @@ export default function EditPaymentMethodBottomSheet({
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
   const theme = useTheme();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -122,6 +124,33 @@ export default function EditPaymentMethodBottomSheet({
     [onDismiss]
   );
 
+  // Convert payment types to dropdown options
+  const paymentTypeOptions: DropdownOption[] = PAYMENT_METHOD_TYPES.map(paymentType => ({
+    label: formatPaymentTypeForDisplay(paymentType),
+    value: paymentType,
+    id: paymentType
+  }));
+
+  const renderTypeDropdown = () => (
+    <>
+      <DropdownButton
+        onPress={() => setShowTypeDropdown(true)}
+        selectedValue={type}
+        options={paymentTypeOptions}
+        placeholder="Select Payment Type"
+        label="Payment Type"
+      />
+      <DropdownBottomSheet
+        visible={showTypeDropdown}
+        onDismiss={() => setShowTypeDropdown(false)}
+        options={paymentTypeOptions}
+        onSelect={(value) => setType(value)}
+        selectedValue={type}
+        title="Select Payment Type"
+      />
+    </>
+  );
+
   return (
     <BottomSheetModal
       ref={bottomSheetModalRef}
@@ -176,42 +205,7 @@ export default function EditPaymentMethodBottomSheet({
                 contentStyle={{ fontWeight: '500' }}
               />
 
-              <View style={{
-                padding: 16,
-                backgroundColor: theme.colors.surfaceVariant,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: theme.colors.outline,
-              }}>
-                <Text variant="bodyMedium" style={{
-                  marginBottom: 12,
-                  fontWeight: '600',
-                  color: theme.colors.onSurfaceVariant
-                }}>
-                  Payment Type
-                </Text>
-                <View style={{ gap: 8 }}>
-                  {PAYMENT_METHOD_TYPES.map((paymentType: string) => (
-                    <Button
-                      key={paymentType}
-                      mode={type === paymentType ? "contained" : "outlined"}
-                      onPress={() => setType(paymentType)}
-                      contentStyle={{
-                        paddingVertical: 8,
-                      }}
-                      labelStyle={{
-                        fontSize: 14,
-                        fontWeight: '600',
-                      }}
-                      style={{
-                        borderRadius: 6,
-                      }}
-                    >
-                      {formatPaymentTypeForDisplay(paymentType)}
-                    </Button>
-                  ))}
-                </View>
-              </View>
+              {renderTypeDropdown()}
 
               <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
                 <Button

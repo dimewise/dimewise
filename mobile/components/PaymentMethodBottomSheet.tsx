@@ -6,12 +6,12 @@ import {
   TextInput,
   useTheme,
   Surface,
-  Divider,
-  Menu
+  Divider
 } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePaymentMethods } from '../storage';
+import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 
 const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
 
@@ -38,7 +38,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showTypeMenu, setShowTypeMenu] = useState(false);
+  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
   const theme = useTheme();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -109,31 +109,31 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
     [onDismiss]
   );
 
-  const renderTypeMenu = () => (
-    <Menu
-      visible={showTypeMenu}
-      onDismiss={() => setShowTypeMenu(false)}
-      anchor={
-        <Button
-          mode="outlined"
-          onPress={() => setShowTypeMenu(true)}
-          contentStyle={{ justifyContent: 'flex-start' }}
-        >
-          {type || "Select type"}
-        </Button>
-      }
-    >
-      {PAYMENT_METHOD_TYPES.map((methodType) => (
-        <Menu.Item
-          key={methodType}
-          onPress={() => {
-            setType(methodType);
-            setShowTypeMenu(false);
-          }}
-          title={methodType}
-        />
-      ))}
-    </Menu>
+  // Convert payment types to dropdown options
+  const paymentTypeOptions: DropdownOption[] = PAYMENT_METHOD_TYPES.map(paymentType => ({
+    label: formatPaymentTypeForDisplay(paymentType),
+    value: paymentType,
+    id: paymentType
+  }));
+
+  const renderTypeDropdown = () => (
+    <>
+      <DropdownButton
+        onPress={() => setShowTypeDropdown(true)}
+        selectedValue={type}
+        options={paymentTypeOptions}
+        placeholder="Select Payment Type"
+        label="Payment Type"
+      />
+      <DropdownBottomSheet
+        visible={showTypeDropdown}
+        onDismiss={() => setShowTypeDropdown(false)}
+        options={paymentTypeOptions}
+        onSelect={(value) => setType(value)}
+        selectedValue={type}
+        title="Select Payment Type"
+      />
+    </>
   );
 
   return (
@@ -191,42 +191,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                 contentStyle={{ fontWeight: '500' }}
               />
 
-              <View style={{
-                padding: 16,
-                backgroundColor: theme.colors.surfaceVariant,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: theme.colors.outline,
-              }}>
-                <Text variant="bodyMedium" style={{
-                  marginBottom: 12,
-                  fontWeight: '600',
-                  color: theme.colors.onSurfaceVariant
-                }}>
-                  Payment Type
-                </Text>
-                <View style={{ gap: 8 }}>
-                  {PAYMENT_METHOD_TYPES.map((paymentType: string) => (
-                    <Button
-                      key={paymentType}
-                      mode={type === paymentType ? "contained" : "outlined"}
-                      onPress={() => setType(paymentType)}
-                      contentStyle={{
-                        paddingVertical: 8,
-                      }}
-                      labelStyle={{
-                        fontSize: 14,
-                        fontWeight: '600',
-                      }}
-                      style={{
-                        borderRadius: 6,
-                      }}
-                    >
-                      {formatPaymentTypeForDisplay(paymentType)}
-                    </Button>
-                  ))}
-                </View>
-              </View>
+              {renderTypeDropdown()}
 
               <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
                 <Button

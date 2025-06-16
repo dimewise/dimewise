@@ -5,10 +5,10 @@ import {
   Button,
   TextInput,
   useTheme,
-  Menu,
   Surface,
   Divider
 } from 'react-native-paper';
+import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput } from '../storage';
@@ -31,8 +31,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   const [paymentMethodId, setPaymentMethodId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
-  const [showPaymentMethodMenu, setShowPaymentMethodMenu] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
 
   const theme = useTheme();
   const { currency } = useCurrency();
@@ -74,8 +74,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     setCategoryId('');
     setPaymentMethodId('');
     setError('');
-    setShowCategoryMenu(false);
-    setShowPaymentMethodMenu(false);
+    setShowCategoryDropdown(false);
+    setShowPaymentMethodDropdown(false);
     Keyboard.dismiss();
   };
 
@@ -148,86 +148,58 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   const selectedCategory = categories.find(cat => cat.id === categoryId);
   const selectedPaymentMethod = paymentMethods.find(pm => pm.id === paymentMethodId);
 
-  const renderCategoryMenu = () => (
-    <Menu
-      visible={showCategoryMenu}
-      onDismiss={() => setShowCategoryMenu(false)}
-      anchor={
-        <Button
-          mode="outlined"
-          onPress={() => setShowCategoryMenu(true)}
-          contentStyle={{
-            justifyContent: 'flex-start',
-            paddingVertical: 12,
-            paddingHorizontal: 20,
-          }}
-          labelStyle={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: theme.colors.onSurface,
-          }}
-          style={{
-            borderRadius: 6,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
-          }}
-        >
-          {selectedCategory ? selectedCategory.name : 'Select Category'}
-        </Button>
-      }
-    >
-      {categories.map((category) => (
-        <Menu.Item
-          key={category.id}
-          onPress={() => {
-            setCategoryId(category.id);
-            setShowCategoryMenu(false);
-          }}
-          title={category.name}
-        />
-      ))}
-    </Menu>
+  // Convert categories to dropdown options
+  const categoryOptions: DropdownOption[] = categories.map(category => ({
+    label: category.name,
+    value: category.id,
+    id: category.id
+  }));
+
+  const renderCategoryDropdown = () => (
+    <>
+      <DropdownButton
+        onPress={() => setShowCategoryDropdown(true)}
+        selectedValue={categoryId}
+        options={categoryOptions}
+        placeholder="Select Category"
+        label="Category"
+      />
+      <DropdownBottomSheet
+        visible={showCategoryDropdown}
+        onDismiss={() => setShowCategoryDropdown(false)}
+        options={categoryOptions}
+        onSelect={(value) => setCategoryId(value)}
+        selectedValue={categoryId}
+        title="Select Category"
+      />
+    </>
   );
 
-  const renderPaymentMethodMenu = () => (
-    <Menu
-      visible={showPaymentMethodMenu}
-      onDismiss={() => setShowPaymentMethodMenu(false)}
-      anchor={
-        <Button
-          mode="outlined"
-          onPress={() => setShowPaymentMethodMenu(true)}
-          contentStyle={{
-            justifyContent: 'flex-start',
-            paddingVertical: 12,
-            paddingHorizontal: 20,
-          }}
-          labelStyle={{
-            fontSize: 16,
-            fontWeight: '600',
-            color: theme.colors.onSurface,
-          }}
-          style={{
-            borderRadius: 6,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
-          }}
-        >
-          {selectedPaymentMethod ? selectedPaymentMethod.name : 'Select Payment Method'}
-        </Button>
-      }
-    >
-      {paymentMethods.map((paymentMethod) => (
-        <Menu.Item
-          key={paymentMethod.id}
-          onPress={() => {
-            setPaymentMethodId(paymentMethod.id);
-            setShowPaymentMethodMenu(false);
-          }}
-          title={paymentMethod.name}
-        />
-      ))}
-    </Menu>
+  // Convert payment methods to dropdown options
+  const paymentMethodOptions: DropdownOption[] = paymentMethods.map(paymentMethod => ({
+    label: paymentMethod.name,
+    value: paymentMethod.id,
+    id: paymentMethod.id
+  }));
+
+  const renderPaymentMethodDropdown = () => (
+    <>
+      <DropdownButton
+        onPress={() => setShowPaymentMethodDropdown(true)}
+        selectedValue={paymentMethodId}
+        options={paymentMethodOptions}
+        placeholder="Select Payment Method"
+        label="Payment Method"
+      />
+      <DropdownBottomSheet
+        visible={showPaymentMethodDropdown}
+        onDismiss={() => setShowPaymentMethodDropdown(false)}
+        options={paymentMethodOptions}
+        onSelect={(value) => setPaymentMethodId(value)}
+        selectedValue={paymentMethodId}
+        title="Select Payment Method"
+      />
+    </>
   );
 
   return (
@@ -306,8 +278,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
               />
 
               <View style={{ gap: 16 }}>
-                {renderCategoryMenu()}
-                {renderPaymentMethodMenu()}
+                {renderCategoryDropdown()}
+                {renderPaymentMethodDropdown()}
               </View>
 
               <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
