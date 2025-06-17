@@ -181,12 +181,13 @@ export default function EditExpenseBottomSheet({
   );
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowDatePicker(false);
-    }
     if (selectedDate) {
       setDate(selectedDate);
     }
+  };
+
+  const handleDatePickerToggle = () => {
+    setShowDatePicker(!showDatePicker);
   };
 
   const formatDateForDisplay = (date: Date) => {
@@ -256,9 +257,9 @@ export default function EditExpenseBottomSheet({
     <>
       <Button
         mode="outlined"
-        onPress={() => setShowDatePicker(true)}
+        onPress={handleDatePickerToggle}
         contentStyle={{
-          paddingVertical: 12,
+          paddingVertical: 4,
           justifyContent: 'flex-start'
         }}
         labelStyle={{
