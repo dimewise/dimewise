@@ -104,6 +104,19 @@ export default function ExpensesScreen() {
     setSelectedExpense(null);
   };
 
+  const handleExpenseVerificationUpdated = async () => {
+    await loadData(); // Reload data to get updated verification status
+
+    // Update the selectedExpense with fresh data
+    if (selectedExpense) {
+      const updatedExpenses = await expenseOps.getExpenses();
+      const freshExpense = updatedExpenses.find(e => e.id === selectedExpense.id);
+      if (freshExpense) {
+        setSelectedExpense(freshExpense);
+      }
+    }
+  };
+
   const filteredExpenses = expenses.filter(expense => {
     const matchesSearch = !searchQuery ||
       expense.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -261,6 +274,7 @@ export default function ExpensesScreen() {
         }}
         onEdit={handleEditExpense}
         onDeleted={handleExpenseDeleted}
+        onExpenseUpdated={handleExpenseVerificationUpdated}
       />
 
       <EditExpenseBottomSheet

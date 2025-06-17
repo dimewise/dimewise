@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
 const DATABASE_NAME = 'dimewise.db';
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 
 // Supported currencies - expanded list including MYR and other major currencies
 export const SUPPORTED_CURRENCIES = [
@@ -49,14 +49,47 @@ export const migrateDbIfNeeded = async (db: SQLite.SQLiteDatabase): Promise<void
     }
 
     // Add future migrations here as version increments
-    // if (currentVersion === 1) {
-    //   await migrationV1toV2(db);
-    // }
+    if (currentVersion === 1) {
+      await migrationV1toV2(db);
+    }
 
     // Update database version
     await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
     console.log(`Database migrated to version ${DATABASE_VERSION}`);
   });
+};
+
+const migrationV1toV2 = async (database: SQLite.SQLiteDatabase): Promise<void> => {
+  console.log('Migrating from version 1 to 2: Adding verification fields...');
+
+  // Check if columns already exist to avoid errors
+  const tableInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(expenses)"
+  );
+
+  const columnNames = tableInfo.map(column => column.name);
+  const hasIsVerified = columnNames.includes('is_verified');
+  const hasVerifiedAt = columnNames.includes('verified_at');
+
+  if (!hasIsVerified) {
+    console.log('Adding is_verified column...');
+    await database.execAsync(`
+      ALTER TABLE expenses ADD COLUMN is_verified INTEGER DEFAULT 0 CHECK (is_verified IN (0, 1));
+    `);
+  } else {
+    console.log('is_verified column already exists');
+  }
+
+  if (!hasVerifiedAt) {
+    console.log('Adding verified_at column...');
+    await database.execAsync(`
+      ALTER TABLE expenses ADD COLUMN verified_at TEXT;
+    `);
+  } else {
+    console.log('verified_at column already exists');
+  }
+
+  console.log('Migration v1 to v2 completed');
 };
 
 const createInitialSchema = async (database: SQLite.SQLiteDatabase): Promise<void> => {
@@ -87,6 +120,8 @@ const createInitialSchema = async (database: SQLite.SQLiteDatabase): Promise<voi
       payment_method_id TEXT,
       previous_category_id TEXT, -- For audit trail when category is deleted
       date TEXT NOT NULL,
+      is_verified INTEGER DEFAULT 0 CHECK (is_verified IN (0, 1)),
+      verified_at TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL,
@@ -169,6 +204,43 @@ const createInitialSchema = async (database: SQLite.SQLiteDatabase): Promise<voi
 // Utility function to generate UUID-like IDs
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
+// Utility function to completely reset the database
+export const resetDatabase = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+  console.log('⚠️ RESETTING DATABASE - ALL DATA WILL BE LOST ⚠️');
+
+  try {
+    // Drop all tables
+    await db.execAsync(`
+      DROP TABLE IF EXISTS expenses;
+      DROP TABLE IF EXISTS categories;
+      DROP TABLE IF EXISTS payment_methods;
+      DROP TABLE IF EXISTS exchange_rates;
+      DROP TABLE IF EXISTS settings;
+    `);
+
+    // Reset version to 0
+    await db.execAsync('PRAGMA user_version = 0');
+
+    console.log('Database reset completed. Restart the app to recreate schema.');
+  } catch (error) {
+    console.error('Error resetting database:', error);
+    throw error;
+  }
+};
+
+// Utility function to reset database version (forces migration re-run)
+export const resetDatabaseVersion = async (db: SQLite.SQLiteDatabase): Promise<void> => {
+  console.log('Resetting database version to force migration re-run...');
+
+  try {
+    await db.execAsync('PRAGMA user_version = 1');
+    console.log('Database version reset to 1. Restart the app to re-run migrations.');
+  } catch (error) {
+    console.error('Error resetting database version:', error);
+    throw error;
+  }
 };
 
 // Database constants for usage
