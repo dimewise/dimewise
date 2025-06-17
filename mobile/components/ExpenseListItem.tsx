@@ -9,6 +9,7 @@ interface ExpenseListItemProps {
   expense: Expense;
   category?: Category;
   paymentMethod?: PaymentMethod;
+  hideDescription?: boolean;
   onPress: (expense: Expense) => void;
 }
 
@@ -16,6 +17,7 @@ export default function ExpenseListItem({
   expense,
   category,
   paymentMethod,
+  hideDescription,
   onPress
 }: ExpenseListItemProps) {
   const theme = useTheme();
@@ -48,19 +50,28 @@ export default function ExpenseListItem({
         alignItems: 'flex-start'
       }}>
         <View style={{ flex: 1, marginRight: 20 }}>
-          <Text variant="titleMedium" style={{
+          <Text variant="titleMedium" numberOfLines={1} ellipsizeMode="tail" style={{
             fontWeight: '600',
-            marginBottom: 6,
+            marginBottom: 8,
             color: theme.colors.onSurface
           }}>
             {expense.title}
           </Text>
-          {expense.description && (
+          <Text variant="bodySmall" style={{
+            color: theme.colors.onSurfaceVariant,
+            fontWeight: '500',
+            marginBottom: 16
+          }}>
+            {new Date(expense.date).toLocaleDateString()}
+          </Text>
+          {expense.description && !hideDescription && (
             <Text
               variant="bodySmall"
+              numberOfLines={3}
+              ellipsizeMode="tail"
               style={{
                 color: theme.colors.onSurfaceVariant,
-                marginBottom: expense.description ? 16 : 12,
+                marginBottom: expense.description ? 16 : 8,
                 lineHeight: 20
               }}
             >
@@ -71,7 +82,7 @@ export default function ExpenseListItem({
             flexDirection: 'row',
             alignItems: 'center',
             gap: 12,
-            flexWrap: 'wrap'
+            flexWrap: 'nowrap'
           }}>
             <View style={{
               paddingHorizontal: 12,
@@ -111,12 +122,6 @@ export default function ExpenseListItem({
                 </Text>
               </View>
             )}
-            <Text variant="bodySmall" style={{
-              color: theme.colors.onSurfaceVariant,
-              fontWeight: '500'
-            }}>
-              {new Date(expense.date).toLocaleDateString()}
-            </Text>
           </View>
         </View>
         <Text variant="titleMedium" style={{
@@ -126,6 +131,6 @@ export default function ExpenseListItem({
           {formatAmountLocal(expense.amount)}
         </Text>
       </View>
-    </TouchableOpacity>
+    </TouchableOpacity >
   );
 } 

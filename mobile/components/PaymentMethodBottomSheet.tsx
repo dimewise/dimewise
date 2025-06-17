@@ -198,7 +198,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                   mode="outlined"
                   onPress={onDismiss}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -206,7 +206,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                   }}
                   style={{
                     flex: 1,
-                    borderRadius: 25,
+                    borderRadius: 6,
                   }}
                 >
                   Cancel
@@ -216,7 +216,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                   onPress={handleSubmit}
                   loading={loading}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,

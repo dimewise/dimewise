@@ -167,7 +167,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
                 mode="outlined"
                 onPress={onDismiss}
                 contentStyle={{
-                  paddingVertical: 8,
+                  paddingVertical: 4,
                 }}
                 labelStyle={{
                   fontSize: 16,
@@ -186,7 +186,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
                 onPress={handleSubmit}
                 loading={loading}
                 contentStyle={{
-                  paddingVertical: 8,
+                  paddingVertical: 4,
                 }}
                 labelStyle={{
                   fontSize: 16,

@@ -132,12 +132,6 @@ export default function ExpenseDetailBottomSheet({
               }}>
                 Expense Details
               </Text>
-              <IconButton
-                icon="close"
-                size={24}
-                onPress={onDismiss}
-                iconColor={theme.colors.onSurfaceVariant}
-              />
             </View>
 
             {/* Expense Details */}
@@ -290,7 +284,7 @@ export default function ExpenseDetailBottomSheet({
                   loading={deleting}
                   disabled={deleting}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -310,7 +304,7 @@ export default function ExpenseDetailBottomSheet({
                   mode="contained"
                   onPress={handleEdit}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -362,12 +356,18 @@ export default function ExpenseDetailBottomSheet({
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button
+              onPress={() => setShowDeleteDialog(false)}
+              contentStyle={{ paddingVertical: 4 }}
+            >
+              Cancel
+            </Button>
             <Button
               onPress={handleConfirmDelete}
               textColor={theme.colors.error}
               loading={deleting}
               disabled={deleting}
+              contentStyle={{ paddingVertical: 4 }}
             >
               Delete
             </Button>

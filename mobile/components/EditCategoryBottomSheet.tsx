@@ -184,7 +184,7 @@ export default function EditCategoryBottomSheet({
                   mode="outlined"
                   onPress={onDismiss}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -192,7 +192,7 @@ export default function EditCategoryBottomSheet({
                   }}
                   style={{
                     flex: 1,
-                    borderRadius: 25,
+                    borderRadius: 6,
                   }}
                 >
                   Cancel
@@ -202,7 +202,7 @@ export default function EditCategoryBottomSheet({
                   onPress={handleSubmit}
                   loading={loading}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -210,7 +210,7 @@ export default function EditCategoryBottomSheet({
                   }}
                   style={{
                     flex: 1,
-                    borderRadius: 25,
+                    borderRadius: 6,
                     shadowColor: theme.colors.primary,
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.2,

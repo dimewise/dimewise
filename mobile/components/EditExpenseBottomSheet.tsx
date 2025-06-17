@@ -385,7 +385,7 @@ export default function EditExpenseBottomSheet({
                   mode="outlined"
                   onPress={onDismiss}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -405,7 +405,7 @@ export default function EditExpenseBottomSheet({
                   loading={loading}
                   disabled={loading}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -422,7 +422,7 @@ export default function EditExpenseBottomSheet({
                     elevation: 2,
                   }}
                 >
-                  Update Expense
+                  Save
                 </Button>
               </View>
             </View>
