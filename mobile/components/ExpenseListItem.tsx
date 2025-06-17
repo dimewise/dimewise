@@ -124,12 +124,32 @@ export default function ExpenseListItem({
             )}
           </View>
         </View>
-        <Text variant="titleMedium" style={{
-          fontWeight: '700',
-          color: theme.colors.onSurface
-        }}>
-          {formatAmountLocal(expense.amount)}
-        </Text>
+        <View style={{ alignItems: 'flex-end', gap: 8 }}>
+          <Text variant="titleMedium" style={{
+            fontWeight: '700',
+            color: theme.colors.onSurface
+          }}>
+            {formatAmountLocal(expense.amount)}
+          </Text>
+          <View style={{
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            backgroundColor: expense.isVerified ? theme.colors.primaryContainer : theme.colors.surfaceVariant,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.colors.outline,
+          }}>
+            <Text variant="bodySmall" style={{
+              color: expense.isVerified ? theme.colors.onPrimaryContainer : theme.colors.onSurfaceVariant,
+              fontWeight: '600',
+              fontSize: 10,
+              textTransform: 'uppercase',
+              letterSpacing: 0.5
+            }}>
+              {expense.isVerified ? '✓ Verified' : 'Unverified'}
+            </Text>
+          </View>
+        </View>
       </View>
     </TouchableOpacity >
   );

@@ -4,7 +4,7 @@ import * as paymentMethods from './paymentMethods';
 import * as expenses from './expenses';
 import * as exchangeRates from './exchangeRates';
 import * as settings from './settings';
-import { generateId } from './database';
+import { generateId, resetDatabase, resetDatabaseVersion } from './database';
 
 // Categories hooks
 export const useCategories = () => {
@@ -68,7 +68,9 @@ export const useExpenses = () => {
     getTotalSpent: () => expenses.getTotalSpent(db),
     searchExpenses: (query: string) => expenses.searchExpenses(db, query),
     expenseExists: (id: string) => expenses.expenseExists(db, id),
-    saveExpense: (expense: any) => expenses.saveExpense(db, expense)
+    saveExpense: (expense: any) => expenses.saveExpense(db, expense),
+    verifyExpense: (id: string) => expenses.verifyExpense(db, id),
+    unverifyExpense: (id: string) => expenses.unverifyExpense(db, id)
   };
 };
 
@@ -112,7 +114,11 @@ export const useSettings = () => {
 
 // Utility hooks
 export const useUtilities = () => {
+  const db = useSQLiteContext();
+
   return {
-    generateId
+    generateId,
+    resetDatabase: () => resetDatabase(db),
+    resetDatabaseVersion: () => resetDatabaseVersion(db)
   };
 }; 

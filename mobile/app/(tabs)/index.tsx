@@ -146,6 +146,23 @@ export default function HomePage() {
     setSelectedExpense(null);
   };
 
+  const handleExpenseVerificationUpdated = async () => {
+    console.log('🔄 handleExpenseVerificationUpdated called - reloading data...');
+    await loadData(); // Reload data to get updated verification status
+
+    // Update the selectedExpense with fresh data
+    if (selectedExpense) {
+      console.log('🔄 Updating selectedExpense with fresh data...');
+      const updatedExpenses = await expenseOps.getExpenses();
+      const freshExpense = updatedExpenses.find(e => e.id === selectedExpense.id);
+      if (freshExpense) {
+        console.log('✅ Found fresh expense data, updating selectedExpense');
+        setSelectedExpense(freshExpense);
+      }
+    }
+    console.log('✅ Data reload and selectedExpense update completed');
+  };
+
   const renderCategory = (category: CategoryWithSpending) => {
     const isUncategorized = category.id === SYSTEM_CATEGORIES.UNCATEGORIZED;
 
@@ -544,6 +561,7 @@ export default function HomePage() {
         }}
         onEdit={handleEditExpense}
         onDeleted={handleExpenseDeleted}
+        onExpenseUpdated={handleExpenseVerificationUpdated}
       />
 
       <EditExpenseBottomSheet

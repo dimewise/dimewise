@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { Dimensions, View } from 'react-native';
 import {
   Text,
   Button,
@@ -22,6 +22,7 @@ interface ExpenseDetailBottomSheetProps {
   onDismiss: () => void;
   onEdit: (expense: Expense) => void;
   onDeleted: () => void;
+  onExpenseUpdated?: () => void;
 }
 
 export default function ExpenseDetailBottomSheet({
@@ -31,10 +32,12 @@ export default function ExpenseDetailBottomSheet({
   paymentMethod,
   onDismiss,
   onEdit,
-  onDeleted
+  onDeleted,
+  onExpenseUpdated
 }: ExpenseDetailBottomSheetProps) {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const theme = useTheme();
   const { currency } = useCurrency();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -99,6 +102,27 @@ export default function ExpenseDetailBottomSheet({
     }
   };
 
+  const handleToggleVerification = async () => {
+    if (!expense) return;
+
+    setUpdating(true);
+    try {
+      if (expense.isVerified) {
+        await expenseOps.unverifyExpense(expense.id);
+      } else {
+        await expenseOps.verifyExpense(expense.id);
+      }
+
+      if (onExpenseUpdated) {
+        await onExpenseUpdated();
+      }
+    } catch (error) {
+      console.error('Error toggling verification:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   if (!expense) return null;
 
   return (
@@ -111,6 +135,7 @@ export default function ExpenseDetailBottomSheet({
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
+      maxDynamicContentSize={Dimensions.get('window').height * 0.85}
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
@@ -118,40 +143,15 @@ export default function ExpenseDetailBottomSheet({
             padding: 8,
             backgroundColor: theme.colors.surface,
           }}>
-            {/* Header */}
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 32
-            }}>
-              <Text variant="headlineMedium" style={{
-                fontWeight: '700',
-                color: theme.colors.onSurface,
-                flex: 1
-              }}>
-                Expense Details
-              </Text>
-            </View>
-
             {/* Expense Details */}
             <View style={{ gap: 24 }}>
               {/* Title */}
-              <View>
-                <Text variant="labelLarge" style={{
-                  color: theme.colors.onSurfaceVariant,
-                  marginBottom: 8,
-                  fontWeight: '600'
-                }}>
-                  Title
-                </Text>
-                <Text variant="titleLarge" style={{
-                  color: theme.colors.onSurface,
-                  fontWeight: '600'
-                }}>
-                  {expense.title}
-                </Text>
-              </View>
+              <Text variant="titleLarge" style={{
+                color: theme.colors.onSurface,
+                fontWeight: '600'
+              }}>
+                {expense.title}
+              </Text>
 
               {/* Description */}
               {expense.description && (
@@ -191,62 +191,6 @@ export default function ExpenseDetailBottomSheet({
 
               <Divider style={{ backgroundColor: theme.colors.outline }} />
 
-              {/* Category */}
-              <View>
-                <Text variant="labelLarge" style={{
-                  color: theme.colors.onSurfaceVariant,
-                  marginBottom: 8,
-                  fontWeight: '600'
-                }}>
-                  Category
-                </Text>
-                <View style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 12,
-                  backgroundColor: theme.colors.primaryContainer,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: theme.colors.outline,
-                  alignSelf: 'flex-start'
-                }}>
-                  <Text variant="titleMedium" style={{
-                    color: theme.colors.onPrimaryContainer,
-                    fontWeight: '600'
-                  }}>
-                    {category?.name || 'Unknown'}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Payment Method */}
-              {paymentMethod && (
-                <View>
-                  <Text variant="labelLarge" style={{
-                    color: theme.colors.onSurfaceVariant,
-                    marginBottom: 8,
-                    fontWeight: '600'
-                  }}>
-                    Payment Method
-                  </Text>
-                  <View style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    backgroundColor: theme.colors.surfaceVariant,
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    borderColor: theme.colors.outline,
-                    alignSelf: 'flex-start'
-                  }}>
-                    <Text variant="titleMedium" style={{
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '600'
-                    }}>
-                      {paymentMethod.name}
-                    </Text>
-                  </View>
-                </View>
-              )}
-
               {/* Date */}
               <View>
                 <Text variant="labelLarge" style={{
@@ -269,11 +213,120 @@ export default function ExpenseDetailBottomSheet({
                 </Text>
               </View>
 
+              {/* Metadata */}
+              <View>
+                <Text variant="labelLarge" style={{
+                  color: theme.colors.onSurfaceVariant,
+                  marginBottom: 8,
+                  fontWeight: '600'
+                }}>
+                  Metadata
+                </Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <View style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    backgroundColor: theme.colors.primaryContainer,
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: theme.colors.outline,
+                    alignSelf: 'flex-start'
+                  }}>
+                    <Text variant="bodySmall" style={{
+                      color: theme.colors.onPrimaryContainer,
+                      fontWeight: '600'
+                    }}>
+                      {category?.name || 'Unknown'}
+                    </Text>
+                  </View>
+                  {paymentMethod && (
+                    <View style={{
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      backgroundColor: theme.colors.surfaceVariant,
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: theme.colors.outline,
+                      alignSelf: 'flex-start'
+                    }}>
+                      <Text variant="bodySmall" style={{
+                        color: theme.colors.onSurfaceVariant,
+                        fontWeight: '600'
+                      }}>
+                        {paymentMethod.name}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+
+              {/* Verification Status */}
+              <View>
+                <Text variant="labelLarge" style={{
+                  color: theme.colors.onSurfaceVariant,
+                  marginBottom: 8,
+                  fontWeight: '600'
+                }}>
+                  Verification Status
+                </Text>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  backgroundColor: expense.isVerified ? theme.colors.primaryContainer : theme.colors.surfaceVariant,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                }}>
+                  <View style={{ flex: 1 }}>
+                    <Text variant="titleMedium" style={{
+                      color: expense.isVerified ? theme.colors.onPrimaryContainer : theme.colors.onSurfaceVariant,
+                      fontWeight: '600',
+                      marginBottom: 4
+                    }}>
+                      {expense.isVerified ? 'Verified' : 'Unverified'}
+                    </Text>
+                    {expense.isVerified && expense.verifiedAt && (
+                      <Text variant="bodySmall" style={{
+                        color: expense.isVerified ? theme.colors.onPrimaryContainer : theme.colors.onSurfaceVariant,
+                        opacity: 0.8
+                      }}>
+                        Verified {new Date(expense.verifiedAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </Text>
+                    )}
+                  </View>
+                  <Button
+                    mode={expense.isVerified ? "outlined" : "contained"}
+                    onPress={handleToggleVerification}
+                    loading={updating}
+                    disabled={updating}
+                    contentStyle={{ paddingVertical: 4, paddingHorizontal: 12 }}
+                    labelStyle={{ fontSize: 14, fontWeight: '600' }}
+                    style={{
+                      borderRadius: 6,
+                      ...(expense.isVerified ? {
+                        borderColor: theme.colors.onPrimaryContainer
+                      } : {})
+                    }}
+                    textColor={expense.isVerified ? theme.colors.onPrimaryContainer : undefined}
+                  >
+                    {expense.isVerified ? 'Unverify' : 'Verify'}
+                  </Button>
+                </View>
+              </View>
+
               {/* Action Buttons */}
               <View style={{
                 flexDirection: 'row',
                 gap: 16,
-                marginTop: 32,
+                marginTop: 16,
                 paddingTop: 16,
                 borderTopWidth: 1,
                 borderTopColor: theme.colors.outline
