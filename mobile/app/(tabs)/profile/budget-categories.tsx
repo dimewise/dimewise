@@ -125,7 +125,8 @@ export default function BudgetCategoriesScreen() {
           categories.map((category) => (
             <View key={category.id} style={{
               marginVertical: 4,
-              padding: 24,
+              paddingVertical: 16,
+              paddingHorizontal: 24,
               backgroundColor: theme.colors.surface,
               borderRadius: 8,
               borderWidth: 1,

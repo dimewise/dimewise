@@ -125,7 +125,8 @@ export default function PaymentMethodsScreen() {
           paymentMethods.map((method) => (
             <View key={method.id} style={{
               marginVertical: 4,
-              padding: 24,
+              paddingVertical: 16,
+              paddingHorizontal: 24,
               backgroundColor: theme.colors.surface,
               borderRadius: 8,
               borderWidth: 1,
