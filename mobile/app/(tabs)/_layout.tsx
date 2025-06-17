@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs } from 'expo-router';
+import { Tabs, router } from 'expo-router';
 import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -43,6 +43,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="account" size={size} color={color} />
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            // Reset profile stack to index when tab is pressed
+            router.push('/profile');
+          },
         }}
       />
     </Tabs>
