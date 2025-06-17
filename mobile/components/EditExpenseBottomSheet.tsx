@@ -12,7 +12,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput } from '../storage';
+import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput, SYSTEM_CATEGORIES } from '../storage';
 import { Category, PaymentMethod, Expense } from '../storage';
 import { useCurrency } from '../utils/CurrencyContext';
 
@@ -201,12 +201,14 @@ export default function EditExpenseBottomSheet({
     });
   };
 
-  // Convert categories to dropdown options
-  const categoryOptions: DropdownOption[] = categories.map(category => ({
-    label: category.name,
-    value: category.id,
-    id: category.id
-  }));
+  // Convert categories to dropdown options (excluding uncategorized)
+  const categoryOptions: DropdownOption[] = categories
+    .filter(category => category.id !== SYSTEM_CATEGORIES.UNCATEGORIZED)
+    .map(category => ({
+      label: category.name,
+      value: category.id,
+      id: category.id
+    }));
 
   const renderCategoryDropdown = () => (
     <>
