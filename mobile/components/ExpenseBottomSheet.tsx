@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { View, Keyboard, Platform } from 'react-native';
+import { View, Keyboard, Platform, Dimensions } from 'react-native';
 import {
   Text,
   Button,
@@ -151,12 +151,13 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   );
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowDatePicker(false);
-    }
     if (selectedDate) {
       setDate(selectedDate);
     }
+  };
+
+  const handleDatePickerToggle = () => {
+    setShowDatePicker(!showDatePicker);
   };
 
   const formatDateForDisplay = (date: Date) => {
@@ -229,9 +230,9 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
     <>
       <Button
         mode="outlined"
-        onPress={() => setShowDatePicker(true)}
+        onPress={handleDatePickerToggle}
         contentStyle={{
-          paddingVertical: 12,
+          paddingVertical: 4,
           justifyContent: 'flex-start'
         }}
         labelStyle={{
@@ -269,6 +270,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
+      maxDynamicContentSize={Dimensions.get('window').height * 0.85}
+      enableContentPanningGesture
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
