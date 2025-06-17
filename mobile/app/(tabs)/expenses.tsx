@@ -271,6 +271,10 @@ export default function ExpensesScreen() {
           setSelectedExpense(null);
           setIsTransitioningToEdit(false);
         }}
+        onCancel={() => {
+          setShowEditSheet(false);
+          setShowDetailSheet(true);
+        }}
         onExpenseUpdated={handleExpenseUpdated}
       />
     </View>

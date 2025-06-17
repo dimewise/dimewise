@@ -20,6 +20,7 @@ interface EditExpenseBottomSheetProps {
   visible: boolean;
   expense: Expense | null;
   onDismiss: () => void;
+  onCancel?: () => void;
   onExpenseUpdated?: () => void;
 }
 
@@ -27,6 +28,7 @@ export default function EditExpenseBottomSheet({
   visible,
   expense,
   onDismiss,
+  onCancel,
   onExpenseUpdated
 }: EditExpenseBottomSheetProps) {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -383,7 +385,7 @@ export default function EditExpenseBottomSheet({
               <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
                 <Button
                   mode="outlined"
-                  onPress={onDismiss}
+                  onPress={onCancel || onDismiss}
                   contentStyle={{
                     paddingVertical: 4,
                   }}
