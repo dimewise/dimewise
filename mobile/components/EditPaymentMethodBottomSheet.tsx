@@ -212,7 +212,7 @@ export default function EditPaymentMethodBottomSheet({
                   mode="outlined"
                   onPress={onDismiss}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -220,7 +220,7 @@ export default function EditPaymentMethodBottomSheet({
                   }}
                   style={{
                     flex: 1,
-                    borderRadius: 25,
+                    borderRadius: 6,
                   }}
                 >
                   Cancel
@@ -230,7 +230,7 @@ export default function EditPaymentMethodBottomSheet({
                   onPress={handleSubmit}
                   loading={loading}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -238,7 +238,7 @@ export default function EditPaymentMethodBottomSheet({
                   }}
                   style={{
                     flex: 1,
-                    borderRadius: 25,
+                    borderRadius: 6,
                     shadowColor: theme.colors.primary,
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.2,
@@ -246,7 +246,7 @@ export default function EditPaymentMethodBottomSheet({
                     elevation: 3,
                   }}
                 >
-                  Save Changes
+                  Save
                 </Button>
               </View>
             </View>

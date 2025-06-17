@@ -358,7 +358,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
                   mode="outlined"
                   onPress={onDismiss}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,
@@ -376,7 +376,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
                   mode="contained"
                   onPress={handleSubmit}
                   contentStyle={{
-                    paddingVertical: 8,
+                    paddingVertical: 4,
                   }}
                   labelStyle={{
                     fontSize: 16,

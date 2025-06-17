@@ -483,6 +483,7 @@ export default function HomePage() {
                       expense={expense}
                       category={category}
                       paymentMethod={paymentMethod}
+                      hideDescription={true}
                       onPress={handleExpensePress}
                     />
                   );

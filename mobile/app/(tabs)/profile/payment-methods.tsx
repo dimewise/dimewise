@@ -7,7 +7,8 @@ import {
   Dialog,
   Portal,
   Appbar,
-  FAB
+  FAB,
+  IconButton
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
@@ -147,53 +148,27 @@ export default function PaymentMethodsScreen() {
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <Button
-                    mode="outlined"
-                    compact
+                  <IconButton
+                    icon="pencil"
+                    size={24}
                     onPress={() => {
                       setEditingPaymentMethod(method);
                       setShowEditPaymentMethodSheet(true);
                     }}
-                    labelStyle={{
-                      fontSize: 12,
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5
-                    }}
-                    contentStyle={{
-                      paddingVertical: 2,
-                      paddingHorizontal: 8,
-                    }}
+                    iconColor={theme.colors.primary}
                     style={{
-                      borderRadius: 4,
-                      minWidth: 60,
+                      margin: 0,
                     }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    mode="outlined"
-                    compact
+                  />
+                  <IconButton
+                    icon="delete"
+                    size={24}
                     onPress={() => showDeleteConfirmation(method.id, method.name)}
-                    labelStyle={{
-                      fontSize: 12,
-                      fontWeight: '600',
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5,
-                      color: theme.colors.error
-                    }}
-                    contentStyle={{
-                      paddingVertical: 2,
-                      paddingHorizontal: 8,
-                    }}
+                    iconColor={theme.colors.error}
                     style={{
-                      borderRadius: 4,
-                      minWidth: 60,
-                      borderColor: theme.colors.error,
+                      margin: 0,
                     }}
-                  >
-                    Delete
-                  </Button>
+                  />
                 </View>
               </View>
             </View>
