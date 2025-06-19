@@ -9,12 +9,13 @@ import {
   Divider
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTranslation } from 'react-i18next';
 import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput, SYSTEM_CATEGORIES } from '../storage';
 import { Category, PaymentMethod } from '../storage';
-import { useCurrency } from '../utils/CurrencyContext';
+import { useCurrency } from '../utils/UserSettingsContext';
 
 interface ExpenseBottomSheetProps {
   visible: boolean;
@@ -38,6 +39,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
 
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -66,7 +68,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
       setPaymentMethods(payMethods);
     } catch (e) {
       console.error('Failed to load data:', e);
-      setError('Failed to load data. Please try again.');
+      setError(t('status.error'));
     }
   };
 
@@ -86,23 +88,23 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
 
   const handleSubmit = async () => {
     if (!title.trim()) {
-      setError('Title is required');
+      setError(t('forms.titleRequired'));
       return;
     }
 
     const validation = validateCurrencyInput(amount, currency);
     if (!validation.isValid) {
-      setError(validation.error || 'Please enter a valid amount');
+      setError(validation.error || t('forms.validAmountRequired'));
       return;
     }
 
     if (!categoryId) {
-      setError('Please select a category');
+      setError(t('forms.categoryRequired'));
       return;
     }
 
     if (!paymentMethodId) {
-      setError('Please select a payment method');
+      setError(t('forms.paymentMethodRequired'));
       return;
     }
 
@@ -124,7 +126,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
       onExpenseAdded?.();
     } catch (e) {
       console.error('Failed to save expense:', e);
-      setError('Failed to save expense. Please try again.');
+      setError(t('status.error'));
     } finally {
       setLoading(false);
     }
@@ -187,8 +189,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
         onPress={() => setShowCategoryDropdown(true)}
         selectedValue={categoryId}
         options={categoryOptions}
-        placeholder="Select Category"
-        label="Category"
+        placeholder={t('forms.selectCategory')}
+        label={t('expenses.category')}
       />
       <DropdownBottomSheet
         visible={showCategoryDropdown}
@@ -196,7 +198,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
         options={categoryOptions}
         onSelect={(value) => setCategoryId(value)}
         selectedValue={categoryId}
-        title="Select Category"
+        title={t('forms.selectCategory')}
       />
     </>
   );
@@ -214,8 +216,8 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
         onPress={() => setShowPaymentMethodDropdown(true)}
         selectedValue={paymentMethodId}
         options={paymentMethodOptions}
-        placeholder="Select Payment Method"
-        label="Payment Method"
+        placeholder={t('forms.selectPaymentMethod')}
+        label={t('expenses.paymentMethod')}
       />
       <DropdownBottomSheet
         visible={showPaymentMethodDropdown}
@@ -223,7 +225,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
         options={paymentMethodOptions}
         onSelect={(value) => setPaymentMethodId(value)}
         selectedValue={paymentMethodId}
-        title="Select Payment Method"
+        title={t('forms.selectPaymentMethod')}
       />
     </>
   );
@@ -287,7 +289,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
               color: theme.colors.onSurface,
               textAlign: 'center'
             }}>
-              New Expense
+              {t('expenses.newExpense')}
             </Text>
 
             {error ? (
@@ -307,7 +309,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
 
             <View style={{ gap: 24 }}>
               <TextInput
-                label="Title"
+                label={t('forms.title')}
                 value={title}
                 onChangeText={setTitle}
                 mode="outlined"
@@ -317,7 +319,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
               />
 
               <TextInput
-                label="Description (optional)"
+                label={t('forms.descriptionOptional')}
                 value={description}
                 onChangeText={setDescription}
                 mode="outlined"
@@ -329,7 +331,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
               />
 
               <TextInput
-                label={`Amount (${currency})`}
+                label={t('forms.amountCurrency', { currency })}
                 value={amount}
                 onChangeText={setAmount}
                 mode="outlined"
@@ -345,7 +347,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
                   color: theme.colors.onSurfaceVariant,
                   fontWeight: '600'
                 }}>
-                  Date
+                  {t('expenses.date')}
                 </Text>
                 {renderDatePicker()}
               </View>
@@ -372,7 +374,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
                     borderRadius: 6,
                   }}
                 >
-                  Cancel
+                  {t('actions.cancel')}
                 </Button>
                 <Button
                   mode="contained"
@@ -395,7 +397,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded 
                     elevation: 2,
                   }}
                 >
-                  Save Expense
+                  {t('expenses.addExpense')}
                 </Button>
               </View>
             </View>

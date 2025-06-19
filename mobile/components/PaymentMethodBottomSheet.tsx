@@ -10,19 +10,20 @@ import {
 } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { usePaymentMethods } from '../storage';
 import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 
 const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
 
-const formatPaymentTypeForDisplay = (type: string): string => {
+const formatPaymentTypeForDisplay = (type: string, t: any): string => {
   const typeMap: Record<string, string> = {
-    'credit_card': 'Credit Card',
-    'debit_card': 'Debit Card',
-    'cash': 'Cash',
-    'bank_transfer': 'Bank Transfer',
-    'digital_wallet': 'Digital Wallet',
-    'other': 'Other'
+    'credit_card': t('paymentMethods.creditCard'),
+    'debit_card': t('paymentMethods.debitCard'),
+    'cash': t('paymentMethods.cash'),
+    'bank_transfer': t('paymentMethods.bankTransfer'),
+    'digital_wallet': t('paymentMethods.digitalWallet'),
+    'other': t('paymentMethods.other')
   };
   return typeMap[type] || type;
 };
@@ -41,6 +42,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
   const theme = useTheme();
+  const { t } = useTranslation();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // Storage hooks
@@ -64,12 +66,12 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      setError('Payment method name is required');
+      setError(t('forms.paymentMethodNameRequired'));
       return;
     }
 
     if (!type) {
-      setError('Please select a payment method type');
+      setError(t('forms.paymentMethodTypeRequired'));
       return;
     }
 
@@ -83,7 +85,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
       onPaymentMethodAdded?.();
     } catch (e) {
       console.error('Failed to save payment method:', e);
-      setError('Failed to save payment method. Please try again.');
+      setError(t('forms.savePaymentMethodError'));
     } finally {
       setLoading(false);
     }
@@ -111,7 +113,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
 
   // Convert payment types to dropdown options
   const paymentTypeOptions: DropdownOption[] = PAYMENT_METHOD_TYPES.map(paymentType => ({
-    label: formatPaymentTypeForDisplay(paymentType),
+    label: formatPaymentTypeForDisplay(paymentType, t),
     value: paymentType,
     id: paymentType
   }));
@@ -122,8 +124,8 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
         onPress={() => setShowTypeDropdown(true)}
         selectedValue={type}
         options={paymentTypeOptions}
-        placeholder="Select Payment Type"
-        label="Payment Type"
+        placeholder={t('forms.selectPaymentType')}
+        label={t('forms.paymentType')}
       />
       <DropdownBottomSheet
         visible={showTypeDropdown}
@@ -131,7 +133,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
         options={paymentTypeOptions}
         onSelect={(value) => setType(value)}
         selectedValue={type}
-        title="Select Payment Type"
+        title={t('forms.selectPaymentType')}
       />
     </>
   );
@@ -162,7 +164,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
               color: theme.colors.onSurface,
               textAlign: 'center'
             }}>
-              New Payment Method
+              {t('paymentMethods.addPaymentMethod')}
             </Text>
 
             {error ? (
@@ -182,7 +184,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
 
             <View style={{ gap: 24 }}>
               <TextInput
-                label="Payment Method Name"
+                label={t('paymentMethods.methodName')}
                 value={name}
                 onChangeText={setName}
                 mode="outlined"
@@ -209,7 +211,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                     borderRadius: 6,
                   }}
                 >
-                  Cancel
+                  {t('actions.cancel')}
                 </Button>
                 <Button
                   mode="contained"
@@ -233,7 +235,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                     elevation: 2,
                   }}
                 >
-                  Add Method
+                  {t('paymentMethods.addPaymentMethod')}
                 </Button>
               </View>
             </View>

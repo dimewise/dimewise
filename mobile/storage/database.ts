@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
 const DATABASE_NAME = 'dimewise.db';
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 
 // Supported currencies - expanded list including MYR and other major currencies
 export const SUPPORTED_CURRENCIES = [
@@ -11,6 +11,14 @@ export const SUPPORTED_CURRENCIES = [
 ] as const;
 
 export type Currency = typeof SUPPORTED_CURRENCIES[number];
+
+// Supported languages
+export const SUPPORTED_LANGUAGES = [
+  { code: 'en', label: 'English', nativeLabel: 'English' },
+  { code: 'ja', label: 'Japanese', nativeLabel: '日本語' }
+] as const;
+
+export type Language = typeof SUPPORTED_LANGUAGES[number]['code'];
 
 // System category IDs
 export const SYSTEM_CATEGORIES = {
@@ -53,6 +61,10 @@ export const migrateDbIfNeeded = async (db: SQLite.SQLiteDatabase): Promise<void
       await migrationV1toV2(db);
     }
 
+    if (currentVersion === 2) {
+      await migrationV2toV3(db);
+    }
+
     // Update database version
     await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
     console.log(`Database migrated to version ${DATABASE_VERSION}`);
@@ -90,6 +102,29 @@ const migrationV1toV2 = async (database: SQLite.SQLiteDatabase): Promise<void> =
   }
 
   console.log('Migration v1 to v2 completed');
+};
+
+const migrationV2toV3 = async (database: SQLite.SQLiteDatabase): Promise<void> => {
+  console.log('Migrating from version 2 to 3: Adding preferred_language column...');
+
+  // Check if column already exists to avoid errors
+  const tableInfo = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(settings)"
+  );
+
+  const columnNames = tableInfo.map(column => column.name);
+  const hasPreferredLanguage = columnNames.includes('preferred_language');
+
+  if (!hasPreferredLanguage) {
+    console.log('Adding preferred_language column...');
+    await database.execAsync(`
+      ALTER TABLE settings ADD COLUMN preferred_language TEXT DEFAULT 'en' CHECK (preferred_language IN ('en', 'ja'));
+    `);
+  } else {
+    console.log('preferred_language column already exists');
+  }
+
+  console.log('Migration v2 to v3 completed');
 };
 
 const createInitialSchema = async (database: SQLite.SQLiteDatabase): Promise<void> => {
@@ -144,6 +179,7 @@ const createInitialSchema = async (database: SQLite.SQLiteDatabase): Promise<voi
     CREATE TABLE settings (
       id INTEGER PRIMARY KEY NOT NULL CHECK (id = 1),
       currency TEXT NOT NULL CHECK (currency IN ('${SUPPORTED_CURRENCIES.join("','")}')),
+      preferred_language TEXT DEFAULT 'en' CHECK (preferred_language IN ('en', 'ja')),
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
@@ -162,7 +198,7 @@ const createInitialSchema = async (database: SQLite.SQLiteDatabase): Promise<voi
     INSERT INTO payment_methods (id, name, type) VALUES 
       ('default-cash', 'Cash', 'cash');
     
-    INSERT INTO settings (id, currency) VALUES (1, 'USD');
+    INSERT INTO settings (id, currency, preferred_language) VALUES (1, 'USD', 'en');
 
     -- Insert initial exchange rates (as of 2024 - approximate rates)
     INSERT INTO exchange_rates (base_currency, target_currency, buy_rate, sell_rate) VALUES

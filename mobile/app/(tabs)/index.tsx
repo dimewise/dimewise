@@ -12,9 +12,10 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useExpenses, useCategories, usePaymentMethods, formatAmount, SYSTEM_CATEGORIES } from '../../storage';
 import { Expense, Category, PaymentMethod } from '../../storage';
-import { useCurrency, useCurrencyRefresh } from '../../utils/CurrencyContext';
+import { useCurrency, useCurrencyRefresh } from '../../utils/UserSettingsContext';
 import ExpenseBottomSheet from '../../components/ExpenseBottomSheet';
 import ExpenseListItem from '../../components/ExpenseListItem';
 import ExpenseDetailBottomSheet from '../../components/ExpenseDetailBottomSheet';
@@ -38,6 +39,7 @@ export default function HomePage() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
 
@@ -242,7 +244,7 @@ export default function HomePage() {
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
-                {category.percentage.toFixed(1)}% used
+                {category.percentage.toFixed(1)}% {t('status.used')}
               </Text>
               <Text
                 variant="bodySmall"
@@ -252,8 +254,8 @@ export default function HomePage() {
                 }}
               >
                 {remaining >= 0 ?
-                  `${remainingFormatted} remaining` :
-                  `${overBudgetFormatted} over budget`
+                  `${remainingFormatted} ${t('home.remaining')}` :
+                  `${overBudgetFormatted} ${t('expenses.overBudget')}`
                 }
               </Text>
             </View>
@@ -283,14 +285,14 @@ export default function HomePage() {
                 letterSpacing: -0.5,
                 marginBottom: 4
               }}>
-                Monthly Budget
+                {t('expenses.monthlyBudget')}
               </Text>
               <Text variant="bodyMedium" style={{
                 color: theme.colors.onSurfaceVariant,
                 fontWeight: '500',
                 opacity: 0.8
               }}>
-                {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                {new Date().toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
               </Text>
             </View>
 
@@ -350,7 +352,7 @@ export default function HomePage() {
                   marginLeft: 4,
                   marginTop: 8
                 }}>
-                  used
+                  {t('status.used')}
                 </Text>
               </View>
             </View>
@@ -386,7 +388,7 @@ export default function HomePage() {
                     textTransform: 'uppercase',
                     letterSpacing: 0.5
                   }}>
-                    Spent
+                    {t('expenses.spent')}
                   </Text>
                 </View>
                 <Text variant="titleMedium" style={{
@@ -429,7 +431,7 @@ export default function HomePage() {
                     textTransform: 'uppercase',
                     letterSpacing: 0.5
                   }}>
-                    {remaining >= 0 ? 'Left' : 'Over'}
+                    {remaining >= 0 ? t('home.left') : t('home.over')}
                   </Text>
                 </View>
                 <Text variant="titleMedium" style={{
@@ -462,10 +464,10 @@ export default function HomePage() {
                 textAlign: 'center',
                 lineHeight: 20
               }}>
-                {budgetPercentage >= 95 ? ' Budget exceeded! Consider reviewing expenses.' :
-                  budgetPercentage >= 85 ? 'Nearing budget limit. Monitor spending.' :
-                    budgetPercentage >= 60 ? 'On track with your budget.' :
-                      'Great! You have plenty of budget remaining.'}
+                {budgetPercentage >= 95 ? t('home.budgetExceeded') :
+                  budgetPercentage >= 85 ? t('home.nearingLimit') :
+                    budgetPercentage >= 60 ? t('home.onTrack') :
+                      t('home.greatProgress')}
               </Text>
             </View>
           </View>
@@ -480,17 +482,17 @@ export default function HomePage() {
             borderWidth: 1,
             borderColor: theme.colors.outline,
           }}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>Loading...</Text>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('status.loading')}</Text>
           </View>
         ) : categories.length > 0 ? (
           <>
-            <Text variant="headlineMedium" style={{ marginBottom: 24, fontWeight: '700', color: theme.colors.onBackground }}>Budget Categories</Text>
+            <Text variant="headlineMedium" style={{ marginBottom: 24, fontWeight: '700', color: theme.colors.onBackground }}>{t('categories.title')}</Text>
             {categories.map(renderCategory)}
 
             {expenses.length > 0 && (
               <>
                 <View style={{ marginVertical: 32, height: 1, backgroundColor: theme.colors.outline }} />
-                <Text variant="headlineMedium" style={{ marginBottom: 24, fontWeight: '700', color: theme.colors.onBackground }}>Recent Expenses</Text>
+                <Text variant="headlineMedium" style={{ marginBottom: 24, fontWeight: '700', color: theme.colors.onBackground }}>{t('home.recentTransactions')}</Text>
                 {expenses.map((expense) => {
                   const category = categories.find(c => c.id === expense.categoryId);
                   const paymentMethod = paymentMethods.find(p => p.id === expense.paymentMethodId);
@@ -518,14 +520,14 @@ export default function HomePage() {
             borderColor: theme.colors.outline,
           }}>
             <Text variant="titleLarge" style={{ textAlign: 'center', marginBottom: 16, fontWeight: '600', color: theme.colors.onSurface }}>
-              No budget categories found
+              {t('home.noBudgetCategories')}
             </Text>
             <Text variant="bodyMedium" style={{
               textAlign: 'center',
               color: theme.colors.onSurfaceVariant,
               lineHeight: 24,
             }}>
-              Set up budget categories in your profile to start tracking expenses.
+              {t('home.setupCategories')}
             </Text>
           </View>
         )}
@@ -533,7 +535,7 @@ export default function HomePage() {
 
       <FAB
         icon="plus"
-        label="New Expense"
+        label={t('home.newExpense')}
         onPress={() => setShowExpenseSheet(true)}
         style={{
           position: 'absolute',

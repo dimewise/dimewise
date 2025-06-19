@@ -1,6 +1,6 @@
 // Re-export types and constants
-export type { Currency } from './database';
-export { SUPPORTED_CURRENCIES, SYSTEM_CATEGORIES, generateId } from './database';
+export type { Currency, Language } from './database';
+export { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, SYSTEM_CATEGORIES, generateId } from './database';
 export type { Category, CategoryWithSpending } from './categories';
 export type { PaymentMethod } from './paymentMethods';
 export type { Expense } from './expenses';

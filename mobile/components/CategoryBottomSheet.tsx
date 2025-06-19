@@ -10,8 +10,9 @@ import {
 } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useCategories, validateCurrencyInput } from '../storage';
-import { useCurrency } from '../utils/CurrencyContext';
+import { useCurrency } from '../utils/UserSettingsContext';
 
 interface CategoryBottomSheetProps {
   visible: boolean;
@@ -26,6 +27,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
   const [error, setError] = useState('');
 
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -51,13 +53,13 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      setError('Category name is required');
+      setError(t('forms.categoryNameRequired'));
       return;
     }
 
     const validation = validateCurrencyInput(budget, currency);
     if (!validation.isValid) {
-      setError(validation.error || 'Please enter a valid budget amount');
+      setError(validation.error || t('forms.enterValidBudgetAmount'));
       return;
     }
 
@@ -75,7 +77,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
       onCategoryAdded?.();
     } catch (e) {
       console.error('Failed to save category:', e);
-      setError('Failed to save category. Please try again.');
+      setError(t('forms.saveCategoryError'));
     } finally {
       setLoading(false);
     }
@@ -122,7 +124,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
             color: theme.colors.onSurface,
             textAlign: 'center'
           }}>
-            New Category
+            {t('categories.newCategory')}
           </Text>
 
           {error ? (
@@ -142,7 +144,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
 
           <View style={{ gap: 24 }}>
             <TextInput
-              label="Category Name"
+              label={t('forms.categoryName')}
               value={name}
               onChangeText={setName}
               mode="outlined"
@@ -152,7 +154,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
             />
 
             <TextInput
-              label={`Budget Amount (${currency})`}
+              label={t('forms.budgetAmount', { currency })}
               value={budget}
               onChangeText={setBudget}
               mode="outlined"
@@ -179,7 +181,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
                   borderRadius: 6,
                 }}
               >
-                Cancel
+                {t('actions.cancel')}
               </Button>
               <Button
                 mode="contained"
@@ -203,7 +205,7 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
                   elevation: 2,
                 }}
               >
-                Add Category
+                {t('categories.addCategory')}
               </Button>
             </View>
           </View>
