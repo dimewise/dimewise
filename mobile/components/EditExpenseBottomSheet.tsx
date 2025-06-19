@@ -9,12 +9,13 @@ import {
   Divider
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTranslation } from 'react-i18next';
 import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput, SYSTEM_CATEGORIES } from '../storage';
 import { Category, PaymentMethod, Expense } from '../storage';
-import { useCurrency } from '../utils/CurrencyContext';
+import { useCurrency } from '../utils/UserSettingsContext';
 
 interface EditExpenseBottomSheetProps {
   visible: boolean;
@@ -46,6 +47,7 @@ export default function EditExpenseBottomSheet({
   const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
 
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -94,7 +96,7 @@ export default function EditExpenseBottomSheet({
       setPaymentMethods(payMethods);
     } catch (e) {
       console.error('Failed to load data:', e);
-      setError('Failed to load data. Please try again.');
+      setError(t('status.error'));
     }
   };
 
@@ -116,23 +118,23 @@ export default function EditExpenseBottomSheet({
     if (!expense) return;
 
     if (!title.trim()) {
-      setError('Title is required');
+      setError(t('forms.titleRequired'));
       return;
     }
 
     const validation = validateCurrencyInput(amount, currency);
     if (!validation.isValid) {
-      setError(validation.error || 'Please enter a valid amount');
+      setError(validation.error || t('forms.validAmountRequired'));
       return;
     }
 
     if (!categoryId) {
-      setError('Please select a category');
+      setError(t('forms.categoryRequired'));
       return;
     }
 
     if (!paymentMethodId) {
-      setError('Please select a payment method');
+      setError(t('forms.paymentMethodRequired'));
       return;
     }
 
@@ -157,7 +159,7 @@ export default function EditExpenseBottomSheet({
       onExpenseUpdated?.();
     } catch (e) {
       console.error('Failed to update expense:', e);
-      setError('Failed to update expense. Please try again.');
+      setError(t('forms.updateExpenseError'));
     } finally {
       setLoading(false);
     }
@@ -216,8 +218,8 @@ export default function EditExpenseBottomSheet({
         onPress={() => setShowCategoryDropdown(true)}
         selectedValue={categoryId}
         options={categoryOptions}
-        placeholder="Select Category"
-        label="Category"
+        placeholder={t('forms.selectCategory')}
+        label={t('expenses.category')}
       />
       <DropdownBottomSheet
         visible={showCategoryDropdown}
@@ -225,7 +227,7 @@ export default function EditExpenseBottomSheet({
         options={categoryOptions}
         onSelect={(value) => setCategoryId(value)}
         selectedValue={categoryId}
-        title="Select Category"
+        title={t('forms.selectCategory')}
       />
     </>
   );
@@ -243,8 +245,8 @@ export default function EditExpenseBottomSheet({
         onPress={() => setShowPaymentMethodDropdown(true)}
         selectedValue={paymentMethodId}
         options={paymentMethodOptions}
-        placeholder="Select Payment Method"
-        label="Payment Method"
+        placeholder={t('forms.selectPaymentMethod')}
+        label={t('expenses.paymentMethod')}
       />
       <DropdownBottomSheet
         visible={showPaymentMethodDropdown}
@@ -252,7 +254,7 @@ export default function EditExpenseBottomSheet({
         options={paymentMethodOptions}
         onSelect={(value) => setPaymentMethodId(value)}
         selectedValue={paymentMethodId}
-        title="Select Payment Method"
+        title={t('forms.selectPaymentMethod')}
       />
     </>
   );
@@ -316,7 +318,7 @@ export default function EditExpenseBottomSheet({
               color: theme.colors.onSurface,
               textAlign: 'center'
             }}>
-              Update Expense
+              {t('expenses.editExpense')}
             </Text>
 
             {error ? (
@@ -336,7 +338,7 @@ export default function EditExpenseBottomSheet({
 
             <View style={{ gap: 24 }}>
               <TextInput
-                label="Title"
+                label={t('forms.title')}
                 value={title}
                 onChangeText={setTitle}
                 mode="outlined"
@@ -346,7 +348,7 @@ export default function EditExpenseBottomSheet({
               />
 
               <TextInput
-                label="Description (optional)"
+                label={t('forms.descriptionOptional')}
                 value={description}
                 onChangeText={setDescription}
                 mode="outlined"
@@ -358,7 +360,7 @@ export default function EditExpenseBottomSheet({
               />
 
               <TextInput
-                label={`Amount (${currency})`}
+                label={t('forms.amountCurrency', { currency })}
                 value={amount}
                 onChangeText={setAmount}
                 mode="outlined"
@@ -374,7 +376,7 @@ export default function EditExpenseBottomSheet({
                   color: theme.colors.onSurfaceVariant,
                   fontWeight: '600'
                 }}>
-                  Date
+                  {t('expenses.date')}
                 </Text>
                 {renderDatePicker()}
               </View>
@@ -401,7 +403,7 @@ export default function EditExpenseBottomSheet({
                     borderRadius: 6,
                   }}
                 >
-                  Cancel
+                  {t('actions.cancel')}
                 </Button>
                 <Button
                   mode="contained"
@@ -426,7 +428,7 @@ export default function EditExpenseBottomSheet({
                     elevation: 2,
                   }}
                 >
-                  Save
+                  {t('actions.saveChanges')}
                 </Button>
               </View>
             </View>

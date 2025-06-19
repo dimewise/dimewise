@@ -42,7 +42,7 @@ export function DropdownButton({
   onPress,
   selectedValue,
   options,
-  placeholder = "Select an option",
+  placeholder = "Select an option", // TODO: This should be translated by parent component
   label
 }: DropdownButtonProps) {
   const theme = useTheme();

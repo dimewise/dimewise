@@ -11,8 +11,9 @@ import {
 } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Expense, Category, PaymentMethod, useExpenses, formatAmount } from '../storage';
-import { useCurrency } from '../utils/CurrencyContext';
+import { useCurrency } from '../utils/UserSettingsContext';
 
 interface ExpenseDetailBottomSheetProps {
   visible: boolean;
@@ -39,6 +40,7 @@ export default function ExpenseDetailBottomSheet({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [updating, setUpdating] = useState(false);
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const expenseOps = useExpenses();
@@ -161,7 +163,7 @@ export default function ExpenseDetailBottomSheet({
                     marginBottom: 8,
                     fontWeight: '600'
                   }}>
-                    Description
+                    {t('forms.description')}
                   </Text>
                   <Text variant="bodyLarge" style={{
                     color: theme.colors.onSurface,
@@ -179,7 +181,7 @@ export default function ExpenseDetailBottomSheet({
                   marginBottom: 8,
                   fontWeight: '600'
                 }}>
-                  Amount
+                  {t('forms.amount')}
                 </Text>
                 <Text variant="headlineSmall" style={{
                   color: theme.colors.primary,
@@ -198,7 +200,7 @@ export default function ExpenseDetailBottomSheet({
                   marginBottom: 8,
                   fontWeight: '600'
                 }}>
-                  Date
+                  {t('expenses.date')}
                 </Text>
                 <Text variant="titleMedium" style={{
                   color: theme.colors.onSurface,
@@ -220,7 +222,7 @@ export default function ExpenseDetailBottomSheet({
                   marginBottom: 8,
                   fontWeight: '600'
                 }}>
-                  Metadata
+                  {t('expenses.categoryAndPaymentMethod')}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
                   <View style={{
@@ -236,7 +238,7 @@ export default function ExpenseDetailBottomSheet({
                       color: theme.colors.onPrimaryContainer,
                       fontWeight: '600'
                     }}>
-                      {category?.name || 'Unknown'}
+                      {category?.name || t('common.unknown')}
                     </Text>
                   </View>
                   {paymentMethod && (
@@ -267,7 +269,7 @@ export default function ExpenseDetailBottomSheet({
                   marginBottom: 8,
                   fontWeight: '600'
                 }}>
-                  Verification Status
+                  {t('expenses.verificationStatus')}
                 </Text>
                 <View style={{
                   flexDirection: 'row',
@@ -286,18 +288,20 @@ export default function ExpenseDetailBottomSheet({
                       fontWeight: '600',
                       marginBottom: 4
                     }}>
-                      {expense.isVerified ? 'Verified' : 'Unverified'}
+                      {expense.isVerified ? t('status.verified') : t('status.unverified')}
                     </Text>
                     {expense.isVerified && expense.verifiedAt && (
                       <Text variant="bodySmall" style={{
                         color: expense.isVerified ? theme.colors.onPrimaryContainer : theme.colors.onSurfaceVariant,
                         opacity: 0.8
                       }}>
-                        Verified {new Date(expense.verifiedAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
+                        {t('status.verifiedOn', {
+                          date: new Date(expense.verifiedAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
                         })}
                       </Text>
                     )}
@@ -317,7 +321,7 @@ export default function ExpenseDetailBottomSheet({
                     }}
                     textColor={expense.isVerified ? theme.colors.onPrimaryContainer : undefined}
                   >
-                    {expense.isVerified ? 'Unverify' : 'Verify'}
+                    {expense.isVerified ? t('actions.unverify') : t('actions.verify')}
                   </Button>
                 </View>
               </View>
@@ -351,7 +355,7 @@ export default function ExpenseDetailBottomSheet({
                   }}
                   textColor={theme.colors.error}
                 >
-                  Delete
+                  {t('common.delete')}
                 </Button>
                 <Button
                   mode="contained"
@@ -374,7 +378,7 @@ export default function ExpenseDetailBottomSheet({
                     elevation: 2,
                   }}
                 >
-                  Edit
+                  {t('common.edit')}
                 </Button>
               </View>
             </View>
@@ -392,20 +396,20 @@ export default function ExpenseDetailBottomSheet({
           }}
         >
           <Dialog.Title style={{ color: theme.colors.onSurface }}>
-            Delete Expense
+            {t('expenses.deleteExpense')}
           </Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, marginBottom: 16 }}>
-              Are you sure you want to delete "{expense?.title}"?
+              {t('actions.deleteConfirmMessage', { name: expense?.title })}
             </Text>
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 8 }}>
-              Amount: {expense ? formatAmountLocal(expense.amount) : ''}
+              {t('forms.amount')}: {expense ? formatAmountLocal(expense.amount) : ''}
             </Text>
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 16 }}>
-              Date: {expense ? new Date(expense.date).toLocaleDateString() : ''}
+              {t('expenses.date')}: {expense ? new Date(expense.date).toLocaleDateString() : ''}
             </Text>
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              This action cannot be undone.
+              {t('actions.cannotUndo')}
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
@@ -413,7 +417,7 @@ export default function ExpenseDetailBottomSheet({
               onPress={() => setShowDeleteDialog(false)}
               contentStyle={{ paddingVertical: 4 }}
             >
-              Cancel
+              {t('actions.cancel')}
             </Button>
             <Button
               onPress={handleConfirmDelete}
@@ -422,7 +426,7 @@ export default function ExpenseDetailBottomSheet({
               disabled={deleting}
               contentStyle={{ paddingVertical: 4 }}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </Dialog.Actions>
         </Dialog>

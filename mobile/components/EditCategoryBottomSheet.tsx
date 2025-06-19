@@ -10,9 +10,10 @@ import {
 } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useCategories, validateCurrencyInput } from '../storage';
 import { Category } from '../storage';
-import { useCurrency } from '../utils/CurrencyContext';
+import { useCurrency } from '../utils/UserSettingsContext';
 
 interface EditCategoryBottomSheetProps {
   visible: boolean;
@@ -33,6 +34,7 @@ export default function EditCategoryBottomSheet({
   const [error, setError] = useState('');
 
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -61,13 +63,13 @@ export default function EditCategoryBottomSheet({
     if (!category) return;
 
     if (!name.trim()) {
-      setError('Category name is required');
+      setError(t('forms.categoryNameRequired'));
       return;
     }
 
     const validation = validateCurrencyInput(budget, currency);
     if (!validation.isValid) {
-      setError(validation.error || 'Please enter a valid budget amount');
+      setError(validation.error || t('forms.enterValidBudgetAmount'));
       return;
     }
 
@@ -88,7 +90,7 @@ export default function EditCategoryBottomSheet({
       onCategoryUpdated?.();
     } catch (e) {
       console.error('Failed to update category:', e);
-      setError('Failed to update category. Please try again.');
+      setError(t('forms.updateCategoryError'));
     } finally {
       setLoading(false);
     }
@@ -139,7 +141,7 @@ export default function EditCategoryBottomSheet({
               color: theme.colors.onSurface,
               textAlign: 'center'
             }}>
-              Edit Category
+              {t('categories.editCategory')}
             </Text>
 
             {error ? (
@@ -159,7 +161,7 @@ export default function EditCategoryBottomSheet({
 
             <View style={{ gap: 24 }}>
               <TextInput
-                label="Category Name"
+                label={t('forms.categoryName')}
                 value={name}
                 onChangeText={setName}
                 mode="outlined"
@@ -169,7 +171,7 @@ export default function EditCategoryBottomSheet({
               />
 
               <TextInput
-                label={`Budget Amount (${currency})`}
+                label={t('forms.budgetAmount', { currency })}
                 value={budget}
                 onChangeText={setBudget}
                 mode="outlined"
@@ -195,7 +197,7 @@ export default function EditCategoryBottomSheet({
                     borderRadius: 6,
                   }}
                 >
-                  Cancel
+                  {t('actions.cancel')}
                 </Button>
                 <Button
                   mode="contained"
@@ -218,7 +220,7 @@ export default function EditCategoryBottomSheet({
                     elevation: 3,
                   }}
                 >
-                  Save Changes
+                  {t('actions.saveChanges')}
                 </Button>
               </View>
             </View>

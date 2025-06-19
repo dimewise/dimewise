@@ -105,7 +105,9 @@ export const useSettings = () => {
     getSettings: () => settings.getSettings(db),
     updateSettings: (newSettings: any) => settings.updateSettings(db, newSettings),
     updateCurrency: (currency: any) => settings.updateCurrency(db, currency),
+    updateLanguage: (language: any) => settings.updateLanguage(db, language),
     getCurrentCurrency: () => settings.getCurrentCurrency(db),
+    getCurrentLanguage: () => settings.getCurrentLanguage(db),
     resetSettings: () => settings.resetSettings(db),
     settingsExist: () => settings.settingsExist(db),
     ensureSettingsExist: () => settings.ensureSettingsExist(db)

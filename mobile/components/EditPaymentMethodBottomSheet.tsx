@@ -8,20 +8,21 @@ import {
 } from 'react-native-paper';
 import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { usePaymentMethods } from '../storage';
 import { PaymentMethod } from '../storage';
 import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 
 const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
 
-const formatPaymentTypeForDisplay = (type: string): string => {
+const formatPaymentTypeForDisplay = (type: string, t: any): string => {
   const typeMap: Record<string, string> = {
-    'credit_card': 'Credit Card',
-    'debit_card': 'Debit Card',
-    'cash': 'Cash',
-    'bank_transfer': 'Bank Transfer',
-    'digital_wallet': 'Digital Wallet',
-    'other': 'Other'
+    'credit_card': t('paymentMethods.creditCard'),
+    'debit_card': t('paymentMethods.debitCard'),
+    'cash': t('paymentMethods.cash'),
+    'bank_transfer': t('paymentMethods.bankTransfer'),
+    'digital_wallet': t('paymentMethods.digitalWallet'),
+    'other': t('paymentMethods.other')
   };
   return typeMap[type] || type;
 };
@@ -46,6 +47,7 @@ export default function EditPaymentMethodBottomSheet({
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
   const theme = useTheme();
+  const { t } = useTranslation();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // Storage hooks
@@ -73,12 +75,12 @@ export default function EditPaymentMethodBottomSheet({
     if (!paymentMethod) return;
 
     if (!name.trim()) {
-      setError('Payment method name is required');
+      setError(t('forms.paymentMethodNameRequired'));
       return;
     }
 
     if (!type) {
-      setError('Payment method type is required');
+      setError(t('forms.paymentMethodTypeRequired'));
       return;
     }
 
@@ -98,7 +100,7 @@ export default function EditPaymentMethodBottomSheet({
       onPaymentMethodUpdated?.();
     } catch (e) {
       console.error('Failed to update payment method:', e);
-      setError('Failed to update payment method. Please try again.');
+      setError(t('forms.updatePaymentMethodError'));
     } finally {
       setLoading(false);
     }
@@ -126,7 +128,7 @@ export default function EditPaymentMethodBottomSheet({
 
   // Convert payment types to dropdown options
   const paymentTypeOptions: DropdownOption[] = PAYMENT_METHOD_TYPES.map(paymentType => ({
-    label: formatPaymentTypeForDisplay(paymentType),
+    label: formatPaymentTypeForDisplay(paymentType, t),
     value: paymentType,
     id: paymentType
   }));
@@ -137,8 +139,8 @@ export default function EditPaymentMethodBottomSheet({
         onPress={() => setShowTypeDropdown(true)}
         selectedValue={type}
         options={paymentTypeOptions}
-        placeholder="Select Payment Type"
-        label="Payment Type"
+        placeholder={t('forms.selectPaymentType')}
+        label={t('forms.paymentType')}
       />
       <DropdownBottomSheet
         visible={showTypeDropdown}
@@ -146,7 +148,7 @@ export default function EditPaymentMethodBottomSheet({
         options={paymentTypeOptions}
         onSelect={(value) => setType(value)}
         selectedValue={type}
-        title="Select Payment Type"
+        title={t('forms.selectPaymentType')}
       />
     </>
   );
@@ -176,7 +178,7 @@ export default function EditPaymentMethodBottomSheet({
               color: theme.colors.onSurface,
               textAlign: 'center'
             }}>
-              Edit Payment Method
+              {t('paymentMethods.editPaymentMethod')}
             </Text>
 
             {error ? (
@@ -196,7 +198,7 @@ export default function EditPaymentMethodBottomSheet({
 
             <View style={{ gap: 24 }}>
               <TextInput
-                label="Payment Method Name"
+                label={t('paymentMethods.methodName')}
                 value={name}
                 onChangeText={setName}
                 mode="outlined"
@@ -223,7 +225,7 @@ export default function EditPaymentMethodBottomSheet({
                     borderRadius: 6,
                   }}
                 >
-                  Cancel
+                  {t('actions.cancel')}
                 </Button>
                 <Button
                   mode="contained"
@@ -246,7 +248,7 @@ export default function EditPaymentMethodBottomSheet({
                     elevation: 3,
                   }}
                 >
-                  Save
+                  {t('common.save')}
                 </Button>
               </View>
             </View>

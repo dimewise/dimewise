@@ -1,16 +1,18 @@
 import { SQLiteDatabase } from 'expo-sqlite';
-import { Currency } from './database';
+import { Currency, Language } from './database';
 
 export interface Settings {
   id: number;
   currency: Currency;
+  preferredLanguage: Language;
   createdAt: string;
   updatedAt: string;
 }
 
 // Default settings
 const DEFAULT_SETTINGS: Omit<Settings, 'id' | 'createdAt' | 'updatedAt'> = {
-  currency: 'USD'
+  currency: 'USD',
+  preferredLanguage: 'en'
 };
 
 // Get settings
@@ -19,6 +21,7 @@ export const getSettings = async (db: SQLiteDatabase): Promise<Settings> => {
     const row = await db.getFirstAsync<{
       id: number;
       currency: string;
+      preferred_language: string;
       created_at: string;
       updated_at: string;
     }>('SELECT * FROM settings WHERE id = 1');
@@ -32,6 +35,7 @@ export const getSettings = async (db: SQLiteDatabase): Promise<Settings> => {
     return {
       id: row.id,
       currency: row.currency as Currency,
+      preferredLanguage: (row.preferred_language || 'en') as Language,
       createdAt: row.created_at,
       updatedAt: row.updated_at
     };
@@ -42,6 +46,7 @@ export const getSettings = async (db: SQLiteDatabase): Promise<Settings> => {
     return {
       id: 1,
       currency: DEFAULT_SETTINGS.currency,
+      preferredLanguage: DEFAULT_SETTINGS.preferredLanguage,
       createdAt: now,
       updatedAt: now
     };
@@ -64,8 +69,8 @@ export const updateSettings = async (db: SQLiteDatabase, newSettings: Partial<Se
     };
 
     await db.runAsync(
-      'UPDATE settings SET currency = ?, updated_at = ? WHERE id = 1',
-      [updatedSettings.currency, now]
+      'UPDATE settings SET currency = ?, preferred_language = ?, updated_at = ? WHERE id = 1',
+      [updatedSettings.currency, updatedSettings.preferredLanguage, now]
     );
 
     return updatedSettings;
@@ -96,19 +101,41 @@ export const getCurrentCurrency = async (db: SQLiteDatabase): Promise<Currency> 
   }
 };
 
+// Update language setting
+export const updateLanguage = async (db: SQLiteDatabase, language: Language): Promise<void> => {
+  try {
+    await updateSettings(db, { preferredLanguage: language });
+  } catch (error) {
+    console.error('Error updating language:', error);
+    throw error;
+  }
+};
+
+// Get current language
+export const getCurrentLanguage = async (db: SQLiteDatabase): Promise<Language> => {
+  try {
+    const settings = await getSettings(db);
+    return settings.preferredLanguage;
+  } catch (error) {
+    console.error('Error getting current language:', error);
+    return DEFAULT_SETTINGS.preferredLanguage;
+  }
+};
+
 // Reset settings to defaults
 export const resetSettings = async (db: SQLiteDatabase): Promise<Settings> => {
   try {
     const now = new Date().toISOString();
 
     await db.runAsync(
-      'UPDATE settings SET currency = ?, updated_at = ? WHERE id = 1',
-      [DEFAULT_SETTINGS.currency, now]
+      'UPDATE settings SET currency = ?, preferred_language = ?, updated_at = ? WHERE id = 1',
+      [DEFAULT_SETTINGS.currency, DEFAULT_SETTINGS.preferredLanguage, now]
     );
 
     return {
       id: 1,
       currency: DEFAULT_SETTINGS.currency,
+      preferredLanguage: DEFAULT_SETTINGS.preferredLanguage,
       createdAt: now, // This won't be accurate, but reset operation
       updatedAt: now
     };
@@ -138,8 +165,8 @@ export const ensureSettingsExist = async (db: SQLiteDatabase): Promise<void> => 
     if (!exists) {
       const now = new Date().toISOString();
       await db.runAsync(
-        'INSERT INTO settings (id, currency, created_at, updated_at) VALUES (1, ?, ?, ?)',
-        [DEFAULT_SETTINGS.currency, now, now]
+        'INSERT INTO settings (id, currency, preferred_language, created_at, updated_at) VALUES (1, ?, ?, ?, ?)',
+        [DEFAULT_SETTINGS.currency, DEFAULT_SETTINGS.preferredLanguage, now, now]
       );
       console.log('Created default settings');
     }

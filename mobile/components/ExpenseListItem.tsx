@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { Expense, Category, PaymentMethod } from '../storage';
 import { formatAmount } from '../storage';
-import { useCurrency } from '../utils/CurrencyContext';
+import { useCurrency } from '../utils/UserSettingsContext';
 
 interface ExpenseListItemProps {
   expense: Expense;

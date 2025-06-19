@@ -7,9 +7,11 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 export default function ProfileScreen() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   useFocusEffect(
     useCallback(() => {
@@ -39,7 +41,7 @@ export default function ProfileScreen() {
           backgroundColor: theme.colors.background
         }}>
           <Text variant="headlineMedium" style={{ fontWeight: '700', marginBottom: 16, color: theme.colors.onBackground }}>
-            Profile
+            {t('navigation.profile')}
           </Text>
         </View>
 
@@ -53,8 +55,8 @@ export default function ProfileScreen() {
             overflow: 'hidden'
           }}>
             <List.Item
-              title="Settings"
-              description="Currency and app preferences"
+              title={t('navigation.settings')}
+              description={t('settings.currencyAndPreferences')}
               left={(props) => <List.Icon {...props} icon="cog" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={handleNavigateToSettings}
@@ -74,8 +76,8 @@ export default function ProfileScreen() {
             <View style={{ height: 1, backgroundColor: theme.colors.outline, marginHorizontal: 16 }} />
 
             <List.Item
-              title="Budget Categories"
-              description="Manage spending categories and budgets"
+              title={t('navigation.categories')}
+              description={t('categories.manageCategoriesAndBudgets')}
               left={(props) => <List.Icon {...props} icon="wallet" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={handleNavigateToBudgetCategories}
@@ -95,8 +97,8 @@ export default function ProfileScreen() {
             <View style={{ height: 1, backgroundColor: theme.colors.outline, marginHorizontal: 16 }} />
 
             <List.Item
-              title="Payment Methods"
-              description="Manage your payment sources"
+              title={t('paymentMethods.title')}
+              description={t('paymentMethods.managePaymentSources')}
               left={(props) => <List.Icon {...props} icon="credit-card" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={handleNavigateToPaymentMethods}

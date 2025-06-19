@@ -12,19 +12,20 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { usePaymentMethods } from '../../../storage';
 import { PaymentMethod } from '../../../storage';
 import PaymentMethodBottomSheet from '../../../components/PaymentMethodBottomSheet';
 import EditPaymentMethodBottomSheet from '../../../components/EditPaymentMethodBottomSheet';
 
-const formatPaymentTypeForDisplay = (type: string): string => {
+const formatPaymentTypeForDisplay = (type: string, t: any): string => {
   const typeMap: Record<string, string> = {
-    'credit_card': 'Credit Card',
-    'debit_card': 'Debit Card',
-    'cash': 'Cash',
-    'bank_transfer': 'Bank Transfer',
-    'digital_wallet': 'Digital Wallet',
-    'other': 'Other'
+    'credit_card': t('paymentMethods.creditCard'),
+    'debit_card': t('paymentMethods.debitCard'),
+    'cash': t('paymentMethods.cash'),
+    'bank_transfer': t('paymentMethods.bankTransfer'),
+    'digital_wallet': t('paymentMethods.digitalWallet'),
+    'other': t('paymentMethods.other')
   };
   return typeMap[type] || type;
 };
@@ -38,6 +39,7 @@ export default function PaymentMethodsScreen() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string, name: string } | null>(null);
   const theme = useTheme();
+  const { t } = useTranslation();
 
   // Storage hooks
   const paymentMethodOps = usePaymentMethods();
@@ -106,7 +108,7 @@ export default function PaymentMethodsScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
       <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Payment Methods" titleStyle={{ fontWeight: '700' }} />
+        <Appbar.Content title={t('paymentMethods.title')} titleStyle={{ fontWeight: '700' }} />
       </Appbar.Header>
 
       <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
@@ -119,7 +121,7 @@ export default function PaymentMethodsScreen() {
             borderWidth: 1,
             borderColor: theme.colors.outline,
           }}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>Loading payment methods...</Text>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('status.loading')}</Text>
           </View>
         ) : paymentMethods.length > 0 ? (
           paymentMethods.map((method) => (
@@ -145,7 +147,7 @@ export default function PaymentMethodsScreen() {
                 <View style={{ flex: 1 }}>
                   <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 6, color: theme.colors.onSurface }}>{method.name}</Text>
                   <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
-                    {formatPaymentTypeForDisplay(method.type)}
+                    {formatPaymentTypeForDisplay(method.type, t)}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -184,14 +186,14 @@ export default function PaymentMethodsScreen() {
             borderColor: theme.colors.outline,
           }}>
             <Text variant="titleLarge" style={{ textAlign: 'center', marginBottom: 16, fontWeight: '600', color: theme.colors.onSurface }}>
-              No payment methods found
+              {t('paymentMethods.noPaymentMethods')}
             </Text>
             <Text variant="bodyMedium" style={{
               textAlign: 'center',
               color: theme.colors.onSurfaceVariant,
               lineHeight: 24,
             }}>
-              Add payment methods to track where your money comes from.
+              {t('paymentMethods.addToTrack')}
             </Text>
           </View>
         )}
@@ -199,7 +201,7 @@ export default function PaymentMethodsScreen() {
 
       <FAB
         icon="plus"
-        label="New Payment Method"
+        label={t('paymentMethods.addPaymentMethod')}
         onPress={() => setShowPaymentMethodSheet(true)}
         style={{
           position: 'absolute',
@@ -234,20 +236,23 @@ export default function PaymentMethodsScreen() {
           }}
         >
           <Dialog.Title style={{ color: theme.colors.onSurface }}>
-            Confirm Delete
+            {t('actions.deleteConfirm')}
           </Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-              Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+              {t('actions.deleteConfirmMessage', { name: itemToDelete?.name })}
+            </Text>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>
+              {t('actions.cannotUndo')}
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button onPress={() => setShowDeleteDialog(false)}>{t('actions.cancel')}</Button>
             <Button
               onPress={handleConfirmDelete}
               textColor={theme.colors.error}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </Dialog.Actions>
         </Dialog>

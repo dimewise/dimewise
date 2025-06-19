@@ -12,9 +12,10 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useExpenses, useCategories, usePaymentMethods, formatAmount } from '../../storage';
 import { Expense, Category, PaymentMethod } from '../../storage';
-import { useCurrency, useCurrencyRefresh } from '../../utils/CurrencyContext';
+import { useCurrency, useCurrencyRefresh } from '../../utils/UserSettingsContext';
 import ExpenseBottomSheet from '../../components/ExpenseBottomSheet';
 import ExpenseListItem from '../../components/ExpenseListItem';
 import ExpenseDetailBottomSheet from '../../components/ExpenseDetailBottomSheet';
@@ -33,6 +34,7 @@ export default function ExpensesScreen() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
 
@@ -138,7 +140,7 @@ export default function ExpensesScreen() {
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
-    return category?.name || 'Unknown';
+    return category?.name || t('common.unknown');
   };
 
   return (
@@ -151,10 +153,10 @@ export default function ExpensesScreen() {
           backgroundColor: theme.colors.background
         }}>
           <Text variant="headlineMedium" style={{ fontWeight: '700', marginBottom: 16, color: theme.colors.onBackground }}>
-            Expenses
+            {t('expenses.title')}
           </Text>
           <Searchbar
-            placeholder="Search expenses..."
+            placeholder={t('common.search')}
             onChangeText={setSearchQuery}
             value={searchQuery}
             style={{ backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.outline }}
@@ -164,14 +166,14 @@ export default function ExpensesScreen() {
         <View style={{ paddingHorizontal: 24, paddingBottom: 16, backgroundColor: theme.colors.background }}>
           {categories.length > 0 && (
             <View style={{ gap: 8 }}>
-              <Text variant="labelLarge" style={{ color: theme.colors.onBackground, fontWeight: '600' }}>Filter by category:</Text>
+              <Text variant="labelLarge" style={{ color: theme.colors.onBackground, fontWeight: '600' }}>{t('common.filter')}:</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={{ flexDirection: 'row', gap: 8, paddingRight: 16 }}>
                   <Chip
                     selected={selectedCategory === null}
                     onPress={() => setSelectedCategory(null)}
                   >
-                    All
+                    {t('common.all')}
                   </Chip>
                   {categories.map((category) => (
                     <Chip
@@ -200,7 +202,7 @@ export default function ExpensesScreen() {
               borderWidth: 1,
               borderColor: theme.colors.outline,
             }}>
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>Loading expenses...</Text>
+              <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('expenses.loadingExpenses')}</Text>
             </View>
           ) : filteredExpenses.length > 0 ? (
             filteredExpenses.map((expense) => {
@@ -227,7 +229,7 @@ export default function ExpensesScreen() {
               borderColor: theme.colors.outline,
             }}>
               <Text variant="titleLarge" style={{ textAlign: 'center', marginBottom: 16, fontWeight: '600', color: theme.colors.onSurface }}>
-                {searchQuery || selectedCategory ? 'No matching expenses found' : 'No expenses found'}
+                {searchQuery || selectedCategory ? t('expenses.noMatchingExpenses') : t('expenses.noExpenses')}
               </Text>
               <Text variant="bodyMedium" style={{
                 textAlign: 'center',
@@ -235,8 +237,8 @@ export default function ExpensesScreen() {
                 lineHeight: 24,
               }}>
                 {searchQuery || selectedCategory
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'Start tracking your expenses by adding your first expense.'
+                  ? t('expenses.adjustFilters')
+                  : t('expenses.startTracking')
                 }
               </Text>
             </View>
@@ -245,7 +247,7 @@ export default function ExpensesScreen() {
 
         <FAB
           icon="plus"
-          label="New Expense"
+          label={t('expenses.newExpense')}
           onPress={() => setShowExpenseSheet(true)}
           style={{
             position: 'absolute',

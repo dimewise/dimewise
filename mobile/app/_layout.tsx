@@ -12,7 +12,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Import providers
 import { DatabaseProvider } from '../storage/provider';
-import { CurrencyProvider } from '../utils/CurrencyContext';
+import { UserSettingsProvider } from '../utils/UserSettingsContext';
+
+// Import i18n configuration (this initializes i18n)
+import '../utils/i18n';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -134,7 +137,7 @@ export default function RootLayout() {
         <PaperProvider theme={paperTheme}>
           <ThemeProvider value={navigationTheme}>
             <DatabaseProvider>
-              <CurrencyProvider>
+              <UserSettingsProvider>
                 <BottomSheetModalProvider>
                   <Stack
                     screenOptions={{
@@ -147,7 +150,7 @@ export default function RootLayout() {
                     backgroundColor={paperTheme.colors.surface}
                   />
                 </BottomSheetModalProvider>
-              </CurrencyProvider>
+              </UserSettingsProvider>
             </DatabaseProvider>
           </ThemeProvider>
         </PaperProvider>

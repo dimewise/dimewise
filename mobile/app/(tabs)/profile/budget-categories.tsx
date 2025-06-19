@@ -12,9 +12,10 @@ import {
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useCategories, SYSTEM_CATEGORIES, formatAmount } from '../../../storage';
 import { Category } from '../../../storage';
-import { useCurrency, useCurrencyRefresh } from '../../../utils/CurrencyContext';
+import { useCurrency, useCurrencyRefresh } from '../../../utils/UserSettingsContext';
 import CategoryBottomSheet from '../../../components/CategoryBottomSheet';
 import EditCategoryBottomSheet from '../../../components/EditCategoryBottomSheet';
 
@@ -27,6 +28,7 @@ export default function BudgetCategoriesScreen() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{ id: string, name: string } | null>(null);
   const theme = useTheme();
+  const { t } = useTranslation();
   const { currency } = useCurrency();
   const refreshKey = useCurrencyRefresh();
 
@@ -106,7 +108,7 @@ export default function BudgetCategoriesScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
       <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title="Budget Categories" titleStyle={{ fontWeight: '700' }} />
+        <Appbar.Content title={t('categories.title')} titleStyle={{ fontWeight: '700' }} />
       </Appbar.Header>
 
       <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
@@ -119,7 +121,7 @@ export default function BudgetCategoriesScreen() {
             borderWidth: 1,
             borderColor: theme.colors.outline,
           }}>
-            <Text style={{ color: theme.colors.onSurfaceVariant }}>Loading categories...</Text>
+            <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('status.loading')}</Text>
           </View>
         ) : categories.length > 0 ? (
           categories.map((category) => (
@@ -145,7 +147,7 @@ export default function BudgetCategoriesScreen() {
                 <View style={{ flex: 1 }}>
                   <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 6, color: theme.colors.onSurface }}>{category.name}</Text>
                   <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
-                    Budget: {formatAmount(category.budget, currency)}
+                    {t('expenses.budget')}: {formatAmount(category.budget, currency)}
                   </Text>
                 </View>
                 <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -184,14 +186,14 @@ export default function BudgetCategoriesScreen() {
             borderColor: theme.colors.outline,
           }}>
             <Text variant="titleLarge" style={{ textAlign: 'center', marginBottom: 16, fontWeight: '600', color: theme.colors.onSurface }}>
-              No categories found
+              {t('categories.noCategories')}
             </Text>
             <Text variant="bodyMedium" style={{
               textAlign: 'center',
               color: theme.colors.onSurfaceVariant,
               lineHeight: 24,
             }}>
-              Create your first budget category to start tracking expenses.
+              {t('categories.createFirst')}
             </Text>
           </View>
         )}
@@ -199,7 +201,7 @@ export default function BudgetCategoriesScreen() {
 
       <FAB
         icon="plus"
-        label="New Category"
+        label={t('categories.newCategory')}
         onPress={() => setShowCategorySheet(true)}
         style={{
           position: 'absolute',
@@ -234,20 +236,20 @@ export default function BudgetCategoriesScreen() {
           }}
         >
           <Dialog.Title style={{ color: theme.colors.onSurface }}>
-            Confirm Delete
+            {t('actions.deleteConfirm')}
           </Dialog.Title>
           <Dialog.Content>
             <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-              Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+              {t('actions.deleteConfirmMessage', { name: itemToDelete?.name })} {t('actions.cannotUndo')}
             </Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button onPress={() => setShowDeleteDialog(false)}>{t('common.cancel')}</Button>
             <Button
               onPress={handleConfirmDelete}
               textColor={theme.colors.error}
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </Dialog.Actions>
         </Dialog>
