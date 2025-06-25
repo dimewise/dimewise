@@ -1,160 +1,123 @@
-import { useEffect } from 'react';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { PaperProvider, MD3LightTheme, MD3DarkTheme, adaptNavigationTheme } from 'react-native-paper';
-import { DefaultTheme, DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { useColorScheme } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-// Import providers
-import { DatabaseProvider } from '../storage/provider';
-import { UserSettingsProvider } from '../utils/UserSettingsContext';
-
-// Import i18n configuration (this initializes i18n)
-import '../utils/i18n';
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import {
+	DarkTheme,
+	DefaultTheme,
+	NavigationContainer,
+	ThemeProvider,
+} from "@react-navigation/native";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { openDatabaseSync, SQLiteProvider } from "expo-sqlite";
+import { StatusBar } from "expo-status-bar";
+import { Suspense, useEffect, useMemo } from "react";
+import { Text, useColorScheme, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+	ActivityIndicator,
+	adaptNavigationTheme,
+	PaperProvider,
+} from "react-native-paper";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { DATABASE_NAME, db, seedInitialData } from "../db/drizzle";
+import migrations from "../db/generated/migrations/migrations";
+import "../utils/i18n";
+import { RefreshKeyProvider } from "../components/contexts/RefreshKeyContext";
+import { UserProvider } from "../components/contexts/UserContext";
+import { darkTheme, lightTheme } from "../utils/theme";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const { LightTheme, DarkTheme: NavigationDarkTheme } = adaptNavigationTheme({
-  reactNavigationLight: DefaultTheme,
-  reactNavigationDark: DarkTheme,
+	reactNavigationLight: DefaultTheme,
+	reactNavigationDark: DarkTheme,
 });
 
-// Custom DimeWise Finance Theme - Pure Monochrome
-const lightTheme = {
-  ...MD3LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    // Primary: Pure black for maximum contrast
-    primary: '#000000', // Pure black
-    primaryContainer: '#F5F5F5', // Light gray container
-    // Secondary: Medium gray (no blue hints)
-    secondary: '#6B7280', // Pure medium gray
-    secondaryContainer: '#E5E7EB', // Light gray container
-    // Tertiary: Only for critical alerts
-    tertiary: '#DC2626', // Clean red for errors only
-    tertiaryContainer: '#FEF2F2', // Very light red container
-    // Surfaces - Pure monochrome
-    surface: '#FFFFFF', // Pure white
-    surfaceVariant: '#FAFAFA', // Barely-there gray
-    background: '#FFFFFF', // Pure white background
-    // Error colors - Minimal red
-    error: '#DC2626', // Clean red
-    errorContainer: '#FEF2F2', // Light red container
-    // Text colors - Pure monochrome hierarchy
-    onPrimary: '#FFFFFF',
-    onPrimaryContainer: '#000000',
-    onSecondary: '#FFFFFF',
-    onSecondaryContainer: '#374151',
-    onTertiary: '#FFFFFF',
-    onTertiaryContainer: '#DC2626',
-    onSurface: '#111827', // Near black
-    onSurfaceVariant: '#6B7280', // Medium gray
-    onBackground: '#111827',
-    onError: '#FFFFFF',
-    onErrorContainer: '#DC2626',
-    outline: '#E5E7EB', // Very light gray border
-    outlineVariant: '#F3F4F6', // Even lighter gray border
-    inverseSurface: '#111827',
-    inverseOnSurface: '#F9FAFB',
-    inversePrimary: '#9CA3AF', // Light gray
-    shadow: '#000000',
-    scrim: '#000000',
-    surfaceTint: '#000000',
-  },
-};
-
-const darkTheme = {
-  ...MD3DarkTheme,
-  colors: {
-    ...MD3DarkTheme.colors,
-    // Primary: Soft white for dark mode
-    primary: '#F5F5F5', // Pure light gray
-    primaryContainer: '#2D2D2D', // Pure dark gray container
-    // Secondary: Pure neutral grays
-    secondary: '#9E9E9E', // Pure medium gray
-    secondaryContainer: '#424242', // Pure dark gray
-    // Tertiary: Only for critical alerts
-    tertiary: '#E53E3E', // Pure red for dark mode
-    tertiaryContainer: '#7F1D1D', // Dark red container
-    // Dark surfaces - Pure neutral grays (no blue undertones)
-    surface: '#1A1A1A', // Pure dark gray (not blue-tinted)
-    surfaceVariant: '#2D2D2D', // Slightly lighter pure gray
-    background: '#121212', // Pure dark background (Material Design standard)
-    // Error colors
-    error: '#E53E3E', // Pure red
-    errorContainer: '#7F1D1D', // Dark red container
-    // Text colors - Pure monochrome
-    onPrimary: '#121212', // Dark text on light primary
-    onPrimaryContainer: '#E0E0E0', // Light gray text
-    onSecondary: '#121212', // Dark text on light secondary
-    onSecondaryContainer: '#E0E0E0', // Light gray text
-    onTertiary: '#FFFFFF',
-    onTertiaryContainer: '#FEF2F2',
-    onSurface: '#E0E0E0', // Pure light gray (no blue tint)
-    onSurfaceVariant: '#9E9E9E', // Pure medium gray
-    onBackground: '#E0E0E0', // Pure light gray
-    onError: '#FEF2F2',
-    onErrorContainer: '#FECACA',
-    outline: '#424242', // Pure gray borders
-    outlineVariant: '#2D2D2D', // Darker pure gray
-    inverseSurface: '#F5F5F5',
-    inverseOnSurface: '#121212',
-    inversePrimary: '#121212',
-    shadow: '#000000',
-    scrim: '#000000',
-    surfaceTint: '#F5F5F5',
-  },
-};
-
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const paperTheme = colorScheme === 'dark' ? darkTheme : lightTheme;
-  const navigationTheme = colorScheme === 'dark' ? NavigationDarkTheme : LightTheme;
+	// database
+	const { success, error } = useMigrations(db, migrations);
 
-  const [loaded] = useFonts({
-    // Add any custom fonts here
-  });
+	// theme/colorscheme
+	const colorScheme = useColorScheme();
+	const [loaded] = useFonts({
+		// Add fonts
+	});
+	const paperTheme = useMemo(
+		() => (colorScheme === "dark" ? darkTheme : lightTheme),
+		[colorScheme],
+	);
+	const navigationTheme = useMemo(
+		() => ({
+			...(colorScheme === "dark" ? NavigationDarkTheme : LightTheme),
+			colors: {
+				...NavigationDarkTheme.colors,
+				background: paperTheme.colors.background,
+				primary: paperTheme.colors.primary,
+				card: paperTheme.colors.surface,
+				text: paperTheme.colors.onSurface,
+				border: paperTheme.colors.outline ?? "#ccc",
+			},
+		}),
+		[colorScheme, paperTheme],
+	);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+	useEffect(() => {
+		if (loaded) SplashScreen.hideAsync();
+	}, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
+	if (!loaded) {
+		return (
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+				<ActivityIndicator size="large" />
+			</View>
+		);
+	}
 
-  return (
-    <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <PaperProvider theme={paperTheme}>
-          <ThemeProvider value={navigationTheme}>
-            <DatabaseProvider>
-              <UserSettingsProvider>
-                <BottomSheetModalProvider>
-                  <Stack
-                    screenOptions={{
-                      headerShown: false,
-                    }}
-                  />
-                  <StatusBar
-                    style={colorScheme === 'dark' ? 'light' : 'dark'}
-                    translucent={true}
-                    backgroundColor={paperTheme.colors.surface}
-                  />
-                </BottomSheetModalProvider>
-              </UserSettingsProvider>
-            </DatabaseProvider>
-          </ThemeProvider>
-        </PaperProvider>
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
-  );
-} 
+	if (error) {
+		return (
+			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+				<Text>Database migration failed</Text>
+				<Text>{String(error.message)}</Text>
+			</View>
+		);
+	}
+
+	// only run seeder after successful migrations
+	if (success) {
+		seedInitialData(db);
+	}
+
+	return (
+		<Suspense fallback={<ActivityIndicator size="large" />}>
+			<SQLiteProvider
+				databaseName={DATABASE_NAME}
+				options={{ enableChangeListener: true }}
+				useSuspense
+			>
+				<SafeAreaProvider>
+					<GestureHandlerRootView style={{ flex: 1 }}>
+						<PaperProvider theme={paperTheme}>
+							<NavigationContainer theme={navigationTheme}>
+								<BottomSheetModalProvider>
+									<UserProvider>
+										<RefreshKeyProvider>
+											<Stack screenOptions={{ headerShown: false }} />
+											<StatusBar
+												style={colorScheme === "dark" ? "light" : "dark"}
+												translucent
+												backgroundColor={paperTheme.colors.surface}
+											/>
+										</RefreshKeyProvider>
+									</UserProvider>
+								</BottomSheetModalProvider>
+							</NavigationContainer>
+						</PaperProvider>
+					</GestureHandlerRootView>
+				</SafeAreaProvider>
+			</SQLiteProvider>
+		</Suspense>
+	);
+}

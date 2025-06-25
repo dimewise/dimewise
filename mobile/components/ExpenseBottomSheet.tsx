@@ -1,409 +1,461 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { View, Keyboard, Platform, Dimensions } from 'react-native';
 import {
-  Text,
-  Button,
-  TextInput,
-  useTheme,
-  Surface,
-  Divider
-} from 'react-native-paper';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { useTranslation } from 'react-i18next';
-import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
-import { BottomSheetModal, BottomSheetView, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCategories, useExpenses, usePaymentMethods, validateCurrencyInput, SYSTEM_CATEGORIES } from '../storage';
-import { Category, PaymentMethod } from '../storage';
-import { useCurrency } from '../utils/UserSettingsContext';
+	BottomSheetBackdrop,
+	BottomSheetModal,
+	BottomSheetScrollView,
+	BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Dimensions, Keyboard, Platform, View } from "react-native";
+import {
+	Button,
+	Divider,
+	Surface,
+	Text,
+	TextInput,
+	useTheme,
+} from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { db } from "../db/drizzle";
+import {
+	type Category,
+	expense,
+	type NewExpense,
+	type PaymentMethod,
+} from "../db/schema";
+import { generatedUUID, validateCurrencyInput } from "../db/utils";
+import { useRefreshKey } from "./contexts/RefreshKeyContext";
+import { useUser } from "./contexts/UserContext";
+import DropdownBottomSheet, {
+	DropdownButton,
+	type DropdownOption,
+} from "./DropdownBottomSheet";
 
 interface ExpenseBottomSheetProps {
-  visible: boolean;
-  onDismiss: () => void;
-  onExpenseAdded?: () => void;
+	visible: boolean;
+	onDismiss: () => void;
 }
 
-export default function ExpenseBottomSheet({ visible, onDismiss, onExpenseAdded }: ExpenseBottomSheetProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [amount, setAmount] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [paymentMethodId, setPaymentMethodId] = useState('');
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-  const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
+export default function ExpenseBottomSheet({
+	visible,
+	onDismiss,
+}: ExpenseBottomSheetProps) {
+	const [categories, setCategories] = useState<Category[]>([]);
+	const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
+	const [amount, setAmount] = useState("");
+	const [categoryId, setCategoryId] = useState("");
+	const [paymentMethodId, setPaymentMethodId] = useState("");
+	const [date, setDate] = useState(new Date());
+	const [showDatePicker, setShowDatePicker] = useState(false);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState("");
+	const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+	const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] =
+		useState(false);
 
-  const theme = useTheme();
-  const { t } = useTranslation();
-  const { currency } = useCurrency();
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+	const theme = useTheme();
+	const { t } = useTranslation();
+	const { user, userSetting } = useUser();
+	const { triggerRefresh } = useRefreshKey();
+	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  // Storage hooks
-  const categoryOps = useCategories();
-  const expenseOps = useExpenses();
-  const paymentMethodOps = usePaymentMethods();
+	useEffect(() => {
+		if (visible) {
+			bottomSheetModalRef.current?.present();
+		} else {
+			bottomSheetModalRef.current?.dismiss();
+			resetForm();
+		}
+	}, [visible]);
 
-  useEffect(() => {
-    if (visible) {
-      bottomSheetModalRef.current?.present();
-      loadData();
-    } else {
-      bottomSheetModalRef.current?.dismiss();
-      resetForm();
-    }
-  }, [visible]);
+	const resetForm = () => {
+		setTitle("");
+		setDescription("");
+		setAmount("");
+		setCategoryId("");
+		setPaymentMethodId("");
+		setDate(new Date());
+		setError("");
+		setShowCategoryDropdown(false);
+		setShowPaymentMethodDropdown(false);
+		setShowDatePicker(false);
+		Keyboard.dismiss();
+	};
 
-  const loadData = async () => {
-    try {
-      const [cats, payMethods] = await Promise.all([
-        categoryOps.getCategories(),
-        paymentMethodOps.getPaymentMethods(),
-      ]);
-      setCategories(cats);
-      setPaymentMethods(payMethods);
-    } catch (e) {
-      console.error('Failed to load data:', e);
-      setError(t('status.error'));
-    }
-  };
+	const handleSubmit = async () => {
+		if (!user) return;
 
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setAmount('');
-    setCategoryId('');
-    setPaymentMethodId('');
-    setDate(new Date());
-    setError('');
-    setShowCategoryDropdown(false);
-    setShowPaymentMethodDropdown(false);
-    setShowDatePicker(false);
-    Keyboard.dismiss();
-  };
+		if (!title.trim()) {
+			setError(t("forms.titleRequired"));
+			return;
+		}
 
-  const handleSubmit = async () => {
-    if (!title.trim()) {
-      setError(t('forms.titleRequired'));
-      return;
-    }
+		const validation = validateCurrencyInput(
+			amount,
+			userSetting?.currency ?? "USD",
+		);
+		if (!validation.isValid) {
+			setError(validation.error || t("forms.validAmountRequired"));
+			return;
+		}
 
-    const validation = validateCurrencyInput(amount, currency);
-    if (!validation.isValid) {
-      setError(validation.error || t('forms.validAmountRequired'));
-      return;
-    }
+		if (!categoryId) {
+			setError(t("forms.categoryRequired"));
+			return;
+		}
 
-    if (!categoryId) {
-      setError(t('forms.categoryRequired'));
-      return;
-    }
+		if (!paymentMethodId) {
+			setError(t("forms.paymentMethodRequired"));
+			return;
+		}
 
-    if (!paymentMethodId) {
-      setError(t('forms.paymentMethodRequired'));
-      return;
-    }
+		setLoading(true);
+		setError("");
 
-    setLoading(true);
-    setError('');
+		const newExpense: NewExpense = {
+			id: generatedUUID(),
+			title: title.trim(),
+			description: description.trim(),
+			amount: Number(amount),
+			currency: userSetting?.currency ?? "USD",
+			categoryId: categoryId,
+			paymentMethodId: paymentMethodId,
+			incurredAt: date.toISOString(),
+			userId: user?.id,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			deletedAt: null,
+		};
 
-    try {
-      await expenseOps.createExpense(
-        title.trim(),
-        description.trim(),
-        Number(amount),
-        currency,
-        categoryId,
-        paymentMethodId,
-        date.toISOString()
-      );
+		try {
+			await db.insert(expense).values(newExpense);
 
-      onDismiss();
-      onExpenseAdded?.();
-    } catch (e) {
-      console.error('Failed to save expense:', e);
-      setError(t('status.error'));
-    } finally {
-      setLoading(false);
-    }
-  };
+			onDismiss();
+			triggerRefresh("expenses");
+		} catch (e) {
+			console.error("Failed to save expense:", e);
+			setError(t("status.error"));
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index === -1) {
-      onDismiss();
-    }
-  }, [onDismiss]);
+	const handleSheetChanges = useCallback(
+		(index: number) => {
+			if (index === -1) {
+				onDismiss();
+			}
+		},
+		[onDismiss],
+	);
 
-  // Backdrop component for tap-to-dismiss
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        opacity={0.5}
-        onPress={onDismiss}
-      />
-    ),
-    [onDismiss]
-  );
+	// Backdrop component for tap-to-dismiss
+	const renderBackdrop = useCallback(
+		(props: any) => (
+			<BottomSheetBackdrop
+				{...props}
+				disappearsOnIndex={-1}
+				appearsOnIndex={0}
+				opacity={0.5}
+				onPress={onDismiss}
+			/>
+		),
+		[onDismiss],
+	);
 
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      setDate(selectedDate);
-    }
-  };
+	const handleDateChange = (event: any, selectedDate?: Date) => {
+		if (selectedDate) {
+			setDate(selectedDate);
+		}
+	};
 
-  const handleDatePickerToggle = () => {
-    setShowDatePicker(!showDatePicker);
-  };
+	const handleDatePickerToggle = () => {
+		setShowDatePicker(!showDatePicker);
+	};
 
-  const formatDateForDisplay = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+	const formatDateForDisplay = (date: Date) => {
+		return date.toLocaleDateString("en-US", {
+			weekday: "short",
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		});
+	};
 
-  const selectedCategory = categories.find(cat => cat.id === categoryId);
-  const selectedPaymentMethod = paymentMethods.find(pm => pm.id === paymentMethodId);
+	const selectedCategory = categories.find((cat) => cat.id === categoryId);
+	const selectedPaymentMethod = paymentMethods.find(
+		(pm) => pm.id === paymentMethodId,
+	);
 
-  // Convert categories to dropdown options (excluding uncategorized)
-  const categoryOptions: DropdownOption[] = categories
-    .filter(category => category.id !== SYSTEM_CATEGORIES.UNCATEGORIZED)
-    .map(category => ({
-      label: category.name,
-      value: category.id,
-      id: category.id
-    }));
+	// Convert categories to dropdown options (excluding uncategorized)
+	const categoryOptions: DropdownOption[] = categories.map((category) => ({
+		label: category.name,
+		value: category.id,
+		id: category.id,
+	}));
 
-  const renderCategoryDropdown = () => (
-    <>
-      <DropdownButton
-        onPress={() => setShowCategoryDropdown(true)}
-        selectedValue={categoryId}
-        options={categoryOptions}
-        placeholder={t('forms.selectCategory')}
-        label={t('expenses.category')}
-      />
-      <DropdownBottomSheet
-        visible={showCategoryDropdown}
-        onDismiss={() => setShowCategoryDropdown(false)}
-        options={categoryOptions}
-        onSelect={(value) => setCategoryId(value)}
-        selectedValue={categoryId}
-        title={t('forms.selectCategory')}
-      />
-    </>
-  );
+	const renderCategoryDropdown = () => (
+		<>
+			<DropdownButton
+				onPress={() => setShowCategoryDropdown(true)}
+				selectedValue={categoryId}
+				options={categoryOptions}
+				placeholder={t("forms.selectCategory")}
+				label={t("expenses.category")}
+			/>
+			<DropdownBottomSheet
+				visible={showCategoryDropdown}
+				onDismiss={() => setShowCategoryDropdown(false)}
+				options={categoryOptions}
+				onSelect={(value) => setCategoryId(value)}
+				selectedValue={categoryId}
+				title={t("forms.selectCategory")}
+			/>
+		</>
+	);
 
-  // Convert payment methods to dropdown options
-  const paymentMethodOptions: DropdownOption[] = paymentMethods.map(paymentMethod => ({
-    label: paymentMethod.name,
-    value: paymentMethod.id,
-    id: paymentMethod.id
-  }));
+	// Convert payment methods to dropdown options
+	const paymentMethodOptions: DropdownOption[] = paymentMethods.map(
+		(paymentMethod) => ({
+			label: paymentMethod.name,
+			value: paymentMethod.id,
+			id: paymentMethod.id,
+		}),
+	);
 
-  const renderPaymentMethodDropdown = () => (
-    <>
-      <DropdownButton
-        onPress={() => setShowPaymentMethodDropdown(true)}
-        selectedValue={paymentMethodId}
-        options={paymentMethodOptions}
-        placeholder={t('forms.selectPaymentMethod')}
-        label={t('expenses.paymentMethod')}
-      />
-      <DropdownBottomSheet
-        visible={showPaymentMethodDropdown}
-        onDismiss={() => setShowPaymentMethodDropdown(false)}
-        options={paymentMethodOptions}
-        onSelect={(value) => setPaymentMethodId(value)}
-        selectedValue={paymentMethodId}
-        title={t('forms.selectPaymentMethod')}
-      />
-    </>
-  );
+	const renderPaymentMethodDropdown = () => (
+		<>
+			<DropdownButton
+				onPress={() => setShowPaymentMethodDropdown(true)}
+				selectedValue={paymentMethodId}
+				options={paymentMethodOptions}
+				placeholder={t("forms.selectPaymentMethod")}
+				label={t("expenses.paymentMethod")}
+			/>
+			<DropdownBottomSheet
+				visible={showPaymentMethodDropdown}
+				onDismiss={() => setShowPaymentMethodDropdown(false)}
+				options={paymentMethodOptions}
+				onSelect={(value) => setPaymentMethodId(value)}
+				selectedValue={paymentMethodId}
+				title={t("forms.selectPaymentMethod")}
+			/>
+		</>
+	);
 
-  const renderDatePicker = () => (
-    <>
-      <Button
-        mode="outlined"
-        onPress={handleDatePickerToggle}
-        contentStyle={{
-          paddingVertical: 4,
-          justifyContent: 'flex-start'
-        }}
-        labelStyle={{
-          fontSize: 16,
-          fontWeight: '500',
-          textAlign: 'left'
-        }}
-        style={{
-          borderRadius: 6,
-          borderColor: theme.colors.outline,
-          backgroundColor: theme.colors.surface
-        }}
-      >
-        {formatDateForDisplay(date)}
-      </Button>
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={handleDateChange}
-          maximumDate={new Date()}
-        />
-      )}
-    </>
-  );
+	const renderDatePicker = () => (
+		<>
+			<Button
+				mode="outlined"
+				onPress={handleDatePickerToggle}
+				contentStyle={{
+					paddingVertical: 4,
+					justifyContent: "flex-start",
+				}}
+				labelStyle={{
+					fontSize: 16,
+					fontWeight: "500",
+					textAlign: "left",
+				}}
+				style={{
+					borderRadius: 6,
+					borderColor: theme.colors.outline,
+					backgroundColor: theme.colors.surface,
+				}}
+			>
+				{formatDateForDisplay(date)}
+			</Button>
+			{showDatePicker && (
+				<DateTimePicker
+					value={date}
+					mode="date"
+					display={Platform.OS === "ios" ? "spinner" : "default"}
+					onChange={handleDateChange}
+					maximumDate={new Date()}
+				/>
+			)}
+		</>
+	);
 
-  return (
-    <BottomSheetModal
-      ref={bottomSheetModalRef}
-      index={0}
-      onChange={handleSheetChanges}
-      enablePanDownToClose
-      enableDynamicSizing
-      backgroundStyle={{ backgroundColor: theme.colors.surface }}
-      handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
-      backdropComponent={renderBackdrop}
-      maxDynamicContentSize={Dimensions.get('window').height * 0.85}
-      enableContentPanningGesture
-    >
-      <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
-        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-          <View style={{
-            padding: 8,
-            backgroundColor: theme.colors.surface,
-          }}>
-            <Text variant="headlineMedium" style={{
-              marginBottom: 32,
-              fontWeight: '700',
-              color: theme.colors.onSurface,
-              textAlign: 'center'
-            }}>
-              {t('expenses.newExpense')}
-            </Text>
+	return (
+		<BottomSheetModal
+			ref={bottomSheetModalRef}
+			index={0}
+			onChange={handleSheetChanges}
+			enablePanDownToClose
+			enableDynamicSizing
+			backgroundStyle={{ backgroundColor: theme.colors.surface }}
+			handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
+			backdropComponent={renderBackdrop}
+			maxDynamicContentSize={Dimensions.get("window").height * 0.85}
+			enableContentPanningGesture
+		>
+			<BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
+				<SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
+					<View
+						style={{
+							padding: 8,
+							backgroundColor: theme.colors.surface,
+						}}
+					>
+						<Text
+							variant="headlineMedium"
+							style={{
+								marginBottom: 32,
+								fontWeight: "700",
+								color: theme.colors.onSurface,
+								textAlign: "center",
+							}}
+						>
+							{t("expenses.newExpense")}
+						</Text>
 
-            {error ? (
-              <View style={{
-                padding: 16,
-                backgroundColor: theme.colors.errorContainer,
-                borderRadius: 6,
-                marginBottom: 24,
-                borderWidth: 1,
-                borderColor: theme.colors.outline,
-              }}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
-                  {error}
-                </Text>
-              </View>
-            ) : null}
+						{error ? (
+							<View
+								style={{
+									padding: 16,
+									backgroundColor: theme.colors.errorContainer,
+									borderRadius: 6,
+									marginBottom: 24,
+									borderWidth: 1,
+									borderColor: theme.colors.outline,
+								}}
+							>
+								<Text
+									variant="bodyMedium"
+									style={{
+										color: theme.colors.onErrorContainer,
+										fontWeight: "500",
+									}}
+								>
+									{error}
+								</Text>
+							</View>
+						) : null}
 
-            <View style={{ gap: 24 }}>
-              <TextInput
-                label={t('forms.title')}
-                value={title}
-                onChangeText={setTitle}
-                mode="outlined"
-                style={{ backgroundColor: theme.colors.surface }}
-                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
-                contentStyle={{ fontWeight: '500' }}
-              />
+						<View style={{ gap: 24 }}>
+							<TextInput
+								label={t("forms.title")}
+								value={title}
+								onChangeText={setTitle}
+								mode="outlined"
+								style={{ backgroundColor: theme.colors.surface }}
+								outlineStyle={{
+									borderColor: theme.colors.outline,
+									borderWidth: 1,
+									borderRadius: 6,
+								}}
+								contentStyle={{ fontWeight: "500" }}
+							/>
 
-              <TextInput
-                label={t('forms.descriptionOptional')}
-                value={description}
-                onChangeText={setDescription}
-                mode="outlined"
-                multiline
-                numberOfLines={3}
-                style={{ backgroundColor: theme.colors.surface }}
-                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
-                contentStyle={{ fontWeight: '500' }}
-              />
+							<TextInput
+								label={t("forms.descriptionOptional")}
+								value={description}
+								onChangeText={setDescription}
+								mode="outlined"
+								multiline
+								numberOfLines={3}
+								style={{ backgroundColor: theme.colors.surface }}
+								outlineStyle={{
+									borderColor: theme.colors.outline,
+									borderWidth: 1,
+									borderRadius: 6,
+								}}
+								contentStyle={{ fontWeight: "500" }}
+							/>
 
-              <TextInput
-                label={t('forms.amountCurrency', { currency })}
-                value={amount}
-                onChangeText={setAmount}
-                mode="outlined"
-                keyboardType="numeric"
-                style={{ backgroundColor: theme.colors.surface }}
-                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
-                contentStyle={{ fontWeight: '600', fontSize: 16 }}
-              />
+							<TextInput
+								label={t("forms.amountCurrency", {
+									currency: userSetting?.currency ?? "USD",
+								})}
+								value={amount}
+								onChangeText={setAmount}
+								mode="outlined"
+								keyboardType="numeric"
+								style={{ backgroundColor: theme.colors.surface }}
+								outlineStyle={{
+									borderColor: theme.colors.outline,
+									borderWidth: 1,
+									borderRadius: 6,
+								}}
+								contentStyle={{ fontWeight: "600", fontSize: 16 }}
+							/>
 
-              <View>
-                <Text variant="labelLarge" style={{
-                  marginBottom: 8,
-                  color: theme.colors.onSurfaceVariant,
-                  fontWeight: '600'
-                }}>
-                  {t('expenses.date')}
-                </Text>
-                {renderDatePicker()}
-              </View>
+							<View>
+								<Text
+									variant="labelLarge"
+									style={{
+										marginBottom: 8,
+										color: theme.colors.onSurfaceVariant,
+										fontWeight: "600",
+									}}
+								>
+									{t("expenses.date")}
+								</Text>
+								{renderDatePicker()}
+							</View>
 
-              <View style={{ gap: 16 }}>
-                {renderCategoryDropdown()}
-                {renderPaymentMethodDropdown()}
-              </View>
+							<View style={{ gap: 16 }}>
+								{renderCategoryDropdown()}
+								{renderPaymentMethodDropdown()}
+							</View>
 
-              <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
-                <Button
-                  mode="outlined"
-                  onPress={onDismiss}
-                  contentStyle={{
-                    paddingVertical: 4,
-                  }}
-                  labelStyle={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    letterSpacing: 0.25
-                  }}
-                  style={{
-                    flex: 1,
-                    borderRadius: 6,
-                  }}
-                >
-                  {t('actions.cancel')}
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleSubmit}
-                  contentStyle={{
-                    paddingVertical: 4,
-                  }}
-                  labelStyle={{
-                    fontSize: 16,
-                    fontWeight: '600',
-                    letterSpacing: 0.25
-                  }}
-                  style={{
-                    flex: 1,
-                    borderRadius: 6,
-                    shadowColor: '#000000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 2,
-                  }}
-                >
-                  {t('expenses.addExpense')}
-                </Button>
-              </View>
-            </View>
-          </View>
-        </SafeAreaView>
-      </BottomSheetScrollView>
-    </BottomSheetModal>
-  );
-} 
+							<View style={{ flexDirection: "row", gap: 16, marginTop: 16 }}>
+								<Button
+									mode="outlined"
+									onPress={onDismiss}
+									contentStyle={{
+										paddingVertical: 4,
+									}}
+									labelStyle={{
+										fontSize: 16,
+										fontWeight: "600",
+										letterSpacing: 0.25,
+									}}
+									style={{
+										flex: 1,
+										borderRadius: 6,
+									}}
+								>
+									{t("actions.cancel")}
+								</Button>
+								<Button
+									mode="contained"
+									onPress={handleSubmit}
+									contentStyle={{
+										paddingVertical: 4,
+									}}
+									labelStyle={{
+										fontSize: 16,
+										fontWeight: "600",
+										letterSpacing: 0.25,
+									}}
+									style={{
+										flex: 1,
+										borderRadius: 6,
+										shadowColor: "#000000",
+										shadowOffset: { width: 0, height: 2 },
+										shadowOpacity: 0.1,
+										shadowRadius: 4,
+										elevation: 2,
+									}}
+								>
+									{t("expenses.addExpense")}
+								</Button>
+							</View>
+						</View>
+					</View>
+				</SafeAreaView>
+			</BottomSheetScrollView>
+		</BottomSheetModal>
+	);
+}
