@@ -9,11 +9,13 @@ import {
 type RefreshKeys = {
 	expenses: number;
 	categories: number;
+	paymentMethods: number;
 };
 
 const initialKeys: RefreshKeys = {
 	expenses: 0,
 	categories: 0,
+	paymentMethods: 0,
 };
 
 type RefreshKeyContextType = {

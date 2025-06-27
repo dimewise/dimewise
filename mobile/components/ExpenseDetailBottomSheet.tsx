@@ -2,7 +2,6 @@ import {
 	BottomSheetBackdrop,
 	BottomSheetModal,
 	BottomSheetScrollView,
-	BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,21 +10,26 @@ import {
 	Button,
 	Dialog,
 	Divider,
-	IconButton,
 	Portal,
 	Text,
 	useTheme,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import type { Category, Expense, PaymentMethod } from "../db/schema";
+import {
+	softDeleteExpenseById,
+	unverifyExpenseById,
+	verifyExpenseById,
+} from "../db/mutation/expense";
+import { getExpenseFullById } from "../db/repository/expense";
+import type { ExpenseFull } from "../db/repository/types";
+import type { Expense } from "../db/schema";
 import { formatAmount } from "../db/utils";
+import { useRefreshKey } from "./contexts/RefreshKeyContext";
 import { useUser } from "./contexts/UserContext";
 
 interface ExpenseDetailBottomSheetProps {
 	visible: boolean;
-	expense: Expense | null;
-	category?: Category;
-	paymentMethod?: PaymentMethod;
+	expenseId: string | null;
 	onDismiss: () => void;
 	onEdit: (expense: Expense) => void;
 	onDeleted: () => void;
@@ -33,28 +37,35 @@ interface ExpenseDetailBottomSheetProps {
 
 export default function ExpenseDetailBottomSheet({
 	visible,
-	expense,
-	category,
-	paymentMethod,
+	expenseId,
 	onDismiss,
 	onEdit,
 	onDeleted,
 }: ExpenseDetailBottomSheetProps) {
+	const [targetExpense, setTargetExpense] = useState<ExpenseFull | null>(null);
 	const [deleting, setDeleting] = useState(false);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [updating, setUpdating] = useState(false);
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const { userSetting } = useUser();
+	const { refreshKeys, triggerRefresh } = useRefreshKey();
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
 	useEffect(() => {
-		if (visible && expense) {
+		if (visible && expenseId) {
 			bottomSheetModalRef.current?.present();
 		} else {
 			bottomSheetModalRef.current?.dismiss();
 		}
-	}, [visible, expense]);
+	}, [visible, expenseId]);
+
+	useEffect(() => {
+		if (!expenseId) return;
+
+		const expense = getExpenseFullById(expenseId);
+		setTargetExpense(expense);
+	}, [refreshKeys.expenses]);
 
 	const handleSheetChanges = useCallback(
 		(index: number) => {
@@ -87,15 +98,16 @@ export default function ExpenseDetailBottomSheet({
 	};
 
 	const handleConfirmDelete = async () => {
-		if (!expense) return;
+		if (!expenseId || !targetExpense) return;
 
 		setDeleting(true);
 		setShowDeleteDialog(false);
 
 		try {
-			await expenseOps.deleteExpense(expense.id);
+			await softDeleteExpenseById(targetExpense.id);
 			onDismiss();
 			onDeleted();
+			triggerRefresh("expenses");
 		} catch (error) {
 			console.error("Error deleting expense:", error);
 			// Could add error toast here if needed
@@ -105,25 +117,23 @@ export default function ExpenseDetailBottomSheet({
 	};
 
 	const handleEdit = () => {
-		if (expense) {
-			onEdit(expense);
+		if (targetExpense) {
+			onEdit(targetExpense);
 		}
 	};
 
 	const handleToggleVerification = async () => {
-		if (!expense) return;
+		if (!targetExpense) return;
 
 		setUpdating(true);
 		try {
-			if (expense.isVerified) {
-				await expenseOps.unverifyExpense(expense.id);
+			if (targetExpense.incurredAt) {
+				await unverifyExpenseById(targetExpense.id);
 			} else {
-				await expenseOps.verifyExpense(expense.id);
+				await verifyExpenseById(targetExpense.id);
 			}
 
-			if (onExpenseUpdated) {
-				await onExpenseUpdated();
-			}
+			triggerRefresh("expenses");
 		} catch (error) {
 			console.error("Error toggling verification:", error);
 		} finally {
@@ -131,7 +141,7 @@ export default function ExpenseDetailBottomSheet({
 		}
 	};
 
-	if (!expense) return null;
+	if (!expenseId || !targetExpense) return null;
 
 	return (
 		<BottomSheetModal
@@ -163,11 +173,11 @@ export default function ExpenseDetailBottomSheet({
 									fontWeight: "600",
 								}}
 							>
-								{expense.title}
+								{targetExpense.title}
 							</Text>
 
 							{/* Description */}
-							{expense.description && (
+							{targetExpense.description && (
 								<View>
 									<Text
 										variant="labelLarge"
@@ -186,7 +196,7 @@ export default function ExpenseDetailBottomSheet({
 											lineHeight: 24,
 										}}
 									>
-										{expense.description}
+										{targetExpense.description}
 									</Text>
 								</View>
 							)}
@@ -210,7 +220,7 @@ export default function ExpenseDetailBottomSheet({
 										fontWeight: "700",
 									}}
 								>
-									{formatAmountLocal(expense.amount)}
+									{formatAmountLocal(targetExpense.amount)}
 								</Text>
 							</View>
 
@@ -235,12 +245,15 @@ export default function ExpenseDetailBottomSheet({
 										fontWeight: "600",
 									}}
 								>
-									{new Date(expense.date).toLocaleDateString("en-US", {
-										weekday: "long",
-										year: "numeric",
-										month: "long",
-										day: "numeric",
-									})}
+									{new Date(targetExpense.incurredAt).toLocaleDateString(
+										"en-US",
+										{
+											weekday: "long",
+											year: "numeric",
+											month: "long",
+											day: "numeric",
+										},
+									)}
 								</Text>
 							</View>
 
@@ -275,10 +288,10 @@ export default function ExpenseDetailBottomSheet({
 												fontWeight: "600",
 											}}
 										>
-											{category?.name || t("common.unknown")}
+											{targetExpense.category?.name || t("common.unknown")}
 										</Text>
 									</View>
-									{paymentMethod && (
+									{targetExpense.paymentMethod?.name && (
 										<View
 											style={{
 												paddingHorizontal: 16,
@@ -297,7 +310,7 @@ export default function ExpenseDetailBottomSheet({
 													fontWeight: "600",
 												}}
 											>
-												{paymentMethod.name}
+												{targetExpense.paymentMethod.name}
 											</Text>
 										</View>
 									)}
@@ -323,7 +336,7 @@ export default function ExpenseDetailBottomSheet({
 										justifyContent: "space-between",
 										paddingHorizontal: 16,
 										paddingVertical: 8,
-										backgroundColor: expense.isVerified
+										backgroundColor: targetExpense.incurredAt
 											? theme.colors.primaryContainer
 											: theme.colors.surfaceVariant,
 										borderRadius: 8,
@@ -335,43 +348,42 @@ export default function ExpenseDetailBottomSheet({
 										<Text
 											variant="titleMedium"
 											style={{
-												color: expense.isVerified
+												color: targetExpense.incurredAt
 													? theme.colors.onPrimaryContainer
 													: theme.colors.onSurfaceVariant,
 												fontWeight: "600",
 												marginBottom: 4,
 											}}
 										>
-											{expense.isVerified
+											{targetExpense.incurredAt
 												? t("status.verified")
 												: t("status.unverified")}
 										</Text>
-										{expense.isVerified && expense.verifiedAt && (
+										{targetExpense.verifiedAt && (
 											<Text
 												variant="bodySmall"
 												style={{
-													color: expense.isVerified
+													color: targetExpense.verifiedAt
 														? theme.colors.onPrimaryContainer
 														: theme.colors.onSurfaceVariant,
 													opacity: 0.8,
 												}}
 											>
 												{t("status.verifiedOn", {
-													date: new Date(expense.verifiedAt).toLocaleDateString(
-														"en-US",
-														{
-															month: "short",
-															day: "numeric",
-															hour: "2-digit",
-															minute: "2-digit",
-														},
-													),
+													date: new Date(
+														targetExpense.verifiedAt,
+													).toLocaleDateString("en-US", {
+														month: "short",
+														day: "numeric",
+														hour: "2-digit",
+														minute: "2-digit",
+													}),
 												})}
 											</Text>
 										)}
 									</View>
 									<Button
-										mode={expense.isVerified ? "outlined" : "contained"}
+										mode={targetExpense.verifiedAt ? "outlined" : "contained"}
 										onPress={handleToggleVerification}
 										loading={updating}
 										disabled={updating}
@@ -379,19 +391,19 @@ export default function ExpenseDetailBottomSheet({
 										labelStyle={{ fontSize: 14, fontWeight: "600" }}
 										style={{
 											borderRadius: 6,
-											...(expense.isVerified
+											...(targetExpense.verifiedAt
 												? {
 														borderColor: theme.colors.onPrimaryContainer,
 													}
 												: {}),
 										}}
 										textColor={
-											expense.isVerified
+											targetExpense.verifiedAt
 												? theme.colors.onPrimaryContainer
 												: undefined
 										}
 									>
-										{expense.isVerified
+										{targetExpense.verifiedAt
 											? t("actions.unverify")
 											: t("actions.verify")}
 									</Button>
@@ -477,21 +489,23 @@ export default function ExpenseDetailBottomSheet({
 							variant="bodyMedium"
 							style={{ color: theme.colors.onSurface, marginBottom: 16 }}
 						>
-							{t("actions.deleteConfirmMessage", { name: expense?.title })}
+							{t("actions.deleteConfirmMessage", { name: targetExpense.title })}
 						</Text>
 						<Text
 							variant="bodySmall"
 							style={{ color: theme.colors.onSurfaceVariant, marginBottom: 8 }}
 						>
 							{t("forms.amount")}:{" "}
-							{expense ? formatAmountLocal(expense.amount) : ""}
+							{targetExpense ? formatAmountLocal(targetExpense.amount) : ""}
 						</Text>
 						<Text
 							variant="bodySmall"
 							style={{ color: theme.colors.onSurfaceVariant, marginBottom: 16 }}
 						>
 							{t("expenses.date")}:{" "}
-							{expense ? new Date(expense.date).toLocaleDateString() : ""}
+							{targetExpense
+								? new Date(targetExpense.date).toLocaleDateString()
+								: ""}
 						</Text>
 						<Text
 							variant="bodySmall"
@@ -522,4 +536,3 @@ export default function ExpenseDetailBottomSheet({
 		</BottomSheetModal>
 	);
 }
-

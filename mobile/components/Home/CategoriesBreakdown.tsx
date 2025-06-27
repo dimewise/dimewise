@@ -1,15 +1,14 @@
-import { and, eq, gte, isNull, lte } from "drizzle-orm";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
-import { db } from "../../db/drizzle";
-import { category, expense } from "../../db/schema";
+import { getCategoriesByUserId } from "../../db/repository/category";
+import { getExpensesInRangeByUserId } from "../../db/repository/expense";
+import type { CategoryWithSpending } from "../../db/repository/types";
 import { getMonthRange } from "../../utils/datetime";
 import { CategoryList } from "../CategoryList";
 import { useRefreshKey } from "../contexts/RefreshKeyContext";
 import { useUser } from "../contexts/UserContext";
-import type { CategoryWithSpending } from "../types";
 
 export const CategoriesBreakdown = () => {
 	const theme = useTheme();
@@ -21,29 +20,14 @@ export const CategoriesBreakdown = () => {
 	useEffect(() => {
 		if (!user) return;
 
-		// 1. Fetch categories (excluding deleted)
-		const categories = db
-			.select()
-			.from(category)
-			.where(and(eq(category.userId, user.id), isNull(category.deletedAt)))
-			.all();
+		// Fetch categories (excluding deleted)
+		const categories = getCategoriesByUserId(user.id);
 
-		// 2. Fetch this month's expenses (excluding deleted)
+		// Fetch this month's expenses (excluding deleted)
 		const { from, to } = getMonthRange(new Date());
-		const expenses = db
-			.select()
-			.from(expense)
-			.where(
-				and(
-					eq(expense.userId, user.id),
-					isNull(expense.deletedAt),
-					gte(expense.incurredAt, from),
-					lte(expense.incurredAt, to),
-				),
-			)
-			.all();
+		const expenses = getExpensesInRangeByUserId(user.id, from, to);
 
-		// 3. Group expenses by categoryId
+		// Group expenses by categoryId
 		const categoryTotals: Record<string, number> = {};
 		let uncategorizedTotal = 0;
 
@@ -56,7 +40,7 @@ export const CategoriesBreakdown = () => {
 			}
 		});
 
-		// 4. Shape the data
+		// Shape the data
 		const result: CategoryWithSpending[] = categories.map((cat) => {
 			const spent = categoryTotals[cat.id] || 0;
 			const percentage = cat.budget > 0 ? (spent / cat.budget) * 100 : 0;
@@ -69,7 +53,7 @@ export const CategoriesBreakdown = () => {
 			} as CategoryWithSpending;
 		});
 
-		// 5. Add "Uncategorized" if needed
+		// Add "Uncategorized" if needed
 		if (uncategorizedTotal > 0) {
 			result.push({
 				id: "uncategorized",

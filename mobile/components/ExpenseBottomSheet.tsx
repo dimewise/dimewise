@@ -2,34 +2,17 @@ import {
 	BottomSheetBackdrop,
 	BottomSheetModal,
 	BottomSheetScrollView,
-	BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimensions, Keyboard, Platform, View } from "react-native";
-import {
-	Button,
-	Divider,
-	Surface,
-	Text,
-	TextInput,
-	useTheme,
-} from "react-native-paper";
+import { Button, Text, TextInput, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { db } from "../db/drizzle";
-import {
-	type Category,
-	expense,
-	type NewExpense,
-	type PaymentMethod,
-} from "../db/schema";
+import { createExpense } from "../db/mutation/expense";
+import { getCategoriesByUserId } from "../db/repository/category";
+import { getPaymentMethodsByUserId } from "../db/repository/paymentMethod";
+import type { Category, NewExpense, PaymentMethod } from "../db/schema";
 import { generatedUUID, validateCurrencyInput } from "../db/utils";
 import { useRefreshKey } from "./contexts/RefreshKeyContext";
 import { useUser } from "./contexts/UserContext";
@@ -65,7 +48,7 @@ export default function ExpenseBottomSheet({
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const { user, userSetting } = useUser();
-	const { triggerRefresh } = useRefreshKey();
+	const { refreshKeys, triggerRefresh } = useRefreshKey();
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
 	useEffect(() => {
@@ -76,6 +59,16 @@ export default function ExpenseBottomSheet({
 			resetForm();
 		}
 	}, [visible]);
+
+	useEffect(() => {
+		if (!user) return;
+
+		const categories = getCategoriesByUserId(user.id);
+		setCategories(categories);
+
+		const paymentMethods = getPaymentMethodsByUserId(user.id);
+		setPaymentMethods(paymentMethods);
+	}, [refreshKeys.categories, refreshKeys.paymentMethods]);
 
 	const resetForm = () => {
 		setTitle("");
@@ -137,7 +130,7 @@ export default function ExpenseBottomSheet({
 		};
 
 		try {
-			await db.insert(expense).values(newExpense);
+			await createExpense(newExpense);
 
 			onDismiss();
 			triggerRefresh("expenses");
@@ -431,6 +424,7 @@ export default function ExpenseBottomSheet({
 								<Button
 									mode="contained"
 									onPress={handleSubmit}
+									disabled={loading}
 									contentStyle={{
 										paddingVertical: 4,
 									}}

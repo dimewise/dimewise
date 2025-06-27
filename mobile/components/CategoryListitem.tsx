@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
+import type { CategoryWithSpending } from "../db/repository/types";
 import type { Category } from "../db/schema";
 import { formatAmount } from "../db/utils";
 import { useUser } from "./contexts/UserContext";
-import type { CategoryWithSpending } from "./types";
 
 interface Props {
 	category: CategoryWithSpending | Category;
@@ -21,6 +21,7 @@ export const CategoryListItem = ({ category, currency = "USD" }: Props) => {
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const { userSetting } = useUser();
+	const currency = userSetting?.currency ?? "USD";
 
 	// Type guard for CategoryWithSpending
 	const spent = isCategoryWithSpending(category) ? category.spent : undefined;

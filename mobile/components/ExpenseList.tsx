@@ -1,7 +1,7 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, View } from "react-native";
+import { View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { Text, useTheme } from "react-native-paper";
 import { db } from "../db/drizzle";
@@ -18,7 +18,7 @@ import ExpenseListItem from "./ExpenseListItem";
 interface Props {
 	expenses: Expense[];
 	hideDescription?: boolean;
-	onPress: (expense: Expense) => void;
+	onPress: (expenseId: string) => void;
 }
 
 export const ExpenseList = ({

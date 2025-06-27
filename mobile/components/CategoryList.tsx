@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { Text, useTheme } from "react-native-paper";
+import type { CategoryWithSpending } from "../db/repository/types";
 import type { Category } from "../db/schema";
 import { CategoryListItem } from "./CategoryListitem";
-import type { CategoryWithSpending } from "./types";
 
 interface Props {
 	categories: CategoryWithSpending[] | Category[];

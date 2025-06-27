@@ -1,17 +1,16 @@
-import { and, desc, eq, gte, isNull, lte } from "drizzle-orm";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
-import { db } from "../../db/drizzle";
-import { type Expense, expense } from "../../db/schema";
+import { getExpensesInRangeByUserId } from "../../db/repository/expense";
+import type { Expense } from "../../db/schema";
 import { getMonthRange } from "../../utils/datetime";
 import { useRefreshKey } from "../contexts/RefreshKeyContext";
 import { useUser } from "../contexts/UserContext";
 import { ExpenseList } from "../ExpenseList";
 
 interface Props {
-	onPress: (expense: Expense) => void;
+	onPress: (expenseId: string) => void;
 }
 
 export const RecentTransactions = ({ onPress }: Props) => {
@@ -26,22 +25,8 @@ export const RecentTransactions = ({ onPress }: Props) => {
 		if (!user) return;
 
 		const { from, to } = getMonthRange(new Date());
-		const result = db
-			.select()
-			.from(expense)
-			.where(
-				and(
-					eq(expense.userId, user.id),
-					isNull(expense.deletedAt),
-					gte(expense.incurredAt, from),
-					lte(expense.incurredAt, to),
-				),
-			)
-			.orderBy(desc(expense.incurredAt))
-			.limit(10)
-			.all();
-
-		setExpenses(result);
+		const recentExpenses = getExpensesInRangeByUserId(user.id, from, to, 10);
+		setExpenses(recentExpenses);
 	}, [user, refreshKeys.expenses]);
 
 	return (
