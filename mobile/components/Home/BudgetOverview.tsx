@@ -1,10 +1,9 @@
-import { and, eq, gte, isNull, lte, sql } from "drizzle-orm";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Divider, Text, useTheme } from "react-native-paper";
-import { db } from "../../db/drizzle";
-import { category, expense } from "../../db/schema";
+import { getCategoriesBudgetSumByUserId } from "../../db/repository/category";
+import { getMonthlyExpenseSumByUserId } from "../../db/repository/expense";
 import { formatAmount } from "../../db/utils";
 import { getMonthRange } from "../../utils/datetime";
 import { useRefreshKey } from "../contexts/RefreshKeyContext";
@@ -21,31 +20,14 @@ export const BudgetOverview = () => {
 	useEffect(() => {
 		if (!user) return;
 
-		const categories = db
-			.select()
-			.from(category)
-			.where(and(eq(category.userId, user.id), isNull(category.deletedAt)))
-			.all();
-		const budgetSum = categories.reduce(
-			(sum, cat) => sum + (cat.budget ?? 0),
-			0,
-		);
+		// Get total budget sum
+		const budgetSum = getCategoriesBudgetSumByUserId(user.id);
 		setTotalBudget(budgetSum);
 
+		// Get total spent in month
 		const { from, to } = getMonthRange(new Date());
-		const result = db
-			.select({ sum: sql<number>`SUM(${expense.amount})` })
-			.from(expense)
-			.where(
-				and(
-					eq(expense.userId, user.id),
-					isNull(expense.deletedAt),
-					gte(expense.incurredAt, from),
-					lte(expense.incurredAt, to),
-				),
-			)
-			.get();
-		setTotalSpent(result?.sum ?? 0);
+		const totalSpent = getMonthlyExpenseSumByUserId(user.id, from, to);
+		setTotalSpent(totalSpent);
 	}, [user, refreshKeys]);
 
 	const { remainder, percentUsed } = useMemo(() => {
