@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import EditExpenseBottomSheet from "../../components/EditExpenseBottomSheet";
 import ExpenseBottomSheet from "../../components/ExpenseBottomSheet";
 import ExpenseDetailBottomSheet from "../../components/ExpenseDetailBottomSheet";
+import ErrorBoundary from "../../components/ErrorBoundary";
 import { BudgetOverview } from "../../components/Home/BudgetOverview";
 import { CategoriesBreakdown } from "../../components/Home/CategoriesBreakdown";
 import { RecentTransactions } from "../../components/Home/RecentTransactions";
@@ -57,57 +58,63 @@ export default function HomePage() {
 	};
 
 	return (
-		<SafeAreaView
-			style={{ flex: 1, backgroundColor: theme.colors.background }}
-			edges={["top", "left", "right"]}
+		<ErrorBoundary
+			onError={(error, errorInfo) => {
+				console.error('Dashboard error:', error, errorInfo);
+			}}
 		>
-			<ScrollView
+			<SafeAreaView
 				style={{ flex: 1, backgroundColor: theme.colors.background }}
-				contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+				edges={["top", "left", "right"]}
 			>
-				<BudgetOverview />
-				<CategoriesBreakdown />
-				<Divider />
-				<RecentTransactions onPress={handleExpensePress} />
-			</ScrollView>
+				<ScrollView
+					style={{ flex: 1, backgroundColor: theme.colors.background }}
+					contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+				>
+					<BudgetOverview />
+					<CategoriesBreakdown />
+					<Divider />
+					<RecentTransactions onPress={handleExpensePress} />
+				</ScrollView>
 
-			{/* PERIPHERALS */}
-			<FAB
-				icon="plus"
-				label={t("home.newExpense")}
-				onPress={() => setShowExpenseSheet(true)}
-				style={{
-					position: "absolute",
-					bottom: 16,
-					right: 16,
-				}}
-			/>
-			<ExpenseBottomSheet
-				visible={showExpenseSheet}
-				onDismiss={() => setShowExpenseSheet(false)}
-			/>
-			<ExpenseDetailBottomSheet
-				visible={showDetailSheet}
-				expenseId={selectedExpenseId}
-				onDismiss={() => {
-					setShowDetailSheet(false);
-					if (!isTransitioningToEdit) {
+				{/* PERIPHERALS */}
+				<FAB
+					icon="plus"
+					label={t("home.newExpense")}
+					onPress={() => setShowExpenseSheet(true)}
+					style={{
+						position: "absolute",
+						bottom: 16,
+						right: 16,
+					}}
+				/>
+				<ExpenseBottomSheet
+					visible={showExpenseSheet}
+					onDismiss={() => setShowExpenseSheet(false)}
+				/>
+				<ExpenseDetailBottomSheet
+					visible={showDetailSheet}
+					expenseId={selectedExpenseId}
+					onDismiss={() => {
+						setShowDetailSheet(false);
+						if (!isTransitioningToEdit) {
+							setSelectedExpenseId(null);
+						}
+					}}
+					onEdit={handleEditExpense}
+					onDeleted={handleExpenseDeleted}
+				/>
+				<EditExpenseBottomSheet
+					visible={showEditSheet}
+					expenseId={selectedExpenseId}
+					onDismiss={() => {
+						setShowEditSheet(false);
 						setSelectedExpenseId(null);
-					}
-				}}
-				onEdit={handleEditExpense}
-				onDeleted={handleExpenseDeleted}
-			/>
-			<EditExpenseBottomSheet
-				visible={showEditSheet}
-				expenseId={selectedExpenseId}
-				onDismiss={() => {
-					setShowEditSheet(false);
-					setSelectedExpenseId(null);
-					setIsTransitioningToEdit(false);
-				}}
-				onExpenseUpdated={handleExpenseUpdated}
-			/>
-		</SafeAreaView>
+						setIsTransitioningToEdit(false);
+					}}
+					onExpenseUpdated={handleExpenseUpdated}
+				/>
+			</SafeAreaView>
+		</ErrorBoundary>
 	);
 }
