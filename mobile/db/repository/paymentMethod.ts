@@ -1,4 +1,5 @@
 import { and, eq, isNull } from "drizzle-orm";
+import * as Crypto from "expo-crypto";
 import { db } from "../drizzle";
 import { paymentMethod } from "../schema";
 import type { PaymentMethod } from "../schema";
@@ -22,7 +23,7 @@ export const getPaymentMethodById = (paymentMethodId: string) => {
 };
 
 export const createPaymentMethod = (paymentMethodData: Omit<PaymentMethod, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
-	const id = crypto.randomUUID();
+	const id = Crypto.randomUUID();
 	return db
 		.insert(paymentMethod)
 		.values({

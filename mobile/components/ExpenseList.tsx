@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 import { Text, useTheme } from "react-native-paper";
 import { getCategoriesByUserId } from "../db/repository/category";
 import { getPaymentMethodsByUserId } from "../db/repository/paymentMethod";
@@ -84,16 +83,15 @@ export const ExpenseList = ({
 	}
 
 	return (
-		<FlatList
-			data={expenses}
-			keyExtractor={(item) => item.id}
-			renderItem={({ item: expense }) => {
+		<View style={{ paddingBottom: 16 }}>
+			{expenses.map((expense) => {
 				const categoryObj = categories.find((c) => c.id === expense.categoryId);
 				const paymentMethodObj = paymentMethods.find(
 					(p) => p.id === expense.paymentMethodId,
 				);
 				return (
 					<ExpenseListItem
+						key={expense.id}
 						expense={expense}
 						category={categoryObj}
 						paymentMethod={paymentMethodObj}
@@ -101,8 +99,7 @@ export const ExpenseList = ({
 						onPress={onPress}
 					/>
 				);
-			}}
-			contentContainerStyle={{ paddingBottom: 16 }}
-		/>
+			})}
+		</View>
 	);
 };
