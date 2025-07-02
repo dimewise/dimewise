@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
 import { getExpensesInRangeByUserId } from "../../db/repository/expense";
-import type { Expense } from "../../db/schema";
 import { getMonthRange } from "../../utils/datetime";
 import { useRefreshKey } from "../contexts/RefreshKeyContext";
 import { useUser } from "../contexts/UserContext";
 import { ExpenseList } from "../ExpenseList";
+import { useUserData } from "../../hooks/useAsyncData";
+import { LoadingErrorFallback } from "../ErrorBoundary";
 
 interface Props {
 	onPress: (expenseId: string) => void;
@@ -19,15 +19,53 @@ export const RecentTransactions = ({ onPress }: Props) => {
 	const { user } = useUser();
 	const { refreshKeys } = useRefreshKey();
 
-	const [expenses, setExpenses] = useState<Expense[]>([]);
+	// Use the new data loading hook with proper error handling
+	const { data: expenses, loading, error, refetch } = useUserData(
+		(userId) => {
+			const { from, to } = getMonthRange(new Date());
+			return getExpensesInRangeByUserId(userId, from, to, 10);
+		},
+		user?.id,
+		[refreshKeys.expenses]
+	);
 
-	useEffect(() => {
-		if (!user) return;
+	if (loading) {
+		return (
+			<View>
+				<Text
+					variant="headlineMedium"
+					style={{
+						marginBottom: 24,
+						fontWeight: "700",
+						color: theme.colors.onBackground,
+					}}
+				>
+					{t("categories.title")}
+				</Text>
+				<Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+					Loading recent transactions...
+				</Text>
+			</View>
+		);
+	}
 
-		const { from, to } = getMonthRange(new Date());
-		const recentExpenses = getExpensesInRangeByUserId(user.id, from, to, 10);
-		setExpenses(recentExpenses);
-	}, [user, refreshKeys.expenses]);
+	if (error) {
+		return (
+			<View>
+				<Text
+					variant="headlineMedium"
+					style={{
+						marginBottom: 24,
+						fontWeight: "700",
+						color: theme.colors.onBackground,
+					}}
+				>
+					{t("categories.title")}
+				</Text>
+				<LoadingErrorFallback onRetry={refetch} />
+			</View>
+		);
+	}
 
 	return (
 		<View>
@@ -41,7 +79,7 @@ export const RecentTransactions = ({ onPress }: Props) => {
 			>
 				{t("categories.title")}
 			</Text>
-			<ExpenseList expenses={expenses} hideDescription onPress={onPress} />
+			<ExpenseList expenses={expenses || []} hideDescription onPress={onPress} />
 		</View>
 	);
 };

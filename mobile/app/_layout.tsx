@@ -27,6 +27,7 @@ import "../utils/i18n";
 import { RefreshKeyProvider } from "../components/contexts/RefreshKeyContext";
 import { UserProvider } from "../components/contexts/UserContext";
 import { darkTheme, lightTheme } from "../utils/theme";
+import ErrorBoundary from '../components/ErrorBoundary';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -91,33 +92,43 @@ export default function RootLayout() {
 	}
 
 	return (
-		<Suspense fallback={<ActivityIndicator size="large" />}>
-			<SQLiteProvider
-				databaseName={DATABASE_NAME}
-				options={{ enableChangeListener: true }}
-				useSuspense
-			>
-				<SafeAreaProvider>
-					<GestureHandlerRootView style={{ flex: 1 }}>
-						<PaperProvider theme={paperTheme}>
-							<NavigationContainer theme={navigationTheme}>
-								<BottomSheetModalProvider>
-									<UserProvider>
-										<RefreshKeyProvider>
-											<Stack screenOptions={{ headerShown: false }} />
-											<StatusBar
-												style={colorScheme === "dark" ? "light" : "dark"}
-												translucent
-												backgroundColor={paperTheme.colors.surface}
-											/>
-										</RefreshKeyProvider>
-									</UserProvider>
-								</BottomSheetModalProvider>
-							</NavigationContainer>
-						</PaperProvider>
-					</GestureHandlerRootView>
-				</SafeAreaProvider>
-			</SQLiteProvider>
-		</Suspense>
+		<ErrorBoundary
+			onError={(error, errorInfo) => {
+				console.error('Root error boundary caught:', error, errorInfo);
+				// You can add crash reporting here (Sentry, Crashlytics, etc.)
+			}}
+		>
+			<Suspense fallback={<ActivityIndicator size="large" />}>
+				<SQLiteProvider
+					databaseName={DATABASE_NAME}
+					options={{ enableChangeListener: true }}
+					useSuspense
+				>
+					<SafeAreaProvider>
+						<GestureHandlerRootView style={{ flex: 1 }}>
+							<PaperProvider theme={paperTheme}>
+								<NavigationContainer theme={navigationTheme}>
+									<BottomSheetModalProvider>
+										<UserProvider>
+											<RefreshKeyProvider>
+												<Stack screenOptions={{ headerShown: false }}>
+													<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+													<Stack.Screen name="+not-found" />
+												</Stack>
+												<StatusBar
+													style={colorScheme === "dark" ? "light" : "dark"}
+													translucent
+													backgroundColor={paperTheme.colors.surface}
+												/>
+											</RefreshKeyProvider>
+										</UserProvider>
+									</BottomSheetModalProvider>
+								</NavigationContainer>
+							</PaperProvider>
+						</GestureHandlerRootView>
+					</SafeAreaProvider>
+				</SQLiteProvider>
+			</Suspense>
+		</ErrorBoundary>
 	);
 }

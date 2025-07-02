@@ -82,3 +82,50 @@ export const getExpenseFullById = (expenseId: string): ExpenseFull | null => {
 
 	return result as ExpenseFull;
 };
+
+// Get all expenses for a user (with optional search and category filter)
+export const getExpensesByUserId = (
+	userId: string,
+	searchQuery?: string,
+	categoryId?: string
+) => {
+	let whereConditions = [
+		eq(expense.userId, userId),
+		isNull(expense.deletedAt)
+	];
+
+	// Add search condition if provided
+	if (searchQuery) {
+		whereConditions.push(
+			sql`(LOWER(${expense.title}) LIKE LOWER(${'%' + searchQuery + '%'}) OR LOWER(${expense.description}) LIKE LOWER(${'%' + searchQuery + '%'}))`
+		);
+	}
+
+	// Add category filter if provided
+	if (categoryId) {
+		whereConditions.push(eq(expense.categoryId, categoryId));
+	}
+
+	return db
+		.select()
+		.from(expense)
+		.where(and(...whereConditions))
+		.orderBy(desc(expense.incurredAt))
+		.all();
+};
+
+// Get recent expenses for a user (limited)
+export const getRecentExpensesByUserId = (userId: string, limit: number = 10) => {
+	return db
+		.select()
+		.from(expense)
+		.where(
+			and(
+				eq(expense.userId, userId),
+				isNull(expense.deletedAt)
+			)
+		)
+		.orderBy(desc(expense.incurredAt))
+		.limit(limit)
+		.all();
+};
