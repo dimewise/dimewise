@@ -9,3 +9,8 @@ export interface ExpenseFull extends Expense {
 	category: Pick<Category, "id" | "name"> | null;
 	paymentMethod: Pick<PaymentMethod, "id" | "name"> | null;
 }
+
+export interface ExpenseWithDetails extends Expense {
+	category: Pick<Category, "id" | "name"> | null;
+	paymentMethod: Pick<PaymentMethod, "id" | "name"> | null;
+}

@@ -1,5 +1,5 @@
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView } from "react-native";
 import { Divider, FAB, useTheme } from "react-native-paper";
@@ -23,6 +23,7 @@ export default function HomePage() {
 	const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
 	const theme = useTheme();
 	const { t } = useTranslation();
+	const timeoutRef = useRef<number | null>(null);
 
 	useFocusEffect(
 		useCallback(() => {
@@ -32,16 +33,28 @@ export default function HomePage() {
 			setShowEditSheet(false);
 			setSelectedExpenseId(null);
 			setIsTransitioningToEdit(false);
+
+			// Cleanup timeout on unmount
+			return () => {
+				if (timeoutRef.current) {
+					clearTimeout(timeoutRef.current);
+				}
+			};
 		}, []),
 	);
 
-	const handleExpensePress = (expense: Expense) => {
+	const handleExpensePress = useCallback((expense: Expense) => {
+		// Clear any existing timeout
+		if (timeoutRef.current) {
+			clearTimeout(timeoutRef.current);
+		}
+
 		// If detail sheet is already supposed to be open but user clicked again, 
 		// it means there's a display issue - force reset and reopen
 		if (showDetailSheet) {
 			setShowDetailSheet(false);
 			setSelectedExpenseId(null);
-			setTimeout(() => {
+			timeoutRef.current = setTimeout(() => {
 				setSelectedExpenseId(expense.id);
 				setShowDetailSheet(true);
 			}, 100);
@@ -50,7 +63,7 @@ export default function HomePage() {
 
 		// If any other bottom sheet is currently open, add a small delay to avoid animation conflicts
 		if (showExpenseSheet || showEditSheet) {
-			setTimeout(() => {
+			timeoutRef.current = setTimeout(() => {
 				setSelectedExpenseId(expense.id);
 				setShowDetailSheet(true);
 			}, 300);
@@ -58,7 +71,7 @@ export default function HomePage() {
 			setSelectedExpenseId(expense.id);
 			setShowDetailSheet(true);
 		}
-	};
+	}, [showDetailSheet, showExpenseSheet, showEditSheet]);
 
 	const handleEditExpense = (expense: Expense) => {
 		setIsTransitioningToEdit(true);

@@ -1,5 +1,5 @@
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import {
@@ -21,8 +21,9 @@ import ErrorBoundary, { ExpensesErrorFallback } from "../../components/ErrorBoun
 import { useRefreshKey } from "../../components/contexts/RefreshKeyContext";
 import { useUser } from "../../components/contexts/UserContext";
 import type { Category, Expense, PaymentMethod } from "../../db/schema";
+import type { ExpenseWithDetails } from "../../db/repository/types";
 import { getCategoriesByUserId } from "../../db/repository/category";
-import { getExpensesByUserId } from "../../db/repository/expense";
+import { getExpensesWithDetailsByUserId } from "../../db/repository/expense";
 import { getPaymentMethodsByUserId } from "../../db/repository/paymentMethod";
 import { formatAmount } from "../../db/utils";
 import { useMultipleAsyncData } from "../../hooks/useAsyncData";
@@ -40,11 +41,12 @@ export default function ExpensesScreen() {
 	const { t } = useTranslation();
 	const { user, userSetting } = useUser();
 	const { refreshKeys, triggerRefresh } = useRefreshKey();
+	const timeoutRef = useRef<number | null>(null);
 
-	// Load all data using our new hook
+	// Load all data using our optimized hook - expenses now include category/payment method data
 	const { data, loading, error, refetch } = useMultipleAsyncData(
 		{
-			expenses: () => getExpensesByUserId(user!.id),
+			expenses: () => getExpensesWithDetailsByUserId(user!.id),
 			categories: () => getCategoriesByUserId(user!.id),
 			paymentMethods: () => getPaymentMethodsByUserId(user!.id),
 		},
@@ -58,7 +60,7 @@ export default function ExpensesScreen() {
 	const filteredExpenses = useMemo(() => {
 		if (!data?.expenses) return [];
 
-		return data.expenses.filter((expense) => {
+		return (data.expenses as ExpenseWithDetails[]).filter((expense: ExpenseWithDetails) => {
 			const matchesSearch = !searchQuery ||
 				expense.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
 				(expense.description && expense.description.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -77,6 +79,13 @@ export default function ExpensesScreen() {
 			setShowEditSheet(false);
 			setSelectedExpense(null);
 			setIsTransitioningToEdit(false);
+
+			// Cleanup timeout on unmount
+			return () => {
+				if (timeoutRef.current) {
+					clearTimeout(timeoutRef.current);
+				}
+			};
 		}, []),
 	);
 
@@ -84,13 +93,18 @@ export default function ExpensesScreen() {
 		triggerRefresh('expenses');
 	};
 
-	const handleExpensePress = (expense: Expense) => {
+	const handleExpensePress = useCallback((expense: Expense) => {
+		// Clear any existing timeout
+		if (timeoutRef.current) {
+			clearTimeout(timeoutRef.current);
+		}
+
 		// If detail sheet is already supposed to be open but user clicked again, 
 		// it means there's a display issue - force reset and reopen
 		if (showDetailSheet) {
 			setShowDetailSheet(false);
 			setSelectedExpense(null);
-			setTimeout(() => {
+			timeoutRef.current = setTimeout(() => {
 				setSelectedExpense(expense);
 				setShowDetailSheet(true);
 			}, 100);
@@ -99,7 +113,7 @@ export default function ExpensesScreen() {
 
 		// If any other bottom sheet is currently open, add a small delay to avoid animation conflicts
 		if (showExpenseSheet || showEditSheet) {
-			setTimeout(() => {
+			timeoutRef.current = setTimeout(() => {
 				setSelectedExpense(expense);
 				setShowDetailSheet(true);
 			}, 300);
@@ -107,7 +121,7 @@ export default function ExpensesScreen() {
 			setSelectedExpense(expense);
 			setShowDetailSheet(true);
 		}
-	};
+	}, [showDetailSheet, showExpenseSheet, showEditSheet]);
 
 	const handleEditExpense = (expense: Expense) => {
 		setIsTransitioningToEdit(true);
@@ -264,20 +278,15 @@ export default function ExpensesScreen() {
 									</Text>
 								</View>
 							) : (
-								filteredExpenses.map((expense) => {
-									const categoryObj = data?.categories.find((c) => c.id === expense.categoryId);
-									const paymentMethodObj = data?.paymentMethods.find((p) => p.id === expense.paymentMethodId);
-
-									return (
-										<ExpenseListItem
-											key={expense.id}
-											expense={expense}
-											category={categoryObj}
-											paymentMethod={paymentMethodObj}
-											onPress={() => handleExpensePress(expense)}
-										/>
-									);
-								})
+								filteredExpenses.map((expense: ExpenseWithDetails) => (
+									<ExpenseListItem
+										key={expense.id}
+										expense={expense}
+										category={expense.category}
+										paymentMethod={expense.paymentMethod}
+										onPress={() => handleExpensePress(expense)}
+									/>
+								))
 							)}
 						</ScrollView>
 					)}
