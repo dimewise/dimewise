@@ -3,18 +3,19 @@ import { TouchableOpacity, View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 import type { Category, Expense, PaymentMethod } from "../db/schema";
+import type { ExpenseWithDetails } from "../db/repository/types";
 import { formatAmount } from "../db/utils";
 import { useUser } from "./contexts/UserContext";
 
 interface ExpenseListItemProps {
-	expense: Expense;
-	category?: Category;
-	paymentMethod?: PaymentMethod;
+	expense: Expense | ExpenseWithDetails;
+	category?: Category | Pick<Category, "id" | "name"> | null;
+	paymentMethod?: PaymentMethod | Pick<PaymentMethod, "id" | "name"> | null;
 	hideDescription?: boolean;
-	onPress: (expense: Expense) => void;
+	onPress: (expense: Expense | ExpenseWithDetails) => void;
 }
 
-export default function ExpenseListItem({
+const ExpenseListItem = React.memo(function ExpenseListItem({
 	expense,
 	category,
 	paymentMethod,
@@ -185,4 +186,6 @@ export default function ExpenseListItem({
 			</View>
 		</TouchableOpacity>
 	);
-}
+});
+
+export default ExpenseListItem;

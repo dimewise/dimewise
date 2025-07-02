@@ -5,7 +5,7 @@ import { getExpensesInRangeByUserId } from "../../db/repository/expense";
 import { getMonthRange } from "../../utils/datetime";
 import { useRefreshKey } from "../contexts/RefreshKeyContext";
 import { useUser } from "../contexts/UserContext";
-import { ExpenseList } from "../ExpenseList";
+import ExpenseList from "../ExpenseList";
 import { useUserData } from "../../hooks/useAsyncData";
 import { LoadingErrorFallback } from "../ErrorBoundary";
 import type { Expense } from "../../db/schema";

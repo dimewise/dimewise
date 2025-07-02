@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
@@ -15,11 +15,11 @@ interface Props {
 	onPress: (expense: Expense) => void;
 }
 
-export const ExpenseList = ({
+const ExpenseList: React.FC<Props> = ({
 	expenses,
 	hideDescription = false,
 	onPress,
-}: Props) => {
+}) => {
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const { user } = useUser();
@@ -103,3 +103,6 @@ export const ExpenseList = ({
 		</View>
 	);
 };
+
+export { ExpenseList };
+export default ExpenseList;
