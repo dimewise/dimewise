@@ -18,17 +18,23 @@ export const BudgetOverview = () => {
 	const [totalSpent, setTotalSpent] = useState(0);
 
 	useEffect(() => {
-		if (!user) return;
+		if (!user?.id) return;
 
-		// Get total budget sum
-		const budgetSum = getCategoriesBudgetSumByUserId(user.id);
-		setTotalBudget(budgetSum);
+		try {
+			// Get total budget sum
+			const budgetSum = getCategoriesBudgetSumByUserId(user.id);
+			setTotalBudget(budgetSum);
 
-		// Get total spent in month
-		const { from, to } = getMonthRange(new Date());
-		const totalSpent = getMonthlyExpenseSumByUserId(user.id, from, to);
-		setTotalSpent(totalSpent);
-	}, [user, refreshKeys]);
+			// Get total spent in month
+			const { from, to } = getMonthRange(new Date());
+			const totalSpent = getMonthlyExpenseSumByUserId(user.id, from, to);
+			setTotalSpent(totalSpent);
+		} catch (error) {
+			console.error('Error fetching budget overview data:', error);
+			setTotalBudget(0);
+			setTotalSpent(0);
+		}
+	}, [user?.id, refreshKeys.categories, refreshKeys.expenses]);
 
 	const { remainder, percentUsed } = useMemo(() => {
 		const remainder = totalBudget - totalSpent;

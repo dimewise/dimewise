@@ -1,18 +1,13 @@
-import { and, eq, isNull } from "drizzle-orm";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { Text, useTheme } from "react-native-paper";
-import { db } from "../db/drizzle";
-import {
-	type Category,
-	category,
-	type Expense,
-	type PaymentMethod,
-	paymentMethod,
-} from "../db/schema";
+import { getCategoriesByUserId } from "../db/repository/category";
+import { getPaymentMethodsByUserId } from "../db/repository/paymentMethod";
+import type { Category, Expense, PaymentMethod } from "../db/schema";
 import { useUser } from "./contexts/UserContext";
+import { useRefreshKey } from "./contexts/RefreshKeyContext";
 import ExpenseListItem from "./ExpenseListItem";
 
 interface Props {
@@ -29,30 +24,27 @@ export const ExpenseList = ({
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const { user } = useUser();
+	const { refreshKeys } = useRefreshKey();
 
 	const [categories, setCategories] = useState<Category[]>([]);
 	const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
 	useEffect(() => {
-		if (!user) return;
-		// Fetch categories and payment methods for the user
-		const cats = db
-			.select()
-			.from(category)
-			.where(and(eq(category.userId, user.id), isNull(category.deletedAt)))
-			.all();
+		if (!user?.id) return;
 
-		const pms = db
-			.select()
-			.from(paymentMethod)
-			.where(
-				and(eq(paymentMethod.userId, user.id), isNull(paymentMethod.deletedAt)),
-			)
-			.all();
+		try {
+			// Fetch categories and payment methods for the user using repository functions
+			const cats = getCategoriesByUserId(user.id);
+			const pms = getPaymentMethodsByUserId(user.id);
 
-		setCategories(cats);
-		setPaymentMethods(pms);
-	}, [user]);
+			setCategories(cats);
+			setPaymentMethods(pms);
+		} catch (error) {
+			console.error('Error fetching categories and payment methods:', error);
+			setCategories([]);
+			setPaymentMethods([]);
+		}
+	}, [user?.id, refreshKeys.categories, refreshKeys.paymentMethods]);
 
 	if (expenses.length === 0) {
 		return (
@@ -85,7 +77,7 @@ export const ExpenseList = ({
 						lineHeight: 24,
 					}}
 				>
-					{t("expenses.addExpensePrompt")}
+					{t("expenses.startTracking")}
 				</Text>
 			</View>
 		);

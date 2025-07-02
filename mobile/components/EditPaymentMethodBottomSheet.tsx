@@ -6,11 +6,13 @@ import {
   TextInput,
   useTheme
 } from 'react-native-paper';
-import { BottomSheetModal, BottomSheetView, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { usePaymentMethods } from '../storage';
-import { PaymentMethod } from '../storage';
+import { updatePaymentMethod } from '../db/repository/paymentMethod';
+import type { PaymentMethod } from '../db/schema';
+import { useUser } from './contexts/UserContext';
+import { useRefreshKey } from './contexts/RefreshKeyContext';
 import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 
 const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
@@ -48,10 +50,9 @@ export default function EditPaymentMethodBottomSheet({
 
   const theme = useTheme();
   const { t } = useTranslation();
+  const { user } = useUser();
+  const { triggerRefresh } = useRefreshKey();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-  // Storage hooks
-  const paymentMethodOps = usePaymentMethods();
 
   useEffect(() => {
     if (visible && paymentMethod) {
@@ -88,16 +89,16 @@ export default function EditPaymentMethodBottomSheet({
     setError('');
 
     try {
-      const updatedPaymentMethod: PaymentMethod = {
-        ...paymentMethod,
+      const updates = {
         name: name.trim(),
-        type: type as PaymentMethod['type'],
+        type: type as 'credit_card' | 'debit_card' | 'cash' | 'bank_transfer' | 'digital_wallet' | 'other',
       };
 
-      await paymentMethodOps.updatePaymentMethod(updatedPaymentMethod);
+      await updatePaymentMethod(paymentMethod.id, updates);
 
       onDismiss();
       onPaymentMethodUpdated?.();
+      triggerRefresh('paymentMethods');
     } catch (e) {
       console.error('Failed to update payment method:', e);
       setError(t('forms.updatePaymentMethodError'));

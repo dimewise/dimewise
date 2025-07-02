@@ -69,6 +69,15 @@ export default function RootLayout() {
 		if (loaded) SplashScreen.hideAsync();
 	}, [loaded]);
 
+	// Seed initial data only once after successful migrations
+	useEffect(() => {
+		if (success) {
+			console.log('Seeding initial data...');
+			seedInitialData(db);
+			console.log('Initial data seeding completed.');
+		}
+	}, [success]);
+
 	if (!loaded) {
 		return (
 			<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -84,11 +93,6 @@ export default function RootLayout() {
 				<Text>{String(error.message)}</Text>
 			</View>
 		);
-	}
-
-	// only run seeder after successful migrations
-	if (success) {
-		seedInitialData(db);
 	}
 
 	return (

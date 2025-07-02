@@ -1,5 +1,5 @@
 import { useFocusEffect } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 import {
@@ -25,13 +25,9 @@ import { getCategoriesByUserId } from "../../db/repository/category";
 import { getExpensesByUserId } from "../../db/repository/expense";
 import { getPaymentMethodsByUserId } from "../../db/repository/paymentMethod";
 import { formatAmount } from "../../db/utils";
+import { useMultipleAsyncData } from "../../hooks/useAsyncData";
 
 export default function ExpensesScreen() {
-	const [expenses, setExpenses] = useState<Expense[]>([]);
-	const [categories, setCategories] = useState<Category[]>([]);
-	const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 	const [showExpenseSheet, setShowExpenseSheet] = useState(false);
@@ -45,6 +41,34 @@ export default function ExpensesScreen() {
 	const { user, userSetting } = useUser();
 	const { refreshKeys, triggerRefresh } = useRefreshKey();
 
+	// Load all data using our new hook
+	const { data, loading, error, refetch } = useMultipleAsyncData(
+		{
+			expenses: () => getExpensesByUserId(user!.id),
+			categories: () => getCategoriesByUserId(user!.id),
+			paymentMethods: () => getPaymentMethodsByUserId(user!.id),
+		},
+		{
+			immediate: !!user?.id,
+			deps: [user?.id, refreshKeys.expenses, refreshKeys.categories, refreshKeys.paymentMethods]
+		}
+	);
+
+	// Filter expenses based on search and category selection
+	const filteredExpenses = useMemo(() => {
+		if (!data?.expenses) return [];
+
+		return data.expenses.filter((expense) => {
+			const matchesSearch = !searchQuery ||
+				expense.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				(expense.description && expense.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+			const matchesCategory = !selectedCategory || expense.categoryId === selectedCategory;
+
+			return matchesSearch && matchesCategory;
+		});
+	}, [data?.expenses, searchQuery, selectedCategory]);
+
 	useFocusEffect(
 		useCallback(() => {
 			// Close bottom sheets when navigating to this tab
@@ -55,41 +79,6 @@ export default function ExpensesScreen() {
 			setIsTransitioningToEdit(false);
 		}, []),
 	);
-
-	const loadData = async () => {
-		if (!user?.id) return;
-
-		try {
-			setLoading(true);
-			setError(null);
-
-			// Load all data using repository functions
-			const allExpenses = getExpensesByUserId(user.id, searchQuery, selectedCategory || undefined);
-			const allCategories = getCategoriesByUserId(user.id);
-			const allPaymentMethods = getPaymentMethodsByUserId(user.id);
-
-			setExpenses(allExpenses);
-			setCategories(allCategories);
-			setPaymentMethods(allPaymentMethods);
-		} catch (err) {
-			console.error("Error loading expenses:", err);
-			setError(err instanceof Error ? err.message : "Failed to load expenses");
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	// Load data when user changes or refresh keys change
-	useEffect(() => {
-		loadData();
-	}, [user?.id, refreshKeys.expenses, refreshKeys.categories, refreshKeys.paymentMethods]);
-
-	// Reload when search/filter changes
-	useEffect(() => {
-		if (user?.id) {
-			loadData();
-		}
-	}, [searchQuery, selectedCategory]);
 
 	const handleExpenseAdded = () => {
 		triggerRefresh('expenses');
@@ -119,19 +108,9 @@ export default function ExpensesScreen() {
 		setSelectedExpense(null);
 	};
 
-	const handleExpenseVerificationUpdated = async () => {
+	const handleExpenseVerificationUpdated = () => {
 		triggerRefresh('expenses');
-
-		// Update the selectedExpense with fresh data
-		if (selectedExpense && user?.id) {
-			const updatedExpenses = getExpensesByUserId(user.id);
-			const freshExpense = updatedExpenses.find(
-				(e) => e.id === selectedExpense.id,
-			);
-			if (freshExpense) {
-				setSelectedExpense(freshExpense);
-			}
-		}
+		// Refetch will automatically update selectedExpense through the data flow
 	};
 
 	const formatAmountLocal = (amount: number) => {
@@ -144,7 +123,7 @@ export default function ExpensesScreen() {
 	};
 
 	const getCategoryName = (categoryId: string) => {
-		const category = categories.find((c) => c.id === categoryId);
+		const category = data?.categories.find((c) => c.id === categoryId);
 		return category?.name || t("common.unknown");
 	};
 
@@ -153,8 +132,7 @@ export default function ExpensesScreen() {
 		return (
 			<ExpensesErrorFallback
 				onRetry={() => {
-					setError(null);
-					loadData();
+					refetch();
 				}}
 			/>
 		);
@@ -162,7 +140,7 @@ export default function ExpensesScreen() {
 
 	return (
 		<ErrorBoundary
-			fallback={<ExpensesErrorFallback onRetry={loadData} />}
+			fallback={<ExpensesErrorFallback onRetry={refetch} />}
 			onError={(error, errorInfo) => {
 				console.error('Expenses page error:', error, errorInfo);
 			}}
@@ -172,6 +150,7 @@ export default function ExpensesScreen() {
 					style={{ flex: 1, backgroundColor: theme.colors.background }}
 					edges={["top"]}
 				>
+					{/* SEARCH HEADER */}
 					<View
 						style={{
 							paddingTop: 16,
@@ -202,6 +181,7 @@ export default function ExpensesScreen() {
 						/>
 					</View>
 
+					{/* CATEGORY FILTERS */}
 					<View
 						style={{
 							paddingHorizontal: 24,
@@ -209,7 +189,7 @@ export default function ExpensesScreen() {
 							backgroundColor: theme.colors.background,
 						}}
 					>
-						{categories.length > 0 && (
+						{data?.categories && data.categories.length > 0 && (
 							<View style={{ gap: 8 }}>
 								<Text
 									variant="labelLarge"
@@ -218,16 +198,14 @@ export default function ExpensesScreen() {
 									{t("common.filter")}:
 								</Text>
 								<ScrollView horizontal showsHorizontalScrollIndicator={false}>
-									<View
-										style={{ flexDirection: "row", gap: 8, paddingRight: 16 }}
-									>
+									<View style={{ flexDirection: "row", gap: 8, paddingRight: 16 }}>
 										<Chip
 											selected={selectedCategory === null}
 											onPress={() => setSelectedCategory(null)}
 										>
 											{t("common.all")}
 										</Chip>
-										{categories.map((category) => (
+										{data.categories.map((category) => (
 											<Chip
 												key={category.id}
 												selected={selectedCategory === category.id}
@@ -246,6 +224,7 @@ export default function ExpensesScreen() {
 						)}
 					</View>
 
+					{/* EXPENSE LIST */}
 					{loading ? (
 						<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 							<Text>Loading expenses...</Text>
@@ -255,7 +234,7 @@ export default function ExpensesScreen() {
 							style={{ flex: 1 }}
 							contentContainerStyle={{ paddingBottom: 100 }}
 						>
-							{expenses.length === 0 ? (
+							{filteredExpenses.length === 0 ? (
 								<View style={{ padding: 24, alignItems: 'center' }}>
 									<Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
 										{searchQuery || selectedCategory
@@ -265,7 +244,7 @@ export default function ExpensesScreen() {
 									</Text>
 								</View>
 							) : (
-								expenses.map((expense) => (
+								filteredExpenses.map((expense) => (
 									<ExpenseListItem
 										key={expense.id}
 										expense={expense}
@@ -276,7 +255,7 @@ export default function ExpensesScreen() {
 						</ScrollView>
 					)}
 
-					{/* PERIPHERALS */}
+					{/* FLOATING ACTION BUTTON */}
 					<FAB
 						icon="plus"
 						label={t("expenses.newExpense")}
@@ -287,11 +266,13 @@ export default function ExpensesScreen() {
 							right: 16,
 						}}
 					/>
+
+					{/* BOTTOM SHEETS */}
 					<ExpenseBottomSheet
 						visible={showExpenseSheet}
 						onDismiss={() => {
 							setShowExpenseSheet(false);
-							handleExpenseAdded(); // Trigger refresh when bottom sheet closes
+							handleExpenseAdded();
 						}}
 					/>
 					<ExpenseDetailBottomSheet

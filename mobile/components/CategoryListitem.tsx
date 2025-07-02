@@ -8,7 +8,6 @@ import { useUser } from "./contexts/UserContext";
 
 interface Props {
 	category: CategoryWithSpending | Category;
-	currency?: string; // Pass currency for formatting
 }
 
 function isCategoryWithSpending(
@@ -17,7 +16,7 @@ function isCategoryWithSpending(
 	return typeof (cat as CategoryWithSpending).spent === "number";
 }
 
-export const CategoryListItem = ({ category, currency = "USD" }: Props) => {
+export const CategoryListItem = ({ category }: Props) => {
 	const theme = useTheme();
 	const { t } = useTranslation();
 	const { userSetting } = useUser();

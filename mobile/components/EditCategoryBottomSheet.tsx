@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Keyboard } from 'react-native';
 import {
   Text,
   Button,
   TextInput,
   useTheme,
-  Surface,
-  Divider
 } from 'react-native-paper';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useCategories, validateCurrencyInput } from '../storage';
-import { Category } from '../storage';
-import { useCurrency } from '../utils/UserSettingsContext';
+import { updateCategory } from '../db/repository/category';
+import { validateCurrencyInput } from '../db/utils';
+import type { Category } from '../db/schema';
+import { useUser } from './contexts/UserContext';
+import { useRefreshKey } from './contexts/RefreshKeyContext';
 
 interface EditCategoryBottomSheetProps {
   visible: boolean;
@@ -35,11 +35,11 @@ export default function EditCategoryBottomSheet({
 
   const theme = useTheme();
   const { t } = useTranslation();
-  const { currency } = useCurrency();
+  const { user, userSetting } = useUser();
+  const { triggerRefresh } = useRefreshKey();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  // Storage hooks
-  const categoryOps = useCategories();
+  const currency = userSetting?.currency || 'USD';
 
   useEffect(() => {
     if (visible && category) {
@@ -77,17 +77,17 @@ export default function EditCategoryBottomSheet({
     setError('');
 
     try {
-      const updatedCategory: Category = {
-        ...category,
+      const updates = {
         name: name.trim(),
         budget: Number(budget),
         currency: currency,
       };
 
-      await categoryOps.updateCategory(updatedCategory);
+      await updateCategory(category.id, updates);
 
       onDismiss();
       onCategoryUpdated?.();
+      triggerRefresh('categories');
     } catch (e) {
       console.error('Failed to update category:', e);
       setError(t('forms.updateCategoryError'));

@@ -1,18 +1,18 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Keyboard } from 'react-native';
 import {
   Text,
   Button,
   TextInput,
   useTheme,
-  Surface,
-  Divider
 } from 'react-native-paper';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useCategories, validateCurrencyInput } from '../storage';
-import { useCurrency } from '../utils/UserSettingsContext';
+import { createCategory } from '../db/repository/category';
+import { validateCurrencyInput } from '../db/utils';
+import { useUser } from './contexts/UserContext';
+import { useRefreshKey } from './contexts/RefreshKeyContext';
 
 interface CategoryBottomSheetProps {
   visible: boolean;
@@ -28,11 +28,11 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
 
   const theme = useTheme();
   const { t } = useTranslation();
-  const { currency } = useCurrency();
+  const { user, userSetting } = useUser();
+  const { triggerRefresh } = useRefreshKey();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  // Storage hooks
-  const categoryOps = useCategories();
+  const currency = userSetting?.currency || 'USD';
 
 
   useEffect(() => {
@@ -52,6 +52,8 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
   };
 
   const handleSubmit = async () => {
+    if (!user) return;
+
     if (!name.trim()) {
       setError(t('forms.categoryNameRequired'));
       return;
@@ -67,14 +69,18 @@ export default function CategoryBottomSheet({ visible, onDismiss, onCategoryAdde
     setError('');
 
     try {
-      await categoryOps.createCategory(
-        name.trim(),
-        Number(budget),
-        currency
-      );
+      const categoryData = {
+        name: name.trim(),
+        budget: Number(budget),
+        currency: currency,
+        userId: user.id,
+      };
+
+      await createCategory(categoryData);
 
       onDismiss();
       onCategoryAdded?.();
+      triggerRefresh('categories');
     } catch (e) {
       console.error('Failed to save category:', e);
       setError(t('forms.saveCategoryError'));
