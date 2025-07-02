@@ -10,7 +10,7 @@ interface ExpenseListItemProps {
 	category?: Category;
 	paymentMethod?: PaymentMethod;
 	hideDescription?: boolean;
-	onPress: (expenseId: string) => void;
+	onPress: (expense: Expense) => void;
 }
 
 export default function ExpenseListItem({
@@ -25,7 +25,7 @@ export default function ExpenseListItem({
 
 	return (
 		<TouchableOpacity
-			onPress={() => onPress(expense.id)}
+			onPress={() => onPress(expense)}
 			style={{
 				marginVertical: 4,
 				padding: 24,
