@@ -53,19 +53,22 @@ export default function ExpenseDetailBottomSheet({
 	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
 	useEffect(() => {
-		if (visible && expenseId) {
+		if (!expenseId) {
+			setTargetExpense(null);
+			return;
+		}
+
+		const expense = getExpenseFullById(expenseId);
+		setTargetExpense(expense);
+	}, [expenseId, refreshKeys.expenses]);
+
+	useEffect(() => {
+		if (visible && expenseId && targetExpense) {
 			bottomSheetModalRef.current?.present();
 		} else {
 			bottomSheetModalRef.current?.dismiss();
 		}
-	}, [visible, expenseId]);
-
-	useEffect(() => {
-		if (!expenseId) return;
-
-		const expense = getExpenseFullById(expenseId);
-		setTargetExpense(expense);
-	}, [refreshKeys.expenses]);
+	}, [visible, expenseId, targetExpense]);
 
 	const handleSheetChanges = useCallback(
 		(index: number) => {
@@ -141,7 +144,9 @@ export default function ExpenseDetailBottomSheet({
 		}
 	};
 
-	if (!expenseId || !targetExpense) return null;
+	if (!expenseId || !targetExpense) {
+		return null;
+	}
 
 	return (
 		<BottomSheetModal
@@ -393,8 +398,8 @@ export default function ExpenseDetailBottomSheet({
 											borderRadius: 6,
 											...(targetExpense.verifiedAt
 												? {
-														borderColor: theme.colors.onPrimaryContainer,
-													}
+													borderColor: theme.colors.onPrimaryContainer,
+												}
 												: {}),
 										}}
 										textColor={
@@ -504,7 +509,7 @@ export default function ExpenseDetailBottomSheet({
 						>
 							{t("expenses.date")}:{" "}
 							{targetExpense
-								? new Date(targetExpense.date).toLocaleDateString()
+								? new Date(targetExpense.createdAt).toLocaleDateString()
 								: ""}
 						</Text>
 						<Text

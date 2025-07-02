@@ -35,9 +35,29 @@ export default function HomePage() {
 		}, []),
 	);
 
-	const handleExpensePress = (expenseId: string) => {
-		setSelectedExpenseId(expenseId);
-		setShowDetailSheet(true);
+	const handleExpensePress = (expense: Expense) => {
+		// If detail sheet is already supposed to be open but user clicked again, 
+		// it means there's a display issue - force reset and reopen
+		if (showDetailSheet) {
+			setShowDetailSheet(false);
+			setSelectedExpenseId(null);
+			setTimeout(() => {
+				setSelectedExpenseId(expense.id);
+				setShowDetailSheet(true);
+			}, 100);
+			return;
+		}
+
+		// If any other bottom sheet is currently open, add a small delay to avoid animation conflicts
+		if (showExpenseSheet || showEditSheet) {
+			setTimeout(() => {
+				setSelectedExpenseId(expense.id);
+				setShowDetailSheet(true);
+			}, 300);
+		} else {
+			setSelectedExpenseId(expense.id);
+			setShowDetailSheet(true);
+		}
 	};
 
 	const handleEditExpense = (expense: Expense) => {
@@ -81,7 +101,9 @@ export default function HomePage() {
 				<FAB
 					icon="plus"
 					label={t("home.newExpense")}
-					onPress={() => setShowExpenseSheet(true)}
+					onPress={() => {
+						setShowExpenseSheet(true);
+					}}
 					style={{
 						position: "absolute",
 						bottom: 16,
@@ -90,7 +112,9 @@ export default function HomePage() {
 				/>
 				<ExpenseBottomSheet
 					visible={showExpenseSheet}
-					onDismiss={() => setShowExpenseSheet(false)}
+					onDismiss={() => {
+						setShowExpenseSheet(false);
+					}}
 				/>
 				<ExpenseDetailBottomSheet
 					visible={showDetailSheet}

@@ -85,8 +85,28 @@ export default function ExpensesScreen() {
 	};
 
 	const handleExpensePress = (expense: Expense) => {
-		setSelectedExpense(expense);
-		setShowDetailSheet(true);
+		// If detail sheet is already supposed to be open but user clicked again, 
+		// it means there's a display issue - force reset and reopen
+		if (showDetailSheet) {
+			setShowDetailSheet(false);
+			setSelectedExpense(null);
+			setTimeout(() => {
+				setSelectedExpense(expense);
+				setShowDetailSheet(true);
+			}, 100);
+			return;
+		}
+
+		// If any other bottom sheet is currently open, add a small delay to avoid animation conflicts
+		if (showExpenseSheet || showEditSheet) {
+			setTimeout(() => {
+				setSelectedExpense(expense);
+				setShowDetailSheet(true);
+			}, 300);
+		} else {
+			setSelectedExpense(expense);
+			setShowDetailSheet(true);
+		}
 	};
 
 	const handleEditExpense = (expense: Expense) => {
@@ -244,13 +264,20 @@ export default function ExpensesScreen() {
 									</Text>
 								</View>
 							) : (
-								filteredExpenses.map((expense) => (
-									<ExpenseListItem
-										key={expense.id}
-										expense={expense}
-										onPress={() => handleExpensePress(expense)}
-									/>
-								))
+								filteredExpenses.map((expense) => {
+									const categoryObj = data?.categories.find((c) => c.id === expense.categoryId);
+									const paymentMethodObj = data?.paymentMethods.find((p) => p.id === expense.paymentMethodId);
+
+									return (
+										<ExpenseListItem
+											key={expense.id}
+											expense={expense}
+											category={categoryObj}
+											paymentMethod={paymentMethodObj}
+											onPress={() => handleExpensePress(expense)}
+										/>
+									);
+								})
 							)}
 						</ScrollView>
 					)}
@@ -259,7 +286,9 @@ export default function ExpensesScreen() {
 					<FAB
 						icon="plus"
 						label={t("expenses.newExpense")}
-						onPress={() => setShowExpenseSheet(true)}
+						onPress={() => {
+							setShowExpenseSheet(true);
+						}}
 						style={{
 							position: "absolute",
 							bottom: 16,

@@ -8,9 +8,10 @@ import { useUser } from "../contexts/UserContext";
 import { ExpenseList } from "../ExpenseList";
 import { useUserData } from "../../hooks/useAsyncData";
 import { LoadingErrorFallback } from "../ErrorBoundary";
+import type { Expense } from "../../db/schema";
 
 interface Props {
-	onPress: (expenseId: string) => void;
+	onPress: (expense: Expense) => void;
 }
 
 export const RecentTransactions = ({ onPress }: Props) => {

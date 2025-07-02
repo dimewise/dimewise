@@ -12,7 +12,7 @@ import ExpenseListItem from "./ExpenseListItem";
 interface Props {
 	expenses: Expense[];
 	hideDescription?: boolean;
-	onPress: (expenseId: string) => void;
+	onPress: (expense: Expense) => void;
 }
 
 export const ExpenseList = ({
@@ -96,7 +96,7 @@ export const ExpenseList = ({
 						category={categoryObj}
 						paymentMethod={paymentMethodObj}
 						hideDescription={hideDescription}
-						onPress={onPress}
+						onPress={() => onPress(expense)}
 					/>
 				);
 			})}
