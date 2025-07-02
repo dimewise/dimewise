@@ -40,10 +40,10 @@ export const RecentTransactions = ({ onPress }: Props) => {
 						color: theme.colors.onBackground,
 					}}
 				>
-					{t("categories.title")}
+					{t("home.recentTransactions")}
 				</Text>
 				<Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-					Loading recent transactions...
+					{t("status.loading")}
 				</Text>
 			</View>
 		);
@@ -60,7 +60,7 @@ export const RecentTransactions = ({ onPress }: Props) => {
 						color: theme.colors.onBackground,
 					}}
 				>
-					{t("categories.title")}
+					{t("home.recentTransactions")}
 				</Text>
 				<LoadingErrorFallback onRetry={refetch} />
 			</View>
@@ -77,7 +77,7 @@ export const RecentTransactions = ({ onPress }: Props) => {
 					color: theme.colors.onBackground,
 				}}
 			>
-				{t("categories.title")}
+				{t("home.recentTransactions")}
 			</Text>
 			<ExpenseList expenses={expenses || []} hideDescription onPress={onPress} />
 		</View>

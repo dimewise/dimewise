@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 interface UseAsyncDataOptions {
   immediate?: boolean; // Whether to load data immediately
@@ -27,12 +27,16 @@ export function useAsyncData<T>(
   const [loading, setLoading] = useState(immediate);
   const [error, setError] = useState<string | null>(null);
 
+  // Use ref to store the latest asyncFunction to avoid infinite loops
+  const asyncFunctionRef = useRef(asyncFunction);
+  asyncFunctionRef.current = asyncFunction;
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const result = await Promise.resolve(asyncFunction());
+      const result = await Promise.resolve(asyncFunctionRef.current());
       setData(result);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -41,7 +45,7 @@ export function useAsyncData<T>(
     } finally {
       setLoading(false);
     }
-  }, [asyncFunction]);
+  }, []); // Remove asyncFunction from dependencies
 
   // Initial load and dependency-based reloads
   useEffect(() => {
@@ -68,18 +72,49 @@ export function useUserData<T>(
   userId: string | null | undefined,
   deps: React.DependencyList = []
 ): UseAsyncDataResult<T> {
-  return useAsyncData(
-    () => {
-      if (!userId) {
-        throw new Error('User ID is required');
-      }
-      return asyncFunction(userId);
-    },
-    {
-      immediate: !!userId,
-      deps: [userId, ...deps]
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(!!userId);
+  const [error, setError] = useState<string | null>(null);
+
+  // Use ref to store the latest asyncFunction to avoid infinite loops
+  const asyncFunctionRef = useRef(asyncFunction);
+  asyncFunctionRef.current = asyncFunction;
+
+  const fetchData = useCallback(async () => {
+    if (!userId) {
+      setError('User ID is required');
+      setLoading(false);
+      return;
     }
-  );
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const result = await Promise.resolve(asyncFunctionRef.current(userId));
+      setData(result);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      console.error('useUserData error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]); // Only userId dependency
+
+  useEffect(() => {
+    if (userId) {
+      fetchData();
+    }
+  }, [userId, fetchData, ...deps]);
+
+  return {
+    data,
+    loading,
+    error,
+    refetch: fetchData,
+    setData
+  };
 }
 
 /**
@@ -96,13 +131,17 @@ export function useMultipleAsyncData<T extends Record<string, any>>(
   const [loading, setLoading] = useState(immediate);
   const [error, setError] = useState<string | null>(null);
 
+  // Use ref to store the latest asyncFunctions to avoid infinite loops
+  const asyncFunctionsRef = useRef(asyncFunctions);
+  asyncFunctionsRef.current = asyncFunctions;
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const keys = Object.keys(asyncFunctions) as (keyof T)[];
-      const promises = keys.map(key => Promise.resolve(asyncFunctions[key]()));
+      const keys = Object.keys(asyncFunctionsRef.current) as (keyof T)[];
+      const promises = keys.map(key => Promise.resolve(asyncFunctionsRef.current[key]()));
       const results = await Promise.all(promises);
 
       const combinedData = keys.reduce((acc, key, index) => {
@@ -118,7 +157,7 @@ export function useMultipleAsyncData<T extends Record<string, any>>(
     } finally {
       setLoading(false);
     }
-  }, [asyncFunctions]);
+  }, []); // Remove asyncFunctions from dependencies
 
   useEffect(() => {
     if (immediate) {

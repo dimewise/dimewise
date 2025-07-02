@@ -1,17 +1,17 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Keyboard } from 'react-native';
 import {
   Text,
   Button,
   TextInput,
   useTheme,
-  Surface,
-  Divider
 } from 'react-native-paper';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { usePaymentMethods } from '../storage';
+import { createPaymentMethod } from '../db/repository/paymentMethod';
+import { useUser } from './contexts/UserContext';
+import { useRefreshKey } from './contexts/RefreshKeyContext';
 import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
 
 const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
@@ -43,10 +43,9 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
 
   const theme = useTheme();
   const { t } = useTranslation();
+  const { user } = useUser();
+  const { triggerRefresh } = useRefreshKey();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-  // Storage hooks
-  const paymentMethodOps = usePaymentMethods();
 
   useEffect(() => {
     if (visible) {
@@ -65,6 +64,8 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
   };
 
   const handleSubmit = async () => {
+    if (!user) return;
+
     if (!name.trim()) {
       setError(t('forms.paymentMethodNameRequired'));
       return;
@@ -79,10 +80,17 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
     setError('');
 
     try {
-      await paymentMethodOps.createPaymentMethod(name.trim(), type);
+      const paymentMethodData = {
+        name: name.trim(),
+        type: type as 'credit_card' | 'debit_card' | 'cash' | 'bank_transfer' | 'digital_wallet' | 'other',
+        userId: user.id,
+      };
+
+      await createPaymentMethod(paymentMethodData);
 
       onDismiss();
       onPaymentMethodAdded?.();
+      triggerRefresh('paymentMethods');
     } catch (e) {
       console.error('Failed to save payment method:', e);
       setError(t('forms.savePaymentMethodError'));
