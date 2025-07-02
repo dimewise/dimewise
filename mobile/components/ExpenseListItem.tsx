@@ -1,6 +1,7 @@
 import React from "react";
 import { TouchableOpacity, View } from "react-native";
 import { Text, useTheme } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 import type { Category, Expense, PaymentMethod } from "../db/schema";
 import { formatAmount } from "../db/utils";
 import { useUser } from "./contexts/UserContext";
@@ -22,6 +23,7 @@ export default function ExpenseListItem({
 }: ExpenseListItemProps) {
 	const theme = useTheme();
 	const { userSetting } = useUser();
+	const { t } = useTranslation();
 
 	return (
 		<TouchableOpacity
@@ -176,7 +178,7 @@ export default function ExpenseListItem({
 								letterSpacing: 0.5,
 							}}
 						>
-							{expense.verifiedAt ? "✓ Verified" : "Unverified"}
+							{expense.verifiedAt ? `✓ ${t("status.verified")}` : t("status.unverified")}
 						</Text>
 					</View>
 				</View>

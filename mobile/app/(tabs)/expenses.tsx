@@ -252,7 +252,7 @@ export default function ExpensesScreen() {
 					) : (
 						<ScrollView
 							style={{ flex: 1 }}
-							contentContainerStyle={{ paddingBottom: 100 }}
+							contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 24 }}
 						>
 							{filteredExpenses.length === 0 ? (
 								<View style={{ padding: 24, alignItems: 'center' }}>

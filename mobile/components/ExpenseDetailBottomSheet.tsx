@@ -130,7 +130,7 @@ export default function ExpenseDetailBottomSheet({
 
 		setUpdating(true);
 		try {
-			if (targetExpense.incurredAt) {
+			if (targetExpense.verifiedAt) {
 				await unverifyExpenseById(targetExpense.id);
 			} else {
 				await verifyExpenseById(targetExpense.id);
@@ -341,7 +341,7 @@ export default function ExpenseDetailBottomSheet({
 										justifyContent: "space-between",
 										paddingHorizontal: 16,
 										paddingVertical: 8,
-										backgroundColor: targetExpense.incurredAt
+										backgroundColor: targetExpense.verifiedAt
 											? theme.colors.primaryContainer
 											: theme.colors.surfaceVariant,
 										borderRadius: 8,
@@ -353,14 +353,14 @@ export default function ExpenseDetailBottomSheet({
 										<Text
 											variant="titleMedium"
 											style={{
-												color: targetExpense.incurredAt
+												color: targetExpense.verifiedAt
 													? theme.colors.onPrimaryContainer
 													: theme.colors.onSurfaceVariant,
 												fontWeight: "600",
 												marginBottom: 4,
 											}}
 										>
-											{targetExpense.incurredAt
+											{targetExpense.verifiedAt
 												? t("status.verified")
 												: t("status.unverified")}
 										</Text>
