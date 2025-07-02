@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import * as Crypto from "expo-crypto";
 import { db } from "../drizzle";
 import { userSetting } from "../schema";
 import type { UserSetting, CurrencyType, LanguageType } from "../schema";
@@ -12,7 +13,7 @@ export const getUserSettingByUserId = (userId: string) => {
 };
 
 export const createUserSetting = (settingData: Omit<UserSetting, 'id' | 'createdAt' | 'updatedAt'>) => {
-  const id = crypto.randomUUID();
+  const id = Crypto.randomUUID();
   return db
     .insert(userSetting)
     .values({

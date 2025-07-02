@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../utils/i18n';
 import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type CurrencyType, type LanguageType } from '../../../db/schema';
 import { upsertUserSetting } from '../../../db/repository/userSetting';
 import { useUser } from '../../../components/contexts/UserContext';
@@ -45,6 +46,9 @@ export default function SettingsScreen() {
         currency: selectedCurrency,
         preferredLanguage: selectedLanguage
       });
+
+      // Change the app language immediately
+      await i18n.changeLanguage(selectedLanguage);
 
       // Refresh user data to get the updated settings
       await refreshUser();

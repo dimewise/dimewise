@@ -1,4 +1,5 @@
 import { and, eq, isNull } from "drizzle-orm";
+import * as Crypto from "expo-crypto";
 import { db } from "../drizzle";
 import { category } from "../schema";
 import type { Category } from "../schema";
@@ -25,7 +26,7 @@ export const getCategoryById = (categoryId: string) => {
 };
 
 export const createCategory = (categoryData: Omit<Category, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>) => {
-	const id = crypto.randomUUID();
+	const id = Crypto.randomUUID();
 	return db
 		.insert(category)
 		.values({

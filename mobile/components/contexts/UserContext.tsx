@@ -6,6 +6,7 @@ import {
 	useEffect,
 	useState,
 } from "react";
+import i18n from "../../utils/i18n";
 import { db } from "../../db/drizzle";
 import {
 	type User,
@@ -48,6 +49,11 @@ export const UserProvider = ({ children }: PropsWithChildren) => {
 					.limit(1)
 					.get();
 				setSetting(foundSetting ?? null);
+
+				// Sync i18n language with user's preferred language
+				if (foundSetting?.preferredLanguage && i18n.language !== foundSetting.preferredLanguage) {
+					await i18n.changeLanguage(foundSetting.preferredLanguage);
+				}
 			} else {
 				setSetting(null);
 			}

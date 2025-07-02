@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 import { Text, useTheme } from "react-native-paper";
 import type { CategoryWithSpending } from "../db/repository/types";
 import type { Category } from "../db/schema";
@@ -8,9 +7,8 @@ import { CategoryListItem } from "./CategoryListitem";
 
 interface Props {
 	categories: CategoryWithSpending[] | Category[];
-	currency?: string; // Optionally pass currency for formatting
 }
-export const CategoryList = ({ categories, currency = "USD" }: Props) => {
+export const CategoryList = ({ categories }: Props) => {
 	const theme = useTheme();
 	const { t } = useTranslation();
 
@@ -52,13 +50,13 @@ export const CategoryList = ({ categories, currency = "USD" }: Props) => {
 	}
 
 	return (
-		<FlatList
-			data={categories}
-			keyExtractor={(item) => item.id}
-			renderItem={({ item }) => (
-				<CategoryListItem category={item} currency={currency} />
-			)}
-			contentContainerStyle={{ paddingBottom: 16 }}
-		/>
+		<View style={{ paddingBottom: 16 }}>
+			{categories.map((category) => (
+				<CategoryListItem
+					key={category.id}
+					category={category}
+				/>
+			))}
+		</View>
 	);
 };
