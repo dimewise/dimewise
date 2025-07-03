@@ -47,7 +47,9 @@ export default function TabLayout() {
         listeners={{
           tabPress: (e) => {
             // Reset profile stack to index when tab is pressed
-            router.push('/profile');
+            // Prevent default tab behavior to avoid animation conflicts
+            e.preventDefault();
+            router.replace('/(tabs)/profile/');
           },
         }}
       />
