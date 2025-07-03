@@ -180,5 +180,14 @@
     "verified": "Verified",
     "unverified": "Unverified",
     "verifiedOn": "Verified {{date}}"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "subtitle": "We encountered an unexpected error. Don't worry, your data is safe.",
+    "tryAgain": "Try Again",
+    "goHome": "Go to Home",
+    "loadingError": "Failed to load data",
+    "expensesError": "Failed to load expenses",
+    "expensesErrorSubtitle": "There was a problem loading your expenses. Your data is safe."
   }
 }
