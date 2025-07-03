@@ -82,7 +82,7 @@ export default function EditExpenseBottomSheet({
 
 		const paymentMethods = getPaymentMethodsByUserId(user.id);
 		setPaymentMethods(paymentMethods);
-	}, [refreshKeys.categories, refreshKeys.paymentMethods]);
+	}, [user, expenseId, refreshKeys.categories, refreshKeys.paymentMethods]);
 
 	// Separate effect to populate form after data is loaded
 	useEffect(() => {
