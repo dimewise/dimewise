@@ -26,11 +26,16 @@ import migrations from "../db/generated/migrations/migrations";
 import "../utils/i18n";
 import { RefreshKeyProvider } from "../components/contexts/RefreshKeyContext";
 import { UserProvider } from "../components/contexts/UserContext";
+import ErrorBoundary from "../components/ErrorBoundary";
 import { darkTheme, lightTheme } from "../utils/theme";
-import ErrorBoundary from '../components/ErrorBoundary';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+SplashScreen.setOptions({
+	duration: 400,
+	fade: true,
+});
 
 const { LightTheme, DarkTheme: NavigationDarkTheme } = adaptNavigationTheme({
 	reactNavigationLight: DefaultTheme,
@@ -72,9 +77,9 @@ export default function RootLayout() {
 	// Seed initial data only once after successful migrations
 	useEffect(() => {
 		if (success) {
-			console.log('Seeding initial data...');
+			console.log("Seeding initial data...");
 			seedInitialData(db);
-			console.log('Initial data seeding completed.');
+			console.log("Initial data seeding completed.");
 		}
 	}, [success]);
 
@@ -98,7 +103,7 @@ export default function RootLayout() {
 	return (
 		<ErrorBoundary
 			onError={(error, errorInfo) => {
-				console.error('Root error boundary caught:', error, errorInfo);
+				console.error("Root error boundary caught:", error, errorInfo);
 				// You can add crash reporting here (Sentry, Crashlytics, etc.)
 			}}
 		>
@@ -116,7 +121,10 @@ export default function RootLayout() {
 										<UserProvider>
 											<RefreshKeyProvider>
 												<Stack screenOptions={{ headerShown: false }}>
-													<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+													<Stack.Screen
+														name="(tabs)"
+														options={{ headerShown: false }}
+													/>
 													<Stack.Screen name="+not-found" />
 												</Stack>
 												<StatusBar
