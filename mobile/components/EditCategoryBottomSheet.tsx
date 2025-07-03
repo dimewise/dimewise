@@ -3,10 +3,9 @@ import { View, Keyboard } from 'react-native';
 import {
   Text,
   Button,
-  TextInput,
   useTheme,
 } from 'react-native-paper';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { updateCategory } from '../db/repository/category';
@@ -120,16 +119,22 @@ export default function EditCategoryBottomSheet({
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
+
       onChange={handleSheetChanges}
       enablePanDownToClose
       enableDynamicSizing
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetScrollView contentContainerStyle={{
-        padding: 16,
-      }}>
+      <BottomSheetScrollView
+        contentContainerStyle={{ padding: 16 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={false}
+      >
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <View style={{
             padding: 8,
@@ -160,26 +165,62 @@ export default function EditCategoryBottomSheet({
             ) : null}
 
             <View style={{ gap: 24 }}>
-              <TextInput
-                label={t('forms.categoryName')}
-                value={name}
-                onChangeText={setName}
-                mode="outlined"
-                style={{ backgroundColor: theme.colors.surface }}
-                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
-                contentStyle={{ fontWeight: '500' }}
-              />
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 8,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('forms.categoryName')}
+                </Text>
+                <BottomSheetTextInput
+                  value={name}
+                  onChangeText={setName}
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outline,
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    padding: 16,
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                  placeholder={t('forms.categoryName')}
+                />
+              </View>
 
-              <TextInput
-                label={t('forms.budgetAmount', { currency })}
-                value={budget}
-                onChangeText={setBudget}
-                mode="outlined"
-                keyboardType="numeric"
-                style={{ backgroundColor: theme.colors.surface }}
-                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1 }}
-                contentStyle={{ fontWeight: '600', fontSize: 16 }}
-              />
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 8,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('forms.budgetAmount', { currency })}
+                </Text>
+                <BottomSheetTextInput
+                  value={budget}
+                  onChangeText={setBudget}
+                  keyboardType="numeric"
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outline,
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    padding: 16,
+                    fontSize: 18,
+                    fontWeight: '600',
+                    color: theme.colors.onSurface,
+                  }}
+                  placeholder={t('forms.budgetAmount', { currency })}
+                />
+              </View>
 
               <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
                 <Button

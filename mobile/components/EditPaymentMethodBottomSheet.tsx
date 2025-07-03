@@ -3,10 +3,9 @@ import { View, Keyboard } from 'react-native';
 import {
   Text,
   Button,
-  TextInput,
   useTheme
 } from 'react-native-paper';
-import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { BottomSheetModal, BottomSheetBackdrop, BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { updatePaymentMethod } from '../db/repository/paymentMethod';
@@ -158,16 +157,22 @@ export default function EditPaymentMethodBottomSheet({
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
+
       onChange={handleSheetChanges}
       enablePanDownToClose
       enableDynamicSizing
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
     >
-      <BottomSheetScrollView contentContainerStyle={{
-        padding: 16,
-      }}>
+      <BottomSheetScrollView
+        contentContainerStyle={{ padding: 16 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={false}
+      >
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <View style={{
             padding: 8,
@@ -198,15 +203,33 @@ export default function EditPaymentMethodBottomSheet({
             ) : null}
 
             <View style={{ gap: 24 }}>
-              <TextInput
-                label={t('paymentMethods.methodName')}
-                value={name}
-                onChangeText={setName}
-                mode="outlined"
-                style={{ backgroundColor: theme.colors.surface }}
-                outlineStyle={{ borderColor: theme.colors.outline, borderWidth: 1, borderRadius: 6 }}
-                contentStyle={{ fontWeight: '500' }}
-              />
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 8,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('paymentMethods.methodName')}
+                </Text>
+                <BottomSheetTextInput
+                  value={name}
+                  onChangeText={setName}
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outline,
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    padding: 16,
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                  placeholder={t('paymentMethods.methodName')}
+                />
+              </View>
 
               {renderTypeDropdown()}
 

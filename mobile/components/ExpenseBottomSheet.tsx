@@ -2,12 +2,13 @@ import {
 	BottomSheetBackdrop,
 	BottomSheetModal,
 	BottomSheetScrollView,
+	BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimensions, Keyboard, Platform, View } from "react-native";
-import { Button, Text, TextInput, useTheme } from "react-native-paper";
+import { Button, Text, useTheme } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createExpense } from "../db/mutation/expense";
 import { getCategoriesByUserId } from "../db/repository/category";
@@ -69,6 +70,8 @@ export default function ExpenseBottomSheet({
 		const paymentMethods = getPaymentMethodsByUserId(user.id);
 		setPaymentMethods(paymentMethods);
 	}, [refreshKeys.categories, refreshKeys.paymentMethods]);
+
+
 
 	const resetForm = () => {
 		setTitle("");
@@ -286,13 +289,20 @@ export default function ExpenseBottomSheet({
 			onChange={handleSheetChanges}
 			enablePanDownToClose
 			enableDynamicSizing
+			keyboardBehavior="interactive"
+			keyboardBlurBehavior="restore"
 			backgroundStyle={{ backgroundColor: theme.colors.surface }}
 			handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
 			backdropComponent={renderBackdrop}
 			maxDynamicContentSize={Dimensions.get("window").height * 0.85}
 			enableContentPanningGesture
 		>
-			<BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
+			<BottomSheetScrollView
+				contentContainerStyle={{ padding: 16 }}
+				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
+				automaticallyAdjustKeyboardInsets={false}
+			>
 				<SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
 					<View
 						style={{
@@ -336,52 +346,97 @@ export default function ExpenseBottomSheet({
 						) : null}
 
 						<View style={{ gap: 24 }}>
-							<TextInput
-								label={t("forms.title")}
-								value={title}
-								onChangeText={setTitle}
-								mode="outlined"
-								style={{ backgroundColor: theme.colors.surface }}
-								outlineStyle={{
-									borderColor: theme.colors.outline,
-									borderWidth: 1,
-									borderRadius: 6,
-								}}
-								contentStyle={{ fontWeight: "500" }}
-							/>
+							<View>
+								<Text
+									variant="labelLarge"
+									style={{
+										marginBottom: 8,
+										color: theme.colors.onSurfaceVariant,
+										fontWeight: "600",
+									}}
+								>
+									{t("forms.title")}
+								</Text>
+								<BottomSheetTextInput
+									value={title}
+									onChangeText={setTitle}
+									style={{
+										backgroundColor: theme.colors.surface,
+										borderColor: theme.colors.outline,
+										borderWidth: 1,
+										borderRadius: 6,
+										padding: 16,
+										fontSize: 16,
+										fontWeight: "500",
+										color: theme.colors.onSurface,
+									}}
+									placeholder={t("forms.title")}
+								/>
+							</View>
 
-							<TextInput
-								label={t("forms.descriptionOptional")}
-								value={description}
-								onChangeText={setDescription}
-								mode="outlined"
-								multiline
-								numberOfLines={3}
-								style={{ backgroundColor: theme.colors.surface }}
-								outlineStyle={{
-									borderColor: theme.colors.outline,
-									borderWidth: 1,
-									borderRadius: 6,
-								}}
-								contentStyle={{ fontWeight: "500" }}
-							/>
+							<View>
+								<Text
+									variant="labelLarge"
+									style={{
+										marginBottom: 8,
+										color: theme.colors.onSurfaceVariant,
+										fontWeight: "600",
+									}}
+								>
+									{t("forms.descriptionOptional")}
+								</Text>
+								<BottomSheetTextInput
+									value={description}
+									onChangeText={setDescription}
+									multiline
+									numberOfLines={3}
+									style={{
+										backgroundColor: theme.colors.surface,
+										borderColor: theme.colors.outline,
+										borderWidth: 1,
+										borderRadius: 6,
+										padding: 16,
+										fontSize: 16,
+										fontWeight: "500",
+										color: theme.colors.onSurface,
+										minHeight: 80,
+									}}
+									placeholder={t("forms.descriptionOptional")}
+								/>
+							</View>
 
-							<TextInput
-								label={t("forms.amountCurrency", {
-									currency: userSetting?.currency ?? "USD",
-								})}
-								value={amount}
-								onChangeText={setAmount}
-								mode="outlined"
-								keyboardType="numeric"
-								style={{ backgroundColor: theme.colors.surface }}
-								outlineStyle={{
-									borderColor: theme.colors.outline,
-									borderWidth: 1,
-									borderRadius: 6,
-								}}
-								contentStyle={{ fontWeight: "600", fontSize: 16 }}
-							/>
+							<View>
+								<Text
+									variant="labelLarge"
+									style={{
+										marginBottom: 8,
+										color: theme.colors.onSurfaceVariant,
+										fontWeight: "600",
+									}}
+								>
+									{t("forms.amountCurrency", {
+										currency: userSetting?.currency ?? "USD",
+									})}
+								</Text>
+								<BottomSheetTextInput
+									value={amount}
+									onChangeText={setAmount}
+									keyboardType="numeric"
+									style={{
+										backgroundColor: theme.colors.surface,
+										borderColor: theme.colors.outline,
+										borderWidth: 1,
+										borderRadius: 6,
+										padding: 16,
+										fontSize: 18,
+										fontWeight: "600",
+										color: theme.colors.onSurface,
+									}}
+									placeholder={t("forms.amountCurrency", {
+										currency: userSetting?.currency ?? "USD",
+									})}
+								/>
+							</View>
 
 							<View>
 								<Text
