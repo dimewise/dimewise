@@ -1,5 +1,5 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -27,11 +27,6 @@ SplashScreen.setOptions({
   fade: true,
 });
 
-const { LightTheme, DarkTheme: NavigationDarkTheme } = adaptNavigationTheme({
-  reactNavigationLight: DefaultTheme,
-  reactNavigationDark: DarkTheme,
-});
-
 export default function RootLayout() {
   // database
   const { success, error } = useMigrations(db, migrations);
@@ -44,20 +39,6 @@ export default function RootLayout() {
   const paperTheme = useMemo(
     () => (colorScheme === 'dark' ? darkTheme : lightTheme),
     [colorScheme],
-  );
-  const navigationTheme = useMemo(
-    () => ({
-      ...(colorScheme === 'dark' ? NavigationDarkTheme : LightTheme),
-      colors: {
-        ...NavigationDarkTheme.colors,
-        background: paperTheme.colors.background,
-        primary: paperTheme.colors.primary,
-        card: paperTheme.colors.surface,
-        text: paperTheme.colors.onSurface,
-        border: paperTheme.colors.outline ?? '#ccc',
-      },
-    }),
-    [colorScheme, paperTheme],
   );
 
   useEffect(() => {
@@ -106,23 +87,21 @@ export default function RootLayout() {
           <SafeAreaProvider>
             <GestureHandlerRootView style={{ flex: 1 }}>
               <PaperProvider theme={paperTheme}>
-                <NavigationContainer theme={navigationTheme}>
-                  <BottomSheetModalProvider>
-                    <UserProvider>
-                      <RefreshKeyProvider>
-                        <Stack screenOptions={{ headerShown: false }}>
-                          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                          <Stack.Screen name="+not-found" />
-                        </Stack>
-                        <StatusBar
-                          style={colorScheme === 'dark' ? 'light' : 'dark'}
-                          translucent
-                          backgroundColor={paperTheme.colors.surface}
-                        />
-                      </RefreshKeyProvider>
-                    </UserProvider>
-                  </BottomSheetModalProvider>
-                </NavigationContainer>
+                <BottomSheetModalProvider>
+                  <UserProvider>
+                    <RefreshKeyProvider>
+                      <Stack screenOptions={{ headerShown: false }}>
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        <Stack.Screen name="+not-found" />
+                      </Stack>
+                      <StatusBar
+                        style={colorScheme === 'dark' ? 'light' : 'dark'}
+                        translucent
+                        backgroundColor={paperTheme.colors.surface}
+                      />
+                    </RefreshKeyProvider>
+                  </UserProvider>
+                </BottomSheetModalProvider>
               </PaperProvider>
             </GestureHandlerRootView>
           </SafeAreaProvider>

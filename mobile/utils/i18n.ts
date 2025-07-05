@@ -8,7 +8,8 @@ import ja from '../assets/lang/ja.json';
 
 // Get device locale and normalize to our supported codes
 const getDeviceLanguage = (): string => {
-  const deviceLocale = Localization.locale;
+  const locales = Localization.getLocales();
+  const deviceLocale = locales[0]?.languageTag || 'en'; // Get first locale, fallback to 'en'
   const languageCode = deviceLocale.split('-')[0]; // Get 'en' from 'en-US'
 
   // Check if we support this language, otherwise fall back to English
