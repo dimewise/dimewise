@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseAsyncDataOptions {
   immediate?: boolean; // Whether to load data immediately
@@ -19,7 +19,7 @@ interface UseAsyncDataResult<T> {
  */
 export function useAsyncData<T>(
   asyncFunction: () => T | Promise<T>,
-  options: UseAsyncDataOptions = {}
+  options: UseAsyncDataOptions = {},
 ): UseAsyncDataResult<T> {
   const { immediate = true, deps = [] } = options;
 
@@ -59,7 +59,7 @@ export function useAsyncData<T>(
     loading,
     error,
     refetch: fetchData,
-    setData
+    setData,
   };
 }
 
@@ -70,7 +70,7 @@ export function useAsyncData<T>(
 export function useUserData<T>(
   asyncFunction: (userId: string) => T | Promise<T>,
   userId: string | null | undefined,
-  deps: React.DependencyList = []
+  deps: React.DependencyList = [],
 ): UseAsyncDataResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(!!userId);
@@ -113,7 +113,7 @@ export function useUserData<T>(
     loading,
     error,
     refetch: fetchData,
-    setData
+    setData,
   };
 }
 
@@ -121,9 +121,9 @@ export function useUserData<T>(
  * Hook for multiple data sources that should be loaded together
  * Useful for pages that need multiple repository calls
  */
-export function useMultipleAsyncData<T extends Record<string, any>>(
+export function useMultipleAsyncData<T extends Record<string, unknown>>(
   asyncFunctions: { [K in keyof T]: () => T[K] | Promise<T[K]> },
-  options: UseAsyncDataOptions = {}
+  options: UseAsyncDataOptions = {},
 ): UseAsyncDataResult<T> {
   const { immediate = true, deps = [] } = options;
 
@@ -141,7 +141,7 @@ export function useMultipleAsyncData<T extends Record<string, any>>(
       setError(null);
 
       const keys = Object.keys(asyncFunctionsRef.current) as (keyof T)[];
-      const promises = keys.map(key => Promise.resolve(asyncFunctionsRef.current[key]()));
+      const promises = keys.map((key) => Promise.resolve(asyncFunctionsRef.current[key]()));
       const results = await Promise.all(promises);
 
       const combinedData = keys.reduce((acc, key, index) => {
@@ -170,8 +170,8 @@ export function useMultipleAsyncData<T extends Record<string, any>>(
     loading,
     error,
     refetch: fetchData,
-    setData
+    setData,
   };
 }
 
-export default useAsyncData; 
+export default useAsyncData;

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import type React from 'react';
+import { useState } from 'react';
 import { View } from 'react-native';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 
@@ -17,22 +18,17 @@ export const ErrorBoundaryTest: React.FC<ErrorBoundaryTestProps> = ({ onTriggerE
   return (
     <Card style={{ margin: 16, backgroundColor: theme.colors.surfaceVariant }}>
       <Card.Content>
-        <Text variant="titleMedium" style={{ marginBottom: 8, color: theme.colors.onSurfaceVariant }}>
+        <Text
+          variant="titleMedium"
+          style={{ marginBottom: 8, color: theme.colors.onSurfaceVariant }}
+        >
           Error Boundary Test
         </Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button
-            mode="contained"
-            onPress={() => setShouldThrow(true)}
-            style={{ flex: 1 }}
-          >
+          <Button mode="contained" onPress={() => setShouldThrow(true)} style={{ flex: 1 }}>
             Trigger Error
           </Button>
-          <Button
-            mode="outlined"
-            onPress={onTriggerError}
-            style={{ flex: 1 }}
-          >
+          <Button mode="outlined" onPress={onTriggerError} style={{ flex: 1 }}>
             Custom Error
           </Button>
         </View>
@@ -44,4 +40,4 @@ export const ErrorBoundaryTest: React.FC<ErrorBoundaryTestProps> = ({ onTriggerE
 // Component that throws an error immediately
 export const ImmediateErrorTest: React.FC = () => {
   throw new Error('Immediate test error for error boundary design verification');
-}; 
+};

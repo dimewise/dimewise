@@ -1,16 +1,14 @@
-import React, { useRef, useEffect, useCallback } from 'react';
-import { View, ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import {
-  Text,
   Button,
-  useTheme,
-  List,
   Divider,
   IconButton,
+  List,
+  Modal,
   Portal,
-  Modal
+  Text,
+  useTheme,
 } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export interface DropdownOption {
   label: string;
@@ -42,20 +40,23 @@ export function DropdownButton({
   onPress,
   selectedValue,
   options,
-  placeholder = "Select an option", // TODO: This should be translated by parent component
-  label
+  placeholder = 'Select an option', // TODO: This should be translated by parent component
+  label,
 }: DropdownButtonProps) {
   const theme = useTheme();
-  const selectedOption = options.find(option => option.value === selectedValue);
+  const selectedOption = options.find((option) => option.value === selectedValue);
 
   return (
     <View>
       {label && (
-        <Text variant="bodySmall" style={{
-          marginBottom: 4,
-          color: theme.colors.onSurfaceVariant,
-          fontSize: 12,
-        }}>
+        <Text
+          variant="bodySmall"
+          style={{
+            marginBottom: 4,
+            color: theme.colors.onSurfaceVariant,
+            fontSize: 12,
+          }}
+        >
           {label}
         </Text>
       )}
@@ -64,8 +65,8 @@ export function DropdownButton({
         onPress={onPress}
         contentStyle={{
           paddingVertical: 4,
-          flexDirection: "row-reverse",
-          justifyContent: "space-between",
+          flexDirection: 'row-reverse',
+          justifyContent: 'space-between',
         }}
         style={{
           borderRadius: 6,
@@ -108,7 +109,14 @@ export default function DropdownBottomSheet({
         color: selectedValue === item.value ? theme.colors.primary : theme.colors.onSurface,
       }}
       right={() => (
-        <View style={{ width: 40, height: 20, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            width: 40,
+            height: 20,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
           {selectedValue === item.value && (
             <IconButton icon="check" iconColor={theme.colors.primary} size={20} />
           )}
@@ -117,9 +125,7 @@ export default function DropdownBottomSheet({
     />
   );
 
-  const renderSeparator = () => (
-    <Divider style={{ marginHorizontal: 16 }} />
-  );
+  const renderSeparator = () => <Divider style={{ marginHorizontal: 16 }} />;
 
   return (
     <Portal>
@@ -133,11 +139,14 @@ export default function DropdownBottomSheet({
           borderRadius: 8,
         }}
       >
-        <Text variant="titleMedium" style={{
-          fontWeight: '600',
-          color: theme.colors.onSurface,
-          textAlign: 'center',
-        }}>
+        <Text
+          variant="titleMedium"
+          style={{
+            fontWeight: '600',
+            color: theme.colors.onSurface,
+            textAlign: 'center',
+          }}
+        >
           {title}
         </Text>
         <Divider style={{ marginVertical: 12 }} />
@@ -156,4 +165,4 @@ export default function DropdownBottomSheet({
       </Modal>
     </Portal>
   );
-} 
+}

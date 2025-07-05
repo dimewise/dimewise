@@ -1,13 +1,9 @@
-import React, { useCallback } from 'react';
-import { ScrollView, View } from 'react-native';
-import {
-  Text,
-  List,
-  useTheme,
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ScrollView, View } from 'react-native';
+import { List, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 
 export default function ProfileScreen() {
@@ -17,7 +13,7 @@ export default function ProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       // Any cleanup when focusing on this tab can go here
-    }, [])
+    }, []),
   );
 
   const handleNavigateToSettings = () => {
@@ -40,26 +36,37 @@ export default function ProfileScreen() {
     >
       <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
-          <View style={{
-            paddingTop: 16,
-            paddingHorizontal: 24,
-            paddingBottom: 16,
-            backgroundColor: theme.colors.background
-          }}>
-            <Text variant="headlineMedium" style={{ fontWeight: '700', marginBottom: 16, color: theme.colors.onBackground }}>
+          <View
+            style={{
+              paddingTop: 16,
+              paddingHorizontal: 24,
+              paddingBottom: 16,
+              backgroundColor: theme.colors.background,
+            }}
+          >
+            <Text
+              variant="headlineMedium"
+              style={{
+                fontWeight: '700',
+                marginBottom: 16,
+                color: theme.colors.onBackground,
+              }}
+            >
               {t('navigation.profile')}
             </Text>
           </View>
 
           <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-            <View style={{
-              marginHorizontal: 24,
-              backgroundColor: theme.colors.surface,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: theme.colors.outline,
-              overflow: 'hidden'
-            }}>
+            <View
+              style={{
+                marginHorizontal: 24,
+                backgroundColor: theme.colors.surface,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+                overflow: 'hidden',
+              }}
+            >
               <List.Item
                 title={t('navigation.settings')}
                 description={t('settings.currencyAndPreferences')}
@@ -72,14 +79,20 @@ export default function ProfileScreen() {
                 }}
                 titleStyle={{
                   fontWeight: '600',
-                  color: theme.colors.onSurface
+                  color: theme.colors.onSurface,
                 }}
                 descriptionStyle={{
-                  color: theme.colors.onSurfaceVariant
+                  color: theme.colors.onSurfaceVariant,
                 }}
               />
 
-              <View style={{ height: 1, backgroundColor: theme.colors.outline, marginHorizontal: 16 }} />
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: theme.colors.outline,
+                  marginHorizontal: 16,
+                }}
+              />
 
               <List.Item
                 title={t('navigation.categories')}
@@ -93,14 +106,20 @@ export default function ProfileScreen() {
                 }}
                 titleStyle={{
                   fontWeight: '600',
-                  color: theme.colors.onSurface
+                  color: theme.colors.onSurface,
                 }}
                 descriptionStyle={{
-                  color: theme.colors.onSurfaceVariant
+                  color: theme.colors.onSurfaceVariant,
                 }}
               />
 
-              <View style={{ height: 1, backgroundColor: theme.colors.outline, marginHorizontal: 16 }} />
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: theme.colors.outline,
+                  marginHorizontal: 16,
+                }}
+              />
 
               <List.Item
                 title={t('paymentMethods.title')}
@@ -114,10 +133,10 @@ export default function ProfileScreen() {
                 }}
                 titleStyle={{
                   fontWeight: '600',
-                  color: theme.colors.onSurface
+                  color: theme.colors.onSurface,
                 }}
                 descriptionStyle={{
-                  color: theme.colors.onSurfaceVariant
+                  color: theme.colors.onSurfaceVariant,
                 }}
               />
             </View>
@@ -126,4 +145,4 @@ export default function ProfileScreen() {
       </View>
     </ErrorBoundary>
   );
-} 
+}

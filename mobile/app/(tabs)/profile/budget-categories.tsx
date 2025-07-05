@@ -1,25 +1,25 @@
-import React, { useState, useCallback } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import {
-  Text,
-  Button,
-  useTheme,
-  Dialog,
-  Portal,
   Appbar,
+  Button,
+  Dialog,
   FAB,
-  IconButton
+  IconButton,
+  Portal,
+  Text,
+  useTheme,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, router } from 'expo-router';
-import { useTranslation } from 'react-i18next';
 import CategoryBottomSheet from '../../../components/CategoryBottomSheet';
-import EditCategoryBottomSheet from '../../../components/EditCategoryBottomSheet';
-import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
 import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../../components/contexts/UserContext';
+import EditCategoryBottomSheet from '../../../components/EditCategoryBottomSheet';
+import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
+import { deleteCategoryById, getCategoriesByUserId } from '../../../db/repository/category';
 import type { Category } from '../../../db/schema';
-import { getCategoriesByUserId, deleteCategoryById } from '../../../db/repository/category';
 import { formatAmount } from '../../../db/utils';
 import { useUserData } from '../../../hooks/useAsyncData';
 
@@ -28,7 +28,10 @@ export default function BudgetCategoriesScreen() {
   const [showEditCategorySheet, setShowEditCategorySheet] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ id: string, name: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const theme = useTheme();
   const { t } = useTranslation();
@@ -36,18 +39,19 @@ export default function BudgetCategoriesScreen() {
   const { refreshKeys, triggerRefresh } = useRefreshKey();
 
   // Load categories using our new hook
-  const { data: categories, loading, error, refetch } = useUserData(
-    (userId) => getCategoriesByUserId(userId),
-    user?.id,
-    [refreshKeys.categories]
-  );
+  const {
+    data: categories,
+    loading,
+    error,
+    refetch,
+  } = useUserData((userId) => getCategoriesByUserId(userId), user?.id, [refreshKeys.categories]);
 
   useFocusEffect(
     useCallback(() => {
       // Close all bottom sheets when navigating to this screen
       setShowCategorySheet(false);
       setShowEditCategorySheet(false);
-    }, [])
+    }, []),
   );
 
   const handleCategoryAdded = () => {
@@ -115,50 +119,64 @@ export default function BudgetCategoriesScreen() {
           contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
         >
           {loading ? (
-            <View style={{
-              padding: 32,
-              alignItems: 'center',
-              backgroundColor: theme.colors.surface,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: theme.colors.outline,
-            }}>
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('status.loading')}</Text>
-            </View>
-          ) : (categories && categories.length > 0) ? (
-            categories.map((category) => (
-              <View key={category.id} style={{
-                marginVertical: 4,
-                paddingVertical: 16,
-                paddingHorizontal: 24,
+            <View
+              style={{
+                padding: 32,
+                alignItems: 'center',
                 backgroundColor: theme.colors.surface,
                 borderRadius: 8,
                 borderWidth: 1,
                 borderColor: theme.colors.outline,
-                shadowColor: '#000000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-                elevation: 1,
-              }}>
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
+              }}
+            >
+              <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('status.loading')}</Text>
+            </View>
+          ) : categories && categories.length > 0 ? (
+            categories.map((category) => (
+              <View
+                key={category.id}
+                style={{
+                  marginVertical: 4,
+                  paddingVertical: 16,
+                  paddingHorizontal: 24,
+                  backgroundColor: theme.colors.surface,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 2,
+                  elevation: 1,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <View style={{ flex: 1 }}>
-                    <Text variant="titleMedium" style={{
-                      fontWeight: '600',
-                      marginBottom: 6,
-                      color: theme.colors.onSurface
-                    }}>
+                    <Text
+                      variant="titleMedium"
+                      style={{
+                        fontWeight: '600',
+                        marginBottom: 6,
+                        color: theme.colors.onSurface,
+                      }}
+                    >
                       {category.name}
                     </Text>
-                    <Text variant="bodyMedium" style={{
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '500'
-                    }}>
-                      {t('expenses.budget')}: {formatAmount(category.budget, userSetting?.currency || 'USD')}
+                    <Text
+                      variant="bodyMedium"
+                      style={{
+                        color: theme.colors.onSurfaceVariant,
+                        fontWeight: '500',
+                      }}
+                    >
+                      {t('expenses.budget')}:{' '}
+                      {formatAmount(category.budget, userSetting?.currency || 'USD')}
                     </Text>
                   </View>
                   <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -184,27 +202,35 @@ export default function BudgetCategoriesScreen() {
               </View>
             ))
           ) : (
-            <View style={{
-              padding: 48,
-              alignItems: 'center',
-              backgroundColor: theme.colors.surface,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: theme.colors.outline,
-            }}>
-              <Text variant="titleLarge" style={{
-                textAlign: 'center',
-                marginBottom: 16,
-                fontWeight: '600',
-                color: theme.colors.onSurface
-              }}>
+            <View
+              style={{
+                padding: 48,
+                alignItems: 'center',
+                backgroundColor: theme.colors.surface,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}
+            >
+              <Text
+                variant="titleLarge"
+                style={{
+                  textAlign: 'center',
+                  marginBottom: 16,
+                  fontWeight: '600',
+                  color: theme.colors.onSurface,
+                }}
+              >
                 {t('categories.noCategories')}
               </Text>
-              <Text variant="bodyMedium" style={{
-                textAlign: 'center',
-                color: theme.colors.onSurfaceVariant,
-                lineHeight: 24,
-              }}>
+              <Text
+                variant="bodyMedium"
+                style={{
+                  textAlign: 'center',
+                  color: theme.colors.onSurfaceVariant,
+                  lineHeight: 24,
+                }}
+              >
                 {t('categories.createFirst')}
               </Text>
             </View>
@@ -252,15 +278,15 @@ export default function BudgetCategoriesScreen() {
             </Dialog.Title>
             <Dialog.Content>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                {t('actions.deleteConfirmMessage', { name: itemToDelete?.name })} {t('actions.cannotUndo')}
+                {t('actions.deleteConfirmMessage', {
+                  name: itemToDelete?.name,
+                })}{' '}
+                {t('actions.cannotUndo')}
               </Text>
             </Dialog.Content>
             <Dialog.Actions>
               <Button onPress={() => setShowDeleteDialog(false)}>{t('common.cancel')}</Button>
-              <Button
-                onPress={handleConfirmDelete}
-                textColor={theme.colors.error}
-              >
+              <Button onPress={handleConfirmDelete} textColor={theme.colors.error}>
                 {t('common.delete')}
               </Button>
             </Dialog.Actions>
@@ -269,4 +295,4 @@ export default function BudgetCategoriesScreen() {
       </SafeAreaView>
     </ErrorBoundary>
   );
-} 
+}
