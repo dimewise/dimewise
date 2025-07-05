@@ -1,6 +1,6 @@
+import * as Localization from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
 
 // Import translation files
 import en from '../assets/lang/en.json';
@@ -25,25 +25,23 @@ const resources = {
   },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: getDeviceLanguage(), // Initial language from device
-    fallbackLng: 'en', // Fallback to English
+i18n.use(initReactI18next).init({
+  resources,
+  lng: getDeviceLanguage(), // Initial language from device
+  fallbackLng: 'en', // Fallback to English
 
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
+  interpolation: {
+    escapeValue: false, // React already escapes values
+  },
 
-    // Debug in development
-    debug: __DEV__,
+  // Debug in development
+  debug: __DEV__,
 
-    // React i18next configuration
-    react: {
-      useSuspense: false,
-    },
-  });
+  // React i18next configuration
+  react: {
+    useSuspense: false,
+  },
+});
 
 export default i18n;
-export { getDeviceLanguage }; 
+export { getDeviceLanguage };

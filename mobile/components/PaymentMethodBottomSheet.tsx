@@ -1,28 +1,41 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { View, Keyboard } from 'react-native';
 import {
-  Text,
-  Button,
-  useTheme,
-} from 'react-native-paper';
-import { BottomSheetModal, BottomSheetScrollView, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  BottomSheetBackdrop,
+  type BottomSheetBackdropProps,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+} from '@gorhom/bottom-sheet';
+import type { TFunction } from 'i18next';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Keyboard, View } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { createPaymentMethod } from '../db/repository/paymentMethod';
-import { useUser } from './contexts/UserContext';
 import { useRefreshKey } from './contexts/RefreshKeyContext';
-import DropdownBottomSheet, { DropdownButton, DropdownOption } from './DropdownBottomSheet';
+import { useUser } from './contexts/UserContext';
+import DropdownBottomSheet, { DropdownButton, type DropdownOption } from './DropdownBottomSheet';
 
-const PAYMENT_METHOD_TYPES = ['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'];
+const PAYMENT_METHOD_TYPES = [
+  'credit_card',
+  'debit_card',
+  'cash',
+  'bank_transfer',
+  'digital_wallet',
+  'other',
+];
 
-const formatPaymentTypeForDisplay = (type: string, t: any): string => {
+const formatPaymentTypeForDisplay = (
+  type: string,
+  t: TFunction<'translation', undefined>,
+): string => {
   const typeMap: Record<string, string> = {
-    'credit_card': t('paymentMethods.creditCard'),
-    'debit_card': t('paymentMethods.debitCard'),
-    'cash': t('paymentMethods.cash'),
-    'bank_transfer': t('paymentMethods.bankTransfer'),
-    'digital_wallet': t('paymentMethods.digitalWallet'),
-    'other': t('paymentMethods.other')
+    credit_card: t('paymentMethods.creditCard'),
+    debit_card: t('paymentMethods.debitCard'),
+    cash: t('paymentMethods.cash'),
+    bank_transfer: t('paymentMethods.bankTransfer'),
+    digital_wallet: t('paymentMethods.digitalWallet'),
+    other: t('paymentMethods.other'),
   };
   return typeMap[type] || type;
 };
@@ -33,7 +46,11 @@ interface PaymentMethodBottomSheetProps {
   onPaymentMethodAdded?: () => void;
 }
 
-export default function PaymentMethodBottomSheet({ visible, onDismiss, onPaymentMethodAdded }: PaymentMethodBottomSheetProps) {
+export default function PaymentMethodBottomSheet({
+  visible,
+  onDismiss,
+  onPaymentMethodAdded,
+}: PaymentMethodBottomSheetProps) {
   const [name, setName] = useState('');
   const [type, setType] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,6 +63,13 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
   const { triggerRefresh } = useRefreshKey();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
+  const resetForm = useCallback(() => {
+    setName('');
+    setType('');
+    setError('');
+    Keyboard.dismiss();
+  }, []);
+
   useEffect(() => {
     if (visible) {
       bottomSheetModalRef.current?.present();
@@ -53,14 +77,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
       bottomSheetModalRef.current?.dismiss();
       resetForm();
     }
-  }, [visible]);
-
-  const resetForm = () => {
-    setName('');
-    setType('');
-    setError('');
-    Keyboard.dismiss();
-  };
+  }, [visible, resetForm]);
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -81,7 +98,13 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
     try {
       const paymentMethodData = {
         name: name.trim(),
-        type: type as 'credit_card' | 'debit_card' | 'cash' | 'bank_transfer' | 'digital_wallet' | 'other',
+        type: type as
+          | 'credit_card'
+          | 'debit_card'
+          | 'cash'
+          | 'bank_transfer'
+          | 'digital_wallet'
+          | 'other',
         userId: user.id,
       };
 
@@ -98,15 +121,18 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
     }
   };
 
-  const handleSheetChanges = useCallback((index: number) => {
-    if (index === -1) {
-      onDismiss();
-    }
-  }, [onDismiss]);
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        onDismiss();
+      }
+    },
+    [onDismiss],
+  );
 
   // Backdrop component for tap-to-dismiss
   const renderBackdrop = useCallback(
-    (props: any) => (
+    (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
         {...props}
         disappearsOnIndex={-1}
@@ -115,14 +141,14 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
         onPress={onDismiss}
       />
     ),
-    [onDismiss]
+    [onDismiss],
   );
 
   // Convert payment types to dropdown options
-  const paymentTypeOptions: DropdownOption[] = PAYMENT_METHOD_TYPES.map(paymentType => ({
+  const paymentTypeOptions: DropdownOption[] = PAYMENT_METHOD_TYPES.map((paymentType) => ({
     label: formatPaymentTypeForDisplay(paymentType, t),
     value: paymentType,
-    id: paymentType
+    id: paymentType,
   }));
 
   const renderTypeDropdown = () => (
@@ -149,7 +175,6 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
     <BottomSheetModal
       ref={bottomSheetModalRef}
       index={0}
-
       onChange={handleSheetChanges}
       enablePanDownToClose
       enableDynamicSizing
@@ -166,29 +191,42 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
         automaticallyAdjustKeyboardInsets={false}
       >
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
-          <View style={{
-            padding: 8,
-            backgroundColor: theme.colors.surface,
-          }}>
-            <Text variant="headlineMedium" style={{
-              marginBottom: 32,
-              fontWeight: '700',
-              color: theme.colors.onSurface,
-              textAlign: 'center'
-            }}>
+          <View
+            style={{
+              padding: 8,
+              backgroundColor: theme.colors.surface,
+            }}
+          >
+            <Text
+              variant="headlineMedium"
+              style={{
+                marginBottom: 32,
+                fontWeight: '700',
+                color: theme.colors.onSurface,
+                textAlign: 'center',
+              }}
+            >
               {t('paymentMethods.addPaymentMethod')}
             </Text>
 
             {error ? (
-              <View style={{
-                padding: 16,
-                backgroundColor: theme.colors.errorContainer,
-                borderRadius: 6,
-                marginBottom: 24,
-                borderWidth: 1,
-                borderColor: theme.colors.outline,
-              }}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.onErrorContainer, fontWeight: '500' }}>
+              <View
+                style={{
+                  padding: 16,
+                  backgroundColor: theme.colors.errorContainer,
+                  borderRadius: 6,
+                  marginBottom: 24,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                }}
+              >
+                <Text
+                  variant="bodyMedium"
+                  style={{
+                    color: theme.colors.onErrorContainer,
+                    fontWeight: '500',
+                  }}
+                >
                   {error}
                 </Text>
               </View>
@@ -234,7 +272,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                   }}
                   labelStyle={{
                     fontSize: 16,
-                    fontWeight: '600'
+                    fontWeight: '600',
                   }}
                   style={{
                     flex: 1,
@@ -253,7 +291,7 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
                   labelStyle={{
                     fontSize: 16,
                     fontWeight: '600',
-                    letterSpacing: 0.25
+                    letterSpacing: 0.25,
                   }}
                   style={{
                     flex: 1,
@@ -274,4 +312,4 @@ export default function PaymentMethodBottomSheet({ visible, onDismiss, onPayment
       </BottomSheetScrollView>
     </BottomSheetModal>
   );
-} 
+}

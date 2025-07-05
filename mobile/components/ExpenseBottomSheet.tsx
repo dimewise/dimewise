@@ -1,510 +1,493 @@
 import {
-	BottomSheetBackdrop,
-	BottomSheetModal,
-	BottomSheetScrollView,
-	BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { Dimensions, Keyboard, Platform, View } from "react-native";
-import { Button, Text, useTheme } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { createExpense } from "../db/mutation/expense";
-import { getCategoriesByUserId } from "../db/repository/category";
-import { getPaymentMethodsByUserId } from "../db/repository/paymentMethod";
-import type { Category, NewExpense, PaymentMethod } from "../db/schema";
-import { generatedUUID, validateCurrencyInput } from "../db/utils";
-import { useRefreshKey } from "./contexts/RefreshKeyContext";
-import { useUser } from "./contexts/UserContext";
-import DropdownBottomSheet, {
-	DropdownButton,
-	type DropdownOption,
-} from "./DropdownBottomSheet";
+  BottomSheetBackdrop,
+  type BottomSheetBackdropProps,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetTextInput,
+} from '@gorhom/bottom-sheet';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Dimensions, Keyboard, Platform, View } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { createExpense } from '../db/mutation/expense';
+import { getCategoriesByUserId } from '../db/repository/category';
+import { getPaymentMethodsByUserId } from '../db/repository/paymentMethod';
+import type { Category, NewExpense, PaymentMethod } from '../db/schema';
+import { generatedUUID, validateCurrencyInput } from '../db/utils';
+import { useRefreshKey } from './contexts/RefreshKeyContext';
+import { useUser } from './contexts/UserContext';
+import DropdownBottomSheet, { DropdownButton, type DropdownOption } from './DropdownBottomSheet';
 
 interface ExpenseBottomSheetProps {
-	visible: boolean;
-	onDismiss: () => void;
+  visible: boolean;
+  onDismiss: () => void;
 }
 
-export default function ExpenseBottomSheet({
-	visible,
-	onDismiss,
-}: ExpenseBottomSheetProps) {
-	const [categories, setCategories] = useState<Category[]>([]);
-	const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-	const [title, setTitle] = useState("");
-	const [description, setDescription] = useState("");
-	const [amount, setAmount] = useState("");
-	const [categoryId, setCategoryId] = useState("");
-	const [paymentMethodId, setPaymentMethodId] = useState("");
-	const [date, setDate] = useState(new Date());
-	const [showDatePicker, setShowDatePicker] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState("");
-	const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-	const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] =
-		useState(false);
+export default function ExpenseBottomSheet({ visible, onDismiss }: ExpenseBottomSheetProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [paymentMethodId, setPaymentMethodId] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showPaymentMethodDropdown, setShowPaymentMethodDropdown] = useState(false);
 
-	const theme = useTheme();
-	const { t } = useTranslation();
-	const { user, userSetting } = useUser();
-	const { refreshKeys, triggerRefresh } = useRefreshKey();
-	const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const theme = useTheme();
+  const { t } = useTranslation();
+  const { user, userSetting } = useUser();
+  const { refreshKeys, triggerRefresh } = useRefreshKey();
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-	useEffect(() => {
-		if (visible) {
-			bottomSheetModalRef.current?.present();
-		} else {
-			bottomSheetModalRef.current?.dismiss();
-			resetForm();
-		}
-	}, [visible]);
+  const resetForm = useCallback(() => {
+    setTitle('');
+    setDescription('');
+    setAmount('');
+    setCategoryId('');
+    setPaymentMethodId('');
+    setDate(new Date());
+    setError('');
+    setShowCategoryDropdown(false);
+    setShowPaymentMethodDropdown(false);
+    setShowDatePicker(false);
+    Keyboard.dismiss();
+  }, []);
 
-	useEffect(() => {
-		if (!user) return;
+  useEffect(() => {
+    if (visible) {
+      bottomSheetModalRef.current?.present();
+    } else {
+      bottomSheetModalRef.current?.dismiss();
+      resetForm();
+    }
+  }, [visible, resetForm]);
 
-		const categories = getCategoriesByUserId(user.id);
-		setCategories(categories);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKeys are intentionally used to trigger re-fetching
+  useEffect(() => {
+    if (!user) return;
 
-		const paymentMethods = getPaymentMethodsByUserId(user.id);
-		setPaymentMethods(paymentMethods);
-	}, [refreshKeys.categories, refreshKeys.paymentMethods]);
+    const categories = getCategoriesByUserId(user.id);
+    setCategories(categories);
 
+    const paymentMethods = getPaymentMethodsByUserId(user.id);
+    setPaymentMethods(paymentMethods);
+  }, [refreshKeys.categories, refreshKeys.paymentMethods]);
 
+  const handleSubmit = async () => {
+    if (!user) return;
 
-	const resetForm = () => {
-		setTitle("");
-		setDescription("");
-		setAmount("");
-		setCategoryId("");
-		setPaymentMethodId("");
-		setDate(new Date());
-		setError("");
-		setShowCategoryDropdown(false);
-		setShowPaymentMethodDropdown(false);
-		setShowDatePicker(false);
-		Keyboard.dismiss();
-	};
+    if (!title.trim()) {
+      setError(t('forms.titleRequired'));
+      return;
+    }
 
-	const handleSubmit = async () => {
-		if (!user) return;
+    const validation = validateCurrencyInput(amount, userSetting?.currency ?? 'USD');
+    if (!validation.isValid) {
+      setError(validation.error || t('forms.validAmountRequired'));
+      return;
+    }
 
-		if (!title.trim()) {
-			setError(t("forms.titleRequired"));
-			return;
-		}
+    if (!categoryId) {
+      setError(t('forms.categoryRequired'));
+      return;
+    }
 
-		const validation = validateCurrencyInput(
-			amount,
-			userSetting?.currency ?? "USD",
-		);
-		if (!validation.isValid) {
-			setError(validation.error || t("forms.validAmountRequired"));
-			return;
-		}
+    if (!paymentMethodId) {
+      setError(t('forms.paymentMethodRequired'));
+      return;
+    }
 
-		if (!categoryId) {
-			setError(t("forms.categoryRequired"));
-			return;
-		}
+    setLoading(true);
+    setError('');
 
-		if (!paymentMethodId) {
-			setError(t("forms.paymentMethodRequired"));
-			return;
-		}
+    const newExpense: NewExpense = {
+      id: generatedUUID(),
+      title: title.trim(),
+      description: description.trim(),
+      amount: Number(amount),
+      currency: userSetting?.currency ?? 'USD',
+      categoryId: categoryId,
+      paymentMethodId: paymentMethodId,
+      incurredAt: date.toISOString(),
+      userId: user?.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      deletedAt: null,
+    };
 
-		setLoading(true);
-		setError("");
+    try {
+      await createExpense(newExpense);
 
-		const newExpense: NewExpense = {
-			id: generatedUUID(),
-			title: title.trim(),
-			description: description.trim(),
-			amount: Number(amount),
-			currency: userSetting?.currency ?? "USD",
-			categoryId: categoryId,
-			paymentMethodId: paymentMethodId,
-			incurredAt: date.toISOString(),
-			userId: user?.id,
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
-			deletedAt: null,
-		};
+      onDismiss();
+      triggerRefresh('expenses');
+    } catch (e) {
+      console.error('Failed to save expense:', e);
+      setError(t('status.error'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-		try {
-			await createExpense(newExpense);
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        onDismiss();
+      }
+    },
+    [onDismiss],
+  );
 
-			onDismiss();
-			triggerRefresh("expenses");
-		} catch (e) {
-			console.error("Failed to save expense:", e);
-			setError(t("status.error"));
-		} finally {
-			setLoading(false);
-		}
-	};
+  // Backdrop component for tap-to-dismiss
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        onPress={onDismiss}
+      />
+    ),
+    [onDismiss],
+  );
 
-	const handleSheetChanges = useCallback(
-		(index: number) => {
-			if (index === -1) {
-				onDismiss();
-			}
-		},
-		[onDismiss],
-	);
+  const handleDateChange = (_: DateTimePickerEvent, selectedDate?: Date) => {
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
 
-	// Backdrop component for tap-to-dismiss
-	const renderBackdrop = useCallback(
-		(props: any) => (
-			<BottomSheetBackdrop
-				{...props}
-				disappearsOnIndex={-1}
-				appearsOnIndex={0}
-				opacity={0.5}
-				onPress={onDismiss}
-			/>
-		),
-		[onDismiss],
-	);
+  const handleDatePickerToggle = () => {
+    setShowDatePicker(!showDatePicker);
+  };
 
-	const handleDateChange = (event: any, selectedDate?: Date) => {
-		if (selectedDate) {
-			setDate(selectedDate);
-		}
-	};
+  const formatDateForDisplay = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
-	const handleDatePickerToggle = () => {
-		setShowDatePicker(!showDatePicker);
-	};
+  // Convert categories to dropdown options (excluding uncategorized)
+  const categoryOptions: DropdownOption[] = categories.map((category) => ({
+    label: category.name,
+    value: category.id,
+    id: category.id,
+  }));
 
-	const formatDateForDisplay = (date: Date) => {
-		return date.toLocaleDateString("en-US", {
-			weekday: "short",
-			year: "numeric",
-			month: "short",
-			day: "numeric",
-		});
-	};
+  const renderCategoryDropdown = () => (
+    <>
+      <DropdownButton
+        onPress={() => setShowCategoryDropdown(true)}
+        selectedValue={categoryId}
+        options={categoryOptions}
+        placeholder={t('forms.selectCategory')}
+        label={t('expenses.category')}
+      />
+      <DropdownBottomSheet
+        visible={showCategoryDropdown}
+        onDismiss={() => setShowCategoryDropdown(false)}
+        options={categoryOptions}
+        onSelect={(value) => setCategoryId(value)}
+        selectedValue={categoryId}
+        title={t('forms.selectCategory')}
+      />
+    </>
+  );
 
-	const selectedCategory = categories.find((cat) => cat.id === categoryId);
-	const selectedPaymentMethod = paymentMethods.find(
-		(pm) => pm.id === paymentMethodId,
-	);
+  // Convert payment methods to dropdown options
+  const paymentMethodOptions: DropdownOption[] = paymentMethods.map((paymentMethod) => ({
+    label: paymentMethod.name,
+    value: paymentMethod.id,
+    id: paymentMethod.id,
+  }));
 
-	// Convert categories to dropdown options (excluding uncategorized)
-	const categoryOptions: DropdownOption[] = categories.map((category) => ({
-		label: category.name,
-		value: category.id,
-		id: category.id,
-	}));
+  const renderPaymentMethodDropdown = () => (
+    <>
+      <DropdownButton
+        onPress={() => setShowPaymentMethodDropdown(true)}
+        selectedValue={paymentMethodId}
+        options={paymentMethodOptions}
+        placeholder={t('forms.selectPaymentMethod')}
+        label={t('expenses.paymentMethod')}
+      />
+      <DropdownBottomSheet
+        visible={showPaymentMethodDropdown}
+        onDismiss={() => setShowPaymentMethodDropdown(false)}
+        options={paymentMethodOptions}
+        onSelect={(value) => setPaymentMethodId(value)}
+        selectedValue={paymentMethodId}
+        title={t('forms.selectPaymentMethod')}
+      />
+    </>
+  );
 
-	const renderCategoryDropdown = () => (
-		<>
-			<DropdownButton
-				onPress={() => setShowCategoryDropdown(true)}
-				selectedValue={categoryId}
-				options={categoryOptions}
-				placeholder={t("forms.selectCategory")}
-				label={t("expenses.category")}
-			/>
-			<DropdownBottomSheet
-				visible={showCategoryDropdown}
-				onDismiss={() => setShowCategoryDropdown(false)}
-				options={categoryOptions}
-				onSelect={(value) => setCategoryId(value)}
-				selectedValue={categoryId}
-				title={t("forms.selectCategory")}
-			/>
-		</>
-	);
+  const renderDatePicker = () => (
+    <>
+      <Button
+        mode="outlined"
+        onPress={handleDatePickerToggle}
+        contentStyle={{
+          paddingVertical: 4,
+          justifyContent: 'flex-start',
+        }}
+        labelStyle={{
+          fontSize: 16,
+          fontWeight: '500',
+          textAlign: 'left',
+        }}
+        style={{
+          borderRadius: 6,
+          borderColor: theme.colors.outline,
+          backgroundColor: theme.colors.surface,
+        }}
+      >
+        {formatDateForDisplay(date)}
+      </Button>
+      {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          onChange={handleDateChange}
+          maximumDate={new Date()}
+        />
+      )}
+    </>
+  );
 
-	// Convert payment methods to dropdown options
-	const paymentMethodOptions: DropdownOption[] = paymentMethods.map(
-		(paymentMethod) => ({
-			label: paymentMethod.name,
-			value: paymentMethod.id,
-			id: paymentMethod.id,
-		}),
-	);
+  return (
+    <BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
+      onChange={handleSheetChanges}
+      enablePanDownToClose
+      enableDynamicSizing
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      backgroundStyle={{ backgroundColor: theme.colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
+      backdropComponent={renderBackdrop}
+      maxDynamicContentSize={Dimensions.get('window').height * 0.85}
+      enableContentPanningGesture
+    >
+      <BottomSheetScrollView
+        contentContainerStyle={{ padding: 16 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={false}
+      >
+        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+          <View
+            style={{
+              padding: 8,
+              backgroundColor: theme.colors.surface,
+            }}
+          >
+            <Text
+              variant="headlineMedium"
+              style={{
+                marginBottom: 32,
+                fontWeight: '700',
+                color: theme.colors.onSurface,
+                textAlign: 'center',
+              }}
+            >
+              {t('expenses.newExpense')}
+            </Text>
 
-	const renderPaymentMethodDropdown = () => (
-		<>
-			<DropdownButton
-				onPress={() => setShowPaymentMethodDropdown(true)}
-				selectedValue={paymentMethodId}
-				options={paymentMethodOptions}
-				placeholder={t("forms.selectPaymentMethod")}
-				label={t("expenses.paymentMethod")}
-			/>
-			<DropdownBottomSheet
-				visible={showPaymentMethodDropdown}
-				onDismiss={() => setShowPaymentMethodDropdown(false)}
-				options={paymentMethodOptions}
-				onSelect={(value) => setPaymentMethodId(value)}
-				selectedValue={paymentMethodId}
-				title={t("forms.selectPaymentMethod")}
-			/>
-		</>
-	);
+            {error ? (
+              <View
+                style={{
+                  padding: 16,
+                  backgroundColor: theme.colors.errorContainer,
+                  borderRadius: 6,
+                  marginBottom: 24,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                }}
+              >
+                <Text
+                  variant="bodyMedium"
+                  style={{
+                    color: theme.colors.onErrorContainer,
+                    fontWeight: '500',
+                  }}
+                >
+                  {error}
+                </Text>
+              </View>
+            ) : null}
 
-	const renderDatePicker = () => (
-		<>
-			<Button
-				mode="outlined"
-				onPress={handleDatePickerToggle}
-				contentStyle={{
-					paddingVertical: 4,
-					justifyContent: "flex-start",
-				}}
-				labelStyle={{
-					fontSize: 16,
-					fontWeight: "500",
-					textAlign: "left",
-				}}
-				style={{
-					borderRadius: 6,
-					borderColor: theme.colors.outline,
-					backgroundColor: theme.colors.surface,
-				}}
-			>
-				{formatDateForDisplay(date)}
-			</Button>
-			{showDatePicker && (
-				<DateTimePicker
-					value={date}
-					mode="date"
-					display={Platform.OS === "ios" ? "spinner" : "default"}
-					onChange={handleDateChange}
-					maximumDate={new Date()}
-				/>
-			)}
-		</>
-	);
+            <View style={{ gap: 24 }}>
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 8,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('forms.title')}
+                </Text>
+                <BottomSheetTextInput
+                  value={title}
+                  onChangeText={setTitle}
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outline,
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    padding: 16,
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                  }}
+                  placeholder={t('forms.title')}
+                />
+              </View>
 
-	return (
-		<BottomSheetModal
-			ref={bottomSheetModalRef}
-			index={0}
-			onChange={handleSheetChanges}
-			enablePanDownToClose
-			enableDynamicSizing
-			keyboardBehavior="interactive"
-			keyboardBlurBehavior="restore"
-			backgroundStyle={{ backgroundColor: theme.colors.surface }}
-			handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
-			backdropComponent={renderBackdrop}
-			maxDynamicContentSize={Dimensions.get("window").height * 0.85}
-			enableContentPanningGesture
-		>
-			<BottomSheetScrollView
-				contentContainerStyle={{ padding: 16 }}
-				keyboardShouldPersistTaps="handled"
-				showsVerticalScrollIndicator={false}
-				automaticallyAdjustKeyboardInsets={false}
-			>
-				<SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
-					<View
-						style={{
-							padding: 8,
-							backgroundColor: theme.colors.surface,
-						}}
-					>
-						<Text
-							variant="headlineMedium"
-							style={{
-								marginBottom: 32,
-								fontWeight: "700",
-								color: theme.colors.onSurface,
-								textAlign: "center",
-							}}
-						>
-							{t("expenses.newExpense")}
-						</Text>
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 8,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('forms.descriptionOptional')}
+                </Text>
+                <BottomSheetTextInput
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  numberOfLines={3}
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outline,
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    padding: 16,
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: theme.colors.onSurface,
+                    minHeight: 80,
+                  }}
+                  placeholder={t('forms.descriptionOptional')}
+                />
+              </View>
 
-						{error ? (
-							<View
-								style={{
-									padding: 16,
-									backgroundColor: theme.colors.errorContainer,
-									borderRadius: 6,
-									marginBottom: 24,
-									borderWidth: 1,
-									borderColor: theme.colors.outline,
-								}}
-							>
-								<Text
-									variant="bodyMedium"
-									style={{
-										color: theme.colors.onErrorContainer,
-										fontWeight: "500",
-									}}
-								>
-									{error}
-								</Text>
-							</View>
-						) : null}
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 8,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('forms.amountCurrency', {
+                    currency: userSetting?.currency ?? 'USD',
+                  })}
+                </Text>
+                <BottomSheetTextInput
+                  value={amount}
+                  onChangeText={setAmount}
+                  keyboardType="numeric"
+                  style={{
+                    backgroundColor: theme.colors.surface,
+                    borderColor: theme.colors.outline,
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    padding: 16,
+                    fontSize: 18,
+                    fontWeight: '600',
+                    color: theme.colors.onSurface,
+                  }}
+                  placeholder={t('forms.amountCurrency', {
+                    currency: userSetting?.currency ?? 'USD',
+                  })}
+                />
+              </View>
 
-						<View style={{ gap: 24 }}>
-							<View>
-								<Text
-									variant="labelLarge"
-									style={{
-										marginBottom: 8,
-										color: theme.colors.onSurfaceVariant,
-										fontWeight: "600",
-									}}
-								>
-									{t("forms.title")}
-								</Text>
-								<BottomSheetTextInput
-									value={title}
-									onChangeText={setTitle}
-									style={{
-										backgroundColor: theme.colors.surface,
-										borderColor: theme.colors.outline,
-										borderWidth: 1,
-										borderRadius: 6,
-										padding: 16,
-										fontSize: 16,
-										fontWeight: "500",
-										color: theme.colors.onSurface,
-									}}
-									placeholder={t("forms.title")}
-								/>
-							</View>
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 8,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('expenses.date')}
+                </Text>
+                {renderDatePicker()}
+              </View>
 
-							<View>
-								<Text
-									variant="labelLarge"
-									style={{
-										marginBottom: 8,
-										color: theme.colors.onSurfaceVariant,
-										fontWeight: "600",
-									}}
-								>
-									{t("forms.descriptionOptional")}
-								</Text>
-								<BottomSheetTextInput
-									value={description}
-									onChangeText={setDescription}
-									multiline
-									numberOfLines={3}
-									style={{
-										backgroundColor: theme.colors.surface,
-										borderColor: theme.colors.outline,
-										borderWidth: 1,
-										borderRadius: 6,
-										padding: 16,
-										fontSize: 16,
-										fontWeight: "500",
-										color: theme.colors.onSurface,
-										minHeight: 80,
-									}}
-									placeholder={t("forms.descriptionOptional")}
-								/>
-							</View>
+              <View style={{ gap: 16 }}>
+                {renderCategoryDropdown()}
+                {renderPaymentMethodDropdown()}
+              </View>
 
-							<View>
-								<Text
-									variant="labelLarge"
-									style={{
-										marginBottom: 8,
-										color: theme.colors.onSurfaceVariant,
-										fontWeight: "600",
-									}}
-								>
-									{t("forms.amountCurrency", {
-										currency: userSetting?.currency ?? "USD",
-									})}
-								</Text>
-								<BottomSheetTextInput
-									value={amount}
-									onChangeText={setAmount}
-									keyboardType="numeric"
-									style={{
-										backgroundColor: theme.colors.surface,
-										borderColor: theme.colors.outline,
-										borderWidth: 1,
-										borderRadius: 6,
-										padding: 16,
-										fontSize: 18,
-										fontWeight: "600",
-										color: theme.colors.onSurface,
-									}}
-									placeholder={t("forms.amountCurrency", {
-										currency: userSetting?.currency ?? "USD",
-									})}
-								/>
-							</View>
-
-							<View>
-								<Text
-									variant="labelLarge"
-									style={{
-										marginBottom: 8,
-										color: theme.colors.onSurfaceVariant,
-										fontWeight: "600",
-									}}
-								>
-									{t("expenses.date")}
-								</Text>
-								{renderDatePicker()}
-							</View>
-
-							<View style={{ gap: 16 }}>
-								{renderCategoryDropdown()}
-								{renderPaymentMethodDropdown()}
-							</View>
-
-							<View style={{ flexDirection: "row", gap: 16, marginTop: 16 }}>
-								<Button
-									mode="outlined"
-									onPress={onDismiss}
-									contentStyle={{
-										paddingVertical: 4,
-									}}
-									labelStyle={{
-										fontSize: 16,
-										fontWeight: "600",
-										letterSpacing: 0.25,
-									}}
-									style={{
-										flex: 1,
-										borderRadius: 6,
-									}}
-								>
-									{t("actions.cancel")}
-								</Button>
-								<Button
-									mode="contained"
-									onPress={handleSubmit}
-									disabled={loading}
-									contentStyle={{
-										paddingVertical: 4,
-									}}
-									labelStyle={{
-										fontSize: 16,
-										fontWeight: "600",
-										letterSpacing: 0.25,
-									}}
-									style={{
-										flex: 1,
-										borderRadius: 6,
-										shadowColor: "#000000",
-										shadowOffset: { width: 0, height: 2 },
-										shadowOpacity: 0.1,
-										shadowRadius: 4,
-										elevation: 2,
-									}}
-								>
-									{t("expenses.addExpense")}
-								</Button>
-							</View>
-						</View>
-					</View>
-				</SafeAreaView>
-			</BottomSheetScrollView>
-		</BottomSheetModal>
-	);
+              <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
+                <Button
+                  mode="outlined"
+                  onPress={onDismiss}
+                  contentStyle={{
+                    paddingVertical: 4,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    letterSpacing: 0.25,
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 6,
+                  }}
+                >
+                  {t('actions.cancel')}
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit}
+                  disabled={loading}
+                  contentStyle={{
+                    paddingVertical: 4,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    letterSpacing: 0.25,
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 6,
+                    shadowColor: '#000000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  {t('expenses.addExpense')}
+                </Button>
+              </View>
+            </View>
+          </View>
+        </SafeAreaView>
+      </BottomSheetScrollView>
+    </BottomSheetModal>
+  );
 }

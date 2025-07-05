@@ -1,35 +1,42 @@
-import React, { useState, useCallback } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import type { TFunction } from 'i18next';
+import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import {
-  Text,
-  Button,
-  useTheme,
-  Dialog,
-  Portal,
   Appbar,
+  Button,
+  Dialog,
   FAB,
-  IconButton
+  IconButton,
+  Portal,
+  Text,
+  useTheme,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, router } from 'expo-router';
-import { useTranslation } from 'react-i18next';
-import PaymentMethodBottomSheet from '../../../components/PaymentMethodBottomSheet';
-import EditPaymentMethodBottomSheet from '../../../components/EditPaymentMethodBottomSheet';
-import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
 import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../../components/contexts/UserContext';
+import EditPaymentMethodBottomSheet from '../../../components/EditPaymentMethodBottomSheet';
+import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
+import PaymentMethodBottomSheet from '../../../components/PaymentMethodBottomSheet';
+import {
+  deletePaymentMethodById,
+  getPaymentMethodsByUserId,
+} from '../../../db/repository/paymentMethod';
 import type { PaymentMethod } from '../../../db/schema';
-import { getPaymentMethodsByUserId, deletePaymentMethodById } from '../../../db/repository/paymentMethod';
 import { useUserData } from '../../../hooks/useAsyncData';
 
-const formatPaymentTypeForDisplay = (type: string, t: any): string => {
+const formatPaymentTypeForDisplay = (
+  type: string,
+  t: TFunction<'translation', undefined>,
+): string => {
   const typeMap: Record<string, string> = {
-    'credit_card': t('paymentMethods.creditCard'),
-    'debit_card': t('paymentMethods.debitCard'),
-    'cash': t('paymentMethods.cash'),
-    'bank_transfer': t('paymentMethods.bankTransfer'),
-    'digital_wallet': t('paymentMethods.digitalWallet'),
-    'other': t('paymentMethods.other')
+    credit_card: t('paymentMethods.creditCard'),
+    debit_card: t('paymentMethods.debitCard'),
+    cash: t('paymentMethods.cash'),
+    bank_transfer: t('paymentMethods.bankTransfer'),
+    digital_wallet: t('paymentMethods.digitalWallet'),
+    other: t('paymentMethods.other'),
   };
   return typeMap[type] || type;
 };
@@ -39,7 +46,10 @@ export default function PaymentMethodsScreen() {
   const [showEditPaymentMethodSheet, setShowEditPaymentMethodSheet] = useState(false);
   const [editingPaymentMethod, setEditingPaymentMethod] = useState<PaymentMethod | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<{ id: string, name: string } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const theme = useTheme();
   const { t } = useTranslation();
@@ -47,18 +57,21 @@ export default function PaymentMethodsScreen() {
   const { refreshKeys, triggerRefresh } = useRefreshKey();
 
   // Load payment methods using our new hook
-  const { data: paymentMethods, loading, error, refetch } = useUserData(
-    (userId) => getPaymentMethodsByUserId(userId),
-    user?.id,
-    [refreshKeys.paymentMethods]
-  );
+  const {
+    data: paymentMethods,
+    loading,
+    error,
+    refetch,
+  } = useUserData((userId) => getPaymentMethodsByUserId(userId), user?.id, [
+    refreshKeys.paymentMethods,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
       // Close all bottom sheets when navigating to this screen
       setShowPaymentMethodSheet(false);
       setShowEditPaymentMethodSheet(false);
-    }, [])
+    }, []),
   );
 
   const handlePaymentMethodAdded = () => {
@@ -126,49 +139,62 @@ export default function PaymentMethodsScreen() {
           contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
         >
           {loading ? (
-            <View style={{
-              padding: 32,
-              alignItems: 'center',
-              backgroundColor: theme.colors.surface,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: theme.colors.outline,
-            }}>
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('status.loading')}</Text>
-            </View>
-          ) : (paymentMethods && paymentMethods.length > 0) ? (
-            paymentMethods.map((method) => (
-              <View key={method.id} style={{
-                marginVertical: 4,
-                paddingVertical: 16,
-                paddingHorizontal: 24,
+            <View
+              style={{
+                padding: 32,
+                alignItems: 'center',
                 backgroundColor: theme.colors.surface,
                 borderRadius: 8,
                 borderWidth: 1,
                 borderColor: theme.colors.outline,
-                shadowColor: '#000000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 2,
-                elevation: 1,
-              }}>
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
+              }}
+            >
+              <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('status.loading')}</Text>
+            </View>
+          ) : paymentMethods && paymentMethods.length > 0 ? (
+            paymentMethods.map((method) => (
+              <View
+                key={method.id}
+                style={{
+                  marginVertical: 4,
+                  paddingVertical: 16,
+                  paddingHorizontal: 24,
+                  backgroundColor: theme.colors.surface,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: theme.colors.outline,
+                  shadowColor: '#000000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 2,
+                  elevation: 1,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
                   <View style={{ flex: 1 }}>
-                    <Text variant="titleMedium" style={{
-                      fontWeight: '600',
-                      marginBottom: 6,
-                      color: theme.colors.onSurface
-                    }}>
+                    <Text
+                      variant="titleMedium"
+                      style={{
+                        fontWeight: '600',
+                        marginBottom: 6,
+                        color: theme.colors.onSurface,
+                      }}
+                    >
                       {method.name}
                     </Text>
-                    <Text variant="bodyMedium" style={{
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '500'
-                    }}>
+                    <Text
+                      variant="bodyMedium"
+                      style={{
+                        color: theme.colors.onSurfaceVariant,
+                        fontWeight: '500',
+                      }}
+                    >
                       {formatPaymentTypeForDisplay(method.type, t)}
                     </Text>
                   </View>
@@ -195,27 +221,35 @@ export default function PaymentMethodsScreen() {
               </View>
             ))
           ) : (
-            <View style={{
-              padding: 48,
-              alignItems: 'center',
-              backgroundColor: theme.colors.surface,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: theme.colors.outline,
-            }}>
-              <Text variant="titleLarge" style={{
-                textAlign: 'center',
-                marginBottom: 16,
-                fontWeight: '600',
-                color: theme.colors.onSurface
-              }}>
+            <View
+              style={{
+                padding: 48,
+                alignItems: 'center',
+                backgroundColor: theme.colors.surface,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}
+            >
+              <Text
+                variant="titleLarge"
+                style={{
+                  textAlign: 'center',
+                  marginBottom: 16,
+                  fontWeight: '600',
+                  color: theme.colors.onSurface,
+                }}
+              >
                 {t('paymentMethods.noPaymentMethods')}
               </Text>
-              <Text variant="bodyMedium" style={{
-                textAlign: 'center',
-                color: theme.colors.onSurfaceVariant,
-                lineHeight: 24,
-              }}>
+              <Text
+                variant="bodyMedium"
+                style={{
+                  textAlign: 'center',
+                  color: theme.colors.onSurfaceVariant,
+                  lineHeight: 24,
+                }}
+              >
                 {t('paymentMethods.addToTrack')}
               </Text>
             </View>
@@ -263,15 +297,15 @@ export default function PaymentMethodsScreen() {
             </Dialog.Title>
             <Dialog.Content>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                {t('actions.deleteConfirmMessage', { name: itemToDelete?.name })} {t('actions.cannotUndo')}
+                {t('actions.deleteConfirmMessage', {
+                  name: itemToDelete?.name,
+                })}{' '}
+                {t('actions.cannotUndo')}
               </Text>
             </Dialog.Content>
             <Dialog.Actions>
               <Button onPress={() => setShowDeleteDialog(false)}>{t('common.cancel')}</Button>
-              <Button
-                onPress={handleConfirmDelete}
-                textColor={theme.colors.error}
-              >
+              <Button onPress={handleConfirmDelete} textColor={theme.colors.error}>
                 {t('common.delete')}
               </Button>
             </Dialog.Actions>
@@ -280,4 +314,4 @@ export default function PaymentMethodsScreen() {
       </SafeAreaView>
     </ErrorBoundary>
   );
-} 
+}

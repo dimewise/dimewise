@@ -1,204 +1,177 @@
-import {
-	and,
-	desc,
-	eq,
-	getTableColumns,
-	gte,
-	isNull,
-	lte,
-	sql,
-} from "drizzle-orm";
-import { db } from "../drizzle";
-import { category, Expense, expense, paymentMethod } from "../schema";
-import type { ExpenseFull, ExpenseWithDetails } from "./types";
+import { and, desc, eq, getTableColumns, gte, isNull, lte, sql } from 'drizzle-orm';
+import { db } from '../drizzle';
+import { category, expense, paymentMethod } from '../schema';
+import type { ExpenseFull, ExpenseWithDetails } from './types';
 
-export const getMonthlyExpenseSumByUserId = (
-	userId: string,
-	from: string,
-	to: string,
-) => {
-	const result = db
-		.select({ sum: sql<number>`SUM(${expense.amount})` })
-		.from(expense)
-		.where(
-			and(
-				eq(expense.userId, userId),
-				isNull(expense.deletedAt),
-				gte(expense.incurredAt, from),
-				lte(expense.incurredAt, to),
-			),
-		)
-		.get();
-	return result?.sum ?? 0;
+export const getMonthlyExpenseSumByUserId = (userId: string, from: string, to: string) => {
+  const result = db
+    .select({ sum: sql<number>`SUM(${expense.amount})` })
+    .from(expense)
+    .where(
+      and(
+        eq(expense.userId, userId),
+        isNull(expense.deletedAt),
+        gte(expense.incurredAt, from),
+        lte(expense.incurredAt, to),
+      ),
+    )
+    .get();
+  return result?.sum ?? 0;
 };
 
 export const getExpensesInRangeByUserId = (
-	userId: string,
-	from: string,
-	to: string,
-	limit?: number,
+  userId: string,
+  from: string,
+  to: string,
+  limit?: number,
 ) => {
-	let query = db
-		.select()
-		.from(expense)
-		.where(
-			and(
-				eq(expense.userId, userId),
-				isNull(expense.deletedAt),
-				gte(expense.incurredAt, from),
-				lte(expense.incurredAt, to),
-			),
-		)
-		.orderBy(desc(expense.incurredAt))
-		.$dynamic();
+  let query = db
+    .select()
+    .from(expense)
+    .where(
+      and(
+        eq(expense.userId, userId),
+        isNull(expense.deletedAt),
+        gte(expense.incurredAt, from),
+        lte(expense.incurredAt, to),
+      ),
+    )
+    .orderBy(desc(expense.incurredAt))
+    .$dynamic();
 
-	if (typeof limit === "number") {
-		query = query.limit(limit);
-	}
+  if (typeof limit === 'number') {
+    query = query.limit(limit);
+  }
 
-	return query.all() as ExpenseWithDetails[];
+  return query.all() as ExpenseWithDetails[];
 };
 
 export const getExpenseFullById = (expenseId: string): ExpenseFull | null => {
-	const result = db
-		.select({
-			...getTableColumns(expense),
-			category: {
-				id: category.id,
-				name: category.name,
-			},
-			paymentMethod: {
-				id: paymentMethod.id,
-				name: paymentMethod.name,
-			},
-		})
-		.from(expense)
-		.leftJoin(category, eq(expense.categoryId, category.id))
-		.leftJoin(paymentMethod, eq(expense.paymentMethodId, paymentMethod.id))
-		.where(eq(expense.id, expenseId))
-		.get();
+  const result = db
+    .select({
+      ...getTableColumns(expense),
+      category: {
+        id: category.id,
+        name: category.name,
+      },
+      paymentMethod: {
+        id: paymentMethod.id,
+        name: paymentMethod.name,
+      },
+    })
+    .from(expense)
+    .leftJoin(category, eq(expense.categoryId, category.id))
+    .leftJoin(paymentMethod, eq(expense.paymentMethodId, paymentMethod.id))
+    .where(eq(expense.id, expenseId))
+    .get();
 
-	if (!result) return null;
+  if (!result) return null;
 
-	return result as ExpenseFull;
+  return result as ExpenseFull;
 };
 
 // Get all expenses for a user (with optional search and category filter)
-export const getExpensesByUserId = (
-	userId: string,
-	searchQuery?: string,
-	categoryId?: string
-) => {
-	let whereConditions = [
-		eq(expense.userId, userId),
-		isNull(expense.deletedAt)
-	];
+export const getExpensesByUserId = (userId: string, searchQuery?: string, categoryId?: string) => {
+  const whereConditions = [eq(expense.userId, userId), isNull(expense.deletedAt)];
 
-	// Add search condition if provided
-	if (searchQuery) {
-		whereConditions.push(
-			sql`(LOWER(${expense.title}) LIKE LOWER(${'%' + searchQuery + '%'}) OR LOWER(${expense.description}) LIKE LOWER(${'%' + searchQuery + '%'}))`
-		);
-	}
+  // Add search condition if provided
+  if (searchQuery) {
+    whereConditions.push(
+      sql`(LOWER(${expense.title}) LIKE LOWER(${`%${searchQuery}%`}) OR LOWER(${expense.description}) LIKE LOWER(${`%${searchQuery}%`}))`,
+    );
+  }
 
-	// Add category filter if provided
-	if (categoryId) {
-		whereConditions.push(eq(expense.categoryId, categoryId));
-	}
+  // Add category filter if provided
+  if (categoryId) {
+    whereConditions.push(eq(expense.categoryId, categoryId));
+  }
 
-	return db
-		.select()
-		.from(expense)
-		.where(and(...whereConditions))
-		.orderBy(desc(expense.incurredAt))
-		.all();
+  return db
+    .select()
+    .from(expense)
+    .where(and(...whereConditions))
+    .orderBy(desc(expense.incurredAt))
+    .all();
 };
 
 // Get recent expenses for a user (limited)
 export const getRecentExpensesByUserId = (userId: string, limit: number = 10) => {
-	return db
-		.select()
-		.from(expense)
-		.where(
-			and(
-				eq(expense.userId, userId),
-				isNull(expense.deletedAt)
-			)
-		)
-		.orderBy(desc(expense.incurredAt))
-		.limit(limit)
-		.all();
+  return db
+    .select()
+    .from(expense)
+    .where(and(eq(expense.userId, userId), isNull(expense.deletedAt)))
+    .orderBy(desc(expense.incurredAt))
+    .limit(limit)
+    .all();
 };
 
 // Add this optimized function for fetching expenses with related data in one query
 export const getExpensesWithDetailsInRange = (
-	userId: string,
-	from: string,
-	to: string,
-	limit?: number,
+  userId: string,
+  from: string,
+  to: string,
+  limit?: number,
 ) => {
-	let query = db
-		.select({
-			...getTableColumns(expense),
-			category: {
-				id: category.id,
-				name: category.name,
-			},
-			paymentMethod: {
-				id: paymentMethod.id,
-				name: paymentMethod.name,
-			},
-		})
-		.from(expense)
-		.leftJoin(category, eq(expense.categoryId, category.id))
-		.leftJoin(paymentMethod, eq(expense.paymentMethodId, paymentMethod.id))
-		.where(
-			and(
-				eq(expense.userId, userId),
-				isNull(expense.deletedAt),
-				gte(expense.incurredAt, from),
-				lte(expense.incurredAt, to),
-			),
-		)
-		.orderBy(desc(expense.incurredAt))
-		.$dynamic();
+  let query = db
+    .select({
+      ...getTableColumns(expense),
+      category: {
+        id: category.id,
+        name: category.name,
+      },
+      paymentMethod: {
+        id: paymentMethod.id,
+        name: paymentMethod.name,
+      },
+    })
+    .from(expense)
+    .leftJoin(category, eq(expense.categoryId, category.id))
+    .leftJoin(paymentMethod, eq(expense.paymentMethodId, paymentMethod.id))
+    .where(
+      and(
+        eq(expense.userId, userId),
+        isNull(expense.deletedAt),
+        gte(expense.incurredAt, from),
+        lte(expense.incurredAt, to),
+      ),
+    )
+    .orderBy(desc(expense.incurredAt))
+    .$dynamic();
 
-	if (typeof limit === "number") {
-		query = query.limit(limit);
-	}
+  if (typeof limit === 'number') {
+    query = query.limit(limit);
+  }
 
-	return query.all();
+  return query.all();
 };
 
 // Optimized function to get expenses with all related data
-export const getExpensesWithDetailsByUserId = (userId: string, limit?: number): ExpenseWithDetails[] => {
-	let query = db
-		.select({
-			...getTableColumns(expense),
-			category: {
-				id: category.id,
-				name: category.name,
-			},
-			paymentMethod: {
-				id: paymentMethod.id,
-				name: paymentMethod.name,
-			},
-		})
-		.from(expense)
-		.leftJoin(category, eq(expense.categoryId, category.id))
-		.leftJoin(paymentMethod, eq(expense.paymentMethodId, paymentMethod.id))
-		.where(
-			and(
-				eq(expense.userId, userId),
-				isNull(expense.deletedAt)
-			)
-		)
-		.orderBy(desc(expense.incurredAt))
-		.$dynamic();
+export const getExpensesWithDetailsByUserId = (
+  userId: string,
+  limit?: number,
+): ExpenseWithDetails[] => {
+  let query = db
+    .select({
+      ...getTableColumns(expense),
+      category: {
+        id: category.id,
+        name: category.name,
+      },
+      paymentMethod: {
+        id: paymentMethod.id,
+        name: paymentMethod.name,
+      },
+    })
+    .from(expense)
+    .leftJoin(category, eq(expense.categoryId, category.id))
+    .leftJoin(paymentMethod, eq(expense.paymentMethodId, paymentMethod.id))
+    .where(and(eq(expense.userId, userId), isNull(expense.deletedAt)))
+    .orderBy(desc(expense.incurredAt))
+    .$dynamic();
 
-	if (typeof limit === "number") {
-		query = query.limit(limit);
-	}
+  if (typeof limit === 'number') {
+    query = query.limit(limit);
+  }
 
-	return query.all();
+  return query.all();
 };

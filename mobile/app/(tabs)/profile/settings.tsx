@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import {
-  Text,
-  Button,
-  useTheme,
-  Appbar,
-} from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../../utils/i18n';
-import { SUPPORTED_CURRENCIES, SUPPORTED_LANGUAGES, type CurrencyType, type LanguageType } from '../../../db/schema';
-import { upsertUserSetting } from '../../../db/repository/userSetting';
-import { useUser } from '../../../components/contexts/UserContext';
+import { ScrollView, View } from 'react-native';
+import { Appbar, Button, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
-import DropdownBottomSheet, { DropdownButton, DropdownOption } from '../../../components/DropdownBottomSheet';
+import { useUser } from '../../../components/contexts/UserContext';
+import DropdownBottomSheet, {
+  DropdownButton,
+  type DropdownOption,
+} from '../../../components/DropdownBottomSheet';
 import ErrorBoundary from '../../../components/ErrorBoundary';
+import { upsertUserSetting } from '../../../db/repository/userSetting';
+import {
+  type CurrencyType,
+  type LanguageType,
+  SUPPORTED_CURRENCIES,
+  SUPPORTED_LANGUAGES,
+} from '../../../db/schema';
+import i18n from '../../../utils/i18n';
 
 export default function SettingsScreen() {
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyType>('USD');
@@ -44,7 +47,7 @@ export default function SettingsScreen() {
     try {
       await upsertUserSetting(user.id, {
         currency: selectedCurrency,
-        preferredLanguage: selectedLanguage
+        preferredLanguage: selectedLanguage,
       });
 
       // Change the app language immediately
@@ -61,23 +64,23 @@ export default function SettingsScreen() {
   };
 
   // Convert currencies to dropdown options
-  const currencyOptions: DropdownOption[] = SUPPORTED_CURRENCIES.map(curr => ({
+  const currencyOptions: DropdownOption[] = SUPPORTED_CURRENCIES.map((curr) => ({
     label: curr,
     value: curr,
-    id: curr
+    id: curr,
   }));
 
   // Language display mapping
   const languageLabels: Record<LanguageType, string> = {
-    'en': 'English',
-    'ja': '日本語'
+    en: 'English',
+    ja: '日本語',
   };
 
   // Convert languages to dropdown options
-  const languageOptions: DropdownOption[] = SUPPORTED_LANGUAGES.map(lang => ({
+  const languageOptions: DropdownOption[] = SUPPORTED_LANGUAGES.map((lang) => ({
     label: languageLabels[lang],
     value: lang,
-    id: lang
+    id: lang,
   }));
 
   const renderLanguageDropdown = () => (
@@ -132,49 +135,66 @@ export default function SettingsScreen() {
           <Appbar.Content title={t('settings.title')} titleStyle={{ fontWeight: '700' }} />
         </Appbar.Header>
 
-        <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }} contentContainerStyle={{ padding: 24 }}>
+        <ScrollView
+          style={{ flex: 1, backgroundColor: theme.colors.background }}
+          contentContainerStyle={{ padding: 24 }}
+        >
           {/* Language Settings Section */}
-          <View style={{
-            padding: 24,
-            backgroundColor: theme.colors.surface,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
-            marginBottom: 16,
-            shadowColor: '#000000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.05,
-            shadowRadius: 2,
-            elevation: 1,
-          }}>
-            <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 16, color: theme.colors.onSurface }}>
+          <View
+            style={{
+              padding: 24,
+              backgroundColor: theme.colors.surface,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: theme.colors.outline,
+              marginBottom: 16,
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 1,
+            }}
+          >
+            <Text
+              variant="titleMedium"
+              style={{
+                fontWeight: '600',
+                marginBottom: 16,
+                color: theme.colors.onSurface,
+              }}
+            >
               {t('settings.language')}
             </Text>
-            <View style={{ gap: 16 }}>
-              {renderLanguageDropdown()}
-            </View>
+            <View style={{ gap: 16 }}>{renderLanguageDropdown()}</View>
           </View>
 
           {/* Currency Settings Section */}
-          <View style={{
-            padding: 24,
-            backgroundColor: theme.colors.surface,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: theme.colors.outline,
-            marginBottom: 16,
-            shadowColor: '#000000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.05,
-            shadowRadius: 2,
-            elevation: 1,
-          }}>
-            <Text variant="titleMedium" style={{ fontWeight: '600', marginBottom: 16, color: theme.colors.onSurface }}>
+          <View
+            style={{
+              padding: 24,
+              backgroundColor: theme.colors.surface,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: theme.colors.outline,
+              marginBottom: 16,
+              shadowColor: '#000000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 2,
+              elevation: 1,
+            }}
+          >
+            <Text
+              variant="titleMedium"
+              style={{
+                fontWeight: '600',
+                marginBottom: 16,
+                color: theme.colors.onSurface,
+              }}
+            >
               {t('settings.defaultCurrency')}
             </Text>
-            <View style={{ gap: 16 }}>
-              {renderCurrencyDropdown()}
-            </View>
+            <View style={{ gap: 16 }}>{renderCurrencyDropdown()}</View>
           </View>
 
           {/* Save Settings Button */}
@@ -183,14 +203,18 @@ export default function SettingsScreen() {
               mode="contained"
               onPress={handleSaveSettings}
               loading={loading}
-              disabled={loading || (selectedCurrency === userSetting?.currency && selectedLanguage === (userSetting?.preferredLanguage || 'en'))}
+              disabled={
+                loading ||
+                (selectedCurrency === userSetting?.currency &&
+                  selectedLanguage === (userSetting?.preferredLanguage || 'en'))
+              }
               contentStyle={{
                 paddingVertical: 12,
               }}
               labelStyle={{
                 fontSize: 16,
                 fontWeight: '600',
-                letterSpacing: 0.25
+                letterSpacing: 0.25,
               }}
               style={{
                 borderRadius: 8,
@@ -198,16 +222,14 @@ export default function SettingsScreen() {
             >
               {loading
                 ? t('common.loading')
-                : (selectedCurrency === userSetting?.currency && selectedLanguage === (userSetting?.preferredLanguage || 'en'))
+                : selectedCurrency === userSetting?.currency &&
+                    selectedLanguage === (userSetting?.preferredLanguage || 'en')
                   ? t('settings.settingsUpdated')
-                  : t('settings.saveSettings')
-              }
+                  : t('settings.saveSettings')}
             </Button>
           </View>
-
-
         </ScrollView>
       </SafeAreaView>
     </ErrorBoundary>
   );
-} 
+}

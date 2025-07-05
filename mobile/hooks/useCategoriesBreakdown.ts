@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useUser } from '../components/contexts/UserContext';
 import { getCategoriesByUserId } from '../db/repository/category';
 import { getExpensesInRangeByUserId } from '../db/repository/expense';
 import type { CategoryWithSpending } from '../db/repository/types';
 import { getMonthRange } from '../utils/datetime';
-import { useRefreshKey } from '../components/contexts/RefreshKeyContext';
-import { useUser } from '../components/contexts/UserContext';
 
 export function useCategoriesBreakdown(): {
   categories: CategoryWithSpending[];
@@ -14,7 +13,6 @@ export function useCategoriesBreakdown(): {
 } {
   const { t } = useTranslation();
   const { user } = useUser();
-  const { refreshKeys } = useRefreshKey();
 
   const result = useMemo(() => {
     if (!user?.id) {
@@ -57,8 +55,8 @@ export function useCategoriesBreakdown(): {
       // Add "Uncategorized" if needed
       if (uncategorizedTotal > 0) {
         result.push({
-          id: "uncategorized",
-          name: t("common.unknown"),
+          id: 'uncategorized',
+          name: t('common.unknown'),
           budget: 0,
           spent: uncategorizedTotal,
           percentage: 0,
@@ -71,10 +69,10 @@ export function useCategoriesBreakdown(): {
       return {
         categories: [],
         loading: false,
-        error: error instanceof Error ? error.message : 'Failed to load categories'
+        error: error instanceof Error ? error.message : 'Failed to load categories',
       };
     }
-  }, [user?.id, refreshKeys.categories, refreshKeys.expenses, t]);
+  }, [user?.id, t]);
 
   return result;
-} 
+}

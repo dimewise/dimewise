@@ -1,9 +1,9 @@
-import React, { Component, type ReactNode } from 'react';
-import { View } from 'react-native';
-import { Button, Card, Text, useTheme } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
+import { Component, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Props {
   children: ReactNode;
@@ -56,13 +56,23 @@ class ErrorBoundaryClass extends Component<Props, State> {
 }
 
 // Default fallback component
-const DefaultErrorFallback: React.FC<{ error: Error | null; onRetry: () => void }> = ({ error, onRetry }) => {
+const DefaultErrorFallback: React.FC<{
+  error: Error | null;
+  onRetry: () => void;
+}> = ({ error, onRetry }) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 24,
+        }}
+      >
         <View style={{ alignItems: 'center', maxWidth: 320 }}>
           <Text
             variant="headlineSmall"
@@ -70,7 +80,7 @@ const DefaultErrorFallback: React.FC<{ error: Error | null; onRetry: () => void 
               textAlign: 'center',
               marginBottom: 12,
               color: theme.colors.onSurface,
-              fontWeight: '600'
+              fontWeight: '600',
             }}
           >
             {t('errors.title')}
@@ -81,28 +91,30 @@ const DefaultErrorFallback: React.FC<{ error: Error | null; onRetry: () => void 
               textAlign: 'center',
               marginBottom: 32,
               color: theme.colors.onSurfaceVariant,
-              lineHeight: 20
+              lineHeight: 20,
             }}
           >
             {t('errors.subtitle')}
           </Text>
 
           {__DEV__ && error && (
-            <View style={{
-              width: '100%',
-              marginBottom: 24,
-              padding: 16,
-              backgroundColor: theme.colors.errorContainer,
-              borderRadius: 8,
-              borderWidth: 1,
-              borderColor: theme.colors.outline
-            }}>
+            <View
+              style={{
+                width: '100%',
+                marginBottom: 24,
+                padding: 16,
+                backgroundColor: theme.colors.errorContainer,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: theme.colors.outline,
+              }}
+            >
               <Text
                 variant="labelSmall"
                 style={{
                   color: theme.colors.onErrorContainer,
                   fontFamily: 'monospace',
-                  fontSize: 12
+                  fontSize: 12,
                 }}
               >
                 {error.message}
@@ -142,13 +154,20 @@ export const LoadingErrorFallback: React.FC<{ onRetry: () => void }> = ({ onRetr
   const { t } = useTranslation();
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+      }}
+    >
       <Text
         variant="headlineSmall"
         style={{
           marginBottom: 16,
           color: theme.colors.onSurface,
-          textAlign: 'center'
+          textAlign: 'center',
         }}
       >
         {t('errors.loadingError')}
@@ -169,13 +188,20 @@ export const ExpensesErrorFallback: React.FC<{ onRetry: () => void }> = ({ onRet
   const { t } = useTranslation();
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+      }}
+    >
       <Text
         variant="headlineSmall"
         style={{
           marginBottom: 12,
           color: theme.colors.onSurface,
-          textAlign: 'center'
+          textAlign: 'center',
         }}
       >
         {t('errors.expensesError')}
@@ -186,7 +212,7 @@ export const ExpensesErrorFallback: React.FC<{ onRetry: () => void }> = ({ onRet
           textAlign: 'center',
           marginBottom: 32,
           color: theme.colors.onSurfaceVariant,
-          lineHeight: 20
+          lineHeight: 20,
         }}
       >
         {t('errors.expensesErrorSubtitle')}
@@ -207,4 +233,4 @@ const ErrorBoundary: React.FC<Props> = (props) => {
   return <ErrorBoundaryClass {...props} />;
 };
 
-export default ErrorBoundary; 
+export default ErrorBoundary;
