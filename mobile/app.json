@@ -1,54 +1,65 @@
 {
-	"expo": {
-		"name": "DimeWise",
-		"slug": "dimewise",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./assets/icons/splash-icon-dark.png",
-		"userInterfaceStyle": "automatic",
-		"splash": {
-			"image": "./assets/icons/splash-icon-dark.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#ffffff"
-		},
-		"assetBundlePatterns": ["**/*"],
-		"ios": {
-			"supportsTablet": true,
-			"bundleIdentifier": "com.dimewise.app",
-			"icon": {
-				"light": "./assets/icons/ios-light.png",
-				"dark": "./assets/icons/ios-dark.png",
-				"tinted": "./assets/icons/ios-tinted.png"
-			}
-		},
-		"android": {
-			"adaptiveIcon": {
-				"foregroundImage": "./assets/icons/adaptive-icon.png",
-				"monochromeImage": "./assets/icons/adaptive-icon.png",
-				"backgroundColor": "#ffffff"
-			},
-			"package": "com.dimewise.app",
-		},
-		"web": {
-			"favicon": "./assets/favicon.png",
-			"bundler": "metro"
-		},
-		"scheme": "dimewise",
-		"plugins": [
-			"expo-router",
-			[
-				"expo-splash-screen",
-				{
-					"image": "./assets/icons/splash-icon-dark.png",
-					"imageWidth": 200,
-					"resizeMode": "contain",
-					"backgroundColor": "#ffffff",
-					"dark": {
-						"image": "./assets/icons/splash-icon-light.png",
-						"backgroundColor": "#000000"
-					}
-				}
-			]
-		]
-	}
+  "expo": {
+    "name": "Dimewise",
+    "slug": "dimewise",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icons/splash-icon-dark.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/icons/splash-icon-dark.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dimewise.app",
+      "icon": {
+        "light": "./assets/icons/ios-light.png",
+        "dark": "./assets/icons/ios-dark.png",
+        "tinted": "./assets/icons/ios-tinted.png"
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "monochromeImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.dimewise.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "scheme": "dimewise",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icons/splash-icon-dark.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "image": "./assets/icons/splash-icon-light.png",
+            "backgroundColor": "#000000"
+          }
+        }
+      ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "97ed9f04-5400-4bfd-b84e-6ea1a824079d"
+      }
+    }
+  }
 }

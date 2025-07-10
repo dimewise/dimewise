@@ -24,6 +24,7 @@
 		"drizzle-orm": "^0.44.2",
 		"expo": "53.0.17",
 		"expo-crypto": "~14.1.5",
+		"expo-dev-client": "~5.2.4",
 		"expo-drizzle-studio-plugin": "^0.2.0",
 		"expo-font": "~13.3.2",
 		"expo-localization": "^16.1.6",
