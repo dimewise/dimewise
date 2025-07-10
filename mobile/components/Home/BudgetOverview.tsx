@@ -44,243 +44,241 @@ export const BudgetOverview = () => {
   }, [totalBudget, totalSpent]);
 
   return (
-    <View style={{ marginBottom: 32 }}>
-      <View style={{ paddingVertical: 32 }}>
-        {/* Header */}
-        <View
+    <View style={{ paddingVertical: 32 }}>
+      {/* Header */}
+      <View
+        style={{
+          alignItems: 'center',
+          marginBottom: 32,
+        }}
+      >
+        <Text
+          variant="headlineSmall"
           style={{
-            alignItems: 'center',
-            marginBottom: 32,
+            fontWeight: '800',
+            color: theme.colors.onSurface,
+            letterSpacing: -0.5,
+            marginBottom: 4,
           }}
         >
-          <Text
-            variant="headlineSmall"
-            style={{
-              fontWeight: '800',
-              color: theme.colors.onSurface,
-              letterSpacing: -0.5,
-              marginBottom: 4,
-            }}
-          >
-            {t('expenses.monthlyBudget')}
-          </Text>
-          <Text
-            variant="bodyMedium"
-            style={{
-              color: theme.colors.onSurfaceVariant,
-              fontWeight: '500',
-              opacity: 0.8,
-            }}
-          >
-            {new Date().toLocaleDateString(undefined, {
-              month: 'long',
-              year: 'numeric',
-            })}
-          </Text>
-        </View>
+          {t('expenses.monthlyBudget')}
+        </Text>
+        <Text
+          variant="bodyMedium"
+          style={{
+            color: theme.colors.onSurfaceVariant,
+            fontWeight: '500',
+            opacity: 0.8,
+          }}
+        >
+          {new Date().toLocaleDateString(undefined, {
+            month: 'long',
+            year: 'numeric',
+          })}
+        </Text>
+      </View>
 
-        {/* Progress Section */}
-        <View style={{ marginBottom: 28 }}>
-          {/* Custom Progress Bar Container */}
+      {/* Progress Section */}
+      <View style={{ marginBottom: 28 }}>
+        {/* Custom Progress Bar Container */}
+        <View
+          style={{
+            height: 16,
+            backgroundColor: theme.colors.surfaceVariant,
+            borderRadius: 8,
+            overflow: 'hidden',
+            marginBottom: 16,
+            shadowColor: '#000000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          {/* Progress Fill */}
           <View
             style={{
-              height: 16,
-              backgroundColor: theme.colors.surfaceVariant,
+              height: '100%',
+              width: `${Math.min(percentUsed, 100)}%`,
+              backgroundColor:
+                percentUsed >= 95 ? '#FF4444' : percentUsed >= 80 ? '#FF8800' : '#00BF63',
               borderRadius: 8,
-              overflow: 'hidden',
-              marginBottom: 16,
-              shadowColor: '#000000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.08,
+              shadowColor:
+                percentUsed >= 95 ? '#FF4444' : percentUsed >= 80 ? '#FF8800' : '#00BF63',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.3,
               shadowRadius: 4,
               elevation: 2,
             }}
-          >
-            {/* Progress Fill */}
-            <View
-              style={{
-                height: '100%',
-                width: `${Math.min(percentUsed, 100)}%`,
-                backgroundColor:
-                  percentUsed >= 95 ? '#FF4444' : percentUsed >= 80 ? '#FF8800' : '#00BF63',
-                borderRadius: 8,
-                shadowColor:
-                  percentUsed >= 95 ? '#FF4444' : percentUsed >= 80 ? '#FF8800' : '#00BF63',
-                shadowOffset: { width: 0, height: 0 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            />
-          </View>
+          />
+        </View>
 
-          {/* Percentage Display */}
+        {/* Percentage Display */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 4,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 36,
+              fontWeight: '900',
+              color: percentUsed >= 90 ? '#FF4444' : theme.colors.onSurface,
+              letterSpacing: -1,
+              textAlign: 'center',
+            }}
+          >
+            {percentUsed.toFixed(0)}%
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: '600',
+              color: theme.colors.onSurfaceVariant,
+              marginLeft: 4,
+              marginTop: 8,
+            }}
+          >
+            {t('status.used')}
+          </Text>
+        </View>
+      </View>
+
+      {/* Stats Row */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 8,
+          marginBottom: 20,
+        }}
+      >
+        {/* Spent */}
+        <View
+          style={{
+            alignItems: 'center',
+            flex: 1,
+          }}
+        >
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'center',
               marginBottom: 4,
             }}
           >
-            <Text
+            <View
               style={{
-                fontSize: 36,
-                fontWeight: '900',
-                color: percentUsed >= 90 ? '#FF4444' : theme.colors.onSurface,
-                letterSpacing: -1,
-                textAlign: 'center',
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: '#FF6B6B',
+                marginRight: 8,
               }}
-            >
-              {percentUsed.toFixed(0)}%
-            </Text>
+            />
             <Text
+              variant="labelMedium"
               style={{
-                fontSize: 16,
-                fontWeight: '600',
                 color: theme.colors.onSurfaceVariant,
-                marginLeft: 4,
-                marginTop: 8,
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
               }}
             >
-              {t('status.used')}
+              {t('expenses.spent')}
             </Text>
           </View>
-        </View>
-
-        {/* Stats Row */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 8,
-            marginBottom: 20,
-          }}
-        >
-          {/* Spent */}
-          <View
-            style={{
-              alignItems: 'center',
-              flex: 1,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4,
-              }}
-            >
-              <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: '#FF6B6B',
-                  marginRight: 8,
-                }}
-              />
-              <Text
-                variant="labelMedium"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                {t('expenses.spent')}
-              </Text>
-            </View>
-            <Text
-              variant="titleMedium"
-              style={{
-                fontWeight: '700',
-                color: theme.colors.onSurface,
-              }}
-            >
-              {formatAmount(totalSpent, userSetting?.currency || 'USD')}
-            </Text>
-          </View>
-          <Divider />
-          {/* remainder */}
-          <View
-            style={{
-              alignItems: 'center',
-              flex: 1,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 4,
-              }}
-            >
-              <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: remainder >= 0 ? '#00BF63' : '#FF4444',
-                  marginRight: 8,
-                }}
-              />
-              <Text
-                variant="labelMedium"
-                style={{
-                  color: theme.colors.onSurfaceVariant,
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                {remainder >= 0 ? t('home.left') : t('home.over')}
-              </Text>
-            </View>
-            <Text
-              variant="titleMedium"
-              style={{
-                fontWeight: '700',
-                color: remainder >= 0 ? theme.colors.onSurface : '#FF4444',
-              }}
-            >
-              {formatAmount(Math.abs(remainder), userSetting?.currency || 'USD')}
-            </Text>
-          </View>
-        </View>
-
-        {/* Status Message */}
-        <View
-          style={{
-            padding: 16,
-            backgroundColor:
-              percentUsed >= 90 ? '#FFF5F5' : percentUsed >= 75 ? '#FFF8F0' : '#F0FFF4',
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: percentUsed >= 90 ? '#FFE5E5' : percentUsed >= 75 ? '#FFF0E0' : '#E5FFE5',
-            alignItems: 'center',
-          }}
-        >
           <Text
-            variant="bodyMedium"
+            variant="titleMedium"
             style={{
-              color: percentUsed >= 90 ? '#D32F2F' : percentUsed >= 75 ? '#F57C00' : '#2E7D32',
-              fontWeight: '600',
-              textAlign: 'center',
-              lineHeight: 20,
+              fontWeight: '700',
+              color: theme.colors.onSurface,
             }}
           >
-            {percentUsed >= 95
-              ? t('home.budgetExceeded')
-              : percentUsed >= 85
-                ? t('home.nearingLimit')
-                : percentUsed >= 60
-                  ? t('home.onTrack')
-                  : t('home.greatProgress')}
+            {formatAmount(totalSpent, userSetting?.currency || 'USD')}
           </Text>
         </View>
+        <Divider />
+        {/* remainder */}
+        <View
+          style={{
+            alignItems: 'center',
+            flex: 1,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 4,
+            }}
+          >
+            <View
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: remainder >= 0 ? '#00BF63' : '#FF4444',
+                marginRight: 8,
+              }}
+            />
+            <Text
+              variant="labelMedium"
+              style={{
+                color: theme.colors.onSurfaceVariant,
+                fontWeight: '600',
+                textTransform: 'uppercase',
+                letterSpacing: 0.5,
+              }}
+            >
+              {remainder >= 0 ? t('home.left') : t('home.over')}
+            </Text>
+          </View>
+          <Text
+            variant="titleMedium"
+            style={{
+              fontWeight: '700',
+              color: remainder >= 0 ? theme.colors.onSurface : '#FF4444',
+            }}
+          >
+            {formatAmount(Math.abs(remainder), userSetting?.currency || 'USD')}
+          </Text>
+        </View>
+      </View>
+
+      {/* Status Message */}
+      <View
+        style={{
+          padding: 16,
+          backgroundColor:
+            percentUsed >= 90 ? '#FFF5F5' : percentUsed >= 75 ? '#FFF8F0' : '#F0FFF4',
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: percentUsed >= 90 ? '#FFE5E5' : percentUsed >= 75 ? '#FFF0E0' : '#E5FFE5',
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          variant="bodyMedium"
+          style={{
+            color: percentUsed >= 90 ? '#D32F2F' : percentUsed >= 75 ? '#F57C00' : '#2E7D32',
+            fontWeight: '600',
+            textAlign: 'center',
+            lineHeight: 20,
+          }}
+        >
+          {percentUsed >= 95
+            ? t('home.budgetExceeded')
+            : percentUsed >= 85
+              ? t('home.nearingLimit')
+              : percentUsed >= 60
+                ? t('home.onTrack')
+                : t('home.greatProgress')}
+        </Text>
       </View>
     </View>
   );
