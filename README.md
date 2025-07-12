@@ -5,34 +5,21 @@ A personal finance management app for tracking expenses, managing budgets, and g
 ## Table of Contents
 
 - [Features](#features)
-- [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
 - [Development](#development)
 - [Database](#database)
-- [Testing](#testing)
 - [Support](#support)
 - [License](#license)
 
-## Features
-
-- Track expenses with categories and payment methods
-- Manage budget categories with spending limits
-- Monthly overview and spending insights
-- Multi-currency support (30+ currencies)
-- Internationalization (English/Japanese)
-- Offline-first with local SQLite database
-- Dark/light theme support
-
 ## Tech Stack
 
-- **Framework:** React Native with Expo SDK 53
-- **Navigation:** Expo Router
-- **Database:** SQLite with Drizzle ORM
-- **UI:** React Native Paper
-- **State Management:** React Context
-- **Internationalization:** i18next
-- **Language:** TypeScript
+- **Mobile:** React Native with Expo SDK 53
+  - **Database:** SQLite with Drizzle ORM
+  - **UI:** React Native Paper
+  - **State Management:** React Context
+  - **Internationalization:** i18next
+  - **Language:** TypeScript
 
 ## Prerequisites
 
@@ -86,16 +73,6 @@ bun android
   - Payment methods
   - Expenses with verification status
   - Exchange rates for multi-currency support
-
-## Testing
-
-- **Run all tests:**
-
-```bash
-bun test
-```
-
-- Tests are written with [Jest](https://jestjs.io/) and [React Native Testing Library](https://testing-library.com/docs/react-native-testing-library/intro/).
 
 ## Support
 
