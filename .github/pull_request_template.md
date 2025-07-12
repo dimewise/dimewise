@@ -1,20 +1,15 @@
 ## Pull Request Title
 
 <!-- A clear, concise title describing your change. -->
-
----
+<!-- Delete sections or section content as needed -->
 
 ### Summary
 
 Briefly explain the purpose of this PR and the main changes introduced.
 
----
-
 ### Related Issues
 
 <!-- Link to any relevant issues or tickets (e.g., Closes #123, Fixes #456) -->
-
----
 
 ### Changes Made
 
@@ -22,15 +17,11 @@ Briefly explain the purpose of this PR and the main changes introduced.
 - Note any refactoring or bug fixes
 - Mention removed or deprecated code
 
----
-
 ### How to Test
 
 - Steps to reproduce or verify the changes
 - Any test commands or setup required
 - Include screenshots or recordings if helpful
-
----
 
 ### Checklist
 
@@ -42,13 +33,9 @@ Briefly explain the purpose of this PR and the main changes introduced.
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] All new and existing tests passed
 
----
-
 ### Additional Context
 
 Add any other relevant context, screenshots, or information for reviewers.
-
----
 
 ### Reviewer Notes
 
