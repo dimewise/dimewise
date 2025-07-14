@@ -1,5 +1,4 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -9,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Suspense, useEffect, useMemo } from 'react';
 import { Text, useColorScheme, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ActivityIndicator, adaptNavigationTheme, PaperProvider } from 'react-native-paper';
+import { ActivityIndicator, PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { DATABASE_NAME, db, seedInitialData } from '../db/drizzle';
 import migrations from '../db/generated/migrations/migrations';
