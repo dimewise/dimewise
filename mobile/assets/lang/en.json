@@ -60,6 +60,7 @@
 		"paymentMethod": "Payment Method",
 		"date": "Date",
 		"noExpenses": "No expenses found",
+		"noExpensesYet": "No expenses yet",
 		"totalExpenses": "Total Expenses",
 		"overBudget": "over budget",
 		"monthlyBudget": "Monthly Budget",
