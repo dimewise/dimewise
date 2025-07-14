@@ -254,8 +254,8 @@ export default function ExpensesScreen() {
                 <View style={{ padding: 24, alignItems: 'center' }}>
                   <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
                     {searchQuery || selectedCategory
-                      ? 'No matching expenses found'
-                      : 'No expenses yet'}
+                      ? t('expenses.noMatchingExpenses')
+                      : t('expenses.noExpensesYet')}
                   </Text>
                 </View>
               ) : (

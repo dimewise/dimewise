@@ -60,6 +60,7 @@
 		"paymentMethod": "支払い方法",
 		"date": "日付",
 		"noExpenses": "支出が見つかりません",
+		"noExpensesYet": "まだ支出がありません",
 		"totalExpenses": "支出合計",
 		"overBudget": "予算超過",
 		"monthlyBudget": "月間予算",
