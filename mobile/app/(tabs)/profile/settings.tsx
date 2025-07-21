@@ -129,10 +129,16 @@ export default function SettingsScreen() {
         console.error('Settings screen error:', error, errorInfo);
       }}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        edges={[]}
+      >
         <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title={t('settings.title')} titleStyle={{ fontWeight: '700' }} />
+          <Appbar.Content
+            title={t('settings.title')}
+            titleStyle={{ fontWeight: '700' }}
+          />
         </Appbar.Header>
 
         <ScrollView

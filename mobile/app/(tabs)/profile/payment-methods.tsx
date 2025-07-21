@@ -112,10 +112,16 @@ export default function PaymentMethodsScreen() {
   // Error fallback
   if (error) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        edges={[]}
+      >
         <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title={t('paymentMethods.title')} titleStyle={{ fontWeight: '700' }} />
+          <Appbar.Content
+            title={t('paymentMethods.title')}
+            titleStyle={{ fontWeight: '700' }}
+          />
         </Appbar.Header>
         <LoadingErrorFallback onRetry={refetch} />
       </SafeAreaView>
@@ -128,10 +134,16 @@ export default function PaymentMethodsScreen() {
         console.error('Payment methods error:', error, errorInfo);
       }}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        edges={[]}
+      >
         <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title={t('paymentMethods.title')} titleStyle={{ fontWeight: '700' }} />
+          <Appbar.Content
+            title={t('paymentMethods.title')}
+            titleStyle={{ fontWeight: '700' }}
+          />
         </Appbar.Header>
 
         <ScrollView
@@ -296,7 +308,10 @@ export default function PaymentMethodsScreen() {
               {t('actions.deleteConfirm')}
             </Dialog.Title>
             <Dialog.Content>
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+              <Text
+                variant="bodyMedium"
+                style={{ color: theme.colors.onSurface }}
+              >
                 {t('actions.deleteConfirmMessage', {
                   name: itemToDelete?.name,
                 })}{' '}
@@ -305,7 +320,10 @@ export default function PaymentMethodsScreen() {
             </Dialog.Content>
             <Dialog.Actions>
               <Button onPress={() => setShowDeleteDialog(false)}>{t('common.cancel')}</Button>
-              <Button onPress={handleConfirmDelete} textColor={theme.colors.error}>
+              <Button
+                onPress={handleConfirmDelete}
+                textColor={theme.colors.error}
+              >
                 {t('common.delete')}
               </Button>
             </Dialog.Actions>

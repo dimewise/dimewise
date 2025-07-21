@@ -52,7 +52,10 @@ export const CategoryList = ({ categories }: Props) => {
   return (
     <View style={{ paddingBottom: 16 }}>
       {categories.map((category) => (
-        <CategoryListItem key={category.id} category={category} />
+        <CategoryListItem
+          key={category.id}
+          category={category}
+        />
       ))}
     </View>
   );

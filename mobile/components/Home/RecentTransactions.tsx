@@ -48,7 +48,10 @@ export const RecentTransactions = ({ onPress }: Props) => {
         >
           {t('home.recentTransactions')}
         </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+        <Text
+          variant="bodyMedium"
+          style={{ color: theme.colors.onSurfaceVariant }}
+        >
           {t('status.loading')}
         </Text>
       </View>
@@ -85,7 +88,11 @@ export const RecentTransactions = ({ onPress }: Props) => {
       >
         {t('home.recentTransactions')}
       </Text>
-      <ExpenseList expenses={expenses || []} hideDescription onPress={onPress} />
+      <ExpenseList
+        expenses={expenses || []}
+        hideDescription
+        onPress={onPress}
+      />
     </View>
   );
 };

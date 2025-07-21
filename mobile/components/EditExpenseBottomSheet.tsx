@@ -315,7 +315,10 @@ export default function EditExpenseBottomSheet({
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={false}
       >
-        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+        <SafeAreaView
+          edges={['bottom']}
+          style={{ flex: 1 }}
+        >
           <View
             style={{
               padding: 8,

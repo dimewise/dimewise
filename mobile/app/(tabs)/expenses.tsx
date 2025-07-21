@@ -155,7 +155,10 @@ export default function ExpensesScreen() {
       }}
     >
       <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: theme.colors.background }}
+          edges={['top']}
+        >
           {/* SEARCH HEADER */}
           <View
             style={{
@@ -206,7 +209,10 @@ export default function ExpensesScreen() {
                 >
                   {t('common.filter')}:
                 </Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                >
                   <View style={{ flexDirection: 'row', gap: 8, paddingRight: 16 }}>
                     <Chip
                       selected={selectedCategory === null}
@@ -252,7 +258,10 @@ export default function ExpensesScreen() {
             >
               {filteredExpenses.length === 0 ? (
                 <View style={{ padding: 24, alignItems: 'center' }}>
-                  <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+                  <Text
+                    variant="bodyLarge"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
                     {searchQuery || selectedCategory
                       ? t('expenses.noMatchingExpenses')
                       : t('expenses.noExpensesYet')}

@@ -62,7 +62,10 @@ export const CategoryListItem = ({ category }: Props) => {
             alignItems: 'center',
           }}
         >
-          <Text variant="titleMedium" style={{ fontWeight: '600', color: theme.colors.onSurface }}>
+          <Text
+            variant="titleMedium"
+            style={{ fontWeight: '600', color: theme.colors.onSurface }}
+          >
             {category.name}
           </Text>
           <Text

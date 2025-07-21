@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router, Tabs, usePathname, useRouter } from 'expo-router';
+import { Tabs, usePathname, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
 
@@ -33,7 +33,11 @@ export default function TabLayout() {
         options={{
           title: t('navigation.home'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="home" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="home"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -42,7 +46,11 @@ export default function TabLayout() {
         options={{
           title: t('navigation.expenses'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="receipt" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="receipt"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -51,7 +59,11 @@ export default function TabLayout() {
         options={{
           title: t('navigation.profile'),
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account" size={size} color={color} />
+            <MaterialCommunityIcons
+              name="account"
+              size={size}
+              color={color}
+            />
           ),
         }}
         listeners={{

@@ -92,10 +92,16 @@ export default function BudgetCategoriesScreen() {
   // Error fallback
   if (error) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        edges={[]}
+      >
         <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title={t('categories.title')} titleStyle={{ fontWeight: '700' }} />
+          <Appbar.Content
+            title={t('categories.title')}
+            titleStyle={{ fontWeight: '700' }}
+          />
         </Appbar.Header>
         <LoadingErrorFallback onRetry={refetch} />
       </SafeAreaView>
@@ -108,10 +114,16 @@ export default function BudgetCategoriesScreen() {
         console.error('Budget categories error:', error, errorInfo);
       }}
     >
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={[]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        edges={[]}
+      >
         <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
           <Appbar.BackAction onPress={() => router.back()} />
-          <Appbar.Content title={t('categories.title')} titleStyle={{ fontWeight: '700' }} />
+          <Appbar.Content
+            title={t('categories.title')}
+            titleStyle={{ fontWeight: '700' }}
+          />
         </Appbar.Header>
 
         <ScrollView
@@ -277,7 +289,10 @@ export default function BudgetCategoriesScreen() {
               {t('actions.deleteConfirm')}
             </Dialog.Title>
             <Dialog.Content>
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+              <Text
+                variant="bodyMedium"
+                style={{ color: theme.colors.onSurface }}
+              >
                 {t('actions.deleteConfirmMessage', {
                   name: itemToDelete?.name,
                 })}{' '}
@@ -286,7 +301,10 @@ export default function BudgetCategoriesScreen() {
             </Dialog.Content>
             <Dialog.Actions>
               <Button onPress={() => setShowDeleteDialog(false)}>{t('common.cancel')}</Button>
-              <Button onPress={handleConfirmDelete} textColor={theme.colors.error}>
+              <Button
+                onPress={handleConfirmDelete}
+                textColor={theme.colors.error}
+              >
                 {t('common.delete')}
               </Button>
             </Dialog.Actions>
