@@ -118,7 +118,11 @@ export default function DropdownBottomSheet({
           }}
         >
           {selectedValue === item.value && (
-            <IconButton icon="check" iconColor={theme.colors.primary} size={20} />
+            <IconButton
+              icon="check"
+              iconColor={theme.colors.primary}
+              size={20}
+            />
           )}
         </View>
       )}

@@ -35,7 +35,10 @@ export default function ProfileScreen() {
       }}
     >
       <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top']}>
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: theme.colors.background }}
+          edges={['top']}
+        >
           <View
             style={{
               paddingTop: 16,
@@ -70,8 +73,18 @@ export default function ProfileScreen() {
               <List.Item
                 title={t('navigation.settings')}
                 description={t('settings.currencyAndPreferences')}
-                left={(props) => <List.Icon {...props} icon="cog" />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                left={(props) => (
+                  <List.Icon
+                    {...props}
+                    icon="cog"
+                  />
+                )}
+                right={(props) => (
+                  <List.Icon
+                    {...props}
+                    icon="chevron-right"
+                  />
+                )}
                 onPress={handleNavigateToSettings}
                 style={{
                   backgroundColor: theme.colors.surface,
@@ -97,8 +110,18 @@ export default function ProfileScreen() {
               <List.Item
                 title={t('navigation.categories')}
                 description={t('categories.manageCategoriesAndBudgets')}
-                left={(props) => <List.Icon {...props} icon="wallet" />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                left={(props) => (
+                  <List.Icon
+                    {...props}
+                    icon="wallet"
+                  />
+                )}
+                right={(props) => (
+                  <List.Icon
+                    {...props}
+                    icon="chevron-right"
+                  />
+                )}
                 onPress={handleNavigateToBudgetCategories}
                 style={{
                   backgroundColor: theme.colors.surface,
@@ -124,8 +147,18 @@ export default function ProfileScreen() {
               <List.Item
                 title={t('paymentMethods.title')}
                 description={t('paymentMethods.managePaymentSources')}
-                left={(props) => <List.Icon {...props} icon="credit-card" />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
+                left={(props) => (
+                  <List.Icon
+                    {...props}
+                    icon="credit-card"
+                  />
+                )}
+                right={(props) => (
+                  <List.Icon
+                    {...props}
+                    icon="chevron-right"
+                  />
+                )}
                 onPress={handleNavigateToPaymentMethods}
                 style={{
                   backgroundColor: theme.colors.surface,

@@ -156,7 +156,10 @@ export default function ExpenseDetailBottomSheet({
       maxDynamicContentSize={Dimensions.get('window').height * 0.85}
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
-        <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
+        <SafeAreaView
+          edges={['bottom']}
+          style={{ flex: 1 }}
+        >
           <View
             style={{
               padding: 8,
@@ -474,7 +477,10 @@ export default function ExpenseDetailBottomSheet({
             {t('expenses.deleteExpense')}
           </Dialog.Title>
           <Dialog.Content>
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurface, marginBottom: 16 }}>
+            <Text
+              variant="bodyMedium"
+              style={{ color: theme.colors.onSurface, marginBottom: 16 }}
+            >
               {t('actions.deleteConfirmMessage', { name: targetExpense.title })}
             </Text>
             <Text
@@ -490,7 +496,10 @@ export default function ExpenseDetailBottomSheet({
               {t('expenses.date')}:{' '}
               {targetExpense ? new Date(targetExpense.createdAt).toLocaleDateString() : ''}
             </Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text
+              variant="bodySmall"
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
               {t('actions.cannotUndo')}
             </Text>
           </Dialog.Content>

@@ -25,10 +25,18 @@ export const ErrorBoundaryTest: React.FC<ErrorBoundaryTestProps> = ({ onTriggerE
           Error Boundary Test
         </Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button mode="contained" onPress={() => setShouldThrow(true)} style={{ flex: 1 }}>
+          <Button
+            mode="contained"
+            onPress={() => setShouldThrow(true)}
+            style={{ flex: 1 }}
+          >
             Trigger Error
           </Button>
-          <Button mode="outlined" onPress={onTriggerError} style={{ flex: 1 }}>
+          <Button
+            mode="outlined"
+            onPress={onTriggerError}
+            style={{ flex: 1 }}
+          >
             Custom Error
           </Button>
         </View>

@@ -22,7 +22,10 @@ export const CategoriesBreakdown = () => {
         >
           {t('categories.title')}
         </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.error }}>
+        <Text
+          variant="bodyMedium"
+          style={{ color: theme.colors.error }}
+        >
           {error}
         </Text>
       </View>
@@ -42,7 +45,10 @@ export const CategoriesBreakdown = () => {
         {t('categories.title')}
       </Text>
       {loading ? (
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+        <Text
+          variant="bodyMedium"
+          style={{ color: theme.colors.onSurfaceVariant }}
+        >
           Loading categories...
         </Text>
       ) : (
