@@ -1,11 +1,20 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router, Tabs } from 'expo-router';
+import { router, Tabs, usePathname, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
 
 export default function TabLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const redirectToProfile = () => {
+    const targetPath = '/profile';
+    if (pathname !== targetPath) {
+      router.replace(targetPath);
+    }
+  };
 
   return (
     <Tabs
@@ -50,7 +59,7 @@ export default function TabLayout() {
             // Reset profile stack to index when tab is pressed
             // Prevent default tab behavior to avoid animation conflicts
             e.preventDefault();
-            router.replace('/(tabs)/profile/');
+            redirectToProfile();
           },
         }}
       />
