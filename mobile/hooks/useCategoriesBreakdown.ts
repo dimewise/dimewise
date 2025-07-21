@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useRefreshKey } from '../components/contexts/RefreshKeyContext';
 import { useUser } from '../components/contexts/UserContext';
 import { getCategoriesByUserId } from '../db/repository/category';
 import { getExpensesInRangeByUserId } from '../db/repository/expense';
@@ -13,7 +14,9 @@ export function useCategoriesBreakdown(): {
 } {
   const { t } = useTranslation();
   const { user } = useUser();
+  const { refreshKeys } = useRefreshKey();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKeys are intentionally used to trigger re-fetching
   const result = useMemo(() => {
     if (!user?.id) {
       return { categories: [], loading: false, error: null };
@@ -72,7 +75,7 @@ export function useCategoriesBreakdown(): {
         error: error instanceof Error ? error.message : 'Failed to load categories',
       };
     }
-  }, [user?.id, t]);
+  }, [user?.id, t, refreshKeys.expenses, refreshKeys.categories]);
 
   return result;
 }
