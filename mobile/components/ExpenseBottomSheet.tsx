@@ -78,7 +78,7 @@ export default function ExpenseBottomSheet({ visible, onDismiss }: ExpenseBottom
 
     const paymentMethods = getPaymentMethodsByUserId(user.id);
     setPaymentMethods(paymentMethods);
-  }, [refreshKeys.categories, refreshKeys.paymentMethods]);
+  }, [user, refreshKeys.categories, refreshKeys.paymentMethods]);
 
   const handleSubmit = async () => {
     if (!user) return;
