@@ -197,6 +197,7 @@ export default function EditCategoryBottomSheet({
                   {t('forms.categoryName')}
                 </Text>
                 <BSTextInput
+                  defaultValue={name}
                   onChangeText={setName}
                   clearButtonMode="while-editing"
                   placeholder={t('forms.categoryName')}
@@ -215,6 +216,7 @@ export default function EditCategoryBottomSheet({
                   {t('forms.budgetAmount', { currency })}
                 </Text>
                 <BSTextInput
+                  defaultValue={budget}
                   onChangeText={setBudget}
                   keyboardType="numeric"
                   placeholder={t('forms.budgetAmount', { currency })}
