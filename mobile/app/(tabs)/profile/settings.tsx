@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { Appbar, Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
-import { useUser } from '../../../components/contexts/UserContext';
 import DropdownBottomSheet, {
   DropdownButton,
   type DropdownOption,
-} from '../../../components/DropdownBottomSheet';
+} from '../../../components/BottomSheets/DropdownBottomSheet';
+import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
+import { useUser } from '../../../components/contexts/UserContext';
 import ErrorBoundary from '../../../components/ErrorBoundary';
 import { upsertUserSetting } from '../../../db/repository/userSetting';
 import {
