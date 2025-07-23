@@ -250,6 +250,7 @@ export default function EditPaymentMethodBottomSheet({
                   {t('paymentMethods.methodName')}
                 </Text>
                 <BSTextInput
+                  defaultValue={name}
                   onChangeText={setName}
                   placeholder={t('paymentMethods.methodName')}
                 />

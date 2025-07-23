@@ -5,9 +5,10 @@ import {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { desc } from 'drizzle-orm';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Keyboard, Platform, View } from 'react-native';
+import { Dimensions, Keyboard, Platform, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { updateExpenseById } from '../../db/mutation/expense';
@@ -308,6 +309,8 @@ export default function EditExpenseBottomSheet({
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
+      maxDynamicContentSize={Dimensions.get('window').height * 0.9}
+      enableContentPanningGesture
     >
       <BottomSheetScrollView
         contentContainerStyle={{ padding: 16 }}
@@ -373,6 +376,7 @@ export default function EditExpenseBottomSheet({
                   {t('forms.title')}
                 </Text>
                 <BSTextInput
+                  defaultValue={title}
                   onChangeText={setTitle}
                   placeholder={t('forms.title')}
                 />
@@ -390,6 +394,7 @@ export default function EditExpenseBottomSheet({
                   {t('forms.descriptionOptional')}
                 </Text>
                 <BSTextInput
+                  defaultValue={description}
                   onChangeText={setDescription}
                   multiline
                   numberOfLines={3}
@@ -411,6 +416,7 @@ export default function EditExpenseBottomSheet({
                   })}
                 </Text>
                 <BSTextInput
+                  defaultValue={amount}
                   onChangeText={setAmount}
                   keyboardType="numeric"
                   placeholder={t('forms.amountCurrency', {

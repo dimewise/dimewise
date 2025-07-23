@@ -153,7 +153,8 @@ export default function ExpenseDetailBottomSheet({
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
-      maxDynamicContentSize={Dimensions.get('window').height * 0.85}
+      maxDynamicContentSize={Dimensions.get('window').height * 0.9}
+      enableContentPanningGesture
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
         <SafeAreaView
