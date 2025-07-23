@@ -14,11 +14,11 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import EditPaymentMethodBottomSheet from '../../../components/BottomSheets/EditPaymentMethodBottomSheet';
+import PaymentMethodBottomSheet from '../../../components/BottomSheets/PaymentMethodBottomSheet';
 import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../../components/contexts/UserContext';
-import EditPaymentMethodBottomSheet from '../../../components/EditPaymentMethodBottomSheet';
 import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
-import PaymentMethodBottomSheet from '../../../components/PaymentMethodBottomSheet';
 import {
   deletePaymentMethodById,
   getPaymentMethodsByUserId,

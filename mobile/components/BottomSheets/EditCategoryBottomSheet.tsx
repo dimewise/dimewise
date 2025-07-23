@@ -3,18 +3,18 @@ import {
   type BottomSheetBackdropProps,
   BottomSheetModal,
   BottomSheetScrollView,
-  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { updateCategory } from '../db/repository/category';
-import type { Category } from '../db/schema';
-import { validateCurrencyInput } from '../db/utils';
-import { useRefreshKey } from './contexts/RefreshKeyContext';
-import { useUser } from './contexts/UserContext';
+import { updateCategory } from '../../db/repository/category';
+import type { Category } from '../../db/schema';
+import { validateCurrencyInput } from '../../db/utils';
+import { useRefreshKey } from '../contexts/RefreshKeyContext';
+import { useUser } from '../contexts/UserContext';
+import { BSTextInput } from './BottomSheetTextInput';
 
 interface EditCategoryBottomSheetProps {
   visible: boolean;
@@ -196,18 +196,9 @@ export default function EditCategoryBottomSheet({
                 >
                   {t('forms.categoryName')}
                 </Text>
-                <BottomSheetTextInput
+                <BSTextInput
                   onChangeText={setName}
-                  style={{
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.outline,
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    padding: 16,
-                    fontSize: 16,
-                    fontWeight: '500',
-                    color: theme.colors.onSurface,
-                  }}
+                  clearButtonMode="while-editing"
                   placeholder={t('forms.categoryName')}
                 />
               </View>
@@ -223,19 +214,9 @@ export default function EditCategoryBottomSheet({
                 >
                   {t('forms.budgetAmount', { currency })}
                 </Text>
-                <BottomSheetTextInput
+                <BSTextInput
                   onChangeText={setBudget}
                   keyboardType="numeric"
-                  style={{
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.outline,
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    padding: 16,
-                    fontSize: 18,
-                    fontWeight: '600',
-                    color: theme.colors.onSurface,
-                  }}
                   placeholder={t('forms.budgetAmount', { currency })}
                 />
               </View>

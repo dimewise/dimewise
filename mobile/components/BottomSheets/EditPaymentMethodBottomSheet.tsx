@@ -3,7 +3,6 @@ import {
   type BottomSheetBackdropProps,
   BottomSheetModal,
   BottomSheetScrollView,
-  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -11,9 +10,10 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { updatePaymentMethod } from '../db/repository/paymentMethod';
-import type { PaymentMethod } from '../db/schema';
-import { useRefreshKey } from './contexts/RefreshKeyContext';
+import { updatePaymentMethod } from '../../db/repository/paymentMethod';
+import type { PaymentMethod } from '../../db/schema';
+import { useRefreshKey } from '../contexts/RefreshKeyContext';
+import { BSTextInput } from './BottomSheetTextInput';
 import DropdownBottomSheet, { DropdownButton, type DropdownOption } from './DropdownBottomSheet';
 
 const PAYMENT_METHOD_TYPES = [
@@ -249,18 +249,8 @@ export default function EditPaymentMethodBottomSheet({
                 >
                   {t('paymentMethods.methodName')}
                 </Text>
-                <BottomSheetTextInput
+                <BSTextInput
                   onChangeText={setName}
-                  style={{
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.outline,
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    padding: 16,
-                    fontSize: 16,
-                    fontWeight: '500',
-                    color: theme.colors.onSurface,
-                  }}
                   placeholder={t('paymentMethods.methodName')}
                 />
               </View>

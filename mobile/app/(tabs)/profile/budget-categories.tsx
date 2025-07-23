@@ -13,10 +13,10 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import CategoryBottomSheet from '../../../components/CategoryBottomSheet';
+import CategoryBottomSheet from '../../../components/BottomSheets/CategoryBottomSheet';
+import EditCategoryBottomSheet from '../../../components/BottomSheets/EditCategoryBottomSheet';
 import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../../components/contexts/UserContext';
-import EditCategoryBottomSheet from '../../../components/EditCategoryBottomSheet';
 import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
 import { deleteCategoryById, getCategoriesByUserId } from '../../../db/repository/category';
 import type { Category } from '../../../db/schema';

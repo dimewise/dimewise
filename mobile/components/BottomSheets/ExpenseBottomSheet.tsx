@@ -3,40 +3,29 @@ import {
   type BottomSheetBackdropProps,
   BottomSheetModal,
   BottomSheetScrollView,
-  BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Keyboard, Platform, View } from 'react-native';
+import { Dimensions, Keyboard, Platform, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { updateExpenseById } from '../db/mutation/expense';
-import { getCategoriesByUserId } from '../db/repository/category';
-import { getExpenseFullById } from '../db/repository/expense';
-import { getPaymentMethodsByUserId } from '../db/repository/paymentMethod';
-import type { Category, Expense, PaymentMethod } from '../db/schema';
-import { validateCurrencyInput } from '../db/utils';
-import { useRefreshKey } from './contexts/RefreshKeyContext';
-import { useUser } from './contexts/UserContext';
+import { createExpense } from '../../db/mutation/expense';
+import { getCategoriesByUserId } from '../../db/repository/category';
+import { getPaymentMethodsByUserId } from '../../db/repository/paymentMethod';
+import type { Category, NewExpense, PaymentMethod } from '../../db/schema';
+import { generatedUUID, validateCurrencyInput } from '../../db/utils';
+import { useRefreshKey } from '../contexts/RefreshKeyContext';
+import { useUser } from '../contexts/UserContext';
+import { BSTextInput } from './BottomSheetTextInput';
 import DropdownBottomSheet, { DropdownButton, type DropdownOption } from './DropdownBottomSheet';
 
-interface EditExpenseBottomSheetProps {
+interface ExpenseBottomSheetProps {
   visible: boolean;
-  expenseId: string | null;
   onDismiss: () => void;
-  onCancel?: () => void;
-  onExpenseUpdated?: () => void;
 }
 
-export default function EditExpenseBottomSheet({
-  visible,
-  expenseId,
-  onDismiss,
-  onCancel,
-  onExpenseUpdated,
-}: EditExpenseBottomSheetProps) {
-  const [targetExpense, setTargetExpense] = useState<Expense | null>(null);
+export default function ExpenseBottomSheet({ visible, onDismiss }: ExpenseBottomSheetProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [title, setTitle] = useState('');
@@ -57,17 +46,6 @@ export default function EditExpenseBottomSheet({
   const { refreshKeys, triggerRefresh } = useRefreshKey();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-  const populateForm = useCallback(() => {
-    if (targetExpense) {
-      setTitle(targetExpense.title);
-      setDescription(targetExpense.description || '');
-      setAmount(targetExpense.amount.toString());
-      setCategoryId(targetExpense.categoryId ?? '');
-      setPaymentMethodId(targetExpense.paymentMethodId ?? '');
-      setDate(new Date(targetExpense.incurredAt));
-    }
-  }, [targetExpense]);
-
   const resetForm = useCallback(() => {
     setTitle('');
     setDescription('');
@@ -83,39 +61,27 @@ export default function EditExpenseBottomSheet({
   }, []);
 
   useEffect(() => {
-    if (visible && expenseId) {
+    if (visible) {
       bottomSheetModalRef.current?.present();
     } else {
       bottomSheetModalRef.current?.dismiss();
-      if (!visible) {
-        resetForm();
-      }
+      resetForm();
     }
-  }, [visible, expenseId, resetForm]);
+  }, [visible, resetForm]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKeys are intentionally used to trigger re-fetching
   useEffect(() => {
-    if (!user || !expenseId) return;
-
-    const targetExpense = getExpenseFullById(expenseId);
-    setTargetExpense(targetExpense);
+    if (!user) return;
 
     const categories = getCategoriesByUserId(user.id);
     setCategories(categories);
 
     const paymentMethods = getPaymentMethodsByUserId(user.id);
     setPaymentMethods(paymentMethods);
-  }, [user, expenseId, refreshKeys.categories, refreshKeys.paymentMethods]);
-
-  // Separate effect to populate form after data is loaded
-  useEffect(() => {
-    if (visible && expenseId && categories.length > 0 && paymentMethods.length > 0) {
-      populateForm();
-    }
-  }, [visible, expenseId, categories, paymentMethods, populateForm]);
+  }, [user, refreshKeys.categories, refreshKeys.paymentMethods]);
 
   const handleSubmit = async () => {
-    if (!targetExpense) return;
+    if (!user) return;
 
     if (!title.trim()) {
       setError(t('forms.titleRequired'));
@@ -141,25 +107,29 @@ export default function EditExpenseBottomSheet({
     setLoading(true);
     setError('');
 
-    try {
-      const updatedExpense: Expense = {
-        ...targetExpense,
-        title: title.trim(),
-        description: description.trim(),
-        amount: Number(amount),
-        categoryId,
-        paymentMethodId,
-        incurredAt: date.toISOString(),
-      };
+    const newExpense: NewExpense = {
+      id: generatedUUID(),
+      title: title.trim(),
+      description: description.trim(),
+      amount: Number(amount),
+      currency: userSetting?.currency ?? 'USD',
+      categoryId: categoryId,
+      paymentMethodId: paymentMethodId,
+      incurredAt: date.toISOString(),
+      userId: user?.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      deletedAt: null,
+    };
 
-      await updateExpenseById(updatedExpense);
+    try {
+      await createExpense(newExpense);
 
       onDismiss();
-      onExpenseUpdated?.();
       triggerRefresh('expenses');
     } catch (e) {
-      console.error('Failed to update expense:', e);
-      setError(t('forms.updateExpenseError'));
+      console.error('Failed to save expense:', e);
+      setError(t('status.error'));
     } finally {
       setLoading(false);
     }
@@ -174,6 +144,7 @@ export default function EditExpenseBottomSheet({
     [onDismiss],
   );
 
+  // Backdrop component for tap-to-dismiss
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -294,8 +265,6 @@ export default function EditExpenseBottomSheet({
     </>
   );
 
-  if (!targetExpense) return null;
-
   return (
     <BottomSheetModal
       ref={bottomSheetModalRef}
@@ -308,6 +277,8 @@ export default function EditExpenseBottomSheet({
       backgroundStyle={{ backgroundColor: theme.colors.surface }}
       handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
       backdropComponent={renderBackdrop}
+      maxDynamicContentSize={Dimensions.get('window').height * 0.85}
+      enableContentPanningGesture
     >
       <BottomSheetScrollView
         contentContainerStyle={{ padding: 16 }}
@@ -334,7 +305,7 @@ export default function EditExpenseBottomSheet({
                 textAlign: 'center',
               }}
             >
-              {t('expenses.editExpense')}
+              {t('expenses.newExpense')}
             </Text>
 
             {error ? (
@@ -372,18 +343,8 @@ export default function EditExpenseBottomSheet({
                 >
                   {t('forms.title')}
                 </Text>
-                <BottomSheetTextInput
+                <BSTextInput
                   onChangeText={setTitle}
-                  style={{
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.outline,
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    padding: 16,
-                    fontSize: 16,
-                    fontWeight: '500',
-                    color: theme.colors.onSurface,
-                  }}
                   placeholder={t('forms.title')}
                 />
               </View>
@@ -399,21 +360,10 @@ export default function EditExpenseBottomSheet({
                 >
                   {t('forms.descriptionOptional')}
                 </Text>
-                <BottomSheetTextInput
+                <BSTextInput
                   onChangeText={setDescription}
                   multiline
                   numberOfLines={3}
-                  style={{
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.outline,
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    padding: 16,
-                    fontSize: 16,
-                    fontWeight: '500',
-                    color: theme.colors.onSurface,
-                    minHeight: 80,
-                  }}
                   placeholder={t('forms.descriptionOptional')}
                 />
               </View>
@@ -431,19 +381,10 @@ export default function EditExpenseBottomSheet({
                     currency: userSetting?.currency ?? 'USD',
                   })}
                 </Text>
-                <BottomSheetTextInput
+                <BSTextInput
+                  value={amount}
                   onChangeText={setAmount}
                   keyboardType="numeric"
-                  style={{
-                    backgroundColor: theme.colors.surface,
-                    borderColor: theme.colors.outline,
-                    borderWidth: 1,
-                    borderRadius: 6,
-                    padding: 16,
-                    fontSize: 18,
-                    fontWeight: '600',
-                    color: theme.colors.onSurface,
-                  }}
                   placeholder={t('forms.amountCurrency', {
                     currency: userSetting?.currency ?? 'USD',
                   })}
@@ -472,7 +413,7 @@ export default function EditExpenseBottomSheet({
               <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
                 <Button
                   mode="outlined"
-                  onPress={onCancel || onDismiss}
+                  onPress={onDismiss}
                   contentStyle={{
                     paddingVertical: 4,
                   }}
@@ -491,7 +432,6 @@ export default function EditExpenseBottomSheet({
                 <Button
                   mode="contained"
                   onPress={handleSubmit}
-                  loading={loading}
                   disabled={loading}
                   contentStyle={{
                     paddingVertical: 4,
@@ -511,7 +451,7 @@ export default function EditExpenseBottomSheet({
                     elevation: 2,
                   }}
                 >
-                  {t('actions.saveChanges')}
+                  {t('expenses.addExpense')}
                 </Button>
               </View>
             </View>
