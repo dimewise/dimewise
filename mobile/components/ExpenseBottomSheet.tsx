@@ -344,7 +344,6 @@ export default function ExpenseBottomSheet({ visible, onDismiss }: ExpenseBottom
                   {t('forms.title')}
                 </Text>
                 <BottomSheetTextInput
-                  value={title}
                   onChangeText={setTitle}
                   style={{
                     backgroundColor: theme.colors.surface,
@@ -372,7 +371,6 @@ export default function ExpenseBottomSheet({ visible, onDismiss }: ExpenseBottom
                   {t('forms.descriptionOptional')}
                 </Text>
                 <BottomSheetTextInput
-                  value={description}
                   onChangeText={setDescription}
                   multiline
                   numberOfLines={3}

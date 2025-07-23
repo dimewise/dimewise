@@ -248,7 +248,6 @@ export default function PaymentMethodBottomSheet({
                   {t('paymentMethods.methodName')}
                 </Text>
                 <BottomSheetTextInput
-                  value={name}
                   onChangeText={setName}
                   style={{
                     backgroundColor: theme.colors.surface,

@@ -373,7 +373,6 @@ export default function EditExpenseBottomSheet({
                   {t('forms.title')}
                 </Text>
                 <BottomSheetTextInput
-                  value={title}
                   onChangeText={setTitle}
                   style={{
                     backgroundColor: theme.colors.surface,
@@ -401,7 +400,6 @@ export default function EditExpenseBottomSheet({
                   {t('forms.descriptionOptional')}
                 </Text>
                 <BottomSheetTextInput
-                  value={description}
                   onChangeText={setDescription}
                   multiline
                   numberOfLines={3}
@@ -434,7 +432,6 @@ export default function EditExpenseBottomSheet({
                   })}
                 </Text>
                 <BottomSheetTextInput
-                  value={amount}
                   onChangeText={setAmount}
                   keyboardType="numeric"
                   style={{
