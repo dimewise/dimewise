@@ -156,7 +156,10 @@ export default function ExpenseDetailBottomSheet({
       maxDynamicContentSize={Dimensions.get('window').height * 0.9}
       enableContentPanningGesture
     >
-      <BottomSheetScrollView contentContainerStyle={{ padding: 16 }}>
+      <BottomSheetScrollView
+        contentContainerStyle={{ padding: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         <SafeAreaView
           edges={['bottom']}
           style={{ flex: 1 }}

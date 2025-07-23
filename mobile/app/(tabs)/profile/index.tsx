@@ -59,7 +59,10 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <ScrollView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            showsVerticalScrollIndicator={false}
+          >
             <View
               style={{
                 marginHorizontal: 24,

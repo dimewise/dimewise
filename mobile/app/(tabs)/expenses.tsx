@@ -212,6 +212,7 @@ export default function ExpensesScreen() {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
+                  showsVerticalScrollIndicator={false}
                 >
                   <View style={{ flexDirection: 'row', gap: 8, paddingRight: 16 }}>
                     <Chip
@@ -251,6 +252,7 @@ export default function ExpensesScreen() {
           ) : (
             <ScrollView
               style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
               contentContainerStyle={{
                 paddingBottom: 100,
                 paddingHorizontal: 24,

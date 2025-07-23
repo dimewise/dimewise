@@ -129,6 +129,7 @@ export default function BudgetCategoriesScreen() {
         <ScrollView
           style={{ flex: 1, backgroundColor: theme.colors.background }}
           contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
         >
           {loading ? (
             <View
