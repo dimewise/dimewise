@@ -1,5 +1,5 @@
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import type { BottomSheetTextInputProps } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetTextInput';
-import BottomSheetTextInput from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetTextInput';
 import type { StyleProp, TextStyle } from 'react-native';
 import { useTheme } from 'react-native-paper';
 
