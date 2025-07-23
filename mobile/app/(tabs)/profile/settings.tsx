@@ -144,6 +144,7 @@ export default function SettingsScreen() {
         <ScrollView
           style={{ flex: 1, backgroundColor: theme.colors.background }}
           contentContainerStyle={{ padding: 24 }}
+          showsVerticalScrollIndicator={false}
         >
           {/* Language Settings Section */}
           <View

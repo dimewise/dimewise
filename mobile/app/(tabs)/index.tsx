@@ -104,6 +104,7 @@ export default function HomePage() {
         <ScrollView
           style={{ flex: 1, backgroundColor: theme.colors.background }}
           contentContainerStyle={{ padding: 24, paddingBottom: 100, gap: 16 }}
+          showsVerticalScrollIndicator={false}
         >
           <BudgetOverview />
           <CategoriesBreakdown />
