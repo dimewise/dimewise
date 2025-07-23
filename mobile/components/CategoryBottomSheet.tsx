@@ -187,7 +187,6 @@ export default function CategoryBottomSheet({
                 {t('forms.categoryName')}
               </Text>
               <BottomSheetTextInput
-                value={name}
                 onChangeText={setName}
                 style={{
                   backgroundColor: theme.colors.surface,
@@ -215,7 +214,6 @@ export default function CategoryBottomSheet({
                 {t('forms.budgetAmount', { currency })}
               </Text>
               <BottomSheetTextInput
-                value={budget}
                 onChangeText={setBudget}
                 keyboardType="numeric"
                 style={{
