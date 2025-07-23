@@ -186,7 +186,7 @@ export default function PaymentMethodBottomSheet({
     >
       <BottomSheetScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="never"
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={false}
       >

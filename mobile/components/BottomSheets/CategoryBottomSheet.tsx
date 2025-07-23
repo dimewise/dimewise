@@ -131,7 +131,7 @@ export default function CategoryBottomSheet({
     >
       <BottomSheetScrollView
         contentContainerStyle={{ padding: 16 }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="never"
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={false}
       >

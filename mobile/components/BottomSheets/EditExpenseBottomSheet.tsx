@@ -5,7 +5,6 @@ import {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { desc } from 'drizzle-orm';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, Keyboard, Platform, View } from 'react-native';
@@ -314,7 +313,7 @@ export default function EditExpenseBottomSheet({
     >
       <BottomSheetScrollView
         contentContainerStyle={{ padding: 16 }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="never"
         showsVerticalScrollIndicator={false}
         automaticallyAdjustKeyboardInsets={false}
       >
