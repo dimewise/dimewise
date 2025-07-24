@@ -18,6 +18,7 @@ import { getExpenseFullById } from '../../db/repository/expense';
 import type { ExpenseFull } from '../../db/repository/types';
 import type { Expense } from '../../db/schema';
 import { formatAmount } from '../../db/utils';
+import { formatDateWithLocale } from '../../utils/datetime';
 import { useRefreshKey } from '../contexts/RefreshKeyContext';
 import { useUser } from '../contexts/UserContext';
 
@@ -252,12 +253,10 @@ export default function ExpenseDetailBottomSheet({
                     fontWeight: '600',
                   }}
                 >
-                  {new Date(targetExpense.incurredAt).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDateWithLocale(
+                    new Date(targetExpense.incurredAt),
+                    userSetting?.preferredLanguage || 'en',
+                  )}
                 </Text>
               </View>
 
@@ -372,12 +371,10 @@ export default function ExpenseDetailBottomSheet({
                         }}
                       >
                         {t('status.verifiedOn', {
-                          date: new Date(targetExpense.verifiedAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          }),
+                          date: formatDateWithLocale(
+                            new Date(targetExpense.verifiedAt),
+                            userSetting?.preferredLanguage || 'en',
+                          ),
                         })}
                       </Text>
                     )}
