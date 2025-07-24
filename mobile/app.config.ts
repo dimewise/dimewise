@@ -102,6 +102,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     'expo-sqlite',
+    [
+      'expo-localization',
+      {
+        supportedLocales: {
+          ios: ['en', 'ja'],
+          android: ['en', 'ja'],
+        },
+      },
+    ],
   ],
   extra: {
     router: {},
