@@ -16,6 +16,7 @@ import { getExpenseFullById } from '../../db/repository/expense';
 import { getPaymentMethodsByUserId } from '../../db/repository/paymentMethod';
 import type { Category, Expense, PaymentMethod } from '../../db/schema';
 import { validateCurrencyInput } from '../../db/utils';
+import { formatDateWithLocale } from '../../utils/datetime';
 import { useRefreshKey } from '../contexts/RefreshKeyContext';
 import { useUser } from '../contexts/UserContext';
 import { BSTextInput } from './BottomSheetTextInput';
@@ -197,15 +198,6 @@ export default function EditExpenseBottomSheet({
     setShowDatePicker(!showDatePicker);
   };
 
-  const formatDateForDisplay = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
   // Convert categories to dropdown options (excluding uncategorized)
   const categoryOptions: DropdownOption[] = categories.map((category) => ({
     label: category.name,
@@ -280,7 +272,7 @@ export default function EditExpenseBottomSheet({
           backgroundColor: theme.colors.surface,
         }}
       >
-        {formatDateForDisplay(date)}
+        {formatDateWithLocale(date, userSetting?.preferredLanguage || 'en')}
       </Button>
       {showDatePicker && (
         <DateTimePicker
@@ -288,6 +280,7 @@ export default function EditExpenseBottomSheet({
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleDateChange}
+          locale={userSetting?.preferredLanguage || 'en'}
           maximumDate={new Date()}
         />
       )}
