@@ -175,3 +175,71 @@ export const getExpensesWithDetailsByUserId = (
 
   return query.all();
 };
+
+// New optimized function for filtered expense queries
+export const getExpensesWithDetailsByUserIdWithFilters = (
+  userId: string,
+  filters: {
+    dateRange?: { from: string; to: string };
+    verificationStatus?: 'verified' | 'unverified' | 'all';
+    categoryId?: string;
+    searchQuery?: string;
+  },
+  limit?: number,
+): ExpenseWithDetails[] => {
+  const whereConditions = [eq(expense.userId, userId), isNull(expense.deletedAt)];
+
+  // Add date range filter
+  if (filters.dateRange) {
+    whereConditions.push(
+      gte(expense.incurredAt, filters.dateRange.from),
+      lte(expense.incurredAt, filters.dateRange.to),
+    );
+  }
+
+  // Add verification status filter
+  if (filters.verificationStatus && filters.verificationStatus !== 'all') {
+    if (filters.verificationStatus === 'verified') {
+      whereConditions.push(sql`${expense.verifiedAt} IS NOT NULL`);
+    } else {
+      whereConditions.push(sql`${expense.verifiedAt} IS NULL`);
+    }
+  }
+
+  // Add category filter
+  if (filters.categoryId) {
+    whereConditions.push(eq(expense.categoryId, filters.categoryId));
+  }
+
+  // Add search condition
+  if (filters.searchQuery) {
+    whereConditions.push(
+      sql`(LOWER(${expense.title}) LIKE LOWER(${`%${filters.searchQuery}%`}) OR LOWER(${expense.description}) LIKE LOWER(${`%${filters.searchQuery}%`}))`,
+    );
+  }
+
+  let query = db
+    .select({
+      ...getTableColumns(expense),
+      category: {
+        id: category.id,
+        name: category.name,
+      },
+      paymentMethod: {
+        id: paymentMethod.id,
+        name: paymentMethod.name,
+      },
+    })
+    .from(expense)
+    .leftJoin(category, eq(expense.categoryId, category.id))
+    .leftJoin(paymentMethod, eq(expense.paymentMethodId, paymentMethod.id))
+    .where(and(...whereConditions))
+    .orderBy(desc(expense.incurredAt))
+    .$dynamic();
+
+  if (typeof limit === 'number') {
+    query = query.limit(limit);
+  }
+
+  return query.all();
+};

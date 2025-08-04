@@ -23,7 +23,8 @@
 		"thisWeek": "今週",
 		"thisMonth": "今月",
 		"total": "合計",
-		"unknown": "不明"
+		"unknown": "不明",
+		"loadingExpenses": "支出を読み込み中..."
 	},
 	"navigation": {
 		"home": "ホーム",
@@ -72,7 +73,22 @@
 		"startTracking": "最初の支出を追加して支出の追跡を開始してください。",
 		"newExpense": "新しい支出",
 		"categoryAndPaymentMethod": "カテゴリ・支払い方法",
-		"verificationStatus": "検証ステータス"
+		"verificationStatus": "検証ステータス",
+		"filters": {
+			"title": "支出をフィルター",
+			"dateRange": "日付範囲",
+			"startDate": "開始日",
+			"endDate": "終了日",
+			"verificationStatus": "検証ステータス",
+			"verified": "検証済み",
+			"unverified": "未検証",
+			"all": "すべて",
+			"category": "カテゴリ",
+			"applyFilters": "フィルターを適用",
+			"clearAll": "クリア",
+			"selectCategory": "カテゴリを選択",
+			"selectVerificationStatus": "検証ステータスを選択"
+		}
 	},
 	"categories": {
 		"title": "予算カテゴリ",

@@ -23,7 +23,8 @@
 		"thisWeek": "This Week",
 		"thisMonth": "This Month",
 		"total": "Total",
-		"unknown": "Unknown"
+		"unknown": "Unknown",
+		"loadingExpenses": "Loading expenses..."
 	},
 	"navigation": {
 		"home": "Home",
@@ -72,7 +73,22 @@
 		"startTracking": "Start tracking your expenses by adding your first expense.",
 		"newExpense": "New Expense",
 		"categoryAndPaymentMethod": "Category & Payment Method",
-		"verificationStatus": "Verification Status"
+		"verificationStatus": "Verification Status",
+		"filters": {
+			"title": "Filter Expenses",
+			"dateRange": "Date Range",
+			"startDate": "Start Date",
+			"endDate": "End Date",
+			"verificationStatus": "Verification Status",
+			"verified": "Verified",
+			"unverified": "Unverified",
+			"all": "All",
+			"category": "Category",
+			"applyFilters": "Apply Filters",
+			"clearAll": "Clear All Filters",
+			"selectCategory": "Select Category",
+			"selectVerificationStatus": "Select Verification Status"
+		}
 	},
 	"categories": {
 		"title": "Budget Categories",
