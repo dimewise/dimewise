@@ -2,21 +2,23 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
-import { Chip, FAB, Searchbar, Text, useTheme } from 'react-native-paper';
+import { Chip, FAB, Searchbar, Text, useTheme, IconButton } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EditExpenseBottomSheet from '../../components/BottomSheets/EditExpenseBottomSheet';
 import ExpenseBottomSheet from '../../components/BottomSheets/ExpenseBottomSheet';
 import ExpenseDetailBottomSheet from '../../components/BottomSheets/ExpenseDetailBottomSheet';
+import ExpenseFilterBottomSheet, { ExpenseFilters } from '../../components/BottomSheets/ExpenseFilterBottomSheet';
 import { useRefreshKey } from '../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../components/contexts/UserContext';
 import ErrorBoundary, { ExpensesErrorFallback } from '../../components/ErrorBoundary';
 import ExpenseListItem from '../../components/ExpenseListItem';
 import { getCategoriesByUserId } from '../../db/repository/category';
-import { getExpensesWithDetailsByUserId } from '../../db/repository/expense';
+import { getExpensesWithDetailsByUserId, getExpensesWithDetailsByUserIdWithFilters } from '../../db/repository/expense';
 import { getPaymentMethodsByUserId } from '../../db/repository/paymentMethod';
 import type { ExpenseWithDetails } from '../../db/repository/types';
 import type { Expense } from '../../db/schema';
 import { useMultipleAsyncData } from '../../hooks/useAsyncData';
+import { formatDateWithLocale } from '../../utils/datetime';
 
 export default function ExpensesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,8 +26,10 @@ export default function ExpensesScreen() {
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<ExpenseFilters>({});
 
   const theme = useTheme();
   const { t } = useTranslation();
@@ -36,31 +40,24 @@ export default function ExpensesScreen() {
   // Load all data using our optimized hook - expenses now include category/payment method data
   const { data, loading, error, refetch } = useMultipleAsyncData(
     {
-      expenses: () => (user?.id ? getExpensesWithDetailsByUserId(user.id) : Promise.resolve([])),
+      expenses: () => (user?.id ? getExpensesWithDetailsByUserIdWithFilters(user.id, {
+        ...activeFilters,
+        searchQuery: searchQuery || undefined,
+        categoryId: selectedCategory || undefined,
+      }) : Promise.resolve([])),
       categories: () => (user?.id ? getCategoriesByUserId(user.id) : Promise.resolve([])),
       paymentMethods: () => (user?.id ? getPaymentMethodsByUserId(user.id) : Promise.resolve([])),
     },
     {
       immediate: !!user?.id,
-      deps: [user?.id, refreshKeys.expenses, refreshKeys.categories, refreshKeys.paymentMethods],
+      deps: [user?.id, refreshKeys.expenses, refreshKeys.categories, refreshKeys.paymentMethods, activeFilters, searchQuery, selectedCategory],
     },
   );
 
-  // Filter expenses based on search and category selection
+  // Expenses are now filtered at the database level
   const filteredExpenses = useMemo(() => {
-    if (!data?.expenses) return [];
-
-    return (data.expenses as ExpenseWithDetails[]).filter((expense: ExpenseWithDetails) => {
-      const matchesSearch =
-        !searchQuery ||
-        expense.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        expense.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesCategory = !selectedCategory || expense.categoryId === selectedCategory;
-
-      return matchesSearch && matchesCategory;
-    });
-  }, [data?.expenses, searchQuery, selectedCategory]);
+    return (data?.expenses as ExpenseWithDetails[]) || [];
+  }, [data?.expenses]);
 
   useFocusEffect(
     useCallback(() => {
@@ -68,8 +65,13 @@ export default function ExpensesScreen() {
       setShowExpenseSheet(false);
       setShowDetailSheet(false);
       setShowEditSheet(false);
+      setShowFilterSheet(false);
       setSelectedExpense(null);
       setIsTransitioningToEdit(false);
+
+      // Reset filters when navigating away
+      setActiveFilters({});
+      setSelectedCategory(null);
 
       // Cleanup timeout on unmount
       return () => {
@@ -136,6 +138,12 @@ export default function ExpensesScreen() {
     setSelectedExpense(null);
   };
 
+  const handleApplyFilters = (filters: ExpenseFilters) => {
+    setActiveFilters(filters);
+    // Reset the old category filter since it's now handled in the filter sheet
+    setSelectedCategory(null);
+  };
+
   // Error fallback with retry
   if (error) {
     return (
@@ -168,16 +176,30 @@ export default function ExpensesScreen() {
               backgroundColor: theme.colors.background,
             }}
           >
-            <Text
-              variant="headlineMedium"
+            <View
               style={{
-                fontWeight: '700',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 marginBottom: 16,
-                color: theme.colors.onBackground,
               }}
             >
-              {t('expenses.title')}
-            </Text>
+              <Text
+                variant="headlineMedium"
+                style={{
+                  fontWeight: '700',
+                  color: theme.colors.onBackground,
+                }}
+              >
+                {t('expenses.title')}
+              </Text>
+              <IconButton
+                icon="filter-variant"
+                size={24}
+                onPress={() => setShowFilterSheet(true)}
+                iconColor={theme.colors.onBackground}
+              />
+            </View>
             <Searchbar
               placeholder={t('common.search')}
               onChangeText={setSearchQuery}
@@ -190,53 +212,77 @@ export default function ExpensesScreen() {
             />
           </View>
 
-          {/* CATEGORY FILTERS */}
-          <View
-            style={{
-              paddingHorizontal: 24,
-              paddingBottom: 16,
-              backgroundColor: theme.colors.background,
-            }}
-          >
-            {data?.categories && data.categories.length > 0 && (
+          {/* ACTIVE FILTERS */}
+          {(activeFilters.dateRange || activeFilters.verificationStatus || activeFilters.categoryId || selectedCategory) && (
+            <View
+              style={{
+                paddingHorizontal: 24,
+                paddingBottom: 16,
+                backgroundColor: theme.colors.background,
+              }}
+            >
               <View style={{ gap: 8 }}>
-                <Text
-                  variant="labelLarge"
+                <View
                   style={{
-                    color: theme.colors.onBackground,
-                    fontWeight: '600',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
                 >
-                  {t('common.filter')}:
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  showsVerticalScrollIndicator={false}
-                >
-                  <View style={{ flexDirection: 'row', gap: 8, paddingRight: 16 }}>
+                  <Text
+                    variant="labelLarge"
+                    style={{
+                      color: theme.colors.onBackground,
+                      fontWeight: '600',
+                    }}
+                  >
+                    {t('common.filter')}:
+                  </Text>
+                  <Chip
+                    onPress={() => {
+                      setActiveFilters({});
+                      setSelectedCategory(null);
+                    }}
+                    style={{ backgroundColor: theme.colors.errorContainer }}
+                    textStyle={{ color: theme.colors.onErrorContainer }}
+                  >
+                    {t('expenses.filters.clearAll')}
+                  </Chip>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {/* Date Range Filter */}
+                  {activeFilters.dateRange && (
                     <Chip
-                      selected={selectedCategory === null}
-                      onPress={() => setSelectedCategory(null)}
+                      selected
+                      onPress={() => setShowFilterSheet(true)}
                     >
-                      {t('common.all')}
+                      {`${formatDateWithLocale(new Date(activeFilters.dateRange.from), 'en')} - ${formatDateWithLocale(new Date(activeFilters.dateRange.to), 'en')}`}
                     </Chip>
-                    {data.categories.map((category) => (
-                      <Chip
-                        key={category.id}
-                        selected={selectedCategory === category.id}
-                        onPress={() =>
-                          setSelectedCategory(selectedCategory === category.id ? null : category.id)
-                        }
-                      >
-                        {category.name}
-                      </Chip>
-                    ))}
-                  </View>
-                </ScrollView>
+                  )}
+
+                  {/* Verification Status Filter */}
+                  {activeFilters.verificationStatus && (
+                    <Chip
+                      selected
+                      onPress={() => setShowFilterSheet(true)}
+                    >
+                      {activeFilters.verificationStatus === 'verified' ? t('expenses.filters.verified') : t('expenses.filters.unverified')}
+                    </Chip>
+                  )}
+
+                  {/* Category Filter */}
+                  {(activeFilters.categoryId || selectedCategory) && (
+                    <Chip
+                      selected
+                      onPress={() => setShowFilterSheet(true)}
+                    >
+                      {data?.categories?.find(cat => cat.id === (activeFilters.categoryId || selectedCategory))?.name || 'Unknown Category'}
+                    </Chip>
+                  )}
+                </View>
               </View>
-            )}
-          </View>
+            </View>
+          )}
 
           {/* EXPENSE LIST */}
           {loading ? (
@@ -247,7 +293,7 @@ export default function ExpensesScreen() {
                 alignItems: 'center',
               }}
             >
-              <Text>Loading expenses...</Text>
+              <Text>{t('common.loadingExpenses')}</Text>
             </View>
           ) : (
             <ScrollView
@@ -326,6 +372,12 @@ export default function ExpensesScreen() {
               setIsTransitioningToEdit(false);
             }}
             onExpenseUpdated={handleExpenseUpdated}
+          />
+          <ExpenseFilterBottomSheet
+            visible={showFilterSheet}
+            onDismiss={() => setShowFilterSheet(false)}
+            onApplyFilters={handleApplyFilters}
+            currentFilters={activeFilters}
           />
         </SafeAreaView>
       </View>
