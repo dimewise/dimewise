@@ -1,9 +1,11 @@
 default: help
 
 include makefiles/init.mk
-include makefiles/database.mk
-include makefiles/generator.mk
+# include makefiles/database.mk
+# include makefiles/generator.mk
 include makefiles/runner.mk
+
+MAKEFLAGS += --no-print-directory
 
 .PHONY: help
 help: ## Show a list of commands
