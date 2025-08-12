@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import i18n from '../utils/i18n';
 import { type CurrencyType, SUPPORTED_CURRENCIES } from './schema';
 
 // Currency formatting configuration
@@ -148,21 +149,26 @@ export const formatAmountWithCode = (amount: number, currency: CurrencyType): st
  */
 export const validateCurrencyInput = (
   input: string,
+  inputType: 'amount' | 'budget',
   currency: CurrencyType,
 ): { isValid: boolean; error?: string } => {
   const cleanInput = input.replace(/[^\d.-]/g, '');
   const number = parseFloat(cleanInput);
+  let transErrPrefix = 'amount';
+  if (inputType === 'budget') {
+    transErrPrefix = 'budget';
+  }
 
   if (Number.isNaN(number)) {
-    return { isValid: false, error: 'Please enter a valid number' };
+    return { isValid: false, error: i18n.t(`forms.${transErrPrefix}.validNumber`) };
   }
 
   if (number < 0) {
-    return { isValid: false, error: 'Amount cannot be negative' };
+    return { isValid: false, error: i18n.t(`forms.${transErrPrefix}.positiveOnly`) };
   }
 
-  if (number === 0) {
-    return { isValid: false, error: 'Amount must be greater than zero' };
+  if (number === 0 && inputType !== 'budget') {
+    return { isValid: false, error: i18n.t(`forms.${transErrPrefix}.largerThanZero`) };
   }
 
   const config = CURRENCY_CONFIG[currency];
@@ -170,7 +176,7 @@ export const validateCurrencyInput = (
     if (number % 1 !== 0) {
       return {
         isValid: false,
-        error: `${currency} amounts cannot have decimal places`,
+        error: i18n.t(`forms.${transErrPrefix}.disallowDecimals`, { currency: currency }),
       };
     }
   } else {
@@ -178,13 +184,16 @@ export const validateCurrencyInput = (
     if (decimalPart && decimalPart.length > config.decimalPlaces) {
       return {
         isValid: false,
-        error: `${currency} amounts can have at most ${config.decimalPlaces} decimal places`,
+        error: i18n.t(`forms.${transErrPrefix}.upToDecimalPlaces`, {
+          currency: currency,
+          decimals: config.decimalPlaces,
+        }),
       };
     }
   }
 
   if (number > 1000000000) {
-    return { isValid: false, error: 'Amount is too large' };
+    return { isValid: false, error: i18n.t(`forms.${transErrPrefix}.valueTooLarge`) };
   }
 
   return { isValid: true };

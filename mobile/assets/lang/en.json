@@ -174,7 +174,23 @@
 		"selectPaymentType": "Select Payment Type",
 		"paymentType": "Payment Type",
 		"descriptionOptional": "Description (optional)",
-		"amountCurrency": "Amount ({{currency}})"
+		"amountCurrency": "Amount ({{currency}})", 
+    "amount" : { 
+      "validNumber": "Please enter a valid amount", 
+      "postiveOnly": "Amount cannot be negative", 
+      "largerThanZero": "Amount must be greater than zero",
+      "disallowDecimals": "{{currency}} amounts cannot have decimal place", 
+      "upToDecimalPlaces": "{{currency}} amounts can have at most {{decimals}} decimal places", 
+      "valueTooLarge": "Budget is too large" 
+    }, 
+    "budget": { 
+      "validNumber": "Please enter a valid budget", 
+      "postiveOnly": "Budget cannot be negative", 
+      "largerThanZero": "Budget must be greater than zero",
+      "disallowDecimals": "{{currency}} budgets cannot have decimal place", 
+      "upToDecimalPlaces": "{{currency}} budgets can have at most {{decimals}} decimal places", 
+      "valueTooLarge": "Budget is too large" 
+    }
 	},
 	"actions": {
 		"create": "Create",
