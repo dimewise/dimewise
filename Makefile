@@ -4,6 +4,7 @@ include makefiles/init.mk
 # include makefiles/database.mk
 # include makefiles/generator.mk
 include makefiles/runner.mk
+include makefiles/eas.mk
 
 MAKEFLAGS += --no-print-directory
 

@@ -3,7 +3,7 @@
 .PHONY: run-mobile
 run-mobile: ## Starts mobile servers using Expo (requires emulation)
 	@echo "Starting mobile..."
-	cd ./mobile && bun run dev
+	@cd ./mobile && bun run dev
 
 # .PHONY: run-client
 # run-client: ## Starts the client (web)
