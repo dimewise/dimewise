@@ -174,7 +174,23 @@
 		"selectPaymentType": "支払いタイプを選択",
 		"paymentType": "支払いタイプ",
 		"descriptionOptional": "説明（任意）",
-		"amountCurrency": "金額 ({{currency}})"
+		"amountCurrency": "金額 ({{currency}})",
+    "amount": {
+      "validNumber": "有効な金額を入力してください",
+      "postiveOnly": "金額はマイナスにできません",
+      "largerThanZero": "金額はゼロより大きくなければなりません",
+      "disallowDecimals": "{{currency}}の金額には小数点は使用できません",
+      "upToDecimalPlaces": "{{currency}}の金額は最大で{{decimals}}桁の小数点まで許可されています",
+      "valueTooLarge": "予算が大きすぎます"
+    },
+    "budget": {
+      "validNumber": "有効な予算を入力してください",
+      "postiveOnly": "予算はマイナスにできません",
+      "largerThanZero": "予算はゼロより大きくなければなりません",
+      "disallowDecimals": "{{currency}}の予算には小数点は使用できません",
+      "upToDecimalPlaces": "{{currency}}の予算は最大で{{decimals}}桁の小数点まで許可されています",
+      "valueTooLarge": "予算が大きすぎます"
+    }
 	},
 	"actions": {
 		"create": "作成",

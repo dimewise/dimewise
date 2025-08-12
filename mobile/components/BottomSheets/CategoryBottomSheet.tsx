@@ -63,7 +63,7 @@ export default function CategoryBottomSheet({
       return;
     }
 
-    const validation = validateCurrencyInput(budget, currency);
+    const validation = validateCurrencyInput(budget, 'budget', currency);
     if (!validation.isValid) {
       setError(validation.error || t('forms.enterValidBudgetAmount'));
       return;

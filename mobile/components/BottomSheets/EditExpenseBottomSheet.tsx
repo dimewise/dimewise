@@ -123,7 +123,7 @@ export default function EditExpenseBottomSheet({
       return;
     }
 
-    const validation = validateCurrencyInput(amount, userSetting?.currency ?? 'USD');
+    const validation = validateCurrencyInput(amount, 'amount', userSetting?.currency ?? 'USD');
     if (!validation.isValid) {
       setError(validation.error || t('forms.validAmountRequired'));
       return;
