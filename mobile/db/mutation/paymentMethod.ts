@@ -1,20 +1,32 @@
 import { and, eq, isNull } from 'drizzle-orm';
+import * as Crypto from 'expo-crypto';
 import { db } from '../drizzle';
+import type { PaymentMethod } from '../schema';
 import { paymentMethod } from '../schema';
 
-export const getPaymentMethodsByUserId = (userId: string) => {
+export const createPaymentMethod = (
+  paymentMethodData: Omit<PaymentMethod, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
+) => {
+  const id = Crypto.randomUUID();
   return db
-    .select()
-    .from(paymentMethod)
-    .where(and(eq(paymentMethod.userId, userId), isNull(paymentMethod.deletedAt)))
-    .all();
+    .insert(paymentMethod)
+    .values({
+      id,
+      ...paymentMethodData,
+    })
+    .returning()
+    .get();
 };
 
-export const getPaymentMethodById = (paymentMethodId: string) => {
+export const updatePaymentMethod = (
+  paymentMethodId: string,
+  updates: Partial<Omit<PaymentMethod, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
+) => {
   return db
-    .select()
-    .from(paymentMethod)
+    .update(paymentMethod)
+    .set(updates)
     .where(and(eq(paymentMethod.id, paymentMethodId), isNull(paymentMethod.deletedAt)))
+    .returning()
     .get();
 };
 

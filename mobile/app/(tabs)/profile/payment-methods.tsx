@@ -19,10 +19,8 @@ import PaymentMethodBottomSheet from '../../../components/BottomSheets/PaymentMe
 import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../../components/contexts/UserContext';
 import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
-import {
-  deletePaymentMethodById,
-  getPaymentMethodsByUserId,
-} from '../../../db/repository/paymentMethod';
+import { deletePaymentMethodById } from '../../../db/mutation/paymentMethod';
+import { getPaymentMethodsByUserId } from '../../../db/repository/paymentMethod';
 import type { PaymentMethod } from '../../../db/schema';
 import { useUserData } from '../../../hooks/useAsyncData';
 

@@ -1,4 +1,4 @@
-import type { Category, Expense, PaymentMethod } from '../schema';
+import type { Category, Expense, PaymentMethod } from './schema';
 
 export interface CategoryWithSpending extends Category {
   spent: number;

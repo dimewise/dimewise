@@ -1,7 +1,7 @@
 import { and, desc, eq, getTableColumns, gte, isNull, lte, sql } from 'drizzle-orm';
 import { db } from '../drizzle';
 import { category, expense, paymentMethod } from '../schema';
-import type { ExpenseFull, ExpenseWithDetails } from './types';
+import type { ExpenseFull, ExpenseWithDetails } from '../types';
 
 export const getMonthlyExpenseSumByUserId = (userId: string, from: string, to: string) => {
   const result = db
