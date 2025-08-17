@@ -18,7 +18,8 @@ import EditCategoryBottomSheet from '../../../components/BottomSheets/EditCatego
 import { useRefreshKey } from '../../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../../components/contexts/UserContext';
 import ErrorBoundary, { LoadingErrorFallback } from '../../../components/ErrorBoundary';
-import { deleteCategoryById, getCategoriesByUserId } from '../../../db/repository/category';
+import { deleteCategoryById } from '../../../db/mutation/category';
+import { getCategoriesByUserId } from '../../../db/repository/category';
 import type { Category } from '../../../db/schema';
 import { formatAmount } from '../../../db/utils';
 import { useUserData } from '../../../hooks/useAsyncData';

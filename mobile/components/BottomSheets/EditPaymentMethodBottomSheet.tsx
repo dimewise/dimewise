@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { updatePaymentMethod } from '../../db/repository/paymentMethod';
+import { updatePaymentMethod } from '../../db/mutation/paymentMethod';
 import type { PaymentMethod } from '../../db/schema';
 import { useRefreshKey } from '../contexts/RefreshKeyContext';
 import { BSTextInput } from './BottomSheetTextInput';

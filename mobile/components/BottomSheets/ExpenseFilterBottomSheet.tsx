@@ -1,24 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Dimensions, Platform, View } from 'react-native';
-import { format } from 'date-fns';
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import {
-  BottomSheetModal,
   BottomSheetBackdrop,
-  BottomSheetBackdropProps,
+  type BottomSheetBackdropProps,
+  BottomSheetModal,
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
-import { Button } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { Text, useTheme } from 'react-native-paper';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useFocusEffect } from 'expo-router';
-import DropdownBottomSheet, { DropdownOption, DropdownButton } from './DropdownBottomSheet';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Dimensions, Platform, View } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { getCategoriesByUserId } from '../../db/repository/category';
 import { useMultipleAsyncData } from '../../hooks/useAsyncData';
-import { useUser } from '../contexts/UserContext';
-import { useRefreshKey } from '../contexts/RefreshKeyContext';
 import { formatDateWithLocale } from '../../utils/datetime';
+import { useRefreshKey } from '../contexts/RefreshKeyContext';
+import { useUser } from '../contexts/UserContext';
+import DropdownBottomSheet, { DropdownButton, type DropdownOption } from './DropdownBottomSheet';
 
 export interface ExpenseFilters {
   dateRange?: {
@@ -50,16 +48,20 @@ export default function ExpenseFilterBottomSheet({
 
   // Local state for form
   const [startDate, setStartDate] = useState<Date>(
-    currentFilters.dateRange?.from ? new Date(currentFilters.dateRange.from) : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    currentFilters.dateRange?.from
+      ? new Date(currentFilters.dateRange.from)
+      : new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
   const [endDate, setEndDate] = useState<Date>(
-    currentFilters.dateRange?.to ? new Date(currentFilters.dateRange.to) : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59, 999)
+    currentFilters.dateRange?.to
+      ? new Date(currentFilters.dateRange.to)
+      : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59, 999),
   );
   const [verificationStatus, setVerificationStatus] = useState<'verified' | 'unverified' | 'all'>(
-    currentFilters.verificationStatus || 'all'
+    currentFilters.verificationStatus || 'all',
   );
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>(
-    currentFilters.categoryId
+    currentFilters.categoryId,
   );
 
   // Date picker states
@@ -95,10 +97,14 @@ export default function ExpenseFilterBottomSheet({
     useCallback(() => {
       if (visible) {
         setStartDate(
-          currentFilters.dateRange?.from ? new Date(currentFilters.dateRange.from) : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          currentFilters.dateRange?.from
+            ? new Date(currentFilters.dateRange.from)
+            : new Date(new Date().getFullYear(), new Date().getMonth(), 1),
         );
         setEndDate(
-          currentFilters.dateRange?.to ? new Date(currentFilters.dateRange.to) : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59, 999)
+          currentFilters.dateRange?.to
+            ? new Date(currentFilters.dateRange.to)
+            : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59, 999),
         );
         setVerificationStatus(currentFilters.verificationStatus || 'all');
         setSelectedCategoryId(currentFilters.categoryId);
@@ -193,262 +199,260 @@ export default function ExpenseFilterBottomSheet({
   ];
 
   return (
-    <>
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        index={0}
-        onChange={handleSheetChanges}
-        enablePanDownToClose
-        enableDynamicSizing
-        keyboardBehavior="interactive"
-        keyboardBlurBehavior="restore"
-        backgroundStyle={{ backgroundColor: theme.colors.surface }}
-        handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
-        maxDynamicContentSize={Dimensions.get('window').height * 0.9}
-        backdropComponent={renderBackdrop}
-        enableContentPanningGesture
+    <BottomSheetModal
+      ref={bottomSheetModalRef}
+      index={0}
+      onChange={handleSheetChanges}
+      enablePanDownToClose
+      enableDynamicSizing
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      backgroundStyle={{ backgroundColor: theme.colors.surface }}
+      handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
+      maxDynamicContentSize={Dimensions.get('window').height * 0.9}
+      backdropComponent={renderBackdrop}
+      enableContentPanningGesture
+    >
+      <BottomSheetScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
+        keyboardShouldPersistTaps="never"
+        showsVerticalScrollIndicator={false}
+        automaticallyAdjustKeyboardInsets={false}
       >
-        <BottomSheetScrollView
-          contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
-          keyboardShouldPersistTaps="never"
-          showsVerticalScrollIndicator={false}
-          automaticallyAdjustKeyboardInsets={false}
+        <SafeAreaView
+          edges={['bottom']}
+          style={{ flex: 1 }}
         >
-          <SafeAreaView
-            edges={['bottom']}
-            style={{ flex: 1 }}
+          <View
+            style={{
+              padding: 8,
+              backgroundColor: theme.colors.surface,
+            }}
           >
-            <View
+            <Text
+              variant="headlineMedium"
               style={{
-                padding: 8,
-                backgroundColor: theme.colors.surface,
+                marginBottom: 32,
+                fontWeight: '700',
+                color: theme.colors.onSurface,
+                textAlign: 'center',
               }}
             >
-              <Text
-                variant="headlineMedium"
-                style={{
-                  marginBottom: 32,
-                  fontWeight: '700',
-                  color: theme.colors.onSurface,
-                  textAlign: 'center',
-                }}
-              >
-                {t('expenses.filters.title')}
-              </Text>
+              {t('expenses.filters.title')}
+            </Text>
 
-              <View style={{ gap: 24 }}>
-                {/* Date Range Section */}
-                <View>
-                  <Text
-                    variant="labelLarge"
-                    style={{
-                      marginBottom: 16,
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '600',
-                    }}
-                  >
-                    {t('expenses.filters.dateRange')}
-                  </Text>
-                  <View style={{ gap: 12 }}>
-                    <View>
-                      <Text
-                        variant="labelMedium"
-                        style={{
-                          marginBottom: 8,
-                          color: theme.colors.onSurfaceVariant,
-                          fontWeight: '500',
-                        }}
-                      >
-                        {t('expenses.filters.startDate')}
-                      </Text>
-                      <Button
-                        mode="outlined"
-                        onPress={handleStartDatePickerToggle}
-                        contentStyle={{
-                          paddingVertical: 4,
-                          justifyContent: 'flex-start',
-                        }}
-                        labelStyle={{
-                          fontSize: 16,
-                          fontWeight: '500',
-                          textAlign: 'left',
-                        }}
-                        style={{
-                          borderRadius: 6,
-                          borderColor: theme.colors.outline,
-                          backgroundColor: theme.colors.surface,
-                        }}
-                      >
-                        {formatDateWithLocale(startDate, userSetting?.preferredLanguage || 'en')}
-                      </Button>
-                      {showStartDatePicker && (
-                        <DateTimePicker
-                          value={startDate}
-                          mode="date"
-                          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                          onChange={handleStartDateChange}
-                          locale={userSetting?.preferredLanguage || 'en'}
-                          maximumDate={endDate}
-                        />
-                      )}
-                    </View>
-                    <View>
-                      <Text
-                        variant="labelMedium"
-                        style={{
-                          marginBottom: 8,
-                          color: theme.colors.onSurfaceVariant,
-                          fontWeight: '500',
-                        }}
-                      >
-                        {t('expenses.filters.endDate')}
-                      </Text>
-                      <Button
-                        mode="outlined"
-                        onPress={handleEndDatePickerToggle}
-                        contentStyle={{
-                          paddingVertical: 4,
-                          justifyContent: 'flex-start',
-                        }}
-                        labelStyle={{
-                          fontSize: 16,
-                          fontWeight: '500',
-                          textAlign: 'left',
-                        }}
-                        style={{
-                          borderRadius: 6,
-                          borderColor: theme.colors.outline,
-                          backgroundColor: theme.colors.surface,
-                        }}
-                      >
-                        {formatDateWithLocale(endDate, userSetting?.preferredLanguage || 'en')}
-                      </Button>
-                      {showEndDatePicker && (
-                        <DateTimePicker
-                          value={endDate}
-                          mode="date"
-                          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                          locale={userSetting?.preferredLanguage || 'en'}
-                          onChange={handleEndDateChange}
-                          minimumDate={startDate}
-                          maximumDate={new Date()}
-                        />
-                      )}
-                    </View>
+            <View style={{ gap: 24 }}>
+              {/* Date Range Section */}
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 16,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('expenses.filters.dateRange')}
+                </Text>
+                <View style={{ gap: 12 }}>
+                  <View>
+                    <Text
+                      variant="labelMedium"
+                      style={{
+                        marginBottom: 8,
+                        color: theme.colors.onSurfaceVariant,
+                        fontWeight: '500',
+                      }}
+                    >
+                      {t('expenses.filters.startDate')}
+                    </Text>
+                    <Button
+                      mode="outlined"
+                      onPress={handleStartDatePickerToggle}
+                      contentStyle={{
+                        paddingVertical: 4,
+                        justifyContent: 'flex-start',
+                      }}
+                      labelStyle={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        textAlign: 'left',
+                      }}
+                      style={{
+                        borderRadius: 6,
+                        borderColor: theme.colors.outline,
+                        backgroundColor: theme.colors.surface,
+                      }}
+                    >
+                      {formatDateWithLocale(startDate, userSetting?.preferredLanguage || 'en')}
+                    </Button>
+                    {showStartDatePicker && (
+                      <DateTimePicker
+                        value={startDate}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={handleStartDateChange}
+                        locale={userSetting?.preferredLanguage || 'en'}
+                        maximumDate={endDate}
+                      />
+                    )}
+                  </View>
+                  <View>
+                    <Text
+                      variant="labelMedium"
+                      style={{
+                        marginBottom: 8,
+                        color: theme.colors.onSurfaceVariant,
+                        fontWeight: '500',
+                      }}
+                    >
+                      {t('expenses.filters.endDate')}
+                    </Text>
+                    <Button
+                      mode="outlined"
+                      onPress={handleEndDatePickerToggle}
+                      contentStyle={{
+                        paddingVertical: 4,
+                        justifyContent: 'flex-start',
+                      }}
+                      labelStyle={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        textAlign: 'left',
+                      }}
+                      style={{
+                        borderRadius: 6,
+                        borderColor: theme.colors.outline,
+                        backgroundColor: theme.colors.surface,
+                      }}
+                    >
+                      {formatDateWithLocale(endDate, userSetting?.preferredLanguage || 'en')}
+                    </Button>
+                    {showEndDatePicker && (
+                      <DateTimePicker
+                        value={endDate}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        locale={userSetting?.preferredLanguage || 'en'}
+                        onChange={handleEndDateChange}
+                        minimumDate={startDate}
+                        maximumDate={new Date()}
+                      />
+                    )}
                   </View>
                 </View>
+              </View>
 
-                {/* Verification Status Section */}
-                <View>
-                  <Text
-                    variant="labelLarge"
-                    style={{
-                      marginBottom: 16,
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '600',
-                    }}
-                  >
-                    {t('expenses.filters.verificationStatus')}
-                  </Text>
-                  <DropdownButton
-                    onPress={() => setShowVerificationDropdown(true)}
-                    selectedValue={verificationStatus}
-                    options={verificationOptions}
-                    placeholder={t('expenses.filters.selectVerificationStatus')}
-                  />
-                  <DropdownBottomSheet
-                    visible={showVerificationDropdown}
-                    onDismiss={() => setShowVerificationDropdown(false)}
-                    options={verificationOptions}
-                    onSelect={(value) => {
-                      setVerificationStatus(value as 'verified' | 'unverified' | 'all');
-                      setShowVerificationDropdown(false);
-                    }}
-                    selectedValue={verificationStatus}
-                    title={t('expenses.filters.selectVerificationStatus')}
-                  />
-                </View>
+              {/* Verification Status Section */}
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 16,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('expenses.filters.verificationStatus')}
+                </Text>
+                <DropdownButton
+                  onPress={() => setShowVerificationDropdown(true)}
+                  selectedValue={verificationStatus}
+                  options={verificationOptions}
+                  placeholder={t('expenses.filters.selectVerificationStatus')}
+                />
+                <DropdownBottomSheet
+                  visible={showVerificationDropdown}
+                  onDismiss={() => setShowVerificationDropdown(false)}
+                  options={verificationOptions}
+                  onSelect={(value) => {
+                    setVerificationStatus(value as 'verified' | 'unverified' | 'all');
+                    setShowVerificationDropdown(false);
+                  }}
+                  selectedValue={verificationStatus}
+                  title={t('expenses.filters.selectVerificationStatus')}
+                />
+              </View>
 
-                {/* Category Section */}
-                <View>
-                  <Text
-                    variant="labelLarge"
-                    style={{
-                      marginBottom: 16,
-                      color: theme.colors.onSurfaceVariant,
-                      fontWeight: '600',
-                    }}
-                  >
-                    {t('expenses.filters.category')}
-                  </Text>
-                  <DropdownButton
-                    onPress={() => setShowCategoryDropdown(true)}
-                    selectedValue={selectedCategoryId || ''}
-                    options={categoryOptions}
-                    placeholder={t('expenses.filters.selectCategory')}
-                  />
-                  <DropdownBottomSheet
-                    visible={showCategoryDropdown}
-                    onDismiss={() => setShowCategoryDropdown(false)}
-                    options={categoryOptions}
-                    onSelect={(value) => {
-                      setSelectedCategoryId(value || undefined);
-                      setShowCategoryDropdown(false);
-                    }}
-                    selectedValue={selectedCategoryId || ''}
-                    title={t('expenses.filters.selectCategory')}
-                  />
-                </View>
+              {/* Category Section */}
+              <View>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    marginBottom: 16,
+                    color: theme.colors.onSurfaceVariant,
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('expenses.filters.category')}
+                </Text>
+                <DropdownButton
+                  onPress={() => setShowCategoryDropdown(true)}
+                  selectedValue={selectedCategoryId || ''}
+                  options={categoryOptions}
+                  placeholder={t('expenses.filters.selectCategory')}
+                />
+                <DropdownBottomSheet
+                  visible={showCategoryDropdown}
+                  onDismiss={() => setShowCategoryDropdown(false)}
+                  options={categoryOptions}
+                  onSelect={(value) => {
+                    setSelectedCategoryId(value || undefined);
+                    setShowCategoryDropdown(false);
+                  }}
+                  selectedValue={selectedCategoryId || ''}
+                  title={t('expenses.filters.selectCategory')}
+                />
+              </View>
 
-                {/* Action Buttons */}
-                <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
-                  <Button
-                    mode="outlined"
-                    onPress={handleClearAll}
-                    contentStyle={{
-                      paddingVertical: 4,
-                    }}
-                    labelStyle={{
-                      fontSize: 16,
-                      fontWeight: '600',
-                      letterSpacing: 0.25,
-                    }}
-                    style={{
-                      flex: 1,
-                      borderRadius: 6,
-                    }}
-                  >
-                    {t('expenses.filters.clearAll')}
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={handleApplyFilters}
-                    contentStyle={{
-                      paddingVertical: 4,
-                    }}
-                    labelStyle={{
-                      fontSize: 16,
-                      fontWeight: '600',
-                      letterSpacing: 0.25,
-                    }}
-                    style={{
-                      flex: 1,
-                      borderRadius: 6,
-                      shadowColor: '#000000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 4,
-                      elevation: 2,
-                    }}
-                  >
-                    {t('expenses.filters.applyFilters')}
-                  </Button>
-                </View>
+              {/* Action Buttons */}
+              <View style={{ flexDirection: 'row', gap: 16, marginTop: 16 }}>
+                <Button
+                  mode="outlined"
+                  onPress={handleClearAll}
+                  contentStyle={{
+                    paddingVertical: 4,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    letterSpacing: 0.25,
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 6,
+                  }}
+                >
+                  {t('expenses.filters.clearAll')}
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleApplyFilters}
+                  contentStyle={{
+                    paddingVertical: 4,
+                  }}
+                  labelStyle={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    letterSpacing: 0.25,
+                  }}
+                  style={{
+                    flex: 1,
+                    borderRadius: 6,
+                    shadowColor: '#000000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 2,
+                  }}
+                >
+                  {t('expenses.filters.applyFilters')}
+                </Button>
               </View>
             </View>
-          </SafeAreaView>
-        </BottomSheetScrollView>
-      </BottomSheetModal>
-    </>
+          </View>
+        </SafeAreaView>
+      </BottomSheetScrollView>
+    </BottomSheetModal>
   );
-} 
+}

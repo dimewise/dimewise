@@ -2,18 +2,20 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
-import { Chip, FAB, Searchbar, Text, useTheme, IconButton } from 'react-native-paper';
+import { Chip, FAB, IconButton, Searchbar, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EditExpenseBottomSheet from '../../components/BottomSheets/EditExpenseBottomSheet';
 import ExpenseBottomSheet from '../../components/BottomSheets/ExpenseBottomSheet';
 import ExpenseDetailBottomSheet from '../../components/BottomSheets/ExpenseDetailBottomSheet';
-import ExpenseFilterBottomSheet, { ExpenseFilters } from '../../components/BottomSheets/ExpenseFilterBottomSheet';
+import ExpenseFilterBottomSheet, {
+  type ExpenseFilters,
+} from '../../components/BottomSheets/ExpenseFilterBottomSheet';
 import { useRefreshKey } from '../../components/contexts/RefreshKeyContext';
 import { useUser } from '../../components/contexts/UserContext';
 import ErrorBoundary, { ExpensesErrorFallback } from '../../components/ErrorBoundary';
 import ExpenseListItem from '../../components/ExpenseListItem';
 import { getCategoriesByUserId } from '../../db/repository/category';
-import { getExpensesWithDetailsByUserId, getExpensesWithDetailsByUserIdWithFilters } from '../../db/repository/expense';
+import { getExpensesWithDetailsByUserIdWithFilters } from '../../db/repository/expense';
 import { getPaymentMethodsByUserId } from '../../db/repository/paymentMethod';
 import type { ExpenseWithDetails } from '../../db/repository/types';
 import type { Expense } from '../../db/schema';
@@ -40,17 +42,28 @@ export default function ExpensesScreen() {
   // Load all data using our optimized hook - expenses now include category/payment method data
   const { data, loading, error, refetch } = useMultipleAsyncData(
     {
-      expenses: () => (user?.id ? getExpensesWithDetailsByUserIdWithFilters(user.id, {
-        ...activeFilters,
-        searchQuery: searchQuery || undefined,
-        categoryId: selectedCategory || undefined,
-      }) : Promise.resolve([])),
+      expenses: () =>
+        user?.id
+          ? getExpensesWithDetailsByUserIdWithFilters(user.id, {
+              ...activeFilters,
+              searchQuery: searchQuery || undefined,
+              categoryId: selectedCategory || undefined,
+            })
+          : Promise.resolve([]),
       categories: () => (user?.id ? getCategoriesByUserId(user.id) : Promise.resolve([])),
       paymentMethods: () => (user?.id ? getPaymentMethodsByUserId(user.id) : Promise.resolve([])),
     },
     {
       immediate: !!user?.id,
-      deps: [user?.id, refreshKeys.expenses, refreshKeys.categories, refreshKeys.paymentMethods, activeFilters, searchQuery, selectedCategory],
+      deps: [
+        user?.id,
+        refreshKeys.expenses,
+        refreshKeys.categories,
+        refreshKeys.paymentMethods,
+        activeFilters,
+        searchQuery,
+        selectedCategory,
+      ],
     },
   );
 
@@ -213,7 +226,10 @@ export default function ExpensesScreen() {
           </View>
 
           {/* ACTIVE FILTERS */}
-          {(activeFilters.dateRange || activeFilters.verificationStatus || activeFilters.categoryId || selectedCategory) && (
+          {(activeFilters.dateRange ||
+            activeFilters.verificationStatus ||
+            activeFilters.categoryId ||
+            selectedCategory) && (
             <View
               style={{
                 paddingHorizontal: 24,
@@ -266,7 +282,9 @@ export default function ExpensesScreen() {
                       selected
                       onPress={() => setShowFilterSheet(true)}
                     >
-                      {activeFilters.verificationStatus === 'verified' ? t('expenses.filters.verified') : t('expenses.filters.unverified')}
+                      {activeFilters.verificationStatus === 'verified'
+                        ? t('expenses.filters.verified')
+                        : t('expenses.filters.unverified')}
                     </Chip>
                   )}
 
@@ -276,7 +294,9 @@ export default function ExpensesScreen() {
                       selected
                       onPress={() => setShowFilterSheet(true)}
                     >
-                      {data?.categories?.find(cat => cat.id === (activeFilters.categoryId || selectedCategory))?.name || 'Unknown Category'}
+                      {data?.categories?.find(
+                        (cat) => cat.id === (activeFilters.categoryId || selectedCategory),
+                      )?.name || 'Unknown Category'}
                     </Chip>
                   )}
                 </View>

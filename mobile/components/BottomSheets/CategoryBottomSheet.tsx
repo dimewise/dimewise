@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, View } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { createCategory } from '../../db/repository/category';
+import { createCategory } from '../../db/mutation/category';
 import { validateCurrencyInput } from '../../db/utils';
 import { useRefreshKey } from '../contexts/RefreshKeyContext';
 import { useUser } from '../contexts/UserContext';
