@@ -119,13 +119,17 @@
 		"cash": "現金",
 		"bankTransfer": "銀行振込",
 		"digitalWallet": "デジタルウォレット",
-		"other": "その他"
+		"other": "その他",
+		"setupPaymentMethods": "プロフィールで支払い方法を設定して、支出の追跡を開始してください。",
+		"noExpenses": "支出なし",
+		"spending": "支出",
+		"countTransaction": "{{count}}取引",
+		"countTransactions": "{{count}}取引"
 	},
 	"home": {
 		"welcome": "ようこそ",
 		"monthlyOverview": "月間概要",
 		"recentTransactions": "最近の取引",
-		"currentMonth": "今月",
 		"topCategories": "主要カテゴリ",
 		"totalBudget": "総予算",
 		"totalSpent": "総支出",
@@ -180,7 +184,7 @@
 		"descriptionOptional": "説明（任意）",
 		"amountCurrency": "金額 ({{currency}})",
 		"amount": {
-      "amount": "金額",
+			"amount": "金額",
 			"validNumber": "有効な金額を入力してください",
 			"postiveOnly": "金額はマイナスにできません",
 			"largerThanZero": "金額はゼロより大きくなければなりません",
@@ -189,7 +193,7 @@
 			"valueTooLarge": "予算が大きすぎます"
 		},
 		"budget": {
-      "budget": "予算",
+			"budget": "予算",
 			"validNumber": "有効な予算を入力してください",
 			"postiveOnly": "予算はマイナスにできません",
 			"largerThanZero": "予算はゼロより大きくなければなりません",
