@@ -2,7 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
-import { Divider, FAB, IconButton, Text, useTheme } from 'react-native-paper';
+import { FAB, IconButton, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateSelectorBottomSheet from '../../components/BottomSheets/DateSelectorBottomSheet';
 import EditExpenseBottomSheet from '../../components/BottomSheets/EditExpenseBottomSheet';
@@ -11,6 +11,7 @@ import ExpenseDetailBottomSheet from '../../components/BottomSheets/ExpenseDetai
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { BudgetOverview } from '../../components/Home/BudgetOverview';
 import { CategoriesBreakdown } from '../../components/Home/CategoriesBreakdown';
+import { PaymentMethodsBreakdown } from '../../components/Home/PaymentMethodsBreakdown';
 import { RecentTransactions } from '../../components/Home/RecentTransactions';
 import type { Expense } from '../../db/schema';
 
@@ -165,7 +166,10 @@ export default function HomePage() {
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
             />
-            <Divider />
+            <PaymentMethodsBreakdown
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+            />
             <RecentTransactions
               onPress={handleExpensePress}
               selectedMonth={selectedMonth}

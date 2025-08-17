@@ -5,6 +5,11 @@ export interface CategoryWithSpending extends Category {
   percentage: number;
 }
 
+export interface PaymentMethodWithSpending extends PaymentMethod {
+  spent: number;
+  transactionCount: number;
+}
+
 export interface ExpenseFull extends Expense {
   category: Pick<Category, 'id' | 'name'> | null;
   paymentMethod: Pick<PaymentMethod, 'id' | 'name'> | null;

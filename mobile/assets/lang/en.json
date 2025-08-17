@@ -119,13 +119,17 @@
 		"cash": "Cash",
 		"bankTransfer": "Bank Transfer",
 		"digitalWallet": "Digital Wallet",
-		"other": "Other"
+		"other": "Other",
+		"setupPaymentMethods": "Set up payment methods in your profile to start tracking expenses.",
+		"noExpenses": "No expenses",
+		"spending": "Spending",
+		"countTransaction": "{{count}} transaction",
+		"countTransactions": "{{count}} transactions"
 	},
 	"home": {
 		"welcome": "Welcome",
 		"monthlyOverview": "Monthly Overview",
 		"recentTransactions": "Recent Transactions",
-		"currentMonth": "Current Month",
 		"topCategories": "Top Categories",
 		"totalBudget": "Total Budget",
 		"totalSpent": "Total Spent",
@@ -180,7 +184,7 @@
 		"descriptionOptional": "Description (optional)",
 		"amountCurrency": "Amount ({{currency}})",
 		"amount": {
-      "amount": "Amount",
+			"amount": "Amount",
 			"validNumber": "Please enter a valid amount",
 			"postiveOnly": "Amount cannot be negative",
 			"largerThanZero": "Amount must be greater than zero",
@@ -189,7 +193,7 @@
 			"valueTooLarge": "Budget is too large"
 		},
 		"budget": {
-      "budget": "budget", 
+			"budget": "budget",
 			"validNumber": "Please enter a valid budget",
 			"postiveOnly": "Budget cannot be negative",
 			"largerThanZero": "Budget must be greater than zero",
