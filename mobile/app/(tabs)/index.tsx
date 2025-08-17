@@ -1,9 +1,10 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView } from 'react-native';
-import { Divider, FAB, useTheme } from 'react-native-paper';
+import { ScrollView, View } from 'react-native';
+import { Divider, FAB, IconButton, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import DateSelectorBottomSheet from '../../components/BottomSheets/DateSelectorBottomSheet';
 import EditExpenseBottomSheet from '../../components/BottomSheets/EditExpenseBottomSheet';
 import ExpenseBottomSheet from '../../components/BottomSheets/ExpenseBottomSheet';
 import ExpenseDetailBottomSheet from '../../components/BottomSheets/ExpenseDetailBottomSheet';
@@ -17,8 +18,14 @@ export default function HomePage() {
   const [showExpenseSheet, setShowExpenseSheet] = useState(false);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [showDateSelector, setShowDateSelector] = useState(false);
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [isTransitioningToEdit, setIsTransitioningToEdit] = useState(false);
+
+  // Date selection state
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear());
+
   const theme = useTheme();
   const { t } = useTranslation();
   const timeoutRef = useRef<number | null>(null);
@@ -29,8 +36,14 @@ export default function HomePage() {
       setShowExpenseSheet(false);
       setShowDetailSheet(false);
       setShowEditSheet(false);
+      setShowDateSelector(false);
       setSelectedExpenseId(null);
       setIsTransitioningToEdit(false);
+
+      // Reset to current month when navigating to this tab
+      const now = new Date();
+      setSelectedMonth(now.getMonth());
+      setSelectedYear(now.getFullYear());
 
       // Cleanup timeout on unmount
       return () => {
@@ -91,69 +104,125 @@ export default function HomePage() {
     setSelectedExpenseId(null);
   };
 
+  const handleDateSelection = useCallback((month: number, year: number) => {
+    setSelectedMonth(month);
+    setSelectedYear(year);
+  }, []);
+
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {
         console.error('Dashboard error:', error, errorInfo);
       }}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: theme.colors.background }}
-        edges={['top', 'left', 'right']}
-      >
-        <ScrollView
+      <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
+        <SafeAreaView
           style={{ flex: 1, backgroundColor: theme.colors.background }}
-          contentContainerStyle={{ padding: 24, paddingBottom: 100, gap: 16 }}
-          showsVerticalScrollIndicator={false}
+          edges={['top', 'left', 'right']}
         >
-          <BudgetOverview />
-          <CategoriesBreakdown />
-          <Divider />
-          <RecentTransactions onPress={handleExpensePress} />
-        </ScrollView>
+          <View
+            style={{
+              paddingTop: 16,
+              paddingHorizontal: 24,
+              paddingBottom: 16,
+              backgroundColor: theme.colors.background,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                variant="headlineMedium"
+                style={{
+                  fontWeight: '700',
+                  color: theme.colors.onBackground,
+                }}
+              >
+                {t('navigation.home')}
+              </Text>
+              <IconButton
+                icon="calendar"
+                size={24}
+                onPress={() => setShowDateSelector(true)}
+                iconColor={theme.colors.onBackground}
+              />
+            </View>
+          </View>
+          <ScrollView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            contentContainerStyle={{ padding: 24, paddingBottom: 100, gap: 16 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <BudgetOverview
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+            />
+            <CategoriesBreakdown
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+            />
+            <Divider />
+            <RecentTransactions
+              onPress={handleExpensePress}
+              selectedMonth={selectedMonth}
+              selectedYear={selectedYear}
+            />
+          </ScrollView>
 
-        {/* PERIPHERALS */}
-        <FAB
-          icon="plus"
-          label={t('home.newExpense')}
-          onPress={() => {
-            setShowExpenseSheet(true);
-          }}
-          style={{
-            position: 'absolute',
-            bottom: 16,
-            right: 16,
-          }}
-        />
-        <ExpenseBottomSheet
-          visible={showExpenseSheet}
-          onDismiss={() => {
-            setShowExpenseSheet(false);
-          }}
-        />
-        <ExpenseDetailBottomSheet
-          visible={showDetailSheet}
-          expenseId={selectedExpenseId}
-          onDismiss={() => {
-            setShowDetailSheet(false);
-            if (!isTransitioningToEdit) {
+          {/* PERIPHERALS */}
+          <FAB
+            icon="plus"
+            label={t('home.newExpense')}
+            onPress={() => {
+              setShowExpenseSheet(true);
+            }}
+            style={{
+              position: 'absolute',
+              bottom: 16,
+              right: 16,
+            }}
+          />
+          <ExpenseBottomSheet
+            visible={showExpenseSheet}
+            onDismiss={() => {
+              setShowExpenseSheet(false);
+            }}
+          />
+          <ExpenseDetailBottomSheet
+            visible={showDetailSheet}
+            expenseId={selectedExpenseId}
+            onDismiss={() => {
+              setShowDetailSheet(false);
+              if (!isTransitioningToEdit) {
+                setSelectedExpenseId(null);
+              }
+            }}
+            onEdit={handleEditExpense}
+            onDeleted={handleExpenseDeleted}
+          />
+          <EditExpenseBottomSheet
+            visible={showEditSheet}
+            expenseId={selectedExpenseId}
+            onDismiss={() => {
+              setShowEditSheet(false);
               setSelectedExpenseId(null);
-            }
-          }}
-          onEdit={handleEditExpense}
-          onDeleted={handleExpenseDeleted}
-        />
-        <EditExpenseBottomSheet
-          visible={showEditSheet}
-          expenseId={selectedExpenseId}
-          onDismiss={() => {
-            setShowEditSheet(false);
-            setSelectedExpenseId(null);
-            setIsTransitioningToEdit(false);
-          }}
-          onExpenseUpdated={handleExpenseUpdated}
-        />
-      </SafeAreaView>
+              setIsTransitioningToEdit(false);
+            }}
+            onExpenseUpdated={handleExpenseUpdated}
+          />
+          <DateSelectorBottomSheet
+            visible={showDateSelector}
+            onDismiss={() => setShowDateSelector(false)}
+            onApply={handleDateSelection}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+          />
+        </SafeAreaView>
+      </View>
     </ErrorBoundary>
   );
 }

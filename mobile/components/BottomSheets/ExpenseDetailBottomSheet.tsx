@@ -219,7 +219,7 @@ export default function ExpenseDetailBottomSheet({
                     fontWeight: '600',
                   }}
                 >
-                  {t('forms.amount')}
+                  {t('forms.amount.amount')}
                 </Text>
                 <Text
                   variant="headlineSmall"
@@ -488,7 +488,8 @@ export default function ExpenseDetailBottomSheet({
               variant="bodySmall"
               style={{ color: theme.colors.onSurfaceVariant, marginBottom: 8 }}
             >
-              {t('forms.amount')}: {targetExpense ? formatAmountLocal(targetExpense.amount) : ''}
+              {t('forms.amount.amount')}:
+              {targetExpense ? formatAmountLocal(targetExpense.amount) : ''}
             </Text>
             <Text
               variant="bodySmall"

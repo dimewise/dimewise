@@ -5,9 +5,12 @@ import { useUser } from '../components/contexts/UserContext';
 import { getCategoriesByUserId } from '../db/repository/category';
 import { getExpensesInRangeByUserId } from '../db/repository/expense';
 import type { CategoryWithSpending } from '../db/repository/types';
-import { getMonthRange } from '../utils/datetime';
+import { getMonthRangeByMonthYear } from '../utils/datetime';
 
-export function useCategoriesBreakdown(): {
+export function useCategoriesBreakdown(
+  selectedMonth: number,
+  selectedYear: number,
+): {
   categories: CategoryWithSpending[];
   loading: boolean;
   error: string | null;
@@ -26,8 +29,8 @@ export function useCategoriesBreakdown(): {
       // Fetch categories (excluding deleted)
       const categories = getCategoriesByUserId(user.id);
 
-      // Fetch this month's expenses (excluding deleted)
-      const { from, to } = getMonthRange(new Date());
+      // Fetch selected month's expenses (excluding deleted)
+      const { from, to } = getMonthRangeByMonthYear(selectedMonth, selectedYear);
       const expenses = getExpensesInRangeByUserId(user.id, from, to);
 
       // Group expenses by categoryId
@@ -75,7 +78,7 @@ export function useCategoriesBreakdown(): {
         error: error instanceof Error ? error.message : 'Failed to load categories',
       };
     }
-  }, [user?.id, t, refreshKeys.expenses, refreshKeys.categories]);
+  }, [user?.id, t, selectedMonth, selectedYear, refreshKeys.expenses, refreshKeys.categories]);
 
   return result;
 }

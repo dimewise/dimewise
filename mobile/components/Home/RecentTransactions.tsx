@@ -4,7 +4,7 @@ import { Text, useTheme } from 'react-native-paper';
 import { getExpensesInRangeByUserId } from '../../db/repository/expense';
 import type { Expense } from '../../db/schema';
 import { useUserData } from '../../hooks/useAsyncData';
-import { getMonthRange } from '../../utils/datetime';
+import { getMonthRangeByMonthYear } from '../../utils/datetime';
 import { useRefreshKey } from '../contexts/RefreshKeyContext';
 import { useUser } from '../contexts/UserContext';
 import { LoadingErrorFallback } from '../ErrorBoundary';
@@ -12,9 +12,11 @@ import ExpenseList from '../ExpenseList';
 
 interface Props {
   onPress: (expense: Expense) => void;
+  selectedMonth: number;
+  selectedYear: number;
 }
 
-export const RecentTransactions = ({ onPress }: Props) => {
+export const RecentTransactions = ({ onPress, selectedMonth, selectedYear }: Props) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const { user } = useUser();
@@ -28,11 +30,11 @@ export const RecentTransactions = ({ onPress }: Props) => {
     refetch,
   } = useUserData(
     (userId) => {
-      const { from, to } = getMonthRange(new Date());
+      const { from, to } = getMonthRangeByMonthYear(selectedMonth, selectedYear);
       return getExpensesInRangeByUserId(userId, from, to, 10);
     },
     user?.id,
-    [refreshKeys.expenses],
+    [refreshKeys.expenses, selectedMonth, selectedYear],
   );
 
   if (loading) {
