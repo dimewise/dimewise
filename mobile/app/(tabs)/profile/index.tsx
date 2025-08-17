@@ -51,7 +51,6 @@ export default function ProfileScreen() {
               variant="headlineMedium"
               style={{
                 fontWeight: '700',
-                marginBottom: 16,
                 color: theme.colors.onBackground,
               }}
             >
@@ -71,6 +70,7 @@ export default function ProfileScreen() {
                 borderWidth: 1,
                 borderColor: theme.colors.outline,
                 overflow: 'hidden',
+                marginTop: 8,
               }}
             >
               <List.Item

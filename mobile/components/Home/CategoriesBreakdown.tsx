@@ -4,10 +4,15 @@ import { Text, useTheme } from 'react-native-paper';
 import { useCategoriesBreakdown } from '../../hooks/useCategoriesBreakdown';
 import { CategoryList } from '../CategoryList';
 
-export const CategoriesBreakdown = () => {
+interface CategoriesBreakdownProps {
+  selectedMonth: number;
+  selectedYear: number;
+}
+
+export const CategoriesBreakdown = ({ selectedMonth, selectedYear }: CategoriesBreakdownProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
-  const { categories, loading, error } = useCategoriesBreakdown();
+  const { categories, loading, error } = useCategoriesBreakdown(selectedMonth, selectedYear);
 
   if (error) {
     return (
@@ -49,7 +54,7 @@ export const CategoriesBreakdown = () => {
           variant="bodyMedium"
           style={{ color: theme.colors.onSurfaceVariant }}
         >
-          Loading categories...
+          {t('status.loading')}
         </Text>
       ) : (
         <CategoryList categories={categories} />

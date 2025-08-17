@@ -18,6 +18,7 @@
 		"select": "選択",
 		"none": "なし",
 		"all": "すべて",
+		"apply": "適用",
 		"today": "今日",
 		"yesterday": "昨日",
 		"thisWeek": "今週",
@@ -138,13 +139,16 @@
 		"greatProgress": "素晴らしい！まだ予算に余裕があります。",
 		"noBudgetCategories": "予算カテゴリが見つかりません",
 		"setupCategories": "支出の追跡を始めるには、プロフィールで予算カテゴリを設定してください。",
-		"newExpense": "新しい支出"
+		"newExpense": "新しい支出",
+		"selectPeriod": "期間を選択",
+		"selectedPeriod": "選択された期間",
+		"currentMonth": "今月",
+		"selectMonth": "月を選択",
+		"selectYear": "年を選択"
 	},
 	"forms": {
 		"title": "タイトル",
 		"description": "説明",
-		"amount": "金額",
-		"budget": "予算",
 		"name": "名前",
 		"type": "タイプ",
 		"required": "必須",
@@ -175,22 +179,24 @@
 		"paymentType": "支払いタイプ",
 		"descriptionOptional": "説明（任意）",
 		"amountCurrency": "金額 ({{currency}})",
-    "amount": {
-      "validNumber": "有効な金額を入力してください",
-      "postiveOnly": "金額はマイナスにできません",
-      "largerThanZero": "金額はゼロより大きくなければなりません",
-      "disallowDecimals": "{{currency}}の金額には小数点は使用できません",
-      "upToDecimalPlaces": "{{currency}}の金額は最大で{{decimals}}桁の小数点まで許可されています",
-      "valueTooLarge": "予算が大きすぎます"
-    },
-    "budget": {
-      "validNumber": "有効な予算を入力してください",
-      "postiveOnly": "予算はマイナスにできません",
-      "largerThanZero": "予算はゼロより大きくなければなりません",
-      "disallowDecimals": "{{currency}}の予算には小数点は使用できません",
-      "upToDecimalPlaces": "{{currency}}の予算は最大で{{decimals}}桁の小数点まで許可されています",
-      "valueTooLarge": "予算が大きすぎます"
-    }
+		"amount": {
+      "amount": "金額",
+			"validNumber": "有効な金額を入力してください",
+			"postiveOnly": "金額はマイナスにできません",
+			"largerThanZero": "金額はゼロより大きくなければなりません",
+			"disallowDecimals": "{{currency}}の金額には小数点は使用できません",
+			"upToDecimalPlaces": "{{currency}}の金額は最大で{{decimals}}桁の小数点まで許可されています",
+			"valueTooLarge": "予算が大きすぎます"
+		},
+		"budget": {
+      "budget": "予算",
+			"validNumber": "有効な予算を入力してください",
+			"postiveOnly": "予算はマイナスにできません",
+			"largerThanZero": "予算はゼロより大きくなければなりません",
+			"disallowDecimals": "{{currency}}の予算には小数点は使用できません",
+			"upToDecimalPlaces": "{{currency}}の予算は最大で{{decimals}}桁の小数点まで許可されています",
+			"valueTooLarge": "予算が大きすぎます"
+		}
 	},
 	"actions": {
 		"create": "作成",

@@ -5,37 +5,46 @@ import { Divider, Text, useTheme } from 'react-native-paper';
 import { getCategoriesBudgetSumByUserId } from '../../db/repository/category';
 import { getMonthlyExpenseSumByUserId } from '../../db/repository/expense';
 import { formatAmount } from '../../db/utils';
-import { getMonthRange } from '../../utils/datetime';
+import { getMonthRangeByMonthYear } from '../../utils/datetime';
 import { useRefreshKey } from '../contexts/RefreshKeyContext';
 import { useUser } from '../contexts/UserContext';
 
-export const BudgetOverview = () => {
+interface BudgetOverviewProps {
+  selectedMonth: number;
+  selectedYear: number;
+}
+
+export const BudgetOverview = ({ selectedMonth, selectedYear }: BudgetOverviewProps) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const { user, userSetting } = useUser();
   const { refreshKeys } = useRefreshKey();
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpent, setTotalSpent] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: refreshKeys are intentionally used to trigger re-fetching
   useEffect(() => {
     if (!user?.id) return;
 
+    setLoading(true);
     try {
       // Get total budget sum
       const budgetSum = getCategoriesBudgetSumByUserId(user.id);
       setTotalBudget(budgetSum);
 
-      // Get total spent in month
-      const { from, to } = getMonthRange(new Date());
+      // Get total spent in selected month
+      const { from, to } = getMonthRangeByMonthYear(selectedMonth, selectedYear);
       const totalSpent = getMonthlyExpenseSumByUserId(user.id, from, to);
       setTotalSpent(totalSpent);
     } catch (error) {
       console.error('Error fetching budget overview data:', error);
       setTotalBudget(0);
       setTotalSpent(0);
+    } finally {
+      setLoading(false);
     }
-  }, [user?.id, refreshKeys.categories, refreshKeys.expenses]);
+  }, [user?.id, selectedMonth, selectedYear, refreshKeys.categories, refreshKeys.expenses]);
 
   const { remainder, percentUsed } = useMemo(() => {
     const remainder = totalBudget - totalSpent;
@@ -43,8 +52,31 @@ export const BudgetOverview = () => {
     return { remainder, percentUsed: Number(percentUsed.toFixed(2)) };
   }, [totalBudget, totalSpent]);
 
+  const formatSelectedPeriod = useMemo(() => {
+    const date = new Date(selectedYear, selectedMonth, 1);
+    return date.toLocaleDateString(undefined, {
+      month: 'long',
+      year: 'numeric',
+    });
+  }, [selectedMonth, selectedYear]);
+
+  if (loading) {
+    return (
+      <View style={{ paddingVertical: 32, alignItems: 'center' }}>
+        <Text
+          variant="bodyMedium"
+          style={{
+            color: theme.colors.onSurfaceVariant,
+          }}
+        >
+          {t('status.loading')}
+        </Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={{ paddingVertical: 32 }}>
+    <View style={{ paddingBottom: 32, paddingTop: 0 }}>
       {/* Header */}
       <View
         style={{
@@ -71,10 +103,7 @@ export const BudgetOverview = () => {
             opacity: 0.8,
           }}
         >
-          {new Date().toLocaleDateString(undefined, {
-            month: 'long',
-            year: 'numeric',
-          })}
+          {formatSelectedPeriod}
         </Text>
       </View>
 
