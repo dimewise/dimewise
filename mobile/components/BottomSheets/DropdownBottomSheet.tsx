@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { ScrollView, View } from 'react-native';
 import {
   Button,
@@ -25,6 +26,7 @@ interface DropdownDialogProps {
   title: string;
   placeholder?: string;
   label?: string;
+  scrollToIndex?: number; // New prop for auto-scrolling
 }
 
 interface DropdownButtonProps {
@@ -90,13 +92,30 @@ export default function DropdownBottomSheet({
   onSelect,
   selectedValue,
   title,
+  scrollToIndex,
 }: DropdownDialogProps) {
   const theme = useTheme();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const handleSelect = (value: string) => {
     onSelect(value);
     onDismiss();
   };
+
+  // Auto-scroll to specified index when dropdown opens
+  useEffect(() => {
+    if (visible && scrollToIndex !== undefined && scrollToIndex >= 0) {
+      // Small delay to ensure the modal is fully rendered
+      const timer = setTimeout(() => {
+        scrollViewRef.current?.scrollTo({
+          y: (scrollToIndex - 10) * 56, // Approximate height of each item + separator
+          animated: true,
+        });
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [visible, scrollToIndex]);
 
   const renderItem = ({ item }: { item: DropdownOption }) => (
     <List.Item
@@ -156,6 +175,7 @@ export default function DropdownBottomSheet({
         <Divider style={{ marginVertical: 12 }} />
 
         <ScrollView
+          ref={scrollViewRef}
           showsVerticalScrollIndicator={options.length > 7} // Only show scrollbar if needed
           nestedScrollEnabled={true}
         >

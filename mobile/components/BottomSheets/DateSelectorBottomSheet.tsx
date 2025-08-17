@@ -107,11 +107,9 @@ export default function DateSelectorBottomSheet({
     return months;
   }, [userSetting?.preferredLanguage]);
 
-  // Generate year options (current year -10 to +3)
   const yearOptions: DropdownOption[] = useMemo(() => {
-    const currentYear = new Date().getFullYear();
     const years = [];
-    for (let year = currentYear - 10; year <= currentYear + 3; year++) {
+    for (let year = 2000; year <= 2050; year++) {
       years.push({
         label: year.toString(),
         value: year.toString(),
@@ -124,51 +122,69 @@ export default function DateSelectorBottomSheet({
   const selectedMonthLabel = monthOptions.find((m) => m.value === tempMonth.toString())?.label;
   const selectedYearLabel = yearOptions.find((y) => y.value === tempYear.toString())?.label;
 
-  const renderMonthDropdown = () => (
-    <>
-      <DropdownButton
-        onPress={() => setShowMonthDropdown(true)}
-        selectedValue={tempMonth.toString()}
-        options={monthOptions}
-        placeholder={t('home.selectMonth')}
-        label={t('home.selectMonth')}
-      />
-      <DropdownBottomSheet
-        visible={showMonthDropdown}
-        onDismiss={() => setShowMonthDropdown(false)}
-        options={monthOptions}
-        onSelect={(value) => {
-          setTempMonth(parseInt(value));
-          setShowMonthDropdown(false);
-        }}
-        selectedValue={tempMonth.toString()}
-        title={t('home.selectMonth')}
-      />
-    </>
-  );
+  const renderMonthDropdown = () => {
+    // Calculate the index of the current month for auto-scrolling
+    const currentMonth = new Date().getMonth();
+    const currentMonthIndex = monthOptions.findIndex(
+      (option) => parseInt(option.value) === currentMonth,
+    );
 
-  const renderYearDropdown = () => (
-    <>
-      <DropdownButton
-        onPress={() => setShowYearDropdown(true)}
-        selectedValue={tempYear.toString()}
-        options={yearOptions}
-        placeholder={t('home.selectYear')}
-        label={t('home.selectYear')}
-      />
-      <DropdownBottomSheet
-        visible={showYearDropdown}
-        onDismiss={() => setShowYearDropdown(false)}
-        options={yearOptions}
-        onSelect={(value) => {
-          setTempYear(parseInt(value));
-          setShowYearDropdown(false);
-        }}
-        selectedValue={tempYear.toString()}
-        title={t('home.selectYear')}
-      />
-    </>
-  );
+    return (
+      <>
+        <DropdownButton
+          onPress={() => setShowMonthDropdown(true)}
+          selectedValue={tempMonth.toString()}
+          options={monthOptions}
+          placeholder={t('home.selectMonth')}
+          label={t('home.selectMonth')}
+        />
+        <DropdownBottomSheet
+          visible={showMonthDropdown}
+          onDismiss={() => setShowMonthDropdown(false)}
+          options={monthOptions}
+          onSelect={(value) => {
+            setTempMonth(parseInt(value));
+            setShowMonthDropdown(false);
+          }}
+          selectedValue={tempMonth.toString()}
+          title={t('home.selectMonth')}
+          scrollToIndex={currentMonthIndex >= 0 ? currentMonthIndex : 0}
+        />
+      </>
+    );
+  };
+
+  const renderYearDropdown = () => {
+    // Calculate the index of the current year for auto-scrolling
+    const currentYear = new Date().getFullYear();
+    const currentYearIndex = yearOptions.findIndex(
+      (option) => parseInt(option.value) === currentYear,
+    );
+
+    return (
+      <>
+        <DropdownButton
+          onPress={() => setShowYearDropdown(true)}
+          selectedValue={tempYear.toString()}
+          options={yearOptions}
+          placeholder={t('home.selectYear')}
+          label={t('home.selectYear')}
+        />
+        <DropdownBottomSheet
+          visible={showYearDropdown}
+          onDismiss={() => setShowYearDropdown(false)}
+          options={yearOptions}
+          onSelect={(value) => {
+            setTempYear(parseInt(value));
+            setShowYearDropdown(false);
+          }}
+          selectedValue={tempYear.toString()}
+          title={t('home.selectYear')}
+          scrollToIndex={currentYearIndex >= 0 ? currentYearIndex : 0}
+        />
+      </>
+    );
+  };
 
   return (
     <BottomSheetModal
