@@ -10,8 +10,10 @@ run-mobile: ## Starts mobile servers using Expo (requires emulation)
 # 	@echo "Starting client..."
 # 	cd ./client && bun run dev
 #
-# .PHONY: run-server
-# run-server: ## Starts the server
-# 	@echo "Starting server"
-# 	cd ./server && venv/bin/python -m uvicorn src.main:app --reload
-#
+.PHONY: run-server
+run-server: ## Starts the server
+	@echo "Starting server, press Ctrl + C to stop..."
+	@$(call use_env,local) \
+		&& cd ./server && \
+		go run ./cmd/server/main.go
+
