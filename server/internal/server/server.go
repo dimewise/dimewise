@@ -2,17 +2,18 @@ package server
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
-	clerkhttp "github.com/clerk/clerk-sdk-go/v2/http"
+	"github.com/go-chi/chi/v5"
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
+
 	"github.com/dimewise/dimewise/config"
 	"github.com/dimewise/dimewise/generated/oapi"
 	"github.com/dimewise/dimewise/internal/server/handler"
 	"github.com/dimewise/dimewise/internal/server/middleware"
-	"github.com/go-chi/chi/v5"
-	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
 type Server struct {
@@ -21,7 +22,7 @@ type Server struct {
 }
 
 func (s *Server) Start() {
-	log.Print("Server listening on " + s.portAddr)
+	slog.Default().Info("Server listening on " + s.portAddr)
 
 	httpServer := &http.Server{
 		Handler:           s.router,
@@ -29,7 +30,12 @@ func (s *Server) Start() {
 		ReadHeaderTimeout: 1000 * time.Second,
 	}
 
-	log.Fatal(httpServer.ListenAndServe())
+	err := httpServer.ListenAndServe()
+	if err != nil {
+		slog.Default().
+			Error("Error starting server on "+s.portAddr, slog.Any("err", err))
+		os.Exit(1)
+	}
 }
 
 func (s *Server) Router() *chi.Mux {
