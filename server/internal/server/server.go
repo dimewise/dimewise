@@ -10,6 +10,7 @@ import (
 	"github.com/dimewise/dimewise/config"
 	"github.com/dimewise/dimewise/generated/oapi"
 	"github.com/dimewise/dimewise/internal/server/handler"
+	"github.com/dimewise/dimewise/internal/server/middleware"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 )
@@ -51,7 +52,7 @@ func NewServer(config *config.Config) *Server {
 		baseURL := "/api/v1"
 
 		// clerk auth middleware
-		r.Use(clerkhttp.RequireHeaderAuthorization())
+		r.Use(middleware.NewClerkAuthMiddleware(config))
 
 		// TODO: add StrictHTTPServerOptions
 		strictHandler := oapi.NewStrictHandlerWithOptions(
