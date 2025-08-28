@@ -10,7 +10,7 @@ migration-up: ## Runs the latest migrations that have yet to be ran
 	@$(call use_env,local) \
 		&& cd ./server && \
 		go tool goose -dir db/migrations postgres "$$DATABASE_URL" up && \
-		go tool jet -dsn="$$DATABASE_URL" -schema=public -path=./db
+		go tool jet -dsn="$$DATABASE_URL" -schema=public -path=./generated
 	@$(MAKE) format-server
 
 .PHONY: migration-down
