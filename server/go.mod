@@ -5,6 +5,8 @@ go 1.25.0
 require (
 	github.com/clerk/clerk-sdk-go/v2 v2.3.1
 	github.com/go-chi/chi/v5 v5.2.2
+	github.com/go-jet/jet/v2 v2.13.0
+	github.com/google/uuid v1.6.0
 	github.com/oapi-codegen/runtime v1.1.2
 )
 
@@ -27,7 +29,6 @@ require (
 	github.com/getkin/kin-openapi v0.132.0 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.7.1 // indirect
-	github.com/go-jet/jet/v2 v2.13.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
@@ -35,7 +36,6 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.3 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
