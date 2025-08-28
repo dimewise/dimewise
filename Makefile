@@ -2,9 +2,10 @@ default: help
 
 include makefiles/base.mk
 include makefiles/init.mk
-include makefiles/database.mk
-include makefiles/generator.mk
 include makefiles/runner.mk
+include makefiles/generator.mk
+include makefiles/database.mk
+include makefiles/docker.mk
 include makefiles/eas.mk
 include makefiles/utility.mk
 
