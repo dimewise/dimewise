@@ -11,7 +11,8 @@
 		"test": "jest --watchAll",
 		"check": "bunx biome check --write .",
 		"lint": "bunx biome lint .",
-		"format": "bunx biome format --write ."
+		"format": "bunx biome format --write .", 
+    "gen-openapi": "orval --config ./orval.config.ts"
 	},
 	"jest": {
 		"preset": "jest-expo"
