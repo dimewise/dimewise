@@ -4,16 +4,543 @@
 package oapi
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
+)
+
+// Defines values for CurrencyType.
+const (
+	AUD CurrencyType = "AUD"
+	BRL CurrencyType = "BRL"
+	CAD CurrencyType = "CAD"
+	CHF CurrencyType = "CHF"
+	CNY CurrencyType = "CNY"
+	CZK CurrencyType = "CZK"
+	DKK CurrencyType = "DKK"
+	EUR CurrencyType = "EUR"
+	GBP CurrencyType = "GBP"
+	HKD CurrencyType = "HKD"
+	HUF CurrencyType = "HUF"
+	IDR CurrencyType = "IDR"
+	INR CurrencyType = "INR"
+	JPY CurrencyType = "JPY"
+	KRW CurrencyType = "KRW"
+	MXN CurrencyType = "MXN"
+	MYR CurrencyType = "MYR"
+	NOK CurrencyType = "NOK"
+	NZD CurrencyType = "NZD"
+	PHP CurrencyType = "PHP"
+	PLN CurrencyType = "PLN"
+	RUB CurrencyType = "RUB"
+	SEK CurrencyType = "SEK"
+	SGD CurrencyType = "SGD"
+	THB CurrencyType = "THB"
+	TRY CurrencyType = "TRY"
+	TWD CurrencyType = "TWD"
+	USD CurrencyType = "USD"
+	VND CurrencyType = "VND"
+	ZAR CurrencyType = "ZAR"
+)
+
+// Defines values for PaymentMethodType.
+const (
+	BankTransfer  PaymentMethodType = "bank_transfer"
+	Cash          PaymentMethodType = "cash"
+	CreditCard    PaymentMethodType = "credit_card"
+	DebitCard     PaymentMethodType = "debit_card"
+	DigitalWallet PaymentMethodType = "digital_wallet"
+	Other         PaymentMethodType = "other"
+)
+
+// Defines values for SupportedLanguage.
+const (
+	En SupportedLanguage = "en"
+	Ja SupportedLanguage = "ja"
+)
+
+// Defines values for GetExpensesParamsVerificationStatus.
+const (
+	Unverified GetExpensesParamsVerificationStatus = "unverified"
+	Verified   GetExpensesParamsVerificationStatus = "verified"
+)
+
+// BaseEntity defines model for BaseEntity.
+type BaseEntity struct {
+	// CreatedAt Creation timestamp
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Id Unique identifier
+	Id *openapi_types.UUID `json:"id,omitempty"`
+
+	// UpdatedAt Last update timestamp
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+}
+
+// BudgetOverview defines model for BudgetOverview.
+type BudgetOverview struct {
+	// Currency Supported currency types
+	Currency *CurrencyType `json:"currency,omitempty"`
+
+	// Month Month (0-11)
+	Month *int `json:"month,omitempty"`
+
+	// RemainingBudget Remaining budget in cents
+	RemainingBudget *int `json:"remainingBudget,omitempty"`
+
+	// TotalBudget Total budget amount in cents
+	TotalBudget *int `json:"totalBudget,omitempty"`
+
+	// TotalSpent Total spent amount in cents
+	TotalSpent *int `json:"totalSpent,omitempty"`
+
+	// Year Year
+	Year *int `json:"year,omitempty"`
+}
+
+// Category defines model for Category.
+type Category struct {
+	// Amount Budget amount in cents
+	Amount int `json:"amount"`
+
+	// CreatedAt Creation timestamp
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Currency Supported currency types
+	Currency CurrencyType `json:"currency"`
+
+	// DeletedAt Soft deletion timestamp
+	DeletedAt *time.Time `json:"deleted_at"`
+
+	// Id Unique identifier
+	Id *openapi_types.UUID `json:"id,omitempty"`
+
+	// Title Category title
+	Title string `json:"title"`
+
+	// UpdatedAt Last update timestamp
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// UserId User ID
+	UserId openapi_types.UUID `json:"user_id"`
+}
+
+// CategoryBreakdown defines model for CategoryBreakdown.
+type CategoryBreakdown struct {
+	// Budget Budget amount in cents
+	Budget        *int                `json:"budget,omitempty"`
+	CategoryId    *openapi_types.UUID `json:"category_id,omitempty"`
+	CategoryTitle *string             `json:"category_title,omitempty"`
+
+	// Currency Supported currency types
+	Currency *CurrencyType `json:"currency,omitempty"`
+
+	// Remaining Remaining budget in cents
+	Remaining *int `json:"remaining,omitempty"`
+
+	// Spent Spent amount in cents
+	Spent *int `json:"spent,omitempty"`
+}
+
+// CategoryCreate defines model for CategoryCreate.
+type CategoryCreate struct {
+	// Amount Budget amount in cents
+	Amount int `json:"amount"`
+
+	// Currency Supported currency types
+	Currency CurrencyType `json:"currency"`
+
+	// Title Category title
+	Title string `json:"title"`
+}
+
+// CategoryUpdate defines model for CategoryUpdate.
+type CategoryUpdate struct {
+	// Amount Budget amount in cents
+	Amount *int `json:"amount,omitempty"`
+
+	// Currency Supported currency types
+	Currency *CurrencyType `json:"currency,omitempty"`
+
+	// Title Category title
+	Title *string `json:"title,omitempty"`
+}
+
+// CurrencyType Supported currency types
+type CurrencyType string
+
+// ErrorResponse defines model for ErrorResponse.
+type ErrorResponse struct {
+	Code    *string `json:"code,omitempty"`
+	Error   *string `json:"error,omitempty"`
+	Success *bool   `json:"success,omitempty"`
+}
+
+// Expense defines model for Expense.
+type Expense struct {
+	// Amount Amount in cents
+	Amount int `json:"amount"`
+
+	// CategoryId Category ID
+	CategoryId openapi_types.UUID `json:"category_id"`
+
+	// CreatedAt Creation timestamp
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Currency Supported currency types
+	Currency CurrencyType `json:"currency"`
+
+	// Description Expense description
+	Description *string `json:"description"`
+
+	// Id Unique identifier
+	Id *openapi_types.UUID `json:"id,omitempty"`
+
+	// IncurredAt When the expense was incurred
+	IncurredAt time.Time `json:"incurred_at"`
+
+	// PaymentMethodId Payment method ID
+	PaymentMethodId openapi_types.UUID `json:"payment_method_id"`
+
+	// Title Expense title
+	Title string `json:"title"`
+
+	// UpdatedAt Last update timestamp
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// UserId User ID
+	UserId openapi_types.UUID `json:"user_id"`
+
+	// VerifiedAt Verification timestamp
+	VerifiedAt *time.Time `json:"verified_at"`
+}
+
+// ExpenseCreate defines model for ExpenseCreate.
+type ExpenseCreate struct {
+	// Amount Amount in cents
+	Amount int `json:"amount"`
+
+	// CategoryId Category ID
+	CategoryId openapi_types.UUID `json:"category_id"`
+
+	// Currency Supported currency types
+	Currency CurrencyType `json:"currency"`
+
+	// Description Expense description
+	Description *string `json:"description"`
+
+	// IncurredAt When the expense was incurred
+	IncurredAt time.Time `json:"incurred_at"`
+
+	// PaymentMethodId Payment method ID
+	PaymentMethodId openapi_types.UUID `json:"payment_method_id"`
+
+	// Title Expense title
+	Title string `json:"title"`
+}
+
+// ExpenseUpdate defines model for ExpenseUpdate.
+type ExpenseUpdate struct {
+	// Amount Amount in cents
+	Amount *int `json:"amount,omitempty"`
+
+	// CategoryId Category ID
+	CategoryId *openapi_types.UUID `json:"category_id,omitempty"`
+
+	// Currency Supported currency types
+	Currency *CurrencyType `json:"currency,omitempty"`
+
+	// Description Expense description
+	Description *string `json:"description"`
+
+	// IncurredAt When the expense was incurred
+	IncurredAt *time.Time `json:"incurred_at,omitempty"`
+
+	// PaymentMethodId Payment method ID
+	PaymentMethodId *openapi_types.UUID `json:"payment_method_id,omitempty"`
+
+	// Title Expense title
+	Title *string `json:"title,omitempty"`
+}
+
+// ExpenseWithDetails defines model for ExpenseWithDetails.
+type ExpenseWithDetails struct {
+	// Amount Amount in cents
+	Amount   int       `json:"amount"`
+	Category *Category `json:"category,omitempty"`
+
+	// CategoryId Category ID
+	CategoryId openapi_types.UUID `json:"category_id"`
+
+	// CreatedAt Creation timestamp
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Currency Supported currency types
+	Currency CurrencyType `json:"currency"`
+
+	// Description Expense description
+	Description *string `json:"description"`
+
+	// Id Unique identifier
+	Id *openapi_types.UUID `json:"id,omitempty"`
+
+	// IncurredAt When the expense was incurred
+	IncurredAt    time.Time      `json:"incurred_at"`
+	PaymentMethod *PaymentMethod `json:"payment_method,omitempty"`
+
+	// PaymentMethodId Payment method ID
+	PaymentMethodId openapi_types.UUID `json:"payment_method_id"`
+
+	// Title Expense title
+	Title string `json:"title"`
+
+	// UpdatedAt Last update timestamp
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// UserId User ID
+	UserId openapi_types.UUID `json:"user_id"`
+
+	// VerifiedAt Verification timestamp
+	VerifiedAt *time.Time `json:"verified_at"`
+}
+
+// PaginatedResponse defines model for PaginatedResponse.
+type PaginatedResponse struct {
+	Data       *[]map[string]interface{} `json:"data,omitempty"`
+	Pagination *struct {
+		Limit      *int `json:"limit,omitempty"`
+		Page       *int `json:"page,omitempty"`
+		Total      *int `json:"total,omitempty"`
+		TotalPages *int `json:"total_pages,omitempty"`
+	} `json:"pagination,omitempty"`
+}
+
+// PaymentMethod defines model for PaymentMethod.
+type PaymentMethod struct {
+	// CreatedAt Creation timestamp
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// DeletedAt Soft deletion timestamp
+	DeletedAt *time.Time `json:"deleted_at"`
+
+	// Id Unique identifier
+	Id *openapi_types.UUID `json:"id,omitempty"`
+
+	// MethodType Payment method types
+	MethodType PaymentMethodType `json:"method_type"`
+
+	// Title Payment method name
+	Title string `json:"title"`
+
+	// UpdatedAt Last update timestamp
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// UserId User ID
+	UserId openapi_types.UUID `json:"user_id"`
+}
+
+// PaymentMethodBreakdown defines model for PaymentMethodBreakdown.
+type PaymentMethodBreakdown struct {
+	// Currency Supported currency types
+	Currency           *CurrencyType       `json:"currency,omitempty"`
+	PaymentMethodId    *openapi_types.UUID `json:"payment_method_id,omitempty"`
+	PaymentMethodTitle *string             `json:"payment_method_title,omitempty"`
+
+	// TotalSpent Total spent amount in cents
+	TotalSpent *int `json:"total_spent,omitempty"`
+}
+
+// PaymentMethodCreate defines model for PaymentMethodCreate.
+type PaymentMethodCreate struct {
+	// MethodType Payment method types
+	MethodType PaymentMethodType `json:"method_type"`
+
+	// Title Payment method name
+	Title string `json:"title"`
+}
+
+// PaymentMethodType Payment method types
+type PaymentMethodType string
+
+// PaymentMethodUpdate defines model for PaymentMethodUpdate.
+type PaymentMethodUpdate struct {
+	// MethodType Payment method types
+	MethodType *PaymentMethodType `json:"method_type,omitempty"`
+
+	// Title Payment method name
+	Title *string `json:"title,omitempty"`
+}
+
+// SuccessResponse defines model for SuccessResponse.
+type SuccessResponse struct {
+	Message *string `json:"message,omitempty"`
+	Success *bool   `json:"success,omitempty"`
+}
+
+// SupportedLanguage Supported languages
+type SupportedLanguage string
+
+// User defines model for User.
+type User struct {
+	// ClerkId Clerk authentication ID
+	ClerkId string `json:"clerk_id"`
+
+	// CreatedAt Creation timestamp
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+
+	// Currency Supported currency types
+	Currency CurrencyType `json:"currency"`
+
+	// Id Unique identifier
+	Id *openapi_types.UUID `json:"id,omitempty"`
+
+	// PreferredLanguage Supported languages
+	PreferredLanguage SupportedLanguage `json:"preferred_language"`
+
+	// UpdatedAt Last update timestamp
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+}
+
+// UserCreate defines model for UserCreate.
+type UserCreate struct {
+	// Currency Supported currency types
+	Currency CurrencyType `json:"currency"`
+
+	// PreferredLanguage Supported languages
+	PreferredLanguage SupportedLanguage `json:"preferred_language"`
+}
+
+// UserUpdate defines model for UserUpdate.
+type UserUpdate struct {
+	// Currency Supported currency types
+	Currency *CurrencyType `json:"currency,omitempty"`
+
+	// PreferredLanguage Supported languages
+	PreferredLanguage *SupportedLanguage `json:"preferred_language,omitempty"`
+}
+
+// GetAnalyticsBudgetOverviewParams defines parameters for GetAnalyticsBudgetOverview.
+type GetAnalyticsBudgetOverviewParams struct {
+	// Month Month 1-12
+	Month *int `form:"month,omitempty" json:"month,omitempty"`
+
+	// Year Year
+	Year *int `form:"year,omitempty" json:"year,omitempty"`
+}
+
+// GetAnalyticsCategoriesBreakdownParams defines parameters for GetAnalyticsCategoriesBreakdown.
+type GetAnalyticsCategoriesBreakdownParams struct {
+	// Month Month (0-11, where 0 is January)
+	Month *int `form:"month,omitempty" json:"month,omitempty"`
+
+	// Year Year
+	Year *int `form:"year,omitempty" json:"year,omitempty"`
+}
+
+// GetAnalyticsPaymentMethodsBreakdownParams defines parameters for GetAnalyticsPaymentMethodsBreakdown.
+type GetAnalyticsPaymentMethodsBreakdownParams struct {
+	// Month Month (0-11, where 0 is January)
+	Month *int `form:"month,omitempty" json:"month,omitempty"`
+
+	// Year Year
+	Year *int `form:"year,omitempty" json:"year,omitempty"`
+}
+
+// GetAnalyticsRecentTransactionsParams defines parameters for GetAnalyticsRecentTransactions.
+type GetAnalyticsRecentTransactionsParams struct {
+	// Limit Number of recent transactions to retrieve
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Month Month (0-11, where 0 is January)
+	Month *int `form:"month,omitempty" json:"month,omitempty"`
+
+	// Year Year
+	Year *int `form:"year,omitempty" json:"year,omitempty"`
+}
+
+// GetCategoriesParams defines parameters for GetCategories.
+type GetCategoriesParams struct {
+	// IncludeDeleted Include soft-deleted categories
+	IncludeDeleted *bool `form:"include_deleted,omitempty" json:"include_deleted,omitempty"`
+}
+
+// GetExpensesParams defines parameters for GetExpenses.
+type GetExpensesParams struct {
+	// Page Page number for pagination
+	Page *int `form:"page,omitempty" json:"page,omitempty"`
+
+	// Limit Number of items per page
+	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// Search Search query for title/description
+	Search *string `form:"search,omitempty" json:"search,omitempty"`
+
+	// CategoryId Filter by category ID
+	CategoryId *openapi_types.UUID `form:"category_id,omitempty" json:"category_id,omitempty"`
+
+	// PaymentMethodId Filter by payment method ID
+	PaymentMethodId *openapi_types.UUID `form:"payment_method_id,omitempty" json:"payment_method_id,omitempty"`
+
+	// DateFrom Filter expenses from this date (YYYY-MM-DD)
+	DateFrom *openapi_types.Date `form:"date_from,omitempty" json:"date_from,omitempty"`
+
+	// DateTo Filter expenses to this date (YYYY-MM-DD)
+	DateTo *openapi_types.Date `form:"date_to,omitempty" json:"date_to,omitempty"`
+
+	// VerificationStatus Filter by verification status
+	VerificationStatus *GetExpensesParamsVerificationStatus `form:"verification_status,omitempty" json:"verification_status,omitempty"`
+
+	// IncludeDeleted Include soft-deleted expenses
+	IncludeDeleted *bool `form:"include_deleted,omitempty" json:"include_deleted,omitempty"`
+}
+
+// GetExpensesParamsVerificationStatus defines parameters for GetExpenses.
+type GetExpensesParamsVerificationStatus string
+
+// GetPaymentMethodsParams defines parameters for GetPaymentMethods.
+type GetPaymentMethodsParams struct {
+	// IncludeDeleted Include soft-deleted payment methods
+	IncludeDeleted *bool `form:"include_deleted,omitempty" json:"include_deleted,omitempty"`
+}
+
+// PostCategoryJSONRequestBody defines body for PostCategory for application/json ContentType.
+type PostCategoryJSONRequestBody = CategoryCreate
+
+// PutCategoryByIdJSONRequestBody defines body for PutCategoryById for application/json ContentType.
+type PutCategoryByIdJSONRequestBody = CategoryUpdate
+
+// PostExpenseJSONRequestBody defines body for PostExpense for application/json ContentType.
+type PostExpenseJSONRequestBody = ExpenseCreate
+
+// PutExpenseByIdJSONRequestBody defines body for PutExpenseById for application/json ContentType.
+type PutExpenseByIdJSONRequestBody = ExpenseUpdate
+
+// PostPaymentMethodJSONRequestBody defines body for PostPaymentMethod for application/json ContentType.
+type PostPaymentMethodJSONRequestBody = PaymentMethodCreate
+
+// PutPaymentMethodByIdJSONRequestBody defines body for PutPaymentMethodById for application/json ContentType.
+type PutPaymentMethodByIdJSONRequestBody = PaymentMethodUpdate
+
+// PostUserJSONRequestBody defines body for PostUser for application/json ContentType.
+type PostUserJSONRequestBody = UserCreate
+
+// PutMeUserJSONRequestBody defines body for PutMeUser for application/json ContentType.
+type PutMeUserJSONRequestBody = UserUpdate
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -88,12 +615,97 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// GetHello request
-	GetHello(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetAnalyticsBudgetOverview request
+	GetAnalyticsBudgetOverview(ctx context.Context, params *GetAnalyticsBudgetOverviewParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAnalyticsCategoriesBreakdown request
+	GetAnalyticsCategoriesBreakdown(ctx context.Context, params *GetAnalyticsCategoriesBreakdownParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAnalyticsPaymentMethodsBreakdown request
+	GetAnalyticsPaymentMethodsBreakdown(ctx context.Context, params *GetAnalyticsPaymentMethodsBreakdownParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetAnalyticsRecentTransactions request
+	GetAnalyticsRecentTransactions(ctx context.Context, params *GetAnalyticsRecentTransactionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetCategories request
+	GetCategories(ctx context.Context, params *GetCategoriesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostCategoryWithBody request with any body
+	PostCategoryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostCategory(ctx context.Context, body PostCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteCategoryById request
+	DeleteCategoryById(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetCategoryById request
+	GetCategoryById(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutCategoryByIdWithBody request with any body
+	PutCategoryByIdWithBody(ctx context.Context, categoryId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutCategoryById(ctx context.Context, categoryId openapi_types.UUID, body PutCategoryByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetExpenses request
+	GetExpenses(ctx context.Context, params *GetExpensesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostExpenseWithBody request with any body
+	PostExpenseWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostExpense(ctx context.Context, body PostExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteExpenseById request
+	DeleteExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetExpenseById request
+	GetExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutExpenseByIdWithBody request with any body
+	PutExpenseByIdWithBody(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutExpenseById(ctx context.Context, expenseId openapi_types.UUID, body PutExpenseByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostVerifyExpenseById request
+	PostVerifyExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetHealth request
+	GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetPaymentMethods request
+	GetPaymentMethods(ctx context.Context, params *GetPaymentMethodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostPaymentMethodWithBody request with any body
+	PostPaymentMethodWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostPaymentMethod(ctx context.Context, body PostPaymentMethodJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeletePaymentMethodById request
+	DeletePaymentMethodById(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetPaymentMethodById request
+	GetPaymentMethodById(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutPaymentMethodByIdWithBody request with any body
+	PutPaymentMethodByIdWithBody(ctx context.Context, paymentMethodId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutPaymentMethodById(ctx context.Context, paymentMethodId openapi_types.UUID, body PutPaymentMethodByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostUserWithBody request with any body
+	PostUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostUser(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetMeUser request
+	GetMeUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutMeUserWithBody request with any body
+	PutMeUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutMeUser(ctx context.Context, body PutMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) GetHello(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetHelloRequest(c.Server)
+func (c *Client) GetAnalyticsBudgetOverview(ctx context.Context, params *GetAnalyticsBudgetOverviewParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAnalyticsBudgetOverviewRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +716,380 @@ func (c *Client) GetHello(ctx context.Context, reqEditors ...RequestEditorFn) (*
 	return c.Client.Do(req)
 }
 
-// NewGetHelloRequest generates requests for GetHello
-func NewGetHelloRequest(server string) (*http.Request, error) {
+func (c *Client) GetAnalyticsCategoriesBreakdown(ctx context.Context, params *GetAnalyticsCategoriesBreakdownParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAnalyticsCategoriesBreakdownRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetAnalyticsPaymentMethodsBreakdown(ctx context.Context, params *GetAnalyticsPaymentMethodsBreakdownParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAnalyticsPaymentMethodsBreakdownRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetAnalyticsRecentTransactions(ctx context.Context, params *GetAnalyticsRecentTransactionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetAnalyticsRecentTransactionsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetCategories(ctx context.Context, params *GetCategoriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetCategoriesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostCategoryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostCategoryRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostCategory(ctx context.Context, body PostCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostCategoryRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteCategoryById(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteCategoryByIdRequest(c.Server, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetCategoryById(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetCategoryByIdRequest(c.Server, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutCategoryByIdWithBody(ctx context.Context, categoryId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutCategoryByIdRequestWithBody(c.Server, categoryId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutCategoryById(ctx context.Context, categoryId openapi_types.UUID, body PutCategoryByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutCategoryByIdRequest(c.Server, categoryId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetExpenses(ctx context.Context, params *GetExpensesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetExpensesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostExpenseWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostExpenseRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostExpense(ctx context.Context, body PostExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostExpenseRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteExpenseByIdRequest(c.Server, expenseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetExpenseByIdRequest(c.Server, expenseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutExpenseByIdWithBody(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutExpenseByIdRequestWithBody(c.Server, expenseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutExpenseById(ctx context.Context, expenseId openapi_types.UUID, body PutExpenseByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutExpenseByIdRequest(c.Server, expenseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostVerifyExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostVerifyExpenseByIdRequest(c.Server, expenseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetHealthRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPaymentMethods(ctx context.Context, params *GetPaymentMethodsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPaymentMethodsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostPaymentMethodWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostPaymentMethodRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostPaymentMethod(ctx context.Context, body PostPaymentMethodJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostPaymentMethodRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeletePaymentMethodById(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeletePaymentMethodByIdRequest(c.Server, paymentMethodId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPaymentMethodById(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPaymentMethodByIdRequest(c.Server, paymentMethodId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutPaymentMethodByIdWithBody(ctx context.Context, paymentMethodId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutPaymentMethodByIdRequestWithBody(c.Server, paymentMethodId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutPaymentMethodById(ctx context.Context, paymentMethodId openapi_types.UUID, body PutPaymentMethodByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutPaymentMethodByIdRequest(c.Server, paymentMethodId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostUserRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostUser(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostUserRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMeUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMeUserRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutMeUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutMeUserRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutMeUser(ctx context.Context, body PutMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutMeUserRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewGetAnalyticsBudgetOverviewRequest generates requests for GetAnalyticsBudgetOverview
+func NewGetAnalyticsBudgetOverviewRequest(server string, params *GetAnalyticsBudgetOverviewParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -113,7 +1097,413 @@ func NewGetHelloRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/hello")
+	operationPath := fmt.Sprintf("/analytics/budget-overview")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Month != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "month", runtime.ParamLocationQuery, *params.Month); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Year != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "year", runtime.ParamLocationQuery, *params.Year); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAnalyticsCategoriesBreakdownRequest generates requests for GetAnalyticsCategoriesBreakdown
+func NewGetAnalyticsCategoriesBreakdownRequest(server string, params *GetAnalyticsCategoriesBreakdownParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/analytics/categories-breakdown")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Month != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "month", runtime.ParamLocationQuery, *params.Month); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Year != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "year", runtime.ParamLocationQuery, *params.Year); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAnalyticsPaymentMethodsBreakdownRequest generates requests for GetAnalyticsPaymentMethodsBreakdown
+func NewGetAnalyticsPaymentMethodsBreakdownRequest(server string, params *GetAnalyticsPaymentMethodsBreakdownParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/analytics/payment-methods-breakdown")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Month != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "month", runtime.ParamLocationQuery, *params.Month); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Year != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "year", runtime.ParamLocationQuery, *params.Year); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetAnalyticsRecentTransactionsRequest generates requests for GetAnalyticsRecentTransactions
+func NewGetAnalyticsRecentTransactionsRequest(server string, params *GetAnalyticsRecentTransactionsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/analytics/recent-transactions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Month != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "month", runtime.ParamLocationQuery, *params.Month); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Year != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "year", runtime.ParamLocationQuery, *params.Year); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetCategoriesRequest generates requests for GetCategories
+func NewGetCategoriesRequest(server string, params *GetCategoriesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/categories")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.IncludeDeleted != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "include_deleted", runtime.ParamLocationQuery, *params.IncludeDeleted); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostCategoryRequest calls the generic PostCategory builder with application/json body
+func NewPostCategoryRequest(server string, body PostCategoryJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostCategoryRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostCategoryRequestWithBody generates requests for PostCategory with any type of body
+func NewPostCategoryRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/categories")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteCategoryByIdRequest generates requests for DeleteCategoryById
+func NewDeleteCategoryByIdRequest(server string, categoryId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "categoryId", runtime.ParamLocationPath, categoryId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/categories/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetCategoryByIdRequest generates requests for GetCategoryById
+func NewGetCategoryByIdRequest(server string, categoryId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "categoryId", runtime.ParamLocationPath, categoryId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/categories/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -127,6 +1517,757 @@ func NewGetHelloRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPutCategoryByIdRequest calls the generic PutCategoryById builder with application/json body
+func NewPutCategoryByIdRequest(server string, categoryId openapi_types.UUID, body PutCategoryByIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutCategoryByIdRequestWithBody(server, categoryId, "application/json", bodyReader)
+}
+
+// NewPutCategoryByIdRequestWithBody generates requests for PutCategoryById with any type of body
+func NewPutCategoryByIdRequestWithBody(server string, categoryId openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "categoryId", runtime.ParamLocationPath, categoryId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/categories/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetExpensesRequest generates requests for GetExpenses
+func NewGetExpensesRequest(server string, params *GetExpensesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Page != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page", runtime.ParamLocationQuery, *params.Page); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.CategoryId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "category_id", runtime.ParamLocationQuery, *params.CategoryId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PaymentMethodId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "payment_method_id", runtime.ParamLocationQuery, *params.PaymentMethodId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.DateFrom != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "date_from", runtime.ParamLocationQuery, *params.DateFrom); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.DateTo != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "date_to", runtime.ParamLocationQuery, *params.DateTo); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.VerificationStatus != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "verification_status", runtime.ParamLocationQuery, *params.VerificationStatus); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeDeleted != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "include_deleted", runtime.ParamLocationQuery, *params.IncludeDeleted); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostExpenseRequest calls the generic PostExpense builder with application/json body
+func NewPostExpenseRequest(server string, body PostExpenseJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostExpenseRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostExpenseRequestWithBody generates requests for PostExpense with any type of body
+func NewPostExpenseRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteExpenseByIdRequest generates requests for DeleteExpenseById
+func NewDeleteExpenseByIdRequest(server string, expenseId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "expenseId", runtime.ParamLocationPath, expenseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetExpenseByIdRequest generates requests for GetExpenseById
+func NewGetExpenseByIdRequest(server string, expenseId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "expenseId", runtime.ParamLocationPath, expenseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPutExpenseByIdRequest calls the generic PutExpenseById builder with application/json body
+func NewPutExpenseByIdRequest(server string, expenseId openapi_types.UUID, body PutExpenseByIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutExpenseByIdRequestWithBody(server, expenseId, "application/json", bodyReader)
+}
+
+// NewPutExpenseByIdRequestWithBody generates requests for PutExpenseById with any type of body
+func NewPutExpenseByIdRequestWithBody(server string, expenseId openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "expenseId", runtime.ParamLocationPath, expenseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostVerifyExpenseByIdRequest generates requests for PostVerifyExpenseById
+func NewPostVerifyExpenseByIdRequest(server string, expenseId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "expenseId", runtime.ParamLocationPath, expenseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses/%s/verify", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetHealthRequest generates requests for GetHealth
+func NewGetHealthRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/health")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetPaymentMethodsRequest generates requests for GetPaymentMethods
+func NewGetPaymentMethodsRequest(server string, params *GetPaymentMethodsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/payment-methods")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.IncludeDeleted != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "include_deleted", runtime.ParamLocationQuery, *params.IncludeDeleted); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostPaymentMethodRequest calls the generic PostPaymentMethod builder with application/json body
+func NewPostPaymentMethodRequest(server string, body PostPaymentMethodJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostPaymentMethodRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostPaymentMethodRequestWithBody generates requests for PostPaymentMethod with any type of body
+func NewPostPaymentMethodRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/payment-methods")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeletePaymentMethodByIdRequest generates requests for DeletePaymentMethodById
+func NewDeletePaymentMethodByIdRequest(server string, paymentMethodId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "paymentMethodId", runtime.ParamLocationPath, paymentMethodId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/payment-methods/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetPaymentMethodByIdRequest generates requests for GetPaymentMethodById
+func NewGetPaymentMethodByIdRequest(server string, paymentMethodId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "paymentMethodId", runtime.ParamLocationPath, paymentMethodId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/payment-methods/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPutPaymentMethodByIdRequest calls the generic PutPaymentMethodById builder with application/json body
+func NewPutPaymentMethodByIdRequest(server string, paymentMethodId openapi_types.UUID, body PutPaymentMethodByIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutPaymentMethodByIdRequestWithBody(server, paymentMethodId, "application/json", bodyReader)
+}
+
+// NewPutPaymentMethodByIdRequestWithBody generates requests for PutPaymentMethodById with any type of body
+func NewPutPaymentMethodByIdRequestWithBody(server string, paymentMethodId openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "paymentMethodId", runtime.ParamLocationPath, paymentMethodId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/payment-methods/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostUserRequest calls the generic PostUser builder with application/json body
+func NewPostUserRequest(server string, body PostUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostUserRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostUserRequestWithBody generates requests for PostUser with any type of body
+func NewPostUserRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/users")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetMeUserRequest generates requests for GetMeUser
+func NewGetMeUserRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/users/me")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPutMeUserRequest calls the generic PutMeUser builder with application/json body
+func NewPutMeUserRequest(server string, body PutMeUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutMeUserRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPutMeUserRequestWithBody generates requests for PutMeUser with any type of body
+func NewPutMeUserRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/users/me")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -174,17 +2315,104 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// GetHelloWithResponse request
-	GetHelloWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHelloResponse, error)
+	// GetAnalyticsBudgetOverviewWithResponse request
+	GetAnalyticsBudgetOverviewWithResponse(ctx context.Context, params *GetAnalyticsBudgetOverviewParams, reqEditors ...RequestEditorFn) (*GetAnalyticsBudgetOverviewResponse, error)
+
+	// GetAnalyticsCategoriesBreakdownWithResponse request
+	GetAnalyticsCategoriesBreakdownWithResponse(ctx context.Context, params *GetAnalyticsCategoriesBreakdownParams, reqEditors ...RequestEditorFn) (*GetAnalyticsCategoriesBreakdownResponse, error)
+
+	// GetAnalyticsPaymentMethodsBreakdownWithResponse request
+	GetAnalyticsPaymentMethodsBreakdownWithResponse(ctx context.Context, params *GetAnalyticsPaymentMethodsBreakdownParams, reqEditors ...RequestEditorFn) (*GetAnalyticsPaymentMethodsBreakdownResponse, error)
+
+	// GetAnalyticsRecentTransactionsWithResponse request
+	GetAnalyticsRecentTransactionsWithResponse(ctx context.Context, params *GetAnalyticsRecentTransactionsParams, reqEditors ...RequestEditorFn) (*GetAnalyticsRecentTransactionsResponse, error)
+
+	// GetCategoriesWithResponse request
+	GetCategoriesWithResponse(ctx context.Context, params *GetCategoriesParams, reqEditors ...RequestEditorFn) (*GetCategoriesResponse, error)
+
+	// PostCategoryWithBodyWithResponse request with any body
+	PostCategoryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostCategoryResponse, error)
+
+	PostCategoryWithResponse(ctx context.Context, body PostCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PostCategoryResponse, error)
+
+	// DeleteCategoryByIdWithResponse request
+	DeleteCategoryByIdWithResponse(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteCategoryByIdResponse, error)
+
+	// GetCategoryByIdWithResponse request
+	GetCategoryByIdWithResponse(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetCategoryByIdResponse, error)
+
+	// PutCategoryByIdWithBodyWithResponse request with any body
+	PutCategoryByIdWithBodyWithResponse(ctx context.Context, categoryId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutCategoryByIdResponse, error)
+
+	PutCategoryByIdWithResponse(ctx context.Context, categoryId openapi_types.UUID, body PutCategoryByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutCategoryByIdResponse, error)
+
+	// GetExpensesWithResponse request
+	GetExpensesWithResponse(ctx context.Context, params *GetExpensesParams, reqEditors ...RequestEditorFn) (*GetExpensesResponse, error)
+
+	// PostExpenseWithBodyWithResponse request with any body
+	PostExpenseWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostExpenseResponse, error)
+
+	PostExpenseWithResponse(ctx context.Context, body PostExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*PostExpenseResponse, error)
+
+	// DeleteExpenseByIdWithResponse request
+	DeleteExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteExpenseByIdResponse, error)
+
+	// GetExpenseByIdWithResponse request
+	GetExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetExpenseByIdResponse, error)
+
+	// PutExpenseByIdWithBodyWithResponse request with any body
+	PutExpenseByIdWithBodyWithResponse(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutExpenseByIdResponse, error)
+
+	PutExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, body PutExpenseByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutExpenseByIdResponse, error)
+
+	// PostVerifyExpenseByIdWithResponse request
+	PostVerifyExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*PostVerifyExpenseByIdResponse, error)
+
+	// GetHealthWithResponse request
+	GetHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHealthResponse, error)
+
+	// GetPaymentMethodsWithResponse request
+	GetPaymentMethodsWithResponse(ctx context.Context, params *GetPaymentMethodsParams, reqEditors ...RequestEditorFn) (*GetPaymentMethodsResponse, error)
+
+	// PostPaymentMethodWithBodyWithResponse request with any body
+	PostPaymentMethodWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostPaymentMethodResponse, error)
+
+	PostPaymentMethodWithResponse(ctx context.Context, body PostPaymentMethodJSONRequestBody, reqEditors ...RequestEditorFn) (*PostPaymentMethodResponse, error)
+
+	// DeletePaymentMethodByIdWithResponse request
+	DeletePaymentMethodByIdWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeletePaymentMethodByIdResponse, error)
+
+	// GetPaymentMethodByIdWithResponse request
+	GetPaymentMethodByIdWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetPaymentMethodByIdResponse, error)
+
+	// PutPaymentMethodByIdWithBodyWithResponse request with any body
+	PutPaymentMethodByIdWithBodyWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutPaymentMethodByIdResponse, error)
+
+	PutPaymentMethodByIdWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, body PutPaymentMethodByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutPaymentMethodByIdResponse, error)
+
+	// PostUserWithBodyWithResponse request with any body
+	PostUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserResponse, error)
+
+	PostUserWithResponse(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserResponse, error)
+
+	// GetMeUserWithResponse request
+	GetMeUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetMeUserResponse, error)
+
+	// PutMeUserWithBodyWithResponse request with any body
+	PutMeUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutMeUserResponse, error)
+
+	PutMeUserWithResponse(ctx context.Context, body PutMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PutMeUserResponse, error)
 }
 
-type GetHelloResponse struct {
+type GetAnalyticsBudgetOverviewResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *BudgetOverview
+	JSON401      *ErrorResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetHelloResponse) Status() string {
+func (r GetAnalyticsBudgetOverviewResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -192,33 +2420,1783 @@ func (r GetHelloResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetHelloResponse) StatusCode() int {
+func (r GetAnalyticsBudgetOverviewResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// GetHelloWithResponse request returning *GetHelloResponse
-func (c *ClientWithResponses) GetHelloWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHelloResponse, error) {
-	rsp, err := c.GetHello(ctx, reqEditors...)
+type GetAnalyticsCategoriesBreakdownResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]CategoryBreakdown
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAnalyticsCategoriesBreakdownResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAnalyticsCategoriesBreakdownResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetAnalyticsPaymentMethodsBreakdownResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]PaymentMethodBreakdown
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAnalyticsPaymentMethodsBreakdownResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAnalyticsPaymentMethodsBreakdownResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetAnalyticsRecentTransactionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]ExpenseWithDetails
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetAnalyticsRecentTransactionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetAnalyticsRecentTransactionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetCategoriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Category
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetCategoriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetCategoriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostCategoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *Category
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostCategoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostCategoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteCategoryByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *SuccessResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteCategoryByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteCategoryByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetCategoryByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Category
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetCategoryByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetCategoryByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutCategoryByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Category
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PutCategoryByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutCategoryByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetExpensesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Data       *[]ExpenseWithDetails `json:"data,omitempty"`
+		Pagination *struct {
+			Limit      *int `json:"limit,omitempty"`
+			Page       *int `json:"page,omitempty"`
+			Total      *int `json:"total,omitempty"`
+			TotalPages *int `json:"total_pages,omitempty"`
+		} `json:"pagination,omitempty"`
+	}
+	JSON401 *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetExpensesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetExpensesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostExpenseResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *ExpenseWithDetails
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostExpenseResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostExpenseResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteExpenseByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *SuccessResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteExpenseByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteExpenseByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetExpenseByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExpenseWithDetails
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetExpenseByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetExpenseByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutExpenseByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExpenseWithDetails
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PutExpenseByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutExpenseByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostVerifyExpenseByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExpenseWithDetails
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostVerifyExpenseByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostVerifyExpenseByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetHealthResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Status    *string    `json:"status,omitempty"`
+		Timestamp *time.Time `json:"timestamp,omitempty"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r GetHealthResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetHealthResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetPaymentMethodsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]PaymentMethod
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPaymentMethodsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPaymentMethodsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostPaymentMethodResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *PaymentMethod
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostPaymentMethodResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostPaymentMethodResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeletePaymentMethodByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *SuccessResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeletePaymentMethodByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeletePaymentMethodByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetPaymentMethodByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PaymentMethod
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPaymentMethodByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPaymentMethodByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutPaymentMethodByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PaymentMethod
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PutPaymentMethodByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutPaymentMethodByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *User
+	JSON400      *ErrorResponse
+	JSON409      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetMeUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+	JSON401      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMeUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMeUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutMeUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+	JSON400      *ErrorResponse
+	JSON401      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PutMeUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutMeUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// GetAnalyticsBudgetOverviewWithResponse request returning *GetAnalyticsBudgetOverviewResponse
+func (c *ClientWithResponses) GetAnalyticsBudgetOverviewWithResponse(ctx context.Context, params *GetAnalyticsBudgetOverviewParams, reqEditors ...RequestEditorFn) (*GetAnalyticsBudgetOverviewResponse, error) {
+	rsp, err := c.GetAnalyticsBudgetOverview(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetHelloResponse(rsp)
+	return ParseGetAnalyticsBudgetOverviewResponse(rsp)
 }
 
-// ParseGetHelloResponse parses an HTTP response from a GetHelloWithResponse call
-func ParseGetHelloResponse(rsp *http.Response) (*GetHelloResponse, error) {
+// GetAnalyticsCategoriesBreakdownWithResponse request returning *GetAnalyticsCategoriesBreakdownResponse
+func (c *ClientWithResponses) GetAnalyticsCategoriesBreakdownWithResponse(ctx context.Context, params *GetAnalyticsCategoriesBreakdownParams, reqEditors ...RequestEditorFn) (*GetAnalyticsCategoriesBreakdownResponse, error) {
+	rsp, err := c.GetAnalyticsCategoriesBreakdown(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAnalyticsCategoriesBreakdownResponse(rsp)
+}
+
+// GetAnalyticsPaymentMethodsBreakdownWithResponse request returning *GetAnalyticsPaymentMethodsBreakdownResponse
+func (c *ClientWithResponses) GetAnalyticsPaymentMethodsBreakdownWithResponse(ctx context.Context, params *GetAnalyticsPaymentMethodsBreakdownParams, reqEditors ...RequestEditorFn) (*GetAnalyticsPaymentMethodsBreakdownResponse, error) {
+	rsp, err := c.GetAnalyticsPaymentMethodsBreakdown(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAnalyticsPaymentMethodsBreakdownResponse(rsp)
+}
+
+// GetAnalyticsRecentTransactionsWithResponse request returning *GetAnalyticsRecentTransactionsResponse
+func (c *ClientWithResponses) GetAnalyticsRecentTransactionsWithResponse(ctx context.Context, params *GetAnalyticsRecentTransactionsParams, reqEditors ...RequestEditorFn) (*GetAnalyticsRecentTransactionsResponse, error) {
+	rsp, err := c.GetAnalyticsRecentTransactions(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetAnalyticsRecentTransactionsResponse(rsp)
+}
+
+// GetCategoriesWithResponse request returning *GetCategoriesResponse
+func (c *ClientWithResponses) GetCategoriesWithResponse(ctx context.Context, params *GetCategoriesParams, reqEditors ...RequestEditorFn) (*GetCategoriesResponse, error) {
+	rsp, err := c.GetCategories(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetCategoriesResponse(rsp)
+}
+
+// PostCategoryWithBodyWithResponse request with arbitrary body returning *PostCategoryResponse
+func (c *ClientWithResponses) PostCategoryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostCategoryResponse, error) {
+	rsp, err := c.PostCategoryWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostCategoryResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostCategoryWithResponse(ctx context.Context, body PostCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PostCategoryResponse, error) {
+	rsp, err := c.PostCategory(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostCategoryResponse(rsp)
+}
+
+// DeleteCategoryByIdWithResponse request returning *DeleteCategoryByIdResponse
+func (c *ClientWithResponses) DeleteCategoryByIdWithResponse(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteCategoryByIdResponse, error) {
+	rsp, err := c.DeleteCategoryById(ctx, categoryId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteCategoryByIdResponse(rsp)
+}
+
+// GetCategoryByIdWithResponse request returning *GetCategoryByIdResponse
+func (c *ClientWithResponses) GetCategoryByIdWithResponse(ctx context.Context, categoryId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetCategoryByIdResponse, error) {
+	rsp, err := c.GetCategoryById(ctx, categoryId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetCategoryByIdResponse(rsp)
+}
+
+// PutCategoryByIdWithBodyWithResponse request with arbitrary body returning *PutCategoryByIdResponse
+func (c *ClientWithResponses) PutCategoryByIdWithBodyWithResponse(ctx context.Context, categoryId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutCategoryByIdResponse, error) {
+	rsp, err := c.PutCategoryByIdWithBody(ctx, categoryId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutCategoryByIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutCategoryByIdWithResponse(ctx context.Context, categoryId openapi_types.UUID, body PutCategoryByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutCategoryByIdResponse, error) {
+	rsp, err := c.PutCategoryById(ctx, categoryId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutCategoryByIdResponse(rsp)
+}
+
+// GetExpensesWithResponse request returning *GetExpensesResponse
+func (c *ClientWithResponses) GetExpensesWithResponse(ctx context.Context, params *GetExpensesParams, reqEditors ...RequestEditorFn) (*GetExpensesResponse, error) {
+	rsp, err := c.GetExpenses(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetExpensesResponse(rsp)
+}
+
+// PostExpenseWithBodyWithResponse request with arbitrary body returning *PostExpenseResponse
+func (c *ClientWithResponses) PostExpenseWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostExpenseResponse, error) {
+	rsp, err := c.PostExpenseWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostExpenseResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostExpenseWithResponse(ctx context.Context, body PostExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*PostExpenseResponse, error) {
+	rsp, err := c.PostExpense(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostExpenseResponse(rsp)
+}
+
+// DeleteExpenseByIdWithResponse request returning *DeleteExpenseByIdResponse
+func (c *ClientWithResponses) DeleteExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteExpenseByIdResponse, error) {
+	rsp, err := c.DeleteExpenseById(ctx, expenseId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteExpenseByIdResponse(rsp)
+}
+
+// GetExpenseByIdWithResponse request returning *GetExpenseByIdResponse
+func (c *ClientWithResponses) GetExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetExpenseByIdResponse, error) {
+	rsp, err := c.GetExpenseById(ctx, expenseId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetExpenseByIdResponse(rsp)
+}
+
+// PutExpenseByIdWithBodyWithResponse request with arbitrary body returning *PutExpenseByIdResponse
+func (c *ClientWithResponses) PutExpenseByIdWithBodyWithResponse(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutExpenseByIdResponse, error) {
+	rsp, err := c.PutExpenseByIdWithBody(ctx, expenseId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutExpenseByIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, body PutExpenseByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutExpenseByIdResponse, error) {
+	rsp, err := c.PutExpenseById(ctx, expenseId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutExpenseByIdResponse(rsp)
+}
+
+// PostVerifyExpenseByIdWithResponse request returning *PostVerifyExpenseByIdResponse
+func (c *ClientWithResponses) PostVerifyExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*PostVerifyExpenseByIdResponse, error) {
+	rsp, err := c.PostVerifyExpenseById(ctx, expenseId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostVerifyExpenseByIdResponse(rsp)
+}
+
+// GetHealthWithResponse request returning *GetHealthResponse
+func (c *ClientWithResponses) GetHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHealthResponse, error) {
+	rsp, err := c.GetHealth(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetHealthResponse(rsp)
+}
+
+// GetPaymentMethodsWithResponse request returning *GetPaymentMethodsResponse
+func (c *ClientWithResponses) GetPaymentMethodsWithResponse(ctx context.Context, params *GetPaymentMethodsParams, reqEditors ...RequestEditorFn) (*GetPaymentMethodsResponse, error) {
+	rsp, err := c.GetPaymentMethods(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPaymentMethodsResponse(rsp)
+}
+
+// PostPaymentMethodWithBodyWithResponse request with arbitrary body returning *PostPaymentMethodResponse
+func (c *ClientWithResponses) PostPaymentMethodWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostPaymentMethodResponse, error) {
+	rsp, err := c.PostPaymentMethodWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostPaymentMethodResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostPaymentMethodWithResponse(ctx context.Context, body PostPaymentMethodJSONRequestBody, reqEditors ...RequestEditorFn) (*PostPaymentMethodResponse, error) {
+	rsp, err := c.PostPaymentMethod(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostPaymentMethodResponse(rsp)
+}
+
+// DeletePaymentMethodByIdWithResponse request returning *DeletePaymentMethodByIdResponse
+func (c *ClientWithResponses) DeletePaymentMethodByIdWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeletePaymentMethodByIdResponse, error) {
+	rsp, err := c.DeletePaymentMethodById(ctx, paymentMethodId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeletePaymentMethodByIdResponse(rsp)
+}
+
+// GetPaymentMethodByIdWithResponse request returning *GetPaymentMethodByIdResponse
+func (c *ClientWithResponses) GetPaymentMethodByIdWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetPaymentMethodByIdResponse, error) {
+	rsp, err := c.GetPaymentMethodById(ctx, paymentMethodId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPaymentMethodByIdResponse(rsp)
+}
+
+// PutPaymentMethodByIdWithBodyWithResponse request with arbitrary body returning *PutPaymentMethodByIdResponse
+func (c *ClientWithResponses) PutPaymentMethodByIdWithBodyWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutPaymentMethodByIdResponse, error) {
+	rsp, err := c.PutPaymentMethodByIdWithBody(ctx, paymentMethodId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutPaymentMethodByIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutPaymentMethodByIdWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, body PutPaymentMethodByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutPaymentMethodByIdResponse, error) {
+	rsp, err := c.PutPaymentMethodById(ctx, paymentMethodId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutPaymentMethodByIdResponse(rsp)
+}
+
+// PostUserWithBodyWithResponse request with arbitrary body returning *PostUserResponse
+func (c *ClientWithResponses) PostUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserResponse, error) {
+	rsp, err := c.PostUserWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostUserWithResponse(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserResponse, error) {
+	rsp, err := c.PostUser(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostUserResponse(rsp)
+}
+
+// GetMeUserWithResponse request returning *GetMeUserResponse
+func (c *ClientWithResponses) GetMeUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetMeUserResponse, error) {
+	rsp, err := c.GetMeUser(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMeUserResponse(rsp)
+}
+
+// PutMeUserWithBodyWithResponse request with arbitrary body returning *PutMeUserResponse
+func (c *ClientWithResponses) PutMeUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutMeUserResponse, error) {
+	rsp, err := c.PutMeUserWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutMeUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutMeUserWithResponse(ctx context.Context, body PutMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PutMeUserResponse, error) {
+	rsp, err := c.PutMeUser(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutMeUserResponse(rsp)
+}
+
+// ParseGetAnalyticsBudgetOverviewResponse parses an HTTP response from a GetAnalyticsBudgetOverviewWithResponse call
+func ParseGetAnalyticsBudgetOverviewResponse(rsp *http.Response) (*GetAnalyticsBudgetOverviewResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetHelloResponse{
+	response := &GetAnalyticsBudgetOverviewResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BudgetOverview
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAnalyticsCategoriesBreakdownResponse parses an HTTP response from a GetAnalyticsCategoriesBreakdownWithResponse call
+func ParseGetAnalyticsCategoriesBreakdownResponse(rsp *http.Response) (*GetAnalyticsCategoriesBreakdownResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAnalyticsCategoriesBreakdownResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []CategoryBreakdown
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAnalyticsPaymentMethodsBreakdownResponse parses an HTTP response from a GetAnalyticsPaymentMethodsBreakdownWithResponse call
+func ParseGetAnalyticsPaymentMethodsBreakdownResponse(rsp *http.Response) (*GetAnalyticsPaymentMethodsBreakdownResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAnalyticsPaymentMethodsBreakdownResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []PaymentMethodBreakdown
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetAnalyticsRecentTransactionsResponse parses an HTTP response from a GetAnalyticsRecentTransactionsWithResponse call
+func ParseGetAnalyticsRecentTransactionsResponse(rsp *http.Response) (*GetAnalyticsRecentTransactionsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetAnalyticsRecentTransactionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []ExpenseWithDetails
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetCategoriesResponse parses an HTTP response from a GetCategoriesWithResponse call
+func ParseGetCategoriesResponse(rsp *http.Response) (*GetCategoriesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetCategoriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Category
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostCategoryResponse parses an HTTP response from a PostCategoryWithResponse call
+func ParsePostCategoryResponse(rsp *http.Response) (*PostCategoryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostCategoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest Category
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteCategoryByIdResponse parses an HTTP response from a DeleteCategoryByIdWithResponse call
+func ParseDeleteCategoryByIdResponse(rsp *http.Response) (*DeleteCategoryByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteCategoryByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SuccessResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetCategoryByIdResponse parses an HTTP response from a GetCategoryByIdWithResponse call
+func ParseGetCategoryByIdResponse(rsp *http.Response) (*GetCategoryByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetCategoryByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Category
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutCategoryByIdResponse parses an HTTP response from a PutCategoryByIdWithResponse call
+func ParsePutCategoryByIdResponse(rsp *http.Response) (*PutCategoryByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutCategoryByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Category
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetExpensesResponse parses an HTTP response from a GetExpensesWithResponse call
+func ParseGetExpensesResponse(rsp *http.Response) (*GetExpensesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetExpensesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Data       *[]ExpenseWithDetails `json:"data,omitempty"`
+			Pagination *struct {
+				Limit      *int `json:"limit,omitempty"`
+				Page       *int `json:"page,omitempty"`
+				Total      *int `json:"total,omitempty"`
+				TotalPages *int `json:"total_pages,omitempty"`
+			} `json:"pagination,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostExpenseResponse parses an HTTP response from a PostExpenseWithResponse call
+func ParsePostExpenseResponse(rsp *http.Response) (*PostExpenseResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostExpenseResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest ExpenseWithDetails
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteExpenseByIdResponse parses an HTTP response from a DeleteExpenseByIdWithResponse call
+func ParseDeleteExpenseByIdResponse(rsp *http.Response) (*DeleteExpenseByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteExpenseByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SuccessResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetExpenseByIdResponse parses an HTTP response from a GetExpenseByIdWithResponse call
+func ParseGetExpenseByIdResponse(rsp *http.Response) (*GetExpenseByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetExpenseByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExpenseWithDetails
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutExpenseByIdResponse parses an HTTP response from a PutExpenseByIdWithResponse call
+func ParsePutExpenseByIdResponse(rsp *http.Response) (*PutExpenseByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutExpenseByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExpenseWithDetails
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostVerifyExpenseByIdResponse parses an HTTP response from a PostVerifyExpenseByIdWithResponse call
+func ParsePostVerifyExpenseByIdResponse(rsp *http.Response) (*PostVerifyExpenseByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostVerifyExpenseByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExpenseWithDetails
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetHealthResponse parses an HTTP response from a GetHealthWithResponse call
+func ParseGetHealthResponse(rsp *http.Response) (*GetHealthResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetHealthResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Status    *string    `json:"status,omitempty"`
+			Timestamp *time.Time `json:"timestamp,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPaymentMethodsResponse parses an HTTP response from a GetPaymentMethodsWithResponse call
+func ParseGetPaymentMethodsResponse(rsp *http.Response) (*GetPaymentMethodsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPaymentMethodsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []PaymentMethod
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostPaymentMethodResponse parses an HTTP response from a PostPaymentMethodWithResponse call
+func ParsePostPaymentMethodResponse(rsp *http.Response) (*PostPaymentMethodResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostPaymentMethodResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest PaymentMethod
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeletePaymentMethodByIdResponse parses an HTTP response from a DeletePaymentMethodByIdWithResponse call
+func ParseDeletePaymentMethodByIdResponse(rsp *http.Response) (*DeletePaymentMethodByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeletePaymentMethodByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SuccessResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPaymentMethodByIdResponse parses an HTTP response from a GetPaymentMethodByIdWithResponse call
+func ParseGetPaymentMethodByIdResponse(rsp *http.Response) (*GetPaymentMethodByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPaymentMethodByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PaymentMethod
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutPaymentMethodByIdResponse parses an HTTP response from a PutPaymentMethodByIdWithResponse call
+func ParsePutPaymentMethodByIdResponse(rsp *http.Response) (*PutPaymentMethodByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutPaymentMethodByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PaymentMethod
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostUserResponse parses an HTTP response from a PostUserWithResponse call
+func ParsePostUserResponse(rsp *http.Response) (*PostUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetMeUserResponse parses an HTTP response from a GetMeUserWithResponse call
+func ParseGetMeUserResponse(rsp *http.Response) (*GetMeUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMeUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutMeUserResponse parses an HTTP response from a PutMeUserWithResponse call
+func ParsePutMeUserResponse(rsp *http.Response) (*PutMeUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutMeUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
 	}
 
 	return response, nil
@@ -226,18 +4204,225 @@ func ParseGetHelloResponse(rsp *http.Response) (*GetHelloResponse, error) {
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Returns a greeting message
-	// (GET /hello)
-	GetHello(w http.ResponseWriter, r *http.Request)
+	// Get budget overview
+	// (GET /analytics/budget-overview)
+	GetAnalyticsBudgetOverview(w http.ResponseWriter, r *http.Request, params GetAnalyticsBudgetOverviewParams)
+	// Get categories breakdown
+	// (GET /analytics/categories-breakdown)
+	GetAnalyticsCategoriesBreakdown(w http.ResponseWriter, r *http.Request, params GetAnalyticsCategoriesBreakdownParams)
+	// Get payment methods breakdown
+	// (GET /analytics/payment-methods-breakdown)
+	GetAnalyticsPaymentMethodsBreakdown(w http.ResponseWriter, r *http.Request, params GetAnalyticsPaymentMethodsBreakdownParams)
+	// Get recent transactions
+	// (GET /analytics/recent-transactions)
+	GetAnalyticsRecentTransactions(w http.ResponseWriter, r *http.Request, params GetAnalyticsRecentTransactionsParams)
+	// Get user categories
+	// (GET /categories)
+	GetCategories(w http.ResponseWriter, r *http.Request, params GetCategoriesParams)
+	// Create a new category
+	// (POST /categories)
+	PostCategory(w http.ResponseWriter, r *http.Request)
+	// Delete category
+	// (DELETE /categories/{categoryId})
+	DeleteCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID)
+	// Get category by ID
+	// (GET /categories/{categoryId})
+	GetCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID)
+	// Update category
+	// (PUT /categories/{categoryId})
+	PutCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID)
+	// Get user expenses
+	// (GET /expenses)
+	GetExpenses(w http.ResponseWriter, r *http.Request, params GetExpensesParams)
+	// Create a new expense
+	// (POST /expenses)
+	PostExpense(w http.ResponseWriter, r *http.Request)
+	// Delete expense
+	// (DELETE /expenses/{expenseId})
+	DeleteExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
+	// Get expense by ID
+	// (GET /expenses/{expenseId})
+	GetExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
+	// Update expense
+	// (PUT /expenses/{expenseId})
+	PutExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
+	// Verify expense
+	// (POST /expenses/{expenseId}/verify)
+	PostVerifyExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
+	// Health check endpoint
+	// (GET /health)
+	GetHealth(w http.ResponseWriter, r *http.Request)
+	// Get user payment methods
+	// (GET /payment-methods)
+	GetPaymentMethods(w http.ResponseWriter, r *http.Request, params GetPaymentMethodsParams)
+	// Create a new payment method
+	// (POST /payment-methods)
+	PostPaymentMethod(w http.ResponseWriter, r *http.Request)
+	// Delete payment method
+	// (DELETE /payment-methods/{paymentMethodId})
+	DeletePaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID)
+	// Get payment method by ID
+	// (GET /payment-methods/{paymentMethodId})
+	GetPaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID)
+	// Update payment method
+	// (PUT /payment-methods/{paymentMethodId})
+	PutPaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID)
+	// Create a new user
+	// (POST /users)
+	PostUser(w http.ResponseWriter, r *http.Request)
+	// Get current user profile
+	// (GET /users/me)
+	GetMeUser(w http.ResponseWriter, r *http.Request)
+	// Update current user profile
+	// (PUT /users/me)
+	PutMeUser(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
 
-// Returns a greeting message
-// (GET /hello)
-func (_ Unimplemented) GetHello(w http.ResponseWriter, r *http.Request) {
+// Get budget overview
+// (GET /analytics/budget-overview)
+func (_ Unimplemented) GetAnalyticsBudgetOverview(w http.ResponseWriter, r *http.Request, params GetAnalyticsBudgetOverviewParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get categories breakdown
+// (GET /analytics/categories-breakdown)
+func (_ Unimplemented) GetAnalyticsCategoriesBreakdown(w http.ResponseWriter, r *http.Request, params GetAnalyticsCategoriesBreakdownParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get payment methods breakdown
+// (GET /analytics/payment-methods-breakdown)
+func (_ Unimplemented) GetAnalyticsPaymentMethodsBreakdown(w http.ResponseWriter, r *http.Request, params GetAnalyticsPaymentMethodsBreakdownParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get recent transactions
+// (GET /analytics/recent-transactions)
+func (_ Unimplemented) GetAnalyticsRecentTransactions(w http.ResponseWriter, r *http.Request, params GetAnalyticsRecentTransactionsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get user categories
+// (GET /categories)
+func (_ Unimplemented) GetCategories(w http.ResponseWriter, r *http.Request, params GetCategoriesParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new category
+// (POST /categories)
+func (_ Unimplemented) PostCategory(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete category
+// (DELETE /categories/{categoryId})
+func (_ Unimplemented) DeleteCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get category by ID
+// (GET /categories/{categoryId})
+func (_ Unimplemented) GetCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update category
+// (PUT /categories/{categoryId})
+func (_ Unimplemented) PutCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get user expenses
+// (GET /expenses)
+func (_ Unimplemented) GetExpenses(w http.ResponseWriter, r *http.Request, params GetExpensesParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new expense
+// (POST /expenses)
+func (_ Unimplemented) PostExpense(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete expense
+// (DELETE /expenses/{expenseId})
+func (_ Unimplemented) DeleteExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get expense by ID
+// (GET /expenses/{expenseId})
+func (_ Unimplemented) GetExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update expense
+// (PUT /expenses/{expenseId})
+func (_ Unimplemented) PutExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Verify expense
+// (POST /expenses/{expenseId}/verify)
+func (_ Unimplemented) PostVerifyExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Health check endpoint
+// (GET /health)
+func (_ Unimplemented) GetHealth(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get user payment methods
+// (GET /payment-methods)
+func (_ Unimplemented) GetPaymentMethods(w http.ResponseWriter, r *http.Request, params GetPaymentMethodsParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new payment method
+// (POST /payment-methods)
+func (_ Unimplemented) PostPaymentMethod(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete payment method
+// (DELETE /payment-methods/{paymentMethodId})
+func (_ Unimplemented) DeletePaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get payment method by ID
+// (GET /payment-methods/{paymentMethodId})
+func (_ Unimplemented) GetPaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update payment method
+// (PUT /payment-methods/{paymentMethodId})
+func (_ Unimplemented) PutPaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new user
+// (POST /users)
+func (_ Unimplemented) PostUser(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get current user profile
+// (GET /users/me)
+func (_ Unimplemented) GetMeUser(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update current user profile
+// (PUT /users/me)
+func (_ Unimplemented) PutMeUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -250,11 +4435,782 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-// GetHello operation middleware
-func (siw *ServerInterfaceWrapper) GetHello(w http.ResponseWriter, r *http.Request) {
+// GetAnalyticsBudgetOverview operation middleware
+func (siw *ServerInterfaceWrapper) GetAnalyticsBudgetOverview(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAnalyticsBudgetOverviewParams
+
+	// ------------- Optional query parameter "month" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "month", r.URL.Query(), &params.Month)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "month", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year", r.URL.Query(), &params.Year)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetHello(w, r)
+		siw.Handler.GetAnalyticsBudgetOverview(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetAnalyticsCategoriesBreakdown operation middleware
+func (siw *ServerInterfaceWrapper) GetAnalyticsCategoriesBreakdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAnalyticsCategoriesBreakdownParams
+
+	// ------------- Optional query parameter "month" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "month", r.URL.Query(), &params.Month)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "month", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year", r.URL.Query(), &params.Year)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAnalyticsCategoriesBreakdown(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetAnalyticsPaymentMethodsBreakdown operation middleware
+func (siw *ServerInterfaceWrapper) GetAnalyticsPaymentMethodsBreakdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAnalyticsPaymentMethodsBreakdownParams
+
+	// ------------- Optional query parameter "month" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "month", r.URL.Query(), &params.Month)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "month", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year", r.URL.Query(), &params.Year)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAnalyticsPaymentMethodsBreakdown(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetAnalyticsRecentTransactions operation middleware
+func (siw *ServerInterfaceWrapper) GetAnalyticsRecentTransactions(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAnalyticsRecentTransactionsParams
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "month" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "month", r.URL.Query(), &params.Month)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "month", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year", r.URL.Query(), &params.Year)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAnalyticsRecentTransactions(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetCategories operation middleware
+func (siw *ServerInterfaceWrapper) GetCategories(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetCategoriesParams
+
+	// ------------- Optional query parameter "include_deleted" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "include_deleted", r.URL.Query(), &params.IncludeDeleted)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "include_deleted", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCategories(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostCategory operation middleware
+func (siw *ServerInterfaceWrapper) PostCategory(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostCategory(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteCategoryById operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCategoryById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "categoryId" -------------
+	var categoryId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "categoryId", chi.URLParam(r, "categoryId"), &categoryId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteCategoryById(w, r, categoryId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetCategoryById operation middleware
+func (siw *ServerInterfaceWrapper) GetCategoryById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "categoryId" -------------
+	var categoryId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "categoryId", chi.URLParam(r, "categoryId"), &categoryId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCategoryById(w, r, categoryId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutCategoryById operation middleware
+func (siw *ServerInterfaceWrapper) PutCategoryById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "categoryId" -------------
+	var categoryId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "categoryId", chi.URLParam(r, "categoryId"), &categoryId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutCategoryById(w, r, categoryId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetExpenses operation middleware
+func (siw *ServerInterfaceWrapper) GetExpenses(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetExpensesParams
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "search" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "search", r.URL.Query(), &params.Search)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "search", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "category_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "category_id", r.URL.Query(), &params.CategoryId)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "category_id", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "payment_method_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "payment_method_id", r.URL.Query(), &params.PaymentMethodId)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "payment_method_id", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "date_from" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "date_from", r.URL.Query(), &params.DateFrom)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date_from", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "date_to" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "date_to", r.URL.Query(), &params.DateTo)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date_to", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "verification_status" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "verification_status", r.URL.Query(), &params.VerificationStatus)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "verification_status", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "include_deleted" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "include_deleted", r.URL.Query(), &params.IncludeDeleted)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "include_deleted", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetExpenses(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostExpense operation middleware
+func (siw *ServerInterfaceWrapper) PostExpense(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostExpense(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteExpenseById operation middleware
+func (siw *ServerInterfaceWrapper) DeleteExpenseById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "expenseId" -------------
+	var expenseId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "expenseId", chi.URLParam(r, "expenseId"), &expenseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "expenseId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteExpenseById(w, r, expenseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetExpenseById operation middleware
+func (siw *ServerInterfaceWrapper) GetExpenseById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "expenseId" -------------
+	var expenseId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "expenseId", chi.URLParam(r, "expenseId"), &expenseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "expenseId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetExpenseById(w, r, expenseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutExpenseById operation middleware
+func (siw *ServerInterfaceWrapper) PutExpenseById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "expenseId" -------------
+	var expenseId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "expenseId", chi.URLParam(r, "expenseId"), &expenseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "expenseId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutExpenseById(w, r, expenseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostVerifyExpenseById operation middleware
+func (siw *ServerInterfaceWrapper) PostVerifyExpenseById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "expenseId" -------------
+	var expenseId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "expenseId", chi.URLParam(r, "expenseId"), &expenseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "expenseId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostVerifyExpenseById(w, r, expenseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetHealth operation middleware
+func (siw *ServerInterfaceWrapper) GetHealth(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetHealth(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPaymentMethods operation middleware
+func (siw *ServerInterfaceWrapper) GetPaymentMethods(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetPaymentMethodsParams
+
+	// ------------- Optional query parameter "include_deleted" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "include_deleted", r.URL.Query(), &params.IncludeDeleted)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "include_deleted", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPaymentMethods(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostPaymentMethod operation middleware
+func (siw *ServerInterfaceWrapper) PostPaymentMethod(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostPaymentMethod(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeletePaymentMethodById operation middleware
+func (siw *ServerInterfaceWrapper) DeletePaymentMethodById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "paymentMethodId" -------------
+	var paymentMethodId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "paymentMethodId", chi.URLParam(r, "paymentMethodId"), &paymentMethodId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paymentMethodId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeletePaymentMethodById(w, r, paymentMethodId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetPaymentMethodById operation middleware
+func (siw *ServerInterfaceWrapper) GetPaymentMethodById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "paymentMethodId" -------------
+	var paymentMethodId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "paymentMethodId", chi.URLParam(r, "paymentMethodId"), &paymentMethodId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paymentMethodId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetPaymentMethodById(w, r, paymentMethodId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutPaymentMethodById operation middleware
+func (siw *ServerInterfaceWrapper) PutPaymentMethodById(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "paymentMethodId" -------------
+	var paymentMethodId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "paymentMethodId", chi.URLParam(r, "paymentMethodId"), &paymentMethodId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paymentMethodId", Err: err})
+		return
+	}
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutPaymentMethodById(w, r, paymentMethodId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostUser operation middleware
+func (siw *ServerInterfaceWrapper) PostUser(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetMeUser operation middleware
+func (siw *ServerInterfaceWrapper) GetMeUser(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMeUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutMeUser operation middleware
+func (siw *ServerInterfaceWrapper) PutMeUser(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutMeUser(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -378,34 +5334,962 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/hello", wrapper.GetHello)
+		r.Get(options.BaseURL+"/analytics/budget-overview", wrapper.GetAnalyticsBudgetOverview)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/analytics/categories-breakdown", wrapper.GetAnalyticsCategoriesBreakdown)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/analytics/payment-methods-breakdown", wrapper.GetAnalyticsPaymentMethodsBreakdown)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/analytics/recent-transactions", wrapper.GetAnalyticsRecentTransactions)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/categories", wrapper.GetCategories)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/categories", wrapper.PostCategory)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/categories/{categoryId}", wrapper.DeleteCategoryById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/categories/{categoryId}", wrapper.GetCategoryById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/categories/{categoryId}", wrapper.PutCategoryById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/expenses", wrapper.GetExpenses)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/expenses", wrapper.PostExpense)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/expenses/{expenseId}", wrapper.DeleteExpenseById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/expenses/{expenseId}", wrapper.GetExpenseById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/expenses/{expenseId}", wrapper.PutExpenseById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/expenses/{expenseId}/verify", wrapper.PostVerifyExpenseById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/health", wrapper.GetHealth)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/payment-methods", wrapper.GetPaymentMethods)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/payment-methods", wrapper.PostPaymentMethod)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/payment-methods/{paymentMethodId}", wrapper.DeletePaymentMethodById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/payment-methods/{paymentMethodId}", wrapper.GetPaymentMethodById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/payment-methods/{paymentMethodId}", wrapper.PutPaymentMethodById)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/users", wrapper.PostUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/users/me", wrapper.GetMeUser)
+	})
+	r.Group(func(r chi.Router) {
+		r.Put(options.BaseURL+"/users/me", wrapper.PutMeUser)
 	})
 
 	return r
 }
 
-type GetHelloRequestObject struct {
+type GetAnalyticsBudgetOverviewRequestObject struct {
+	Params GetAnalyticsBudgetOverviewParams
 }
 
-type GetHelloResponseObject interface {
-	VisitGetHelloResponse(w http.ResponseWriter) error
+type GetAnalyticsBudgetOverviewResponseObject interface {
+	VisitGetAnalyticsBudgetOverviewResponse(w http.ResponseWriter) error
 }
 
-type GetHello200TextResponse string
+type GetAnalyticsBudgetOverview200JSONResponse BudgetOverview
 
-func (response GetHello200TextResponse) VisitGetHelloResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "text/plain")
+func (response GetAnalyticsBudgetOverview200JSONResponse) VisitGetAnalyticsBudgetOverviewResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
-	_, err := w.Write([]byte(response))
-	return err
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAnalyticsBudgetOverview401JSONResponse ErrorResponse
+
+func (response GetAnalyticsBudgetOverview401JSONResponse) VisitGetAnalyticsBudgetOverviewResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAnalyticsCategoriesBreakdownRequestObject struct {
+	Params GetAnalyticsCategoriesBreakdownParams
+}
+
+type GetAnalyticsCategoriesBreakdownResponseObject interface {
+	VisitGetAnalyticsCategoriesBreakdownResponse(w http.ResponseWriter) error
+}
+
+type GetAnalyticsCategoriesBreakdown200JSONResponse []CategoryBreakdown
+
+func (response GetAnalyticsCategoriesBreakdown200JSONResponse) VisitGetAnalyticsCategoriesBreakdownResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAnalyticsCategoriesBreakdown401JSONResponse ErrorResponse
+
+func (response GetAnalyticsCategoriesBreakdown401JSONResponse) VisitGetAnalyticsCategoriesBreakdownResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAnalyticsPaymentMethodsBreakdownRequestObject struct {
+	Params GetAnalyticsPaymentMethodsBreakdownParams
+}
+
+type GetAnalyticsPaymentMethodsBreakdownResponseObject interface {
+	VisitGetAnalyticsPaymentMethodsBreakdownResponse(w http.ResponseWriter) error
+}
+
+type GetAnalyticsPaymentMethodsBreakdown200JSONResponse []PaymentMethodBreakdown
+
+func (response GetAnalyticsPaymentMethodsBreakdown200JSONResponse) VisitGetAnalyticsPaymentMethodsBreakdownResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAnalyticsPaymentMethodsBreakdown401JSONResponse ErrorResponse
+
+func (response GetAnalyticsPaymentMethodsBreakdown401JSONResponse) VisitGetAnalyticsPaymentMethodsBreakdownResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAnalyticsRecentTransactionsRequestObject struct {
+	Params GetAnalyticsRecentTransactionsParams
+}
+
+type GetAnalyticsRecentTransactionsResponseObject interface {
+	VisitGetAnalyticsRecentTransactionsResponse(w http.ResponseWriter) error
+}
+
+type GetAnalyticsRecentTransactions200JSONResponse []ExpenseWithDetails
+
+func (response GetAnalyticsRecentTransactions200JSONResponse) VisitGetAnalyticsRecentTransactionsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetAnalyticsRecentTransactions401JSONResponse ErrorResponse
+
+func (response GetAnalyticsRecentTransactions401JSONResponse) VisitGetAnalyticsRecentTransactionsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCategoriesRequestObject struct {
+	Params GetCategoriesParams
+}
+
+type GetCategoriesResponseObject interface {
+	VisitGetCategoriesResponse(w http.ResponseWriter) error
+}
+
+type GetCategories200JSONResponse []Category
+
+func (response GetCategories200JSONResponse) VisitGetCategoriesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCategories401JSONResponse ErrorResponse
+
+func (response GetCategories401JSONResponse) VisitGetCategoriesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostCategoryRequestObject struct {
+	Body *PostCategoryJSONRequestBody
+}
+
+type PostCategoryResponseObject interface {
+	VisitPostCategoryResponse(w http.ResponseWriter) error
+}
+
+type PostCategory201JSONResponse Category
+
+func (response PostCategory201JSONResponse) VisitPostCategoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostCategory400JSONResponse ErrorResponse
+
+func (response PostCategory400JSONResponse) VisitPostCategoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostCategory401JSONResponse ErrorResponse
+
+func (response PostCategory401JSONResponse) VisitPostCategoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteCategoryByIdRequestObject struct {
+	CategoryId openapi_types.UUID `json:"categoryId"`
+}
+
+type DeleteCategoryByIdResponseObject interface {
+	VisitDeleteCategoryByIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteCategoryById200JSONResponse SuccessResponse
+
+func (response DeleteCategoryById200JSONResponse) VisitDeleteCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteCategoryById401JSONResponse ErrorResponse
+
+func (response DeleteCategoryById401JSONResponse) VisitDeleteCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteCategoryById404JSONResponse ErrorResponse
+
+func (response DeleteCategoryById404JSONResponse) VisitDeleteCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCategoryByIdRequestObject struct {
+	CategoryId openapi_types.UUID `json:"categoryId"`
+}
+
+type GetCategoryByIdResponseObject interface {
+	VisitGetCategoryByIdResponse(w http.ResponseWriter) error
+}
+
+type GetCategoryById200JSONResponse Category
+
+func (response GetCategoryById200JSONResponse) VisitGetCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCategoryById401JSONResponse ErrorResponse
+
+func (response GetCategoryById401JSONResponse) VisitGetCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCategoryById404JSONResponse ErrorResponse
+
+func (response GetCategoryById404JSONResponse) VisitGetCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutCategoryByIdRequestObject struct {
+	CategoryId openapi_types.UUID `json:"categoryId"`
+	Body       *PutCategoryByIdJSONRequestBody
+}
+
+type PutCategoryByIdResponseObject interface {
+	VisitPutCategoryByIdResponse(w http.ResponseWriter) error
+}
+
+type PutCategoryById200JSONResponse Category
+
+func (response PutCategoryById200JSONResponse) VisitPutCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutCategoryById400JSONResponse ErrorResponse
+
+func (response PutCategoryById400JSONResponse) VisitPutCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutCategoryById401JSONResponse ErrorResponse
+
+func (response PutCategoryById401JSONResponse) VisitPutCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutCategoryById404JSONResponse ErrorResponse
+
+func (response PutCategoryById404JSONResponse) VisitPutCategoryByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpensesRequestObject struct {
+	Params GetExpensesParams
+}
+
+type GetExpensesResponseObject interface {
+	VisitGetExpensesResponse(w http.ResponseWriter) error
+}
+
+type GetExpenses200JSONResponse struct {
+	Data       *[]ExpenseWithDetails `json:"data,omitempty"`
+	Pagination *struct {
+		Limit      *int `json:"limit,omitempty"`
+		Page       *int `json:"page,omitempty"`
+		Total      *int `json:"total,omitempty"`
+		TotalPages *int `json:"total_pages,omitempty"`
+	} `json:"pagination,omitempty"`
+}
+
+func (response GetExpenses200JSONResponse) VisitGetExpensesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpenses401JSONResponse ErrorResponse
+
+func (response GetExpenses401JSONResponse) VisitGetExpensesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostExpenseRequestObject struct {
+	Body *PostExpenseJSONRequestBody
+}
+
+type PostExpenseResponseObject interface {
+	VisitPostExpenseResponse(w http.ResponseWriter) error
+}
+
+type PostExpense201JSONResponse ExpenseWithDetails
+
+func (response PostExpense201JSONResponse) VisitPostExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostExpense400JSONResponse ErrorResponse
+
+func (response PostExpense400JSONResponse) VisitPostExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostExpense401JSONResponse ErrorResponse
+
+func (response PostExpense401JSONResponse) VisitPostExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostExpense404JSONResponse ErrorResponse
+
+func (response PostExpense404JSONResponse) VisitPostExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteExpenseByIdRequestObject struct {
+	ExpenseId openapi_types.UUID `json:"expenseId"`
+}
+
+type DeleteExpenseByIdResponseObject interface {
+	VisitDeleteExpenseByIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteExpenseById200JSONResponse SuccessResponse
+
+func (response DeleteExpenseById200JSONResponse) VisitDeleteExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteExpenseById401JSONResponse ErrorResponse
+
+func (response DeleteExpenseById401JSONResponse) VisitDeleteExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteExpenseById404JSONResponse ErrorResponse
+
+func (response DeleteExpenseById404JSONResponse) VisitDeleteExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpenseByIdRequestObject struct {
+	ExpenseId openapi_types.UUID `json:"expenseId"`
+}
+
+type GetExpenseByIdResponseObject interface {
+	VisitGetExpenseByIdResponse(w http.ResponseWriter) error
+}
+
+type GetExpenseById200JSONResponse ExpenseWithDetails
+
+func (response GetExpenseById200JSONResponse) VisitGetExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpenseById401JSONResponse ErrorResponse
+
+func (response GetExpenseById401JSONResponse) VisitGetExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpenseById404JSONResponse ErrorResponse
+
+func (response GetExpenseById404JSONResponse) VisitGetExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutExpenseByIdRequestObject struct {
+	ExpenseId openapi_types.UUID `json:"expenseId"`
+	Body      *PutExpenseByIdJSONRequestBody
+}
+
+type PutExpenseByIdResponseObject interface {
+	VisitPutExpenseByIdResponse(w http.ResponseWriter) error
+}
+
+type PutExpenseById200JSONResponse ExpenseWithDetails
+
+func (response PutExpenseById200JSONResponse) VisitPutExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutExpenseById400JSONResponse ErrorResponse
+
+func (response PutExpenseById400JSONResponse) VisitPutExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutExpenseById401JSONResponse ErrorResponse
+
+func (response PutExpenseById401JSONResponse) VisitPutExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutExpenseById404JSONResponse ErrorResponse
+
+func (response PutExpenseById404JSONResponse) VisitPutExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostVerifyExpenseByIdRequestObject struct {
+	ExpenseId openapi_types.UUID `json:"expenseId"`
+}
+
+type PostVerifyExpenseByIdResponseObject interface {
+	VisitPostVerifyExpenseByIdResponse(w http.ResponseWriter) error
+}
+
+type PostVerifyExpenseById200JSONResponse ExpenseWithDetails
+
+func (response PostVerifyExpenseById200JSONResponse) VisitPostVerifyExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostVerifyExpenseById401JSONResponse ErrorResponse
+
+func (response PostVerifyExpenseById401JSONResponse) VisitPostVerifyExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostVerifyExpenseById404JSONResponse ErrorResponse
+
+func (response PostVerifyExpenseById404JSONResponse) VisitPostVerifyExpenseByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetHealthRequestObject struct {
+}
+
+type GetHealthResponseObject interface {
+	VisitGetHealthResponse(w http.ResponseWriter) error
+}
+
+type GetHealth200JSONResponse struct {
+	Status    *string    `json:"status,omitempty"`
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+func (response GetHealth200JSONResponse) VisitGetHealthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPaymentMethodsRequestObject struct {
+	Params GetPaymentMethodsParams
+}
+
+type GetPaymentMethodsResponseObject interface {
+	VisitGetPaymentMethodsResponse(w http.ResponseWriter) error
+}
+
+type GetPaymentMethods200JSONResponse []PaymentMethod
+
+func (response GetPaymentMethods200JSONResponse) VisitGetPaymentMethodsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPaymentMethods401JSONResponse ErrorResponse
+
+func (response GetPaymentMethods401JSONResponse) VisitGetPaymentMethodsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostPaymentMethodRequestObject struct {
+	Body *PostPaymentMethodJSONRequestBody
+}
+
+type PostPaymentMethodResponseObject interface {
+	VisitPostPaymentMethodResponse(w http.ResponseWriter) error
+}
+
+type PostPaymentMethod201JSONResponse PaymentMethod
+
+func (response PostPaymentMethod201JSONResponse) VisitPostPaymentMethodResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostPaymentMethod400JSONResponse ErrorResponse
+
+func (response PostPaymentMethod400JSONResponse) VisitPostPaymentMethodResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostPaymentMethod401JSONResponse ErrorResponse
+
+func (response PostPaymentMethod401JSONResponse) VisitPostPaymentMethodResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePaymentMethodByIdRequestObject struct {
+	PaymentMethodId openapi_types.UUID `json:"paymentMethodId"`
+}
+
+type DeletePaymentMethodByIdResponseObject interface {
+	VisitDeletePaymentMethodByIdResponse(w http.ResponseWriter) error
+}
+
+type DeletePaymentMethodById200JSONResponse SuccessResponse
+
+func (response DeletePaymentMethodById200JSONResponse) VisitDeletePaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePaymentMethodById401JSONResponse ErrorResponse
+
+func (response DeletePaymentMethodById401JSONResponse) VisitDeletePaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeletePaymentMethodById404JSONResponse ErrorResponse
+
+func (response DeletePaymentMethodById404JSONResponse) VisitDeletePaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPaymentMethodByIdRequestObject struct {
+	PaymentMethodId openapi_types.UUID `json:"paymentMethodId"`
+}
+
+type GetPaymentMethodByIdResponseObject interface {
+	VisitGetPaymentMethodByIdResponse(w http.ResponseWriter) error
+}
+
+type GetPaymentMethodById200JSONResponse PaymentMethod
+
+func (response GetPaymentMethodById200JSONResponse) VisitGetPaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPaymentMethodById401JSONResponse ErrorResponse
+
+func (response GetPaymentMethodById401JSONResponse) VisitGetPaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetPaymentMethodById404JSONResponse ErrorResponse
+
+func (response GetPaymentMethodById404JSONResponse) VisitGetPaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutPaymentMethodByIdRequestObject struct {
+	PaymentMethodId openapi_types.UUID `json:"paymentMethodId"`
+	Body            *PutPaymentMethodByIdJSONRequestBody
+}
+
+type PutPaymentMethodByIdResponseObject interface {
+	VisitPutPaymentMethodByIdResponse(w http.ResponseWriter) error
+}
+
+type PutPaymentMethodById200JSONResponse PaymentMethod
+
+func (response PutPaymentMethodById200JSONResponse) VisitPutPaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutPaymentMethodById400JSONResponse ErrorResponse
+
+func (response PutPaymentMethodById400JSONResponse) VisitPutPaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutPaymentMethodById401JSONResponse ErrorResponse
+
+func (response PutPaymentMethodById401JSONResponse) VisitPutPaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutPaymentMethodById404JSONResponse ErrorResponse
+
+func (response PutPaymentMethodById404JSONResponse) VisitPutPaymentMethodByIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostUserRequestObject struct {
+	Body *PostUserJSONRequestBody
+}
+
+type PostUserResponseObject interface {
+	VisitPostUserResponse(w http.ResponseWriter) error
+}
+
+type PostUser201JSONResponse User
+
+func (response PostUser201JSONResponse) VisitPostUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostUser400JSONResponse ErrorResponse
+
+func (response PostUser400JSONResponse) VisitPostUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostUser409JSONResponse ErrorResponse
+
+func (response PostUser409JSONResponse) VisitPostUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMeUserRequestObject struct {
+}
+
+type GetMeUserResponseObject interface {
+	VisitGetMeUserResponse(w http.ResponseWriter) error
+}
+
+type GetMeUser200JSONResponse User
+
+func (response GetMeUser200JSONResponse) VisitGetMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMeUser401JSONResponse ErrorResponse
+
+func (response GetMeUser401JSONResponse) VisitGetMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMeUser404JSONResponse ErrorResponse
+
+func (response GetMeUser404JSONResponse) VisitGetMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutMeUserRequestObject struct {
+	Body *PutMeUserJSONRequestBody
+}
+
+type PutMeUserResponseObject interface {
+	VisitPutMeUserResponse(w http.ResponseWriter) error
+}
+
+type PutMeUser200JSONResponse User
+
+func (response PutMeUser200JSONResponse) VisitPutMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutMeUser400JSONResponse ErrorResponse
+
+func (response PutMeUser400JSONResponse) VisitPutMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutMeUser401JSONResponse ErrorResponse
+
+func (response PutMeUser401JSONResponse) VisitPutMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
-	// Returns a greeting message
-	// (GET /hello)
-	GetHello(ctx context.Context, request GetHelloRequestObject) (GetHelloResponseObject, error)
+	// Get budget overview
+	// (GET /analytics/budget-overview)
+	GetAnalyticsBudgetOverview(ctx context.Context, request GetAnalyticsBudgetOverviewRequestObject) (GetAnalyticsBudgetOverviewResponseObject, error)
+	// Get categories breakdown
+	// (GET /analytics/categories-breakdown)
+	GetAnalyticsCategoriesBreakdown(ctx context.Context, request GetAnalyticsCategoriesBreakdownRequestObject) (GetAnalyticsCategoriesBreakdownResponseObject, error)
+	// Get payment methods breakdown
+	// (GET /analytics/payment-methods-breakdown)
+	GetAnalyticsPaymentMethodsBreakdown(ctx context.Context, request GetAnalyticsPaymentMethodsBreakdownRequestObject) (GetAnalyticsPaymentMethodsBreakdownResponseObject, error)
+	// Get recent transactions
+	// (GET /analytics/recent-transactions)
+	GetAnalyticsRecentTransactions(ctx context.Context, request GetAnalyticsRecentTransactionsRequestObject) (GetAnalyticsRecentTransactionsResponseObject, error)
+	// Get user categories
+	// (GET /categories)
+	GetCategories(ctx context.Context, request GetCategoriesRequestObject) (GetCategoriesResponseObject, error)
+	// Create a new category
+	// (POST /categories)
+	PostCategory(ctx context.Context, request PostCategoryRequestObject) (PostCategoryResponseObject, error)
+	// Delete category
+	// (DELETE /categories/{categoryId})
+	DeleteCategoryById(ctx context.Context, request DeleteCategoryByIdRequestObject) (DeleteCategoryByIdResponseObject, error)
+	// Get category by ID
+	// (GET /categories/{categoryId})
+	GetCategoryById(ctx context.Context, request GetCategoryByIdRequestObject) (GetCategoryByIdResponseObject, error)
+	// Update category
+	// (PUT /categories/{categoryId})
+	PutCategoryById(ctx context.Context, request PutCategoryByIdRequestObject) (PutCategoryByIdResponseObject, error)
+	// Get user expenses
+	// (GET /expenses)
+	GetExpenses(ctx context.Context, request GetExpensesRequestObject) (GetExpensesResponseObject, error)
+	// Create a new expense
+	// (POST /expenses)
+	PostExpense(ctx context.Context, request PostExpenseRequestObject) (PostExpenseResponseObject, error)
+	// Delete expense
+	// (DELETE /expenses/{expenseId})
+	DeleteExpenseById(ctx context.Context, request DeleteExpenseByIdRequestObject) (DeleteExpenseByIdResponseObject, error)
+	// Get expense by ID
+	// (GET /expenses/{expenseId})
+	GetExpenseById(ctx context.Context, request GetExpenseByIdRequestObject) (GetExpenseByIdResponseObject, error)
+	// Update expense
+	// (PUT /expenses/{expenseId})
+	PutExpenseById(ctx context.Context, request PutExpenseByIdRequestObject) (PutExpenseByIdResponseObject, error)
+	// Verify expense
+	// (POST /expenses/{expenseId}/verify)
+	PostVerifyExpenseById(ctx context.Context, request PostVerifyExpenseByIdRequestObject) (PostVerifyExpenseByIdResponseObject, error)
+	// Health check endpoint
+	// (GET /health)
+	GetHealth(ctx context.Context, request GetHealthRequestObject) (GetHealthResponseObject, error)
+	// Get user payment methods
+	// (GET /payment-methods)
+	GetPaymentMethods(ctx context.Context, request GetPaymentMethodsRequestObject) (GetPaymentMethodsResponseObject, error)
+	// Create a new payment method
+	// (POST /payment-methods)
+	PostPaymentMethod(ctx context.Context, request PostPaymentMethodRequestObject) (PostPaymentMethodResponseObject, error)
+	// Delete payment method
+	// (DELETE /payment-methods/{paymentMethodId})
+	DeletePaymentMethodById(ctx context.Context, request DeletePaymentMethodByIdRequestObject) (DeletePaymentMethodByIdResponseObject, error)
+	// Get payment method by ID
+	// (GET /payment-methods/{paymentMethodId})
+	GetPaymentMethodById(ctx context.Context, request GetPaymentMethodByIdRequestObject) (GetPaymentMethodByIdResponseObject, error)
+	// Update payment method
+	// (PUT /payment-methods/{paymentMethodId})
+	PutPaymentMethodById(ctx context.Context, request PutPaymentMethodByIdRequestObject) (PutPaymentMethodByIdResponseObject, error)
+	// Create a new user
+	// (POST /users)
+	PostUser(ctx context.Context, request PostUserRequestObject) (PostUserResponseObject, error)
+	// Get current user profile
+	// (GET /users/me)
+	GetMeUser(ctx context.Context, request GetMeUserRequestObject) (GetMeUserResponseObject, error)
+	// Update current user profile
+	// (PUT /users/me)
+	PutMeUser(ctx context.Context, request PutMeUserRequestObject) (PutMeUserResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -437,23 +6321,665 @@ type strictHandler struct {
 	options     StrictHTTPServerOptions
 }
 
-// GetHello operation middleware
-func (sh *strictHandler) GetHello(w http.ResponseWriter, r *http.Request) {
-	var request GetHelloRequestObject
+// GetAnalyticsBudgetOverview operation middleware
+func (sh *strictHandler) GetAnalyticsBudgetOverview(w http.ResponseWriter, r *http.Request, params GetAnalyticsBudgetOverviewParams) {
+	var request GetAnalyticsBudgetOverviewRequestObject
+
+	request.Params = params
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetHello(ctx, request.(GetHelloRequestObject))
+		return sh.ssi.GetAnalyticsBudgetOverview(ctx, request.(GetAnalyticsBudgetOverviewRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetHello")
+		handler = middleware(handler, "GetAnalyticsBudgetOverview")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetHelloResponseObject); ok {
-		if err := validResponse.VisitGetHelloResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetAnalyticsBudgetOverviewResponseObject); ok {
+		if err := validResponse.VisitGetAnalyticsBudgetOverviewResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAnalyticsCategoriesBreakdown operation middleware
+func (sh *strictHandler) GetAnalyticsCategoriesBreakdown(w http.ResponseWriter, r *http.Request, params GetAnalyticsCategoriesBreakdownParams) {
+	var request GetAnalyticsCategoriesBreakdownRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAnalyticsCategoriesBreakdown(ctx, request.(GetAnalyticsCategoriesBreakdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAnalyticsCategoriesBreakdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetAnalyticsCategoriesBreakdownResponseObject); ok {
+		if err := validResponse.VisitGetAnalyticsCategoriesBreakdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAnalyticsPaymentMethodsBreakdown operation middleware
+func (sh *strictHandler) GetAnalyticsPaymentMethodsBreakdown(w http.ResponseWriter, r *http.Request, params GetAnalyticsPaymentMethodsBreakdownParams) {
+	var request GetAnalyticsPaymentMethodsBreakdownRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAnalyticsPaymentMethodsBreakdown(ctx, request.(GetAnalyticsPaymentMethodsBreakdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAnalyticsPaymentMethodsBreakdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetAnalyticsPaymentMethodsBreakdownResponseObject); ok {
+		if err := validResponse.VisitGetAnalyticsPaymentMethodsBreakdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetAnalyticsRecentTransactions operation middleware
+func (sh *strictHandler) GetAnalyticsRecentTransactions(w http.ResponseWriter, r *http.Request, params GetAnalyticsRecentTransactionsParams) {
+	var request GetAnalyticsRecentTransactionsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetAnalyticsRecentTransactions(ctx, request.(GetAnalyticsRecentTransactionsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetAnalyticsRecentTransactions")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetAnalyticsRecentTransactionsResponseObject); ok {
+		if err := validResponse.VisitGetAnalyticsRecentTransactionsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetCategories operation middleware
+func (sh *strictHandler) GetCategories(w http.ResponseWriter, r *http.Request, params GetCategoriesParams) {
+	var request GetCategoriesRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCategories(ctx, request.(GetCategoriesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCategories")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetCategoriesResponseObject); ok {
+		if err := validResponse.VisitGetCategoriesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostCategory operation middleware
+func (sh *strictHandler) PostCategory(w http.ResponseWriter, r *http.Request) {
+	var request PostCategoryRequestObject
+
+	var body PostCategoryJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostCategory(ctx, request.(PostCategoryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostCategory")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostCategoryResponseObject); ok {
+		if err := validResponse.VisitPostCategoryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteCategoryById operation middleware
+func (sh *strictHandler) DeleteCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID) {
+	var request DeleteCategoryByIdRequestObject
+
+	request.CategoryId = categoryId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteCategoryById(ctx, request.(DeleteCategoryByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteCategoryById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteCategoryByIdResponseObject); ok {
+		if err := validResponse.VisitDeleteCategoryByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetCategoryById operation middleware
+func (sh *strictHandler) GetCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID) {
+	var request GetCategoryByIdRequestObject
+
+	request.CategoryId = categoryId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCategoryById(ctx, request.(GetCategoryByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCategoryById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetCategoryByIdResponseObject); ok {
+		if err := validResponse.VisitGetCategoryByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutCategoryById operation middleware
+func (sh *strictHandler) PutCategoryById(w http.ResponseWriter, r *http.Request, categoryId openapi_types.UUID) {
+	var request PutCategoryByIdRequestObject
+
+	request.CategoryId = categoryId
+
+	var body PutCategoryByIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PutCategoryById(ctx, request.(PutCategoryByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutCategoryById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutCategoryByIdResponseObject); ok {
+		if err := validResponse.VisitPutCategoryByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetExpenses operation middleware
+func (sh *strictHandler) GetExpenses(w http.ResponseWriter, r *http.Request, params GetExpensesParams) {
+	var request GetExpensesRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetExpenses(ctx, request.(GetExpensesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetExpenses")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetExpensesResponseObject); ok {
+		if err := validResponse.VisitGetExpensesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostExpense operation middleware
+func (sh *strictHandler) PostExpense(w http.ResponseWriter, r *http.Request) {
+	var request PostExpenseRequestObject
+
+	var body PostExpenseJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostExpense(ctx, request.(PostExpenseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostExpense")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostExpenseResponseObject); ok {
+		if err := validResponse.VisitPostExpenseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteExpenseById operation middleware
+func (sh *strictHandler) DeleteExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	var request DeleteExpenseByIdRequestObject
+
+	request.ExpenseId = expenseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteExpenseById(ctx, request.(DeleteExpenseByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteExpenseById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteExpenseByIdResponseObject); ok {
+		if err := validResponse.VisitDeleteExpenseByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetExpenseById operation middleware
+func (sh *strictHandler) GetExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	var request GetExpenseByIdRequestObject
+
+	request.ExpenseId = expenseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetExpenseById(ctx, request.(GetExpenseByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetExpenseById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetExpenseByIdResponseObject); ok {
+		if err := validResponse.VisitGetExpenseByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutExpenseById operation middleware
+func (sh *strictHandler) PutExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	var request PutExpenseByIdRequestObject
+
+	request.ExpenseId = expenseId
+
+	var body PutExpenseByIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PutExpenseById(ctx, request.(PutExpenseByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutExpenseById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutExpenseByIdResponseObject); ok {
+		if err := validResponse.VisitPutExpenseByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostVerifyExpenseById operation middleware
+func (sh *strictHandler) PostVerifyExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	var request PostVerifyExpenseByIdRequestObject
+
+	request.ExpenseId = expenseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostVerifyExpenseById(ctx, request.(PostVerifyExpenseByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostVerifyExpenseById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostVerifyExpenseByIdResponseObject); ok {
+		if err := validResponse.VisitPostVerifyExpenseByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetHealth operation middleware
+func (sh *strictHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	var request GetHealthRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetHealth(ctx, request.(GetHealthRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetHealth")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetHealthResponseObject); ok {
+		if err := validResponse.VisitGetHealthResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPaymentMethods operation middleware
+func (sh *strictHandler) GetPaymentMethods(w http.ResponseWriter, r *http.Request, params GetPaymentMethodsParams) {
+	var request GetPaymentMethodsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPaymentMethods(ctx, request.(GetPaymentMethodsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPaymentMethods")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPaymentMethodsResponseObject); ok {
+		if err := validResponse.VisitGetPaymentMethodsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostPaymentMethod operation middleware
+func (sh *strictHandler) PostPaymentMethod(w http.ResponseWriter, r *http.Request) {
+	var request PostPaymentMethodRequestObject
+
+	var body PostPaymentMethodJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostPaymentMethod(ctx, request.(PostPaymentMethodRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostPaymentMethod")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostPaymentMethodResponseObject); ok {
+		if err := validResponse.VisitPostPaymentMethodResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeletePaymentMethodById operation middleware
+func (sh *strictHandler) DeletePaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID) {
+	var request DeletePaymentMethodByIdRequestObject
+
+	request.PaymentMethodId = paymentMethodId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeletePaymentMethodById(ctx, request.(DeletePaymentMethodByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeletePaymentMethodById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeletePaymentMethodByIdResponseObject); ok {
+		if err := validResponse.VisitDeletePaymentMethodByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetPaymentMethodById operation middleware
+func (sh *strictHandler) GetPaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID) {
+	var request GetPaymentMethodByIdRequestObject
+
+	request.PaymentMethodId = paymentMethodId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPaymentMethodById(ctx, request.(GetPaymentMethodByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPaymentMethodById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetPaymentMethodByIdResponseObject); ok {
+		if err := validResponse.VisitGetPaymentMethodByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutPaymentMethodById operation middleware
+func (sh *strictHandler) PutPaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID) {
+	var request PutPaymentMethodByIdRequestObject
+
+	request.PaymentMethodId = paymentMethodId
+
+	var body PutPaymentMethodByIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PutPaymentMethodById(ctx, request.(PutPaymentMethodByIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutPaymentMethodById")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutPaymentMethodByIdResponseObject); ok {
+		if err := validResponse.VisitPutPaymentMethodByIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostUser operation middleware
+func (sh *strictHandler) PostUser(w http.ResponseWriter, r *http.Request) {
+	var request PostUserRequestObject
+
+	var body PostUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostUser(ctx, request.(PostUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostUserResponseObject); ok {
+		if err := validResponse.VisitPostUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetMeUser operation middleware
+func (sh *strictHandler) GetMeUser(w http.ResponseWriter, r *http.Request) {
+	var request GetMeUserRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMeUser(ctx, request.(GetMeUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMeUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMeUserResponseObject); ok {
+		if err := validResponse.VisitGetMeUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutMeUser operation middleware
+func (sh *strictHandler) PutMeUser(w http.ResponseWriter, r *http.Request) {
+	var request PutMeUserRequestObject
+
+	var body PutMeUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PutMeUser(ctx, request.(PutMeUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutMeUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutMeUserResponseObject); ok {
+		if err := validResponse.VisitPutMeUserResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
