@@ -16,6 +16,15 @@ type Config struct {
 	logger *slog.Logger
 }
 
+func NewConfig() *Config {
+	config := Config{}
+
+	config.env = provider.NewEnvProvider()
+	config.logger = provider.NewLoggerProvider(config.env)
+
+	return &config
+}
+
 func (c *Config) Clerk() *user.Client {
 	if c.clerk == nil {
 		c.clerk = provider.NewClerkProvider(c.env)
@@ -42,13 +51,4 @@ func (c *Config) Logger() *slog.Logger {
 	}
 
 	return c.logger
-}
-
-func NewConfig() *Config {
-	config := Config{}
-
-	config.env = provider.NewEnvProvider()
-	config.logger = provider.NewLoggerProvider(config.env)
-
-	return &config
 }

@@ -21,27 +21,6 @@ type Server struct {
 	portAddr string
 }
 
-func (s *Server) Start() {
-	slog.Default().Info("Server listening on " + s.portAddr)
-
-	httpServer := &http.Server{
-		Handler:           s.router,
-		Addr:              s.portAddr,
-		ReadHeaderTimeout: 1000 * time.Second,
-	}
-
-	err := httpServer.ListenAndServe()
-	if err != nil {
-		slog.Default().
-			Error("Error starting server on "+s.portAddr, slog.Any("err", err))
-		os.Exit(1)
-	}
-}
-
-func (s *Server) Router() *chi.Mux {
-	return s.router
-}
-
 func NewServer(config *config.Config) *Server {
 	h := handler.NewHandler(config)
 	portAddr := fmt.Sprintf(":%s", config.Env().ServerPort())
@@ -74,4 +53,26 @@ func NewServer(config *config.Config) *Server {
 		router:   r,
 		portAddr: portAddr,
 	}
+}
+
+func (s *Server) Start() {
+	slog.Default().Info("Server listening on " + s.portAddr)
+
+	headerTimeout := 1000
+	httpServer := &http.Server{
+		Handler:           s.router,
+		Addr:              s.portAddr,
+		ReadHeaderTimeout: time.Duration(headerTimeout) * time.Second,
+	}
+
+	err := httpServer.ListenAndServe()
+	if err != nil {
+		slog.Default().
+			Error("Error starting server on "+s.portAddr, slog.Any("err", err))
+		os.Exit(1)
+	}
+}
+
+func (s *Server) Router() *chi.Mux {
+	return s.router
 }

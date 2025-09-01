@@ -2,13 +2,15 @@ package provider
 
 import (
 	"database/sql"
-	"log"
+	"log/slog"
+	"os"
 )
 
 func NewDBProvider(env *EnvProvider) *sql.DB {
 	db, err := sql.Open("postgres", env.databaseURL)
 	if err != nil {
-		log.Fatal("Unable to connect to database")
+		slog.Default().Error("Unable to connect to database")
+		os.Exit(1)
 	}
 
 	db.SetMaxOpenConns(env.databaseMaxConns)
