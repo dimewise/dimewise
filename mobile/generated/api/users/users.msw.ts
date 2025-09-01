@@ -12,7 +12,7 @@ import { HttpResponse, delay, http } from 'msw';
 import { CurrencyType, SupportedLanguage } from '../../model';
 import type { User } from '../../model';
 
-export const getPostUserResponseMock = (): User => ({
+export const getGetMeUserResponseMock = (): User => ({
   ...{
     id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     created_at: faker.helpers.arrayElement([
@@ -31,7 +31,7 @@ export const getPostUserResponseMock = (): User => ({
   },
 });
 
-export const getGetMeUserResponseMock = (): User => ({
+export const getPostMeUserResponseMock = (): User => ({
   ...{
     id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     created_at: faker.helpers.arrayElement([
@@ -69,27 +69,6 @@ export const getPutMeUserResponseMock = (): User => ({
   },
 });
 
-export const getPostUserMockHandler = (
-  overrideResponse?:
-    | User
-    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<User> | User),
-) => {
-  return http.post('*/users', async (info) => {
-    await delay(1000);
-
-    return new HttpResponse(
-      JSON.stringify(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === 'function'
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getPostUserResponseMock(),
-      ),
-      { status: 201, headers: { 'Content-Type': 'application/json' } },
-    );
-  });
-};
-
 export const getGetMeUserMockHandler = (
   overrideResponse?:
     | User
@@ -107,6 +86,27 @@ export const getGetMeUserMockHandler = (
           : getGetMeUserResponseMock(),
       ),
       { status: 200, headers: { 'Content-Type': 'application/json' } },
+    );
+  });
+};
+
+export const getPostMeUserMockHandler = (
+  overrideResponse?:
+    | User
+    | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<User> | User),
+) => {
+  return http.post('*/users/me', async (info) => {
+    await delay(1000);
+
+    return new HttpResponse(
+      JSON.stringify(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === 'function'
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getPostMeUserResponseMock(),
+      ),
+      { status: 201, headers: { 'Content-Type': 'application/json' } },
     );
   });
 };
@@ -132,7 +132,7 @@ export const getPutMeUserMockHandler = (
   });
 };
 export const getUsersMock = () => [
-  getPostUserMockHandler(),
   getGetMeUserMockHandler(),
+  getPostMeUserMockHandler(),
   getPutMeUserMockHandler(),
 ];

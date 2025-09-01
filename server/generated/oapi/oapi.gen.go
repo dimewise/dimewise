@@ -536,8 +536,8 @@ type PostPaymentMethodJSONRequestBody = PaymentMethodCreate
 // PutPaymentMethodByIdJSONRequestBody defines body for PutPaymentMethodById for application/json ContentType.
 type PutPaymentMethodByIdJSONRequestBody = PaymentMethodUpdate
 
-// PostUserJSONRequestBody defines body for PostUser for application/json ContentType.
-type PostUserJSONRequestBody = UserCreate
+// PostMeUserJSONRequestBody defines body for PostMeUser for application/json ContentType.
+type PostMeUserJSONRequestBody = UserCreate
 
 // PutMeUserJSONRequestBody defines body for PutMeUser for application/json ContentType.
 type PutMeUserJSONRequestBody = UserUpdate
@@ -687,13 +687,13 @@ type ClientInterface interface {
 
 	PutPaymentMethodById(ctx context.Context, paymentMethodId openapi_types.UUID, body PutPaymentMethodByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PostUserWithBody request with any body
-	PostUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	PostUser(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetMeUser request
 	GetMeUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostMeUserWithBody request with any body
+	PostMeUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostMeUser(ctx context.Context, body PostMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PutMeUserWithBody request with any body
 	PutMeUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1013,32 +1013,32 @@ func (c *Client) PutPaymentMethodById(ctx context.Context, paymentMethodId opena
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostUserRequestWithBody(c.Server, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) PostUser(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPostUserRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) GetMeUser(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetMeUserRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMeUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMeUserRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMeUser(ctx context.Context, body PostMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMeUserRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2123,46 +2123,6 @@ func NewPutPaymentMethodByIdRequestWithBody(server string, paymentMethodId opena
 	return req, nil
 }
 
-// NewPostUserRequest calls the generic PostUser builder with application/json body
-func NewPostUserRequest(server string, body PostUserJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewPostUserRequestWithBody(server, "application/json", bodyReader)
-}
-
-// NewPostUserRequestWithBody generates requests for PostUser with any type of body
-func NewPostUserRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/users")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
 // NewGetMeUserRequest generates requests for GetMeUser
 func NewGetMeUserRequest(server string) (*http.Request, error) {
 	var err error
@@ -2186,6 +2146,46 @@ func NewGetMeUserRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPostMeUserRequest calls the generic PostMeUser builder with application/json body
+func NewPostMeUserRequest(server string, body PostMeUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostMeUserRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostMeUserRequestWithBody generates requests for PostMeUser with any type of body
+func NewPostMeUserRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/users/me")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2345,13 +2345,13 @@ type ClientWithResponsesInterface interface {
 
 	PutPaymentMethodByIdWithResponse(ctx context.Context, paymentMethodId openapi_types.UUID, body PutPaymentMethodByIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutPaymentMethodByIdResponse, error)
 
-	// PostUserWithBodyWithResponse request with any body
-	PostUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserResponse, error)
-
-	PostUserWithResponse(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserResponse, error)
-
 	// GetMeUserWithResponse request
 	GetMeUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetMeUserResponse, error)
+
+	// PostMeUserWithBodyWithResponse request with any body
+	PostMeUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMeUserResponse, error)
+
+	PostMeUserWithResponse(ctx context.Context, body PostMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMeUserResponse, error)
 
 	// PutMeUserWithBodyWithResponse request with any body
 	PutMeUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutMeUserResponse, error)
@@ -2844,30 +2844,6 @@ func (r PutPaymentMethodByIdResponse) StatusCode() int {
 	return 0
 }
 
-type PostUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON201      *User
-	JSON400      *ErrorResponse
-	JSON409      *ErrorResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r PostUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PostUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type GetMeUserResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2886,6 +2862,30 @@ func (r GetMeUserResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetMeUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostMeUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *User
+	JSON400      *ErrorResponse
+	JSON409      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PostMeUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostMeUserResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3144,23 +3144,6 @@ func (c *ClientWithResponses) PutPaymentMethodByIdWithResponse(ctx context.Conte
 	return ParsePutPaymentMethodByIdResponse(rsp)
 }
 
-// PostUserWithBodyWithResponse request with arbitrary body returning *PostUserResponse
-func (c *ClientWithResponses) PostUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserResponse, error) {
-	rsp, err := c.PostUserWithBody(ctx, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostUserResponse(rsp)
-}
-
-func (c *ClientWithResponses) PostUserWithResponse(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserResponse, error) {
-	rsp, err := c.PostUser(ctx, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePostUserResponse(rsp)
-}
-
 // GetMeUserWithResponse request returning *GetMeUserResponse
 func (c *ClientWithResponses) GetMeUserWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetMeUserResponse, error) {
 	rsp, err := c.GetMeUser(ctx, reqEditors...)
@@ -3168,6 +3151,23 @@ func (c *ClientWithResponses) GetMeUserWithResponse(ctx context.Context, reqEdit
 		return nil, err
 	}
 	return ParseGetMeUserResponse(rsp)
+}
+
+// PostMeUserWithBodyWithResponse request with arbitrary body returning *PostMeUserResponse
+func (c *ClientWithResponses) PostMeUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMeUserResponse, error) {
+	rsp, err := c.PostMeUserWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMeUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostMeUserWithResponse(ctx context.Context, body PostMeUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMeUserResponse, error) {
+	rsp, err := c.PostMeUser(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMeUserResponse(rsp)
 }
 
 // PutMeUserWithBodyWithResponse request with arbitrary body returning *PutMeUserResponse
@@ -3974,46 +3974,6 @@ func ParsePutPaymentMethodByIdResponse(rsp *http.Response) (*PutPaymentMethodByI
 	return response, nil
 }
 
-// ParsePostUserResponse parses an HTTP response from a PostUserWithResponse call
-func ParsePostUserResponse(rsp *http.Response) (*PostUserResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PostUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest User
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON201 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
-		var dest ErrorResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON409 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseGetMeUserResponse parses an HTTP response from a GetMeUserWithResponse call
 func ParseGetMeUserResponse(rsp *http.Response) (*GetMeUserResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -4048,6 +4008,46 @@ func ParseGetMeUserResponse(rsp *http.Response) (*GetMeUserResponse, error) {
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostMeUserResponse parses an HTTP response from a PostMeUserWithResponse call
+func ParsePostMeUserResponse(rsp *http.Response) (*PostMeUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostMeUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON409 = &dest
 
 	}
 
@@ -4156,12 +4156,12 @@ type ServerInterface interface {
 	// Update payment method
 	// (PUT /payment-methods/{paymentMethodId})
 	PutPaymentMethodById(w http.ResponseWriter, r *http.Request, paymentMethodId openapi_types.UUID)
-	// Create a new user
-	// (POST /users)
-	PostUser(w http.ResponseWriter, r *http.Request)
 	// Get current user profile
 	// (GET /users/me)
 	GetMeUser(w http.ResponseWriter, r *http.Request)
+	// Create a new user
+	// (POST /users/me)
+	PostMeUser(w http.ResponseWriter, r *http.Request)
 	// Update current user profile
 	// (PUT /users/me)
 	PutMeUser(w http.ResponseWriter, r *http.Request)
@@ -4291,15 +4291,15 @@ func (_ Unimplemented) PutPaymentMethodById(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Create a new user
-// (POST /users)
-func (_ Unimplemented) PostUser(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
 // Get current user profile
 // (GET /users/me)
 func (_ Unimplemented) GetMeUser(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create a new user
+// (POST /users/me)
+func (_ Unimplemented) PostMeUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -5023,26 +5023,6 @@ func (siw *ServerInterfaceWrapper) PutPaymentMethodById(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
-// PostUser operation middleware
-func (siw *ServerInterfaceWrapper) PostUser(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostUser(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
 // GetMeUser operation middleware
 func (siw *ServerInterfaceWrapper) GetMeUser(w http.ResponseWriter, r *http.Request) {
 
@@ -5054,6 +5034,26 @@ func (siw *ServerInterfaceWrapper) GetMeUser(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetMeUser(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostMeUser operation middleware
+func (siw *ServerInterfaceWrapper) PostMeUser(w http.ResponseWriter, r *http.Request) {
+
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
+
+	r = r.WithContext(ctx)
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostMeUser(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5257,10 +5257,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Put(options.BaseURL+"/payment-methods/{paymentMethodId}", wrapper.PutPaymentMethodById)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/users", wrapper.PostUser)
+		r.Get(options.BaseURL+"/users/me", wrapper.GetMeUser)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/users/me", wrapper.GetMeUser)
+		r.Post(options.BaseURL+"/users/me", wrapper.PostMeUser)
 	})
 	r.Group(func(r chi.Router) {
 		r.Put(options.BaseURL+"/users/me", wrapper.PutMeUser)
@@ -5953,41 +5953,6 @@ func (response PutPaymentMethodById404JSONResponse) VisitPutPaymentMethodByIdRes
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostUserRequestObject struct {
-	Body *PostUserJSONRequestBody
-}
-
-type PostUserResponseObject interface {
-	VisitPostUserResponse(w http.ResponseWriter) error
-}
-
-type PostUser201JSONResponse User
-
-func (response PostUser201JSONResponse) VisitPostUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(201)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostUser400JSONResponse ErrorResponse
-
-func (response PostUser400JSONResponse) VisitPostUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostUser409JSONResponse ErrorResponse
-
-func (response PostUser409JSONResponse) VisitPostUserResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(409)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetMeUserRequestObject struct {
 }
 
@@ -6018,6 +5983,41 @@ type GetMeUser404JSONResponse ErrorResponse
 func (response GetMeUser404JSONResponse) VisitGetMeUserResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostMeUserRequestObject struct {
+	Body *PostMeUserJSONRequestBody
+}
+
+type PostMeUserResponseObject interface {
+	VisitPostMeUserResponse(w http.ResponseWriter) error
+}
+
+type PostMeUser201JSONResponse User
+
+func (response PostMeUser201JSONResponse) VisitPostMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostMeUser400JSONResponse ErrorResponse
+
+func (response PostMeUser400JSONResponse) VisitPostMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostMeUser409JSONResponse ErrorResponse
+
+func (response PostMeUser409JSONResponse) VisitPostMeUserResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(409)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -6119,12 +6119,12 @@ type StrictServerInterface interface {
 	// Update payment method
 	// (PUT /payment-methods/{paymentMethodId})
 	PutPaymentMethodById(ctx context.Context, request PutPaymentMethodByIdRequestObject) (PutPaymentMethodByIdResponseObject, error)
-	// Create a new user
-	// (POST /users)
-	PostUser(ctx context.Context, request PostUserRequestObject) (PostUserResponseObject, error)
 	// Get current user profile
 	// (GET /users/me)
 	GetMeUser(ctx context.Context, request GetMeUserRequestObject) (GetMeUserResponseObject, error)
+	// Create a new user
+	// (POST /users/me)
+	PostMeUser(ctx context.Context, request PostMeUserRequestObject) (PostMeUserResponseObject, error)
 	// Update current user profile
 	// (PUT /users/me)
 	PutMeUser(ctx context.Context, request PutMeUserRequestObject) (PutMeUserResponseObject, error)
@@ -6715,37 +6715,6 @@ func (sh *strictHandler) PutPaymentMethodById(w http.ResponseWriter, r *http.Req
 	}
 }
 
-// PostUser operation middleware
-func (sh *strictHandler) PostUser(w http.ResponseWriter, r *http.Request) {
-	var request PostUserRequestObject
-
-	var body PostUserJSONRequestBody
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
-		return
-	}
-	request.Body = &body
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.PostUser(ctx, request.(PostUserRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "PostUser")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(PostUserResponseObject); ok {
-		if err := validResponse.VisitPostUserResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
 // GetMeUser operation middleware
 func (sh *strictHandler) GetMeUser(w http.ResponseWriter, r *http.Request) {
 	var request GetMeUserRequestObject
@@ -6763,6 +6732,37 @@ func (sh *strictHandler) GetMeUser(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetMeUserResponseObject); ok {
 		if err := validResponse.VisitGetMeUserResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostMeUser operation middleware
+func (sh *strictHandler) PostMeUser(w http.ResponseWriter, r *http.Request) {
+	var request PostMeUserRequestObject
+
+	var body PostMeUserJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostMeUser(ctx, request.(PostMeUserRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostMeUser")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostMeUserResponseObject); ok {
+		if err := validResponse.VisitPostMeUserResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

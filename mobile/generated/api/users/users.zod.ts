@@ -8,48 +8,6 @@
 import { z as zod } from 'zod';
 
 /**
- * Creates a new user with the provided information
- * @summary Create a new user
- */
-export const postUserBody = zod.object({
-  currency: zod
-    .enum([
-      'USD',
-      'EUR',
-      'GBP',
-      'JPY',
-      'KRW',
-      'CAD',
-      'AUD',
-      'CHF',
-      'CNY',
-      'SEK',
-      'NOK',
-      'MXN',
-      'NZD',
-      'SGD',
-      'HKD',
-      'INR',
-      'RUB',
-      'ZAR',
-      'TRY',
-      'BRL',
-      'PLN',
-      'MYR',
-      'THB',
-      'VND',
-      'IDR',
-      'PHP',
-      'TWD',
-      'DKK',
-      'CZK',
-      'HUF',
-    ])
-    .describe('Supported currency types'),
-  preferred_language: zod.enum(['en', 'ja']).describe('Supported languages'),
-});
-
-/**
  * Retrieves the profile of the currently authenticated user
  * @summary Get current user profile
  */
@@ -99,6 +57,48 @@ export const getMeUserResponse = zod
       preferred_language: zod.enum(['en', 'ja']).describe('Supported languages'),
     }),
   );
+
+/**
+ * Creates a new user with the provided information
+ * @summary Create a new user
+ */
+export const postMeUserBody = zod.object({
+  currency: zod
+    .enum([
+      'USD',
+      'EUR',
+      'GBP',
+      'JPY',
+      'KRW',
+      'CAD',
+      'AUD',
+      'CHF',
+      'CNY',
+      'SEK',
+      'NOK',
+      'MXN',
+      'NZD',
+      'SGD',
+      'HKD',
+      'INR',
+      'RUB',
+      'ZAR',
+      'TRY',
+      'BRL',
+      'PLN',
+      'MYR',
+      'THB',
+      'VND',
+      'IDR',
+      'PHP',
+      'TWD',
+      'DKK',
+      'CZK',
+      'HUF',
+    ])
+    .describe('Supported currency types'),
+  preferred_language: zod.enum(['en', 'ja']).describe('Supported languages'),
+});
 
 /**
  * Updates the profile of the currently authenticated user

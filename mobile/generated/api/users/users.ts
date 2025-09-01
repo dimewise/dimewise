@@ -27,80 +27,6 @@ import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import type { ErrorResponse, User, UserCreate, UserUpdate } from '../../model';
 
 /**
- * Creates a new user with the provided information
- * @summary Create a new user
- */
-export const postUser = (
-  userCreate: UserCreate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<User>> => {
-  return axios.post(`/users`, userCreate, options);
-};
-
-export const getPostUserMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postUser>>,
-    TError,
-    { data: UserCreate },
-    TContext
-  >;
-  axios?: AxiosRequestConfig;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postUser>>,
-  TError,
-  { data: UserCreate },
-  TContext
-> => {
-  const mutationKey = ['postUser'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
-    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
-
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUser>>, { data: UserCreate }> = (
-    props,
-  ) => {
-    const { data } = props ?? {};
-
-    return postUser(data, axiosOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type PostUserMutationResult = NonNullable<Awaited<ReturnType<typeof postUser>>>;
-export type PostUserMutationBody = UserCreate;
-export type PostUserMutationError = AxiosError<ErrorResponse | ErrorResponse>;
-
-/**
- * @summary Create a new user
- */
-export const usePostUser = <TError = AxiosError<ErrorResponse | ErrorResponse>, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postUser>>,
-      TError,
-      { data: UserCreate },
-      TContext
-    >;
-    axios?: AxiosRequestConfig;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postUser>>,
-  TError,
-  { data: UserCreate },
-  TContext
-> => {
-  const mutationOptions = getPostUserMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-/**
  * Retrieves the profile of the currently authenticated user
  * @summary Get current user profile
  */
@@ -207,6 +133,84 @@ export function useGetMeUser<
   return query;
 }
 
+/**
+ * Creates a new user with the provided information
+ * @summary Create a new user
+ */
+export const postMeUser = (
+  userCreate: UserCreate,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<User>> => {
+  return axios.post(`/users/me`, userCreate, options);
+};
+
+export const getPostMeUserMutationOptions = <
+  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postMeUser>>,
+    TError,
+    { data: UserCreate },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postMeUser>>,
+  TError,
+  { data: UserCreate },
+  TContext
+> => {
+  const mutationKey = ['postMeUser'];
+  const { mutation: mutationOptions, axios: axiosOptions } = options
+    ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, axios: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postMeUser>>,
+    { data: UserCreate }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postMeUser(data, axiosOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostMeUserMutationResult = NonNullable<Awaited<ReturnType<typeof postMeUser>>>;
+export type PostMeUserMutationBody = UserCreate;
+export type PostMeUserMutationError = AxiosError<ErrorResponse | ErrorResponse>;
+
+/**
+ * @summary Create a new user
+ */
+export const usePostMeUser = <
+  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postMeUser>>,
+      TError,
+      { data: UserCreate },
+      TContext
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postMeUser>>,
+  TError,
+  { data: UserCreate },
+  TContext
+> => {
+  const mutationOptions = getPostMeUserMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 /**
  * Updates the profile of the currently authenticated user
  * @summary Update current user profile
