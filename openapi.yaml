@@ -6,7 +6,7 @@ info:
   contact:
     name: Dimewise Team
 servers:
-  - url: 'https://api.dimewise.com/v1'
+  - url: 'https://api.dimewise.app/v1'
     description: Production server
   - url: 'http://localhost:8080/v1'
     description: Development server
@@ -84,20 +84,20 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
+      required:
+        - id
+        - created_at
+        - updated_at
     User:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
         - type: object
           properties:
-            clerk_id:
-              type: string
-              description: Clerk authentication ID
             currency:
               $ref: '#/components/schemas/CurrencyType'
             preferred_language:
               $ref: '#/components/schemas/SupportedLanguage'
           required:
-            - clerk_id
             - currency
             - preferred_language
     UserCreate:
@@ -117,6 +117,9 @@ components:
           $ref: '#/components/schemas/CurrencyType'
         preferred_language:
           $ref: '#/components/schemas/SupportedLanguage'
+      required:
+        - currency
+        - preferred_language
     Category:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
@@ -170,6 +173,10 @@ components:
           description: Budget amount in cents
         currency:
           $ref: '#/components/schemas/CurrencyType'
+      required:
+        - title
+        - amount
+        - currency
     PaymentMethod:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
@@ -212,6 +219,9 @@ components:
           description: Payment method name
         method_type:
           $ref: '#/components/schemas/PaymentMethodType'
+      required:
+        - title
+        - method_type
     Expense:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
@@ -308,8 +318,8 @@ components:
           description: Expense title
         description:
           type: string
-          nullable: true
           description: Expense description
+          nullable: true
         amount:
           type: integer
           description: Amount in cents
@@ -319,6 +329,13 @@ components:
           type: string
           format: date-time
           description: When the expense was incurred
+      required:
+        - category_id
+        - payment_method_id
+        - title
+        - amount
+        - currency
+        - incurred_at
     ExpenseWithDetails:
       allOf:
         - $ref: '#/components/schemas/Expense'
@@ -328,6 +345,9 @@ components:
               $ref: '#/components/schemas/Category'
             payment_method:
               $ref: '#/components/schemas/PaymentMethod'
+          required:
+            - category
+            - payment_method
     BudgetOverview:
       type: object
       properties:
@@ -344,10 +364,17 @@ components:
           $ref: '#/components/schemas/CurrencyType'
         month:
           type: integer
-          description: Month (0-11)
+          description: Month (1-12)
         year:
           type: integer
           description: Year
+      required:
+        - totalBudget
+        - totalSpent
+        - remainingBudget
+        - currency
+        - month
+        - year
     CategoryBreakdown:
       type: object
       properties:
@@ -367,6 +394,13 @@ components:
           description: Remaining budget in cents
         currency:
           $ref: '#/components/schemas/CurrencyType'
+      required:
+        - category_id
+        - category_title
+        - budget
+        - spent
+        - remaining
+        - currency
     PaymentMethodBreakdown:
       type: object
       properties:
@@ -380,6 +414,11 @@ components:
           description: Total spent amount in cents
         currency:
           $ref: '#/components/schemas/CurrencyType'
+      required:
+        - payment_method_id
+        - payment_method_title
+        - total_spent
+        - currency
     SuccessResponse:
       type: object
       properties:
@@ -389,6 +428,9 @@ components:
         message:
           type: string
           example: Operation completed successfully
+      required:
+        - success
+        - message
     ErrorResponse:
       type: object
       properties:
@@ -401,6 +443,10 @@ components:
         code:
           type: string
           example: VALIDATION_ERROR
+      required:
+        - success
+        - error
+        - code
     PaginatedResponse:
       type: object
       properties:
@@ -410,6 +456,11 @@ components:
             type: object
         pagination:
           type: object
+          required:
+            - page
+            - limit
+            - total
+            - total_pages
           properties:
             page:
               type: integer
@@ -423,6 +474,9 @@ components:
             total_pages:
               type: integer
               example: 5
+      required:
+        - data
+        - pagination
 paths:
   /users/me:
     get:
@@ -1135,7 +1189,7 @@ paths:
       parameters:
         - name: month
           in: query
-          description: 'Month 1-12'
+          description: Month 1-12
           required: false
           schema:
             type: integer

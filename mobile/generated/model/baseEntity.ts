@@ -8,9 +8,9 @@
 
 export interface BaseEntity {
   /** Unique identifier */
-  id?: string;
+  id: string;
   /** Creation timestamp */
-  created_at?: string;
+  created_at: string;
   /** Last update timestamp */
-  updated_at?: string;
+  updated_at: string;
 }

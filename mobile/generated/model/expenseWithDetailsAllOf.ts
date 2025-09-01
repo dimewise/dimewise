@@ -9,6 +9,6 @@ import type { Category } from './category';
 import type { PaymentMethod } from './paymentMethod';
 
 export type ExpenseWithDetailsAllOf = {
-  category?: Category;
-  payment_method?: PaymentMethod;
+  category: Category;
+  payment_method: PaymentMethod;
 };

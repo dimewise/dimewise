@@ -8,13 +8,13 @@
 import type { CurrencyType } from './currencyType';
 
 export interface CategoryBreakdown {
-  category_id?: string;
-  category_title?: string;
+  category_id: string;
+  category_title: string;
   /** Budget amount in cents */
-  budget?: number;
+  budget: number;
   /** Spent amount in cents */
-  spent?: number;
+  spent: number;
   /** Remaining budget in cents */
-  remaining?: number;
-  currency?: CurrencyType;
+  remaining: number;
+  currency: CurrencyType;
 }

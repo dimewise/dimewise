@@ -13,13 +13,12 @@ import { z as zod } from 'zod';
  */
 export const getMeUserResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      clerk_id: zod.string().describe('Clerk authentication ID'),
       currency: zod
         .enum([
           'USD',
@@ -138,20 +137,18 @@ export const putMeUserBody = zod.object({
       'CZK',
       'HUF',
     ])
-    .optional()
     .describe('Supported currency types'),
-  preferred_language: zod.enum(['en', 'ja']).optional().describe('Supported languages'),
+  preferred_language: zod.enum(['en', 'ja']).describe('Supported languages'),
 });
 
 export const putMeUserResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      clerk_id: zod.string().describe('Clerk authentication ID'),
       currency: zod
         .enum([
           'USD',

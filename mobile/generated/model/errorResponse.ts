@@ -7,7 +7,7 @@
  */
 
 export interface ErrorResponse {
-  success?: boolean;
-  error?: string;
-  code?: string;
+  success: boolean;
+  error: string;
+  code: string;
 }

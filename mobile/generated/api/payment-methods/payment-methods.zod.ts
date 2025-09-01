@@ -19,9 +19,9 @@ export const getPaymentMethodsQueryParams = zod.object({
 
 export const getPaymentMethodsResponseItem = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -56,9 +56,9 @@ export const getPaymentMethodByIdParams = zod.object({
 
 export const getPaymentMethodByIdResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -80,18 +80,17 @@ export const putPaymentMethodByIdParams = zod.object({
 });
 
 export const putPaymentMethodByIdBody = zod.object({
-  title: zod.string().optional().describe('Payment method name'),
+  title: zod.string().describe('Payment method name'),
   method_type: zod
     .enum(['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'])
-    .optional()
     .describe('Payment method types'),
 });
 
 export const putPaymentMethodByIdResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -113,6 +112,6 @@ export const deletePaymentMethodByIdParams = zod.object({
 });
 
 export const deletePaymentMethodByIdResponse = zod.object({
-  success: zod.boolean().optional(),
-  message: zod.string().optional(),
+  success: zod.boolean(),
+  message: zod.string(),
 });

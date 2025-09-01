@@ -20,88 +20,40 @@ import type {
 export const getGetAnalyticsBudgetOverviewResponseMock = (
   overrideResponse: Partial<BudgetOverview> = {},
 ): BudgetOverview => ({
-  totalBudget: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
-  totalSpent: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
-  remainingBudget: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
-  currency: faker.helpers.arrayElement([
-    faker.helpers.arrayElement(Object.values(CurrencyType)),
-    undefined,
-  ]),
-  month: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
-  year: faker.helpers.arrayElement([
-    faker.number.int({ min: undefined, max: undefined }),
-    undefined,
-  ]),
+  totalBudget: faker.number.int({ min: undefined, max: undefined }),
+  totalSpent: faker.number.int({ min: undefined, max: undefined }),
+  remainingBudget: faker.number.int({ min: undefined, max: undefined }),
+  currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
+  month: faker.number.int({ min: undefined, max: undefined }),
+  year: faker.number.int({ min: undefined, max: undefined }),
   ...overrideResponse,
 });
 
 export const getGetAnalyticsCategoriesBreakdownResponseMock = (): CategoryBreakdown[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    category_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    category_title: faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      undefined,
-    ]),
-    budget: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
-    spent: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
-    remaining: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
-    currency: faker.helpers.arrayElement([
-      faker.helpers.arrayElement(Object.values(CurrencyType)),
-      undefined,
-    ]),
+    category_id: faker.string.uuid(),
+    category_title: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    budget: faker.number.int({ min: undefined, max: undefined }),
+    spent: faker.number.int({ min: undefined, max: undefined }),
+    remaining: faker.number.int({ min: undefined, max: undefined }),
+    currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
   }));
 
 export const getGetAnalyticsPaymentMethodsBreakdownResponseMock = (): PaymentMethodBreakdown[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
-    payment_method_id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    payment_method_title: faker.helpers.arrayElement([
-      faker.string.alpha({ length: { min: 10, max: 20 } }),
-      undefined,
-    ]),
-    total_spent: faker.helpers.arrayElement([
-      faker.number.int({ min: undefined, max: undefined }),
-      undefined,
-    ]),
-    currency: faker.helpers.arrayElement([
-      faker.helpers.arrayElement(Object.values(CurrencyType)),
-      undefined,
-    ]),
+    payment_method_id: faker.string.uuid(),
+    payment_method_title: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    total_spent: faker.number.int({ min: undefined, max: undefined }),
+    currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
   }));
 
 export const getGetAnalyticsRecentTransactionsResponseMock = (): ExpenseWithDetails[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     ...{
       ...{
-        id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-        created_at: faker.helpers.arrayElement([
-          `${faker.date.past().toISOString().split('.')[0]}Z`,
-          undefined,
-        ]),
-        updated_at: faker.helpers.arrayElement([
-          `${faker.date.past().toISOString().split('.')[0]}Z`,
-          undefined,
-        ]),
+        id: faker.string.uuid(),
+        created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
       },
       ...{
         user_id: faker.string.uuid(),
@@ -122,63 +74,39 @@ export const getGetAnalyticsRecentTransactionsResponseMock = (): ExpenseWithDeta
       },
     },
     ...{
-      category: faker.helpers.arrayElement([
-        {
-          ...{
-            id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-            created_at: faker.helpers.arrayElement([
-              `${faker.date.past().toISOString().split('.')[0]}Z`,
-              undefined,
-            ]),
-            updated_at: faker.helpers.arrayElement([
-              `${faker.date.past().toISOString().split('.')[0]}Z`,
-              undefined,
-            ]),
-          },
-          ...{
-            user_id: faker.string.uuid(),
-            title: faker.string.alpha({ length: { min: 10, max: 20 } }),
-            amount: faker.number.int({ min: undefined, max: undefined }),
-            currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
-            deleted_at: faker.helpers.arrayElement([
-              faker.helpers.arrayElement([
-                `${faker.date.past().toISOString().split('.')[0]}Z`,
-                null,
-              ]),
-              undefined,
-            ]),
-          },
+      category: {
+        ...{
+          id: faker.string.uuid(),
+          created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+          updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
         },
-        undefined,
-      ]),
-      payment_method: faker.helpers.arrayElement([
-        {
-          ...{
-            id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-            created_at: faker.helpers.arrayElement([
-              `${faker.date.past().toISOString().split('.')[0]}Z`,
-              undefined,
-            ]),
-            updated_at: faker.helpers.arrayElement([
-              `${faker.date.past().toISOString().split('.')[0]}Z`,
-              undefined,
-            ]),
-          },
-          ...{
-            user_id: faker.string.uuid(),
-            title: faker.string.alpha({ length: { min: 10, max: 20 } }),
-            method_type: faker.helpers.arrayElement(Object.values(PaymentMethodType)),
-            deleted_at: faker.helpers.arrayElement([
-              faker.helpers.arrayElement([
-                `${faker.date.past().toISOString().split('.')[0]}Z`,
-                null,
-              ]),
-              undefined,
-            ]),
-          },
+        ...{
+          user_id: faker.string.uuid(),
+          title: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          amount: faker.number.int({ min: undefined, max: undefined }),
+          currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
+          deleted_at: faker.helpers.arrayElement([
+            faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, null]),
+            undefined,
+          ]),
         },
-        undefined,
-      ]),
+      },
+      payment_method: {
+        ...{
+          id: faker.string.uuid(),
+          created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+          updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+        },
+        ...{
+          user_id: faker.string.uuid(),
+          title: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          method_type: faker.helpers.arrayElement(Object.values(PaymentMethodType)),
+          deleted_at: faker.helpers.arrayElement([
+            faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, null]),
+            undefined,
+          ]),
+        },
+      },
     },
   }));
 

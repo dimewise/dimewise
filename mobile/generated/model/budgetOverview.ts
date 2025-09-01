@@ -9,14 +9,14 @@ import type { CurrencyType } from './currencyType';
 
 export interface BudgetOverview {
   /** Total budget amount in cents */
-  totalBudget?: number;
+  totalBudget: number;
   /** Total spent amount in cents */
-  totalSpent?: number;
+  totalSpent: number;
   /** Remaining budget in cents */
-  remainingBudget?: number;
-  currency?: CurrencyType;
-  /** Month (0-11) */
-  month?: number;
+  remainingBudget: number;
+  currency: CurrencyType;
+  /** Month (1-12) */
+  month: number;
   /** Year */
-  year?: number;
+  year: number;
 }

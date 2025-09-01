@@ -14,18 +14,11 @@ import type { User } from '../../model';
 
 export const getGetMeUserResponseMock = (): User => ({
   ...{
-    id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    created_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
-    updated_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
+    id: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   },
   ...{
-    clerk_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
     preferred_language: faker.helpers.arrayElement(Object.values(SupportedLanguage)),
   },
@@ -33,18 +26,11 @@ export const getGetMeUserResponseMock = (): User => ({
 
 export const getPostMeUserResponseMock = (): User => ({
   ...{
-    id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    created_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
-    updated_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
+    id: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   },
   ...{
-    clerk_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
     preferred_language: faker.helpers.arrayElement(Object.values(SupportedLanguage)),
   },
@@ -52,18 +38,11 @@ export const getPostMeUserResponseMock = (): User => ({
 
 export const getPutMeUserResponseMock = (): User => ({
   ...{
-    id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    created_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
-    updated_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
+    id: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   },
   ...{
-    clerk_id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     currency: faker.helpers.arrayElement(Object.values(CurrencyType)),
     preferred_language: faker.helpers.arrayElement(Object.values(SupportedLanguage)),
   },

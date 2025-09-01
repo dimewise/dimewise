@@ -9,8 +9,6 @@ import type { CurrencyType } from './currencyType';
 import type { SupportedLanguage } from './supportedLanguage';
 
 export type UserAllOf = {
-  /** Clerk authentication ID */
-  clerk_id: string;
   currency: CurrencyType;
   preferred_language: SupportedLanguage;
 };

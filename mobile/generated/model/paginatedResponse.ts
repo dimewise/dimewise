@@ -9,6 +9,6 @@ import type { PaginatedResponseDataItem } from './paginatedResponseDataItem';
 import type { PaginatedResponsePagination } from './paginatedResponsePagination';
 
 export interface PaginatedResponse {
-  data?: PaginatedResponseDataItem[];
-  pagination?: PaginatedResponsePagination;
+  data: PaginatedResponseDataItem[];
+  pagination: PaginatedResponsePagination;
 }

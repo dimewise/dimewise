@@ -9,6 +9,6 @@ import type { CurrencyType } from './currencyType';
 import type { SupportedLanguage } from './supportedLanguage';
 
 export interface UserUpdate {
-  currency?: CurrencyType;
-  preferred_language?: SupportedLanguage;
+  currency: CurrencyType;
+  preferred_language: SupportedLanguage;
 }
