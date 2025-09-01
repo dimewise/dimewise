@@ -18,7 +18,7 @@ const clerkAuthUserKey contextKey = "clerk_auth_user"
 
 // NewClerkAuthMiddleware attaches the authenticated Clerk user into the request context.
 // If authentication fails, it returns 401 Unauthorized and blocks the request.
-func NewClerkAuthMiddleware(app *config.Config) func(next http.Handler) http.Handler {
+func NewClerkAuthMiddleware(_ *config.Config) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			// Use Clerk middleware to verify Authorization header and extract session claims
@@ -58,7 +58,7 @@ func NewClerkAuthMiddleware(app *config.Config) func(next http.Handler) http.Han
 	}
 }
 
-// FromContext retrieves the authenticated Clerk user from context.
+// GetClerkUserFromContext retrieves the authenticated Clerk user from context.
 func GetClerkUserFromContext(ctx context.Context) (*clerk.User, bool) {
 	authUser, ok := ctx.Value(clerkAuthUserKey).(*clerk.User)
 	return authUser, ok

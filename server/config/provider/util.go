@@ -1,11 +1,12 @@
 package provider
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"os"
 )
 
-// fallbackEnvLookup allows for declaration of fallback string, guarantees a return value
+// fallbackEnvLookup allows for declaration of fallback string, guarantees a return value.
 func fallbackEnvLookup(key string, fallback string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
@@ -15,11 +16,12 @@ func fallbackEnvLookup(key string, fallback string) string {
 	return value
 }
 
-// requiredEnvLookup requires env var to exist
+// requiredEnvLookup requires env var to exist.
 func requiredEnvLookup(key string) string {
 	value, exists := os.LookupEnv(key)
 	if !exists {
-		log.Fatalf("Missing env value for key: %s", key)
+		slog.Default().Error(fmt.Sprintf("Missing env value for key: %s", key))
+		os.Exit(1)
 	}
 
 	return value

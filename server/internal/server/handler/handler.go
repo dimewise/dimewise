@@ -7,6 +7,7 @@ import (
 
 type Handler struct {
 	oapi.StrictServerInterface
+
 	config *config.Config
 }
 

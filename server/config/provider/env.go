@@ -1,7 +1,8 @@
 package provider
 
 import (
-	"log"
+	"log/slog"
+	"os"
 	"strconv"
 )
 
@@ -11,14 +12,6 @@ type EnvProvider struct {
 	databaseURL      string
 	databaseMaxConns int
 	clerkSecretKey   string
-}
-
-func (e *EnvProvider) AppEnv() string {
-	return e.appEnv
-}
-
-func (e *EnvProvider) ServerPort() string {
-	return e.serverPort
 }
 
 func NewEnvProvider() *EnvProvider {
@@ -31,7 +24,9 @@ func NewEnvProvider() *EnvProvider {
 	databaseMaxConns := fallbackEnvLookup("DATABASE_MAX_CONNS", "5")
 	parsedDatabaseMaxConns, err := strconv.Atoi(databaseMaxConns)
 	if err != nil {
-		log.Fatalf("Failed to parse env value 'DATABASE_MAX_CONNS' as an int: %v", err)
+		slog.Default().
+			Error("Failed to parse env value 'DATABASE_MAX_CONNS' as an int", slog.Any("err", err))
+		os.Exit(1)
 	}
 
 	// clerk auth
@@ -46,4 +41,12 @@ func NewEnvProvider() *EnvProvider {
 	}
 
 	return &envProvider
+}
+
+func (e *EnvProvider) AppEnv() string {
+	return e.appEnv
+}
+
+func (e *EnvProvider) ServerPort() string {
+	return e.serverPort
 }
