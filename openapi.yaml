@@ -424,27 +424,6 @@ components:
               type: integer
               example: 5
 paths:
-  /health:
-    get:
-      summary: Health check endpoint
-      description: Returns the health status of the API
-      tags:
-        - System
-      responses:
-        '200':
-          description: API is healthy
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: healthy
-                  timestamp:
-                    type: string
-                    format: date-time
-      operationId: get-health
   /users:
     post:
       summary: Create a new user
