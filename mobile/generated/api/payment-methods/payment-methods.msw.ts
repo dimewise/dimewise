@@ -15,15 +15,9 @@ import type { PaymentMethod, SuccessResponse } from '../../model';
 export const getGetPaymentMethodsResponseMock = (): PaymentMethod[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({
     ...{
-      id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-      created_at: faker.helpers.arrayElement([
-        `${faker.date.past().toISOString().split('.')[0]}Z`,
-        undefined,
-      ]),
-      updated_at: faker.helpers.arrayElement([
-        `${faker.date.past().toISOString().split('.')[0]}Z`,
-        undefined,
-      ]),
+      id: faker.string.uuid(),
+      created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+      updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
     },
     ...{
       user_id: faker.string.uuid(),
@@ -38,15 +32,9 @@ export const getGetPaymentMethodsResponseMock = (): PaymentMethod[] =>
 
 export const getPostPaymentMethodResponseMock = (): PaymentMethod => ({
   ...{
-    id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    created_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
-    updated_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
+    id: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   },
   ...{
     user_id: faker.string.uuid(),
@@ -61,15 +49,9 @@ export const getPostPaymentMethodResponseMock = (): PaymentMethod => ({
 
 export const getGetPaymentMethodByIdResponseMock = (): PaymentMethod => ({
   ...{
-    id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    created_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
-    updated_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
+    id: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   },
   ...{
     user_id: faker.string.uuid(),
@@ -84,15 +66,9 @@ export const getGetPaymentMethodByIdResponseMock = (): PaymentMethod => ({
 
 export const getPutPaymentMethodByIdResponseMock = (): PaymentMethod => ({
   ...{
-    id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-    created_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
-    updated_at: faker.helpers.arrayElement([
-      `${faker.date.past().toISOString().split('.')[0]}Z`,
-      undefined,
-    ]),
+    id: faker.string.uuid(),
+    created_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
+    updated_at: `${faker.date.past().toISOString().split('.')[0]}Z`,
   },
   ...{
     user_id: faker.string.uuid(),
@@ -108,11 +84,8 @@ export const getPutPaymentMethodByIdResponseMock = (): PaymentMethod => ({
 export const getDeletePaymentMethodByIdResponseMock = (
   overrideResponse: Partial<SuccessResponse> = {},
 ): SuccessResponse => ({
-  success: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
-  message: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    undefined,
-  ]),
+  success: faker.datatype.boolean(),
+  message: faker.string.alpha({ length: { min: 10, max: 20 } }),
   ...overrideResponse,
 });
 

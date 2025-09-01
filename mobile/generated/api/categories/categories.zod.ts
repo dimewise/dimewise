@@ -19,9 +19,9 @@ export const getCategoriesQueryParams = zod.object({
 
 export const getCategoriesResponseItem = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -120,9 +120,9 @@ export const getCategoryByIdParams = zod.object({
 
 export const getCategoryByIdResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -176,8 +176,8 @@ export const putCategoryByIdParams = zod.object({
 });
 
 export const putCategoryByIdBody = zod.object({
-  title: zod.string().optional().describe('Category title'),
-  amount: zod.number().optional().describe('Budget amount in cents'),
+  title: zod.string().describe('Category title'),
+  amount: zod.number().describe('Budget amount in cents'),
   currency: zod
     .enum([
       'USD',
@@ -211,15 +211,14 @@ export const putCategoryByIdBody = zod.object({
       'CZK',
       'HUF',
     ])
-    .optional()
     .describe('Supported currency types'),
 });
 
 export const putCategoryByIdResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -273,6 +272,6 @@ export const deleteCategoryByIdParams = zod.object({
 });
 
 export const deleteCategoryByIdResponse = zod.object({
-  success: zod.boolean().optional(),
-  message: zod.string().optional(),
+  success: zod.boolean(),
+  message: zod.string(),
 });

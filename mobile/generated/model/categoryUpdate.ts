@@ -9,8 +9,8 @@ import type { CurrencyType } from './currencyType';
 
 export interface CategoryUpdate {
   /** Category title */
-  title?: string;
+  title: string;
   /** Budget amount in cents */
-  amount?: number;
-  currency?: CurrencyType;
+  amount: number;
+  currency: CurrencyType;
 }

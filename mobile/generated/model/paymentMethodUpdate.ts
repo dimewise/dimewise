@@ -9,6 +9,6 @@ import type { PaymentMethodType } from './paymentMethodType';
 
 export interface PaymentMethodUpdate {
   /** Payment method name */
-  title?: string;
-  method_type?: PaymentMethodType;
+  title: string;
+  method_type: PaymentMethodType;
 }

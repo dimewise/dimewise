@@ -9,19 +9,19 @@ import type { CurrencyType } from './currencyType';
 
 export interface ExpenseUpdate {
   /** Category ID */
-  category_id?: string;
+  category_id: string;
   /** Payment method ID */
-  payment_method_id?: string;
+  payment_method_id: string;
   /** Expense title */
-  title?: string;
+  title: string;
   /**
    * Expense description
    * @nullable
    */
   description?: string | null;
   /** Amount in cents */
-  amount?: number;
-  currency?: CurrencyType;
+  amount: number;
+  currency: CurrencyType;
   /** When the expense was incurred */
-  incurred_at?: string;
+  incurred_at: string;
 }

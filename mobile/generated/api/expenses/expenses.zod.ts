@@ -42,15 +42,13 @@ export const getExpensesQueryParams = zod.object({
 
 export const getExpensesResponse = zod
   .object({
-    data: zod.array(zod.object({})).optional(),
-    pagination: zod
-      .object({
-        page: zod.number().optional(),
-        limit: zod.number().optional(),
-        total: zod.number().optional(),
-        total_pages: zod.number().optional(),
-      })
-      .optional(),
+    data: zod.array(zod.object({})),
+    pagination: zod.object({
+      page: zod.number(),
+      limit: zod.number(),
+      total: zod.number(),
+      total_pages: zod.number(),
+    }),
   })
   .and(
     zod.object({
@@ -58,9 +56,9 @@ export const getExpensesResponse = zod
         .array(
           zod
             .object({
-              id: zod.string().uuid().optional().describe('Unique identifier'),
-              created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-              updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+              id: zod.string().uuid().describe('Unique identifier'),
+              created_at: zod.string().datetime({}).describe('Creation timestamp'),
+              updated_at: zod.string().datetime({}).describe('Last update timestamp'),
             })
             .and(
               zod.object({
@@ -112,13 +110,9 @@ export const getExpensesResponse = zod
               zod.object({
                 category: zod
                   .object({
-                    id: zod.string().uuid().optional().describe('Unique identifier'),
-                    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-                    updated_at: zod
-                      .string()
-                      .datetime({})
-                      .optional()
-                      .describe('Last update timestamp'),
+                    id: zod.string().uuid().describe('Unique identifier'),
+                    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+                    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
                   })
                   .and(
                     zod.object({
@@ -165,17 +159,12 @@ export const getExpensesResponse = zod
                         .nullish()
                         .describe('Soft deletion timestamp'),
                     }),
-                  )
-                  .optional(),
+                  ),
                 payment_method: zod
                   .object({
-                    id: zod.string().uuid().optional().describe('Unique identifier'),
-                    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-                    updated_at: zod
-                      .string()
-                      .datetime({})
-                      .optional()
-                      .describe('Last update timestamp'),
+                    id: zod.string().uuid().describe('Unique identifier'),
+                    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+                    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
                   })
                   .and(
                     zod.object({
@@ -197,8 +186,7 @@ export const getExpensesResponse = zod
                         .nullish()
                         .describe('Soft deletion timestamp'),
                     }),
-                  )
-                  .optional(),
+                  ),
               }),
             ),
         )
@@ -263,9 +251,9 @@ export const getExpenseByIdParams = zod.object({
 
 export const getExpenseByIdResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -317,9 +305,9 @@ export const getExpenseByIdResponse = zod
     zod.object({
       category: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -362,13 +350,12 @@ export const getExpenseByIdResponse = zod
               .describe('Supported currency types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
       payment_method: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -386,8 +373,7 @@ export const getExpenseByIdResponse = zod
               .describe('Payment method types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
     }),
   );
 
@@ -400,11 +386,11 @@ export const putExpenseByIdParams = zod.object({
 });
 
 export const putExpenseByIdBody = zod.object({
-  category_id: zod.string().uuid().optional().describe('Category ID'),
-  payment_method_id: zod.string().uuid().optional().describe('Payment method ID'),
-  title: zod.string().optional().describe('Expense title'),
+  category_id: zod.string().uuid().describe('Category ID'),
+  payment_method_id: zod.string().uuid().describe('Payment method ID'),
+  title: zod.string().describe('Expense title'),
   description: zod.string().nullish().describe('Expense description'),
-  amount: zod.number().optional().describe('Amount in cents'),
+  amount: zod.number().describe('Amount in cents'),
   currency: zod
     .enum([
       'USD',
@@ -438,16 +424,15 @@ export const putExpenseByIdBody = zod.object({
       'CZK',
       'HUF',
     ])
-    .optional()
     .describe('Supported currency types'),
-  incurred_at: zod.string().datetime({}).optional().describe('When the expense was incurred'),
+  incurred_at: zod.string().datetime({}).describe('When the expense was incurred'),
 });
 
 export const putExpenseByIdResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -499,9 +484,9 @@ export const putExpenseByIdResponse = zod
     zod.object({
       category: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -544,13 +529,12 @@ export const putExpenseByIdResponse = zod
               .describe('Supported currency types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
       payment_method: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -568,8 +552,7 @@ export const putExpenseByIdResponse = zod
               .describe('Payment method types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
     }),
   );
 
@@ -582,8 +565,8 @@ export const deleteExpenseByIdParams = zod.object({
 });
 
 export const deleteExpenseByIdResponse = zod.object({
-  success: zod.boolean().optional(),
-  message: zod.string().optional(),
+  success: zod.boolean(),
+  message: zod.string(),
 });
 
 /**
@@ -596,9 +579,9 @@ export const postVerifyExpenseByIdParams = zod.object({
 
 export const postVerifyExpenseByIdResponse = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -650,9 +633,9 @@ export const postVerifyExpenseByIdResponse = zod
     zod.object({
       category: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -695,13 +678,12 @@ export const postVerifyExpenseByIdResponse = zod
               .describe('Supported currency types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
       payment_method: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -719,7 +701,6 @@ export const postVerifyExpenseByIdResponse = zod
               .describe('Payment method types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
     }),
   );

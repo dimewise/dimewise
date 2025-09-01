@@ -83,34 +83,34 @@ const (
 // BaseEntity defines model for BaseEntity.
 type BaseEntity struct {
 	// CreatedAt Creation timestamp
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// Id Unique identifier
-	Id *openapi_types.UUID `json:"id,omitempty"`
+	Id openapi_types.UUID `json:"id"`
 
 	// UpdatedAt Last update timestamp
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // BudgetOverview defines model for BudgetOverview.
 type BudgetOverview struct {
 	// Currency Supported currency types
-	Currency *CurrencyType `json:"currency,omitempty"`
+	Currency CurrencyType `json:"currency"`
 
-	// Month Month (0-11)
-	Month *int `json:"month,omitempty"`
+	// Month Month (1-12)
+	Month int `json:"month"`
 
 	// RemainingBudget Remaining budget in cents
-	RemainingBudget *int `json:"remainingBudget,omitempty"`
+	RemainingBudget int `json:"remainingBudget"`
 
 	// TotalBudget Total budget amount in cents
-	TotalBudget *int `json:"totalBudget,omitempty"`
+	TotalBudget int `json:"totalBudget"`
 
 	// TotalSpent Total spent amount in cents
-	TotalSpent *int `json:"totalSpent,omitempty"`
+	TotalSpent int `json:"totalSpent"`
 
 	// Year Year
-	Year *int `json:"year,omitempty"`
+	Year int `json:"year"`
 }
 
 // Category defines model for Category.
@@ -119,7 +119,7 @@ type Category struct {
 	Amount int `json:"amount"`
 
 	// CreatedAt Creation timestamp
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// Currency Supported currency types
 	Currency CurrencyType `json:"currency"`
@@ -128,13 +128,13 @@ type Category struct {
 	DeletedAt *time.Time `json:"deleted_at"`
 
 	// Id Unique identifier
-	Id *openapi_types.UUID `json:"id,omitempty"`
+	Id openapi_types.UUID `json:"id"`
 
 	// Title Category title
 	Title string `json:"title"`
 
 	// UpdatedAt Last update timestamp
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// UserId User ID
 	UserId openapi_types.UUID `json:"user_id"`
@@ -143,18 +143,18 @@ type Category struct {
 // CategoryBreakdown defines model for CategoryBreakdown.
 type CategoryBreakdown struct {
 	// Budget Budget amount in cents
-	Budget        *int                `json:"budget,omitempty"`
-	CategoryId    *openapi_types.UUID `json:"category_id,omitempty"`
-	CategoryTitle *string             `json:"category_title,omitempty"`
+	Budget        int                `json:"budget"`
+	CategoryId    openapi_types.UUID `json:"category_id"`
+	CategoryTitle string             `json:"category_title"`
 
 	// Currency Supported currency types
-	Currency *CurrencyType `json:"currency,omitempty"`
+	Currency CurrencyType `json:"currency"`
 
 	// Remaining Remaining budget in cents
-	Remaining *int `json:"remaining,omitempty"`
+	Remaining int `json:"remaining"`
 
 	// Spent Spent amount in cents
-	Spent *int `json:"spent,omitempty"`
+	Spent int `json:"spent"`
 }
 
 // CategoryCreate defines model for CategoryCreate.
@@ -172,13 +172,13 @@ type CategoryCreate struct {
 // CategoryUpdate defines model for CategoryUpdate.
 type CategoryUpdate struct {
 	// Amount Budget amount in cents
-	Amount *int `json:"amount,omitempty"`
+	Amount int `json:"amount"`
 
 	// Currency Supported currency types
-	Currency *CurrencyType `json:"currency,omitempty"`
+	Currency CurrencyType `json:"currency"`
 
 	// Title Category title
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title"`
 }
 
 // CurrencyType Supported currency types
@@ -186,9 +186,9 @@ type CurrencyType string
 
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
-	Code    *string `json:"code,omitempty"`
-	Error   *string `json:"error,omitempty"`
-	Success *bool   `json:"success,omitempty"`
+	Code    string `json:"code"`
+	Error   string `json:"error"`
+	Success bool   `json:"success"`
 }
 
 // Expense defines model for Expense.
@@ -200,7 +200,7 @@ type Expense struct {
 	CategoryId openapi_types.UUID `json:"category_id"`
 
 	// CreatedAt Creation timestamp
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// Currency Supported currency types
 	Currency CurrencyType `json:"currency"`
@@ -209,7 +209,7 @@ type Expense struct {
 	Description *string `json:"description"`
 
 	// Id Unique identifier
-	Id *openapi_types.UUID `json:"id,omitempty"`
+	Id openapi_types.UUID `json:"id"`
 
 	// IncurredAt When the expense was incurred
 	IncurredAt time.Time `json:"incurred_at"`
@@ -221,7 +221,7 @@ type Expense struct {
 	Title string `json:"title"`
 
 	// UpdatedAt Last update timestamp
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// UserId User ID
 	UserId openapi_types.UUID `json:"user_id"`
@@ -257,38 +257,38 @@ type ExpenseCreate struct {
 // ExpenseUpdate defines model for ExpenseUpdate.
 type ExpenseUpdate struct {
 	// Amount Amount in cents
-	Amount *int `json:"amount,omitempty"`
+	Amount int `json:"amount"`
 
 	// CategoryId Category ID
-	CategoryId *openapi_types.UUID `json:"category_id,omitempty"`
+	CategoryId openapi_types.UUID `json:"category_id"`
 
 	// Currency Supported currency types
-	Currency *CurrencyType `json:"currency,omitempty"`
+	Currency CurrencyType `json:"currency"`
 
 	// Description Expense description
 	Description *string `json:"description"`
 
 	// IncurredAt When the expense was incurred
-	IncurredAt *time.Time `json:"incurred_at,omitempty"`
+	IncurredAt time.Time `json:"incurred_at"`
 
 	// PaymentMethodId Payment method ID
-	PaymentMethodId *openapi_types.UUID `json:"payment_method_id,omitempty"`
+	PaymentMethodId openapi_types.UUID `json:"payment_method_id"`
 
 	// Title Expense title
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title"`
 }
 
 // ExpenseWithDetails defines model for ExpenseWithDetails.
 type ExpenseWithDetails struct {
 	// Amount Amount in cents
-	Amount   int       `json:"amount"`
-	Category *Category `json:"category,omitempty"`
+	Amount   int      `json:"amount"`
+	Category Category `json:"category"`
 
 	// CategoryId Category ID
 	CategoryId openapi_types.UUID `json:"category_id"`
 
 	// CreatedAt Creation timestamp
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// Currency Supported currency types
 	Currency CurrencyType `json:"currency"`
@@ -297,11 +297,11 @@ type ExpenseWithDetails struct {
 	Description *string `json:"description"`
 
 	// Id Unique identifier
-	Id *openapi_types.UUID `json:"id,omitempty"`
+	Id openapi_types.UUID `json:"id"`
 
 	// IncurredAt When the expense was incurred
-	IncurredAt    time.Time      `json:"incurred_at"`
-	PaymentMethod *PaymentMethod `json:"payment_method,omitempty"`
+	IncurredAt    time.Time     `json:"incurred_at"`
+	PaymentMethod PaymentMethod `json:"payment_method"`
 
 	// PaymentMethodId Payment method ID
 	PaymentMethodId openapi_types.UUID `json:"payment_method_id"`
@@ -310,7 +310,7 @@ type ExpenseWithDetails struct {
 	Title string `json:"title"`
 
 	// UpdatedAt Last update timestamp
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// UserId User ID
 	UserId openapi_types.UUID `json:"user_id"`
@@ -321,25 +321,25 @@ type ExpenseWithDetails struct {
 
 // PaginatedResponse defines model for PaginatedResponse.
 type PaginatedResponse struct {
-	Data       *[]map[string]interface{} `json:"data,omitempty"`
-	Pagination *struct {
-		Limit      *int `json:"limit,omitempty"`
-		Page       *int `json:"page,omitempty"`
-		Total      *int `json:"total,omitempty"`
-		TotalPages *int `json:"total_pages,omitempty"`
-	} `json:"pagination,omitempty"`
+	Data       []map[string]interface{} `json:"data"`
+	Pagination struct {
+		Limit      int `json:"limit"`
+		Page       int `json:"page"`
+		Total      int `json:"total"`
+		TotalPages int `json:"total_pages"`
+	} `json:"pagination"`
 }
 
 // PaymentMethod defines model for PaymentMethod.
 type PaymentMethod struct {
 	// CreatedAt Creation timestamp
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// DeletedAt Soft deletion timestamp
 	DeletedAt *time.Time `json:"deleted_at"`
 
 	// Id Unique identifier
-	Id *openapi_types.UUID `json:"id,omitempty"`
+	Id openapi_types.UUID `json:"id"`
 
 	// MethodType Payment method types
 	MethodType PaymentMethodType `json:"method_type"`
@@ -348,7 +348,7 @@ type PaymentMethod struct {
 	Title string `json:"title"`
 
 	// UpdatedAt Last update timestamp
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 
 	// UserId User ID
 	UserId openapi_types.UUID `json:"user_id"`
@@ -357,12 +357,12 @@ type PaymentMethod struct {
 // PaymentMethodBreakdown defines model for PaymentMethodBreakdown.
 type PaymentMethodBreakdown struct {
 	// Currency Supported currency types
-	Currency           *CurrencyType       `json:"currency,omitempty"`
-	PaymentMethodId    *openapi_types.UUID `json:"payment_method_id,omitempty"`
-	PaymentMethodTitle *string             `json:"payment_method_title,omitempty"`
+	Currency           CurrencyType       `json:"currency"`
+	PaymentMethodId    openapi_types.UUID `json:"payment_method_id"`
+	PaymentMethodTitle string             `json:"payment_method_title"`
 
 	// TotalSpent Total spent amount in cents
-	TotalSpent *int `json:"total_spent,omitempty"`
+	TotalSpent int `json:"total_spent"`
 }
 
 // PaymentMethodCreate defines model for PaymentMethodCreate.
@@ -380,16 +380,16 @@ type PaymentMethodType string
 // PaymentMethodUpdate defines model for PaymentMethodUpdate.
 type PaymentMethodUpdate struct {
 	// MethodType Payment method types
-	MethodType *PaymentMethodType `json:"method_type,omitempty"`
+	MethodType PaymentMethodType `json:"method_type"`
 
 	// Title Payment method name
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title"`
 }
 
 // SuccessResponse defines model for SuccessResponse.
 type SuccessResponse struct {
-	Message *string `json:"message,omitempty"`
-	Success *bool   `json:"success,omitempty"`
+	Message string `json:"message"`
+	Success bool   `json:"success"`
 }
 
 // SupportedLanguage Supported languages
@@ -397,23 +397,20 @@ type SupportedLanguage string
 
 // User defines model for User.
 type User struct {
-	// ClerkId Clerk authentication ID
-	ClerkId string `json:"clerk_id"`
-
 	// CreatedAt Creation timestamp
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
 
 	// Currency Supported currency types
 	Currency CurrencyType `json:"currency"`
 
 	// Id Unique identifier
-	Id *openapi_types.UUID `json:"id,omitempty"`
+	Id openapi_types.UUID `json:"id"`
 
 	// PreferredLanguage Supported languages
 	PreferredLanguage SupportedLanguage `json:"preferred_language"`
 
 	// UpdatedAt Last update timestamp
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // UserCreate defines model for UserCreate.
@@ -428,10 +425,10 @@ type UserCreate struct {
 // UserUpdate defines model for UserUpdate.
 type UserUpdate struct {
 	// Currency Supported currency types
-	Currency *CurrencyType `json:"currency,omitempty"`
+	Currency CurrencyType `json:"currency"`
 
 	// PreferredLanguage Supported languages
-	PreferredLanguage *SupportedLanguage `json:"preferred_language,omitempty"`
+	PreferredLanguage SupportedLanguage `json:"preferred_language"`
 }
 
 // GetAnalyticsBudgetOverviewParams defines parameters for GetAnalyticsBudgetOverview.
@@ -2575,13 +2572,13 @@ type GetExpensesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		Data       *[]ExpenseWithDetails `json:"data,omitempty"`
-		Pagination *struct {
-			Limit      *int `json:"limit,omitempty"`
-			Page       *int `json:"page,omitempty"`
-			Total      *int `json:"total,omitempty"`
-			TotalPages *int `json:"total_pages,omitempty"`
-		} `json:"pagination,omitempty"`
+		Data       []ExpenseWithDetails `json:"data"`
+		Pagination struct {
+			Limit      int `json:"limit"`
+			Page       int `json:"page"`
+			Total      int `json:"total"`
+			TotalPages int `json:"total_pages"`
+		} `json:"pagination"`
 	}
 	JSON401 *ErrorResponse
 }
@@ -3535,13 +3532,13 @@ func ParseGetExpensesResponse(rsp *http.Response) (*GetExpensesResponse, error) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			Data       *[]ExpenseWithDetails `json:"data,omitempty"`
-			Pagination *struct {
-				Limit      *int `json:"limit,omitempty"`
-				Page       *int `json:"page,omitempty"`
-				Total      *int `json:"total,omitempty"`
-				TotalPages *int `json:"total_pages,omitempty"`
-			} `json:"pagination,omitempty"`
+			Data       []ExpenseWithDetails `json:"data"`
+			Pagination struct {
+				Limit      int `json:"limit"`
+				Page       int `json:"page"`
+				Total      int `json:"total"`
+				TotalPages int `json:"total_pages"`
+			} `json:"pagination"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -5558,13 +5555,13 @@ type GetExpensesResponseObject interface {
 }
 
 type GetExpenses200JSONResponse struct {
-	Data       *[]ExpenseWithDetails `json:"data,omitempty"`
-	Pagination *struct {
-		Limit      *int `json:"limit,omitempty"`
-		Page       *int `json:"page,omitempty"`
-		Total      *int `json:"total,omitempty"`
-		TotalPages *int `json:"total_pages,omitempty"`
-	} `json:"pagination,omitempty"`
+	Data       []ExpenseWithDetails `json:"data"`
+	Pagination struct {
+		Limit      int `json:"limit"`
+		Page       int `json:"page"`
+		Total      int `json:"total"`
+		TotalPages int `json:"total_pages"`
+	} `json:"pagination"`
 }
 
 func (response GetExpenses200JSONResponse) VisitGetExpensesResponse(w http.ResponseWriter) error {

@@ -34,9 +34,9 @@ export const getAnalyticsBudgetOverviewQueryParams = zod.object({
 });
 
 export const getAnalyticsBudgetOverviewResponse = zod.object({
-  totalBudget: zod.number().optional().describe('Total budget amount in cents'),
-  totalSpent: zod.number().optional().describe('Total spent amount in cents'),
-  remainingBudget: zod.number().optional().describe('Remaining budget in cents'),
+  totalBudget: zod.number().describe('Total budget amount in cents'),
+  totalSpent: zod.number().describe('Total spent amount in cents'),
+  remainingBudget: zod.number().describe('Remaining budget in cents'),
   currency: zod
     .enum([
       'USD',
@@ -70,10 +70,9 @@ export const getAnalyticsBudgetOverviewResponse = zod.object({
       'CZK',
       'HUF',
     ])
-    .optional()
     .describe('Supported currency types'),
-  month: zod.number().optional().describe('Month (0-11)'),
-  year: zod.number().optional().describe('Year'),
+  month: zod.number().describe('Month (1-12)'),
+  year: zod.number().describe('Year'),
 });
 
 /**
@@ -105,11 +104,11 @@ export const getAnalyticsCategoriesBreakdownQueryParams = zod.object({
 });
 
 export const getAnalyticsCategoriesBreakdownResponseItem = zod.object({
-  category_id: zod.string().uuid().optional(),
-  category_title: zod.string().optional(),
-  budget: zod.number().optional().describe('Budget amount in cents'),
-  spent: zod.number().optional().describe('Spent amount in cents'),
-  remaining: zod.number().optional().describe('Remaining budget in cents'),
+  category_id: zod.string().uuid(),
+  category_title: zod.string(),
+  budget: zod.number().describe('Budget amount in cents'),
+  spent: zod.number().describe('Spent amount in cents'),
+  remaining: zod.number().describe('Remaining budget in cents'),
   currency: zod
     .enum([
       'USD',
@@ -143,7 +142,6 @@ export const getAnalyticsCategoriesBreakdownResponseItem = zod.object({
       'CZK',
       'HUF',
     ])
-    .optional()
     .describe('Supported currency types'),
 });
 export const getAnalyticsCategoriesBreakdownResponse = zod.array(
@@ -179,9 +177,9 @@ export const getAnalyticsPaymentMethodsBreakdownQueryParams = zod.object({
 });
 
 export const getAnalyticsPaymentMethodsBreakdownResponseItem = zod.object({
-  payment_method_id: zod.string().uuid().optional(),
-  payment_method_title: zod.string().optional(),
-  total_spent: zod.number().optional().describe('Total spent amount in cents'),
+  payment_method_id: zod.string().uuid(),
+  payment_method_title: zod.string(),
+  total_spent: zod.number().describe('Total spent amount in cents'),
   currency: zod
     .enum([
       'USD',
@@ -215,7 +213,6 @@ export const getAnalyticsPaymentMethodsBreakdownResponseItem = zod.object({
       'CZK',
       'HUF',
     ])
-    .optional()
     .describe('Supported currency types'),
 });
 export const getAnalyticsPaymentMethodsBreakdownResponse = zod.array(
@@ -260,9 +257,9 @@ export const getAnalyticsRecentTransactionsQueryParams = zod.object({
 
 export const getAnalyticsRecentTransactionsResponseItem = zod
   .object({
-    id: zod.string().uuid().optional().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+    id: zod.string().uuid().describe('Unique identifier'),
+    created_at: zod.string().datetime({}).describe('Creation timestamp'),
+    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -314,9 +311,9 @@ export const getAnalyticsRecentTransactionsResponseItem = zod
     zod.object({
       category: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -359,13 +356,12 @@ export const getAnalyticsRecentTransactionsResponseItem = zod
               .describe('Supported currency types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
       payment_method: zod
         .object({
-          id: zod.string().uuid().optional().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).optional().describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).optional().describe('Last update timestamp'),
+          id: zod.string().uuid().describe('Unique identifier'),
+          created_at: zod.string().datetime({}).describe('Creation timestamp'),
+          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
@@ -383,8 +379,7 @@ export const getAnalyticsRecentTransactionsResponseItem = zod
               .describe('Payment method types'),
             deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
-        )
-        .optional(),
+        ),
     }),
   );
 export const getAnalyticsRecentTransactionsResponse = zod.array(

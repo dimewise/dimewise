@@ -8,9 +8,9 @@
 import type { CurrencyType } from './currencyType';
 
 export interface PaymentMethodBreakdown {
-  payment_method_id?: string;
-  payment_method_title?: string;
+  payment_method_id: string;
+  payment_method_title: string;
   /** Total spent amount in cents */
-  total_spent?: number;
-  currency?: CurrencyType;
+  total_spent: number;
+  currency: CurrencyType;
 }
