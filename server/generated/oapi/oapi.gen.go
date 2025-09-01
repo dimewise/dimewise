@@ -668,9 +668,6 @@ type ClientInterface interface {
 	// PostVerifyExpenseById request
 	PostVerifyExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetHealth request
-	GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetPaymentMethods request
 	GetPaymentMethods(ctx context.Context, params *GetPaymentMethodsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -922,18 +919,6 @@ func (c *Client) PutExpenseById(ctx context.Context, expenseId openapi_types.UUI
 
 func (c *Client) PostVerifyExpenseById(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostVerifyExpenseByIdRequest(c.Server, expenseId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetHealthRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -1934,33 +1919,6 @@ func NewPostVerifyExpenseByIdRequest(server string, expenseId openapi_types.UUID
 	return req, nil
 }
 
-// NewGetHealthRequest generates requests for GetHealth
-func NewGetHealthRequest(server string) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/health")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewGetPaymentMethodsRequest generates requests for GetPaymentMethods
 func NewGetPaymentMethodsRequest(server string, params *GetPaymentMethodsParams) (*http.Request, error) {
 	var err error
@@ -2368,9 +2326,6 @@ type ClientWithResponsesInterface interface {
 	// PostVerifyExpenseByIdWithResponse request
 	PostVerifyExpenseByIdWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*PostVerifyExpenseByIdResponse, error)
 
-	// GetHealthWithResponse request
-	GetHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHealthResponse, error)
-
 	// GetPaymentMethodsWithResponse request
 	GetPaymentMethodsWithResponse(ctx context.Context, params *GetPaymentMethodsParams, reqEditors ...RequestEditorFn) (*GetPaymentMethodsResponse, error)
 
@@ -2769,31 +2724,6 @@ func (r PostVerifyExpenseByIdResponse) StatusCode() int {
 	return 0
 }
 
-type GetHealthResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *struct {
-		Status    *string    `json:"status,omitempty"`
-		Timestamp *time.Time `json:"timestamp,omitempty"`
-	}
-}
-
-// Status returns HTTPResponse.Status
-func (r GetHealthResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetHealthResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
 type GetPaymentMethodsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -3151,15 +3081,6 @@ func (c *ClientWithResponses) PostVerifyExpenseByIdWithResponse(ctx context.Cont
 		return nil, err
 	}
 	return ParsePostVerifyExpenseByIdResponse(rsp)
-}
-
-// GetHealthWithResponse request returning *GetHealthResponse
-func (c *ClientWithResponses) GetHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHealthResponse, error) {
-	rsp, err := c.GetHealth(ctx, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetHealthResponse(rsp)
 }
 
 // GetPaymentMethodsWithResponse request returning *GetPaymentMethodsResponse
@@ -3853,35 +3774,6 @@ func ParsePostVerifyExpenseByIdResponse(rsp *http.Response) (*PostVerifyExpenseB
 	return response, nil
 }
 
-// ParseGetHealthResponse parses an HTTP response from a GetHealthWithResponse call
-func ParseGetHealthResponse(rsp *http.Response) (*GetHealthResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetHealthResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Status    *string    `json:"status,omitempty"`
-			Timestamp *time.Time `json:"timestamp,omitempty"`
-		}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseGetPaymentMethodsResponse parses an HTTP response from a GetPaymentMethodsWithResponse call
 func ParseGetPaymentMethodsResponse(rsp *http.Response) (*GetPaymentMethodsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -4249,9 +4141,6 @@ type ServerInterface interface {
 	// Verify expense
 	// (POST /expenses/{expenseId}/verify)
 	PostVerifyExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
-	// Health check endpoint
-	// (GET /health)
-	GetHealth(w http.ResponseWriter, r *http.Request)
 	// Get user payment methods
 	// (GET /payment-methods)
 	GetPaymentMethods(w http.ResponseWriter, r *http.Request, params GetPaymentMethodsParams)
@@ -4369,12 +4258,6 @@ func (_ Unimplemented) PutExpenseById(w http.ResponseWriter, r *http.Request, ex
 // Verify expense
 // (POST /expenses/{expenseId}/verify)
 func (_ Unimplemented) PostVerifyExpenseById(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-// Health check endpoint
-// (GET /health)
-func (_ Unimplemented) GetHealth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4994,26 +4877,6 @@ func (siw *ServerInterfaceWrapper) PostVerifyExpenseById(w http.ResponseWriter, 
 	handler.ServeHTTP(w, r)
 }
 
-// GetHealth operation middleware
-func (siw *ServerInterfaceWrapper) GetHealth(w http.ResponseWriter, r *http.Request) {
-
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{})
-
-	r = r.WithContext(ctx)
-
-	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetHealth(w, r)
-	}))
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler.ServeHTTP(w, r)
-}
-
 // GetPaymentMethods operation middleware
 func (siw *ServerInterfaceWrapper) GetPaymentMethods(w http.ResponseWriter, r *http.Request) {
 
@@ -5377,9 +5240,6 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/expenses/{expenseId}/verify", wrapper.PostVerifyExpenseById)
-	})
-	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/health", wrapper.GetHealth)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/payment-methods", wrapper.GetPaymentMethods)
@@ -5917,25 +5777,6 @@ func (response PostVerifyExpenseById404JSONResponse) VisitPostVerifyExpenseByIdR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetHealthRequestObject struct {
-}
-
-type GetHealthResponseObject interface {
-	VisitGetHealthResponse(w http.ResponseWriter) error
-}
-
-type GetHealth200JSONResponse struct {
-	Status    *string    `json:"status,omitempty"`
-	Timestamp *time.Time `json:"timestamp,omitempty"`
-}
-
-func (response GetHealth200JSONResponse) VisitGetHealthResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetPaymentMethodsRequestObject struct {
 	Params GetPaymentMethodsParams
 }
@@ -6263,9 +6104,6 @@ type StrictServerInterface interface {
 	// Verify expense
 	// (POST /expenses/{expenseId}/verify)
 	PostVerifyExpenseById(ctx context.Context, request PostVerifyExpenseByIdRequestObject) (PostVerifyExpenseByIdResponseObject, error)
-	// Health check endpoint
-	// (GET /health)
-	GetHealth(ctx context.Context, request GetHealthRequestObject) (GetHealthResponseObject, error)
 	// Get user payment methods
 	// (GET /payment-methods)
 	GetPaymentMethods(ctx context.Context, request GetPaymentMethodsRequestObject) (GetPaymentMethodsResponseObject, error)
@@ -6728,30 +6566,6 @@ func (sh *strictHandler) PostVerifyExpenseById(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostVerifyExpenseByIdResponseObject); ok {
 		if err := validResponse.VisitPostVerifyExpenseByIdResponse(w); err != nil {
-			sh.options.ResponseErrorHandlerFunc(w, r, err)
-		}
-	} else if response != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
-	}
-}
-
-// GetHealth operation middleware
-func (sh *strictHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
-	var request GetHealthRequestObject
-
-	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetHealth(ctx, request.(GetHealthRequestObject))
-	}
-	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetHealth")
-	}
-
-	response, err := handler(r.Context(), w, r, request)
-
-	if err != nil {
-		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetHealthResponseObject); ok {
-		if err := validResponse.VisitGetHealthResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
