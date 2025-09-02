@@ -18,7 +18,7 @@ type Category struct {
 	ID        uuid.UUID `sql:"primary_key"`
 	UserID    uuid.UUID
 	Title     string
-	Amount    int32
+	Amount    int64
 	Currency  CurrencyType
 	DeletedAt *time.Time
 	CreatedAt time.Time

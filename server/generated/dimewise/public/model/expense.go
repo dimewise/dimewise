@@ -21,7 +21,7 @@ type Expense struct {
 	PaymentMethodID uuid.UUID
 	Title           string
 	Description     *string
-	Amount          int32
+	Amount          int64
 	Currency        CurrencyType
 	IncurredAt      time.Time
 	VerifiedAt      *time.Time
