@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/clerk/clerk-sdk-go/v2 v2.3.1
 	github.com/go-chi/chi/v5 v5.2.2
+	github.com/go-errors/errors v1.5.1
 	github.com/go-jet/jet/v2 v2.13.0
 	github.com/google/uuid v1.6.0
 	github.com/oapi-codegen/runtime v1.1.2
