@@ -30,11 +30,11 @@ func NewServer(config *config.Config) *Server {
 	r.Use(chimiddleware.Recoverer)
 
 	/* -- Health -- */
-	r.Get("/api/v1/health", h.GetHealth)
+	r.Get("/v1/health", h.GetHealth)
 
 	/* -- Private OAPI -- */
 	r.Group(func(r chi.Router) {
-		baseURL := "/api/v1"
+		baseURL := "/v1"
 
 		// clerk auth middleware
 		r.Use(middleware.NewClerkAuthMiddleware(config))
