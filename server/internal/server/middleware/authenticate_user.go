@@ -12,10 +12,6 @@ import (
 	"github.com/dimewise/dimewise/config"
 )
 
-type contextKey string
-
-const clerkAuthUserKey contextKey = "clerk_auth_user"
-
 // NewClerkAuthMiddleware attaches the authenticated Clerk user into the request context.
 // If authentication fails, it returns 401 Unauthorized and blocks the request.
 func NewClerkAuthMiddleware(_ *config.Config) func(next http.Handler) http.Handler {
