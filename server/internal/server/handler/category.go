@@ -19,10 +19,10 @@ func (h *Handler) GetCategories(
 		var se *service.Error
 		if errors.As(err, &se) {
 			switch se.Code {
-			case service.ErrCodeUnauthorized:
-				return oapi.GetCategories401JSONResponse{Code: string(se.Code), Success: false}, nil
 			case service.ErrCodeBadRequest:
 				fallthrough
+			case service.ErrCodeUnauthorized:
+				return oapi.GetCategories401JSONResponse{Code: string(se.Code), Success: false}, nil
 			case service.ErrCodeForbidden:
 				fallthrough
 			case service.ErrCodeNotFound:
@@ -74,13 +74,13 @@ func (h *Handler) DeleteCategoryById( //nolint:revive // generated name from oap
 		var se *service.Error
 		if errors.As(err, &se) {
 			switch se.Code {
+			case service.ErrCodeBadRequest:
+				fallthrough
 			case service.ErrCodeUnauthorized:
 				return oapi.DeleteCategoryById401JSONResponse{
 					Code:    string(se.Code),
 					Success: false,
 				}, nil
-			case service.ErrCodeBadRequest:
-				fallthrough
 			case service.ErrCodeForbidden:
 				fallthrough
 			case service.ErrCodeNotFound:
@@ -98,7 +98,33 @@ func (h *Handler) GetCategoryById(
 	ctx context.Context,
 	req oapi.GetCategoryByIdRequestObject,
 ) (oapi.GetCategoryByIdResponseObject, error) {
-	return oapi.GetCategoryById200JSONResponse{}, nil
+	res, err := categorysvc.GetCategoryByID(ctx, h.config, req.CategoryId)
+	if err != nil {
+		var se *service.Error
+		if errors.As(err, &se) {
+			switch se.Code {
+			case service.ErrCodeBadRequest:
+				fallthrough
+			case service.ErrCodeUnauthorized:
+				return oapi.GetCategoryById401JSONResponse{
+					Code:    string(se.Code),
+					Success: false,
+				}, nil
+			case service.ErrCodeForbidden:
+				fallthrough
+			case service.ErrCodeNotFound:
+				return oapi.GetCategoryById404JSONResponse{
+					Code:    string(se.Code),
+					Success: false,
+				}, nil
+			default:
+				return nil, err
+			}
+		}
+		return nil, err
+	}
+
+	return oapi.GetCategoryById200JSONResponse(*res), nil
 }
 
 func (h *Handler) PutCategoryById(
