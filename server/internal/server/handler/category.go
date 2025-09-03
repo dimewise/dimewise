@@ -14,7 +14,28 @@ func (h *Handler) GetCategories(
 	ctx context.Context,
 	req oapi.GetCategoriesRequestObject,
 ) (oapi.GetCategoriesResponseObject, error) {
-	return oapi.GetCategories200JSONResponse{}, nil
+	res, err := categorysvc.GetCategories(ctx, h.config, req.Params)
+	if err != nil {
+		var se *service.Error
+		if errors.As(err, &se) {
+			switch se.Code {
+			case service.ErrCodeUnauthorized:
+				return oapi.GetCategories401JSONResponse{Code: string(se.Code), Success: false}, nil
+			case service.ErrCodeBadRequest:
+				fallthrough
+			case service.ErrCodeForbidden:
+				fallthrough
+			case service.ErrCodeNotFound:
+				fallthrough
+			default:
+				return nil, err
+			}
+		}
+
+		return nil, err
+	}
+
+	return oapi.GetCategories200JSONResponse(*res), nil
 }
 
 func (h *Handler) PostCategory(
