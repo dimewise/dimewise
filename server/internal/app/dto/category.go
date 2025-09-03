@@ -38,3 +38,23 @@ func TransformModelCategoryToOAPICategory(category model.Category) oapi.Category
 		DeletedAt: category.DeletedAt,
 	}
 }
+
+func BatchTransformModelCategoryToOAPICategory(categories []model.Category) []oapi.Category {
+	oapiCategories := make([]oapi.Category, 0, len(categories))
+
+	for _, category := range categories {
+		oapiCategory := oapi.Category{
+			Id:        category.ID,
+			UserId:    category.UserID,
+			Title:     category.Title,
+			Amount:    int(category.Amount),
+			Currency:  oapi.CurrencyType(category.Currency),
+			CreatedAt: category.CreatedAt,
+			UpdatedAt: category.UpdatedAt,
+			DeletedAt: category.DeletedAt,
+		}
+		oapiCategories = append(oapiCategories, oapiCategory)
+	}
+
+	return oapiCategories
+}
