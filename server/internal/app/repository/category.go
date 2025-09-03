@@ -36,3 +36,29 @@ func GetCategoriesByUserID(
 
 	return &dest, nil
 }
+
+func GetCategoryByID(
+	ctx context.Context,
+	db qrm.DB,
+	userID uuid.UUID,
+	categoryID uuid.UUID,
+) (*model.Category, error) {
+	tbl := table.Category
+
+	stmt := tbl.SELECT(tbl.AllColumns).
+		WHERE(tbl.UserID.EQ(postgres.UUID(userID)).AND(tbl.ID.EQ(postgres.UUID(categoryID))))
+
+	dest := []model.Category{}
+	err := stmt.QueryContext(ctx, db, &dest)
+	if err != nil {
+		return nil, errors.Errorf("failed to get category by id of %s: %w", categoryID, err)
+	}
+
+	if len(dest) != 1 {
+		return nil, NewError(ErrCodeNotFound, errors.Errorf("expected 1 row, but found none"))
+	}
+
+	result := dest[0]
+
+	return &result, nil
+}
