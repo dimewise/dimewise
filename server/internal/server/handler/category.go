@@ -44,11 +44,33 @@ func (h *Handler) PostCategory(
 	return oapi.PostCategory201JSONResponse(*res), nil
 }
 
-func (h *Handler) DeleteCategoryById(
+func (h *Handler) DeleteCategoryById( //nolint:revive // generated name from oapi spec
 	ctx context.Context,
 	req oapi.DeleteCategoryByIdRequestObject,
 ) (oapi.DeleteCategoryByIdResponseObject, error) {
-	return oapi.DeleteCategoryById200JSONResponse{}, nil
+	err := categorysvc.DeleteCategory(ctx, h.config, req.CategoryId)
+	if err != nil {
+		var se *service.Error
+		if errors.As(err, &se) {
+			switch se.Code {
+			case service.ErrCodeUnauthorized:
+				return oapi.DeleteCategoryById401JSONResponse{
+					Code:    string(se.Code),
+					Success: false,
+				}, nil
+			case service.ErrCodeBadRequest:
+				fallthrough
+			case service.ErrCodeForbidden:
+				fallthrough
+			case service.ErrCodeNotFound:
+				fallthrough
+			default:
+				return nil, err
+			}
+		}
+		return nil, err
+	}
+	return oapi.DeleteCategoryById200JSONResponse{Success: true}, nil
 }
 
 func (h *Handler) GetCategoryById(
