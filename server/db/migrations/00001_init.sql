@@ -26,8 +26,8 @@ CREATE TABLE "user" (
   "clerk_id" TEXT NOT NULL,
   "currency" currency_type NOT NULL,
   "preferred_language" supported_language NOT NULL,
-  "created_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-  "updated_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+  "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "updated_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 COMMENT ON TABLE "user" IS 'Stores user information including preferred currency and language';
 
@@ -37,9 +37,9 @@ CREATE TABLE "category" (
   "title" TEXT NOT NULL,
   "amount" BIGINT NOT NULL,
   "currency" currency_type NOT NULL,
-  "deleted_at" TIMESTAMP,
-  "created_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-  "updated_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+  "deleted_at" timestamptz,
+  "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "updated_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 COMMENT ON TABLE "category" IS 'User-defined categories to organize expenses, supports soft deletion';
 
@@ -48,9 +48,9 @@ CREATE TABLE "payment_method" (
   "user_id" UUID NOT NULL,
   "title" TEXT NOT NULL,
   "method_type" payment_method_type NOT NULL,
-  "deleted_at" TIMESTAMP,
-  "created_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-  "updated_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+  "deleted_at" timestamptz,
+  "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "updated_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 COMMENT ON TABLE "payment_method" IS 'Stores different payment methods associated with a user, supports soft deletion';
 
@@ -63,10 +63,10 @@ CREATE TABLE "expense" (
   "description" TEXT,
   "amount" BIGINT NOT NULL,
   "currency" currency_type NOT NULL,
-  "incurred_at" TIMESTAMP NOT NULL,
-  "verified_at" TIMESTAMP,
-  "created_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-  "updated_at" TIMESTAMP NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+  "incurred_at" timestamptz NOT NULL,
+  "verified_at" timestamptz,
+  "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+  "updated_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP)
 );
 COMMENT ON TABLE "expense" IS 'Records user expenses, linked to category and payment method';
 

@@ -22,9 +22,9 @@ type paymentMethodTable struct {
 	UserID     postgres.ColumnString
 	Title      postgres.ColumnString
 	MethodType postgres.ColumnString
-	DeletedAt  postgres.ColumnTimestamp
-	CreatedAt  postgres.ColumnTimestamp
-	UpdatedAt  postgres.ColumnTimestamp
+	DeletedAt  postgres.ColumnTimestampz
+	CreatedAt  postgres.ColumnTimestampz
+	UpdatedAt  postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -70,9 +70,9 @@ func newPaymentMethodTableImpl(schemaName, tableName, alias string) paymentMetho
 		UserIDColumn     = postgres.StringColumn("user_id")
 		TitleColumn      = postgres.StringColumn("title")
 		MethodTypeColumn = postgres.StringColumn("method_type")
-		DeletedAtColumn  = postgres.TimestampColumn("deleted_at")
-		CreatedAtColumn  = postgres.TimestampColumn("created_at")
-		UpdatedAtColumn  = postgres.TimestampColumn("updated_at")
+		DeletedAtColumn  = postgres.TimestampzColumn("deleted_at")
+		CreatedAtColumn  = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn  = postgres.TimestampzColumn("updated_at")
 		allColumns       = postgres.ColumnList{IDColumn, UserIDColumn, TitleColumn, MethodTypeColumn, DeletedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns   = postgres.ColumnList{UserIDColumn, TitleColumn, MethodTypeColumn, DeletedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		defaultColumns   = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn}
