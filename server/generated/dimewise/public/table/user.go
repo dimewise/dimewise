@@ -22,8 +22,8 @@ type userTable struct {
 	ClerkID           postgres.ColumnString
 	Currency          postgres.ColumnString
 	PreferredLanguage postgres.ColumnString
-	CreatedAt         postgres.ColumnTimestamp
-	UpdatedAt         postgres.ColumnTimestamp
+	CreatedAt         postgres.ColumnTimestampz
+	UpdatedAt         postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -69,8 +69,8 @@ func newUserTableImpl(schemaName, tableName, alias string) userTable {
 		ClerkIDColumn           = postgres.StringColumn("clerk_id")
 		CurrencyColumn          = postgres.StringColumn("currency")
 		PreferredLanguageColumn = postgres.StringColumn("preferred_language")
-		CreatedAtColumn         = postgres.TimestampColumn("created_at")
-		UpdatedAtColumn         = postgres.TimestampColumn("updated_at")
+		CreatedAtColumn         = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn         = postgres.TimestampzColumn("updated_at")
 		allColumns              = postgres.ColumnList{IDColumn, ClerkIDColumn, CurrencyColumn, PreferredLanguageColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns          = postgres.ColumnList{ClerkIDColumn, CurrencyColumn, PreferredLanguageColumn, CreatedAtColumn, UpdatedAtColumn}
 		defaultColumns          = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn}

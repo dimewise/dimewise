@@ -23,9 +23,9 @@ type categoryTable struct {
 	Title     postgres.ColumnString
 	Amount    postgres.ColumnInteger
 	Currency  postgres.ColumnString
-	DeletedAt postgres.ColumnTimestamp
-	CreatedAt postgres.ColumnTimestamp
-	UpdatedAt postgres.ColumnTimestamp
+	DeletedAt postgres.ColumnTimestampz
+	CreatedAt postgres.ColumnTimestampz
+	UpdatedAt postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -72,9 +72,9 @@ func newCategoryTableImpl(schemaName, tableName, alias string) categoryTable {
 		TitleColumn     = postgres.StringColumn("title")
 		AmountColumn    = postgres.IntegerColumn("amount")
 		CurrencyColumn  = postgres.StringColumn("currency")
-		DeletedAtColumn = postgres.TimestampColumn("deleted_at")
-		CreatedAtColumn = postgres.TimestampColumn("created_at")
-		UpdatedAtColumn = postgres.TimestampColumn("updated_at")
+		DeletedAtColumn = postgres.TimestampzColumn("deleted_at")
+		CreatedAtColumn = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn = postgres.TimestampzColumn("updated_at")
 		allColumns      = postgres.ColumnList{IDColumn, UserIDColumn, TitleColumn, AmountColumn, CurrencyColumn, DeletedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns  = postgres.ColumnList{UserIDColumn, TitleColumn, AmountColumn, CurrencyColumn, DeletedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		defaultColumns  = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn}

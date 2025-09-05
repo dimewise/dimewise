@@ -26,10 +26,10 @@ type expenseTable struct {
 	Description     postgres.ColumnString
 	Amount          postgres.ColumnInteger
 	Currency        postgres.ColumnString
-	IncurredAt      postgres.ColumnTimestamp
-	VerifiedAt      postgres.ColumnTimestamp
-	CreatedAt       postgres.ColumnTimestamp
-	UpdatedAt       postgres.ColumnTimestamp
+	IncurredAt      postgres.ColumnTimestampz
+	VerifiedAt      postgres.ColumnTimestampz
+	CreatedAt       postgres.ColumnTimestampz
+	UpdatedAt       postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -79,10 +79,10 @@ func newExpenseTableImpl(schemaName, tableName, alias string) expenseTable {
 		DescriptionColumn     = postgres.StringColumn("description")
 		AmountColumn          = postgres.IntegerColumn("amount")
 		CurrencyColumn        = postgres.StringColumn("currency")
-		IncurredAtColumn      = postgres.TimestampColumn("incurred_at")
-		VerifiedAtColumn      = postgres.TimestampColumn("verified_at")
-		CreatedAtColumn       = postgres.TimestampColumn("created_at")
-		UpdatedAtColumn       = postgres.TimestampColumn("updated_at")
+		IncurredAtColumn      = postgres.TimestampzColumn("incurred_at")
+		VerifiedAtColumn      = postgres.TimestampzColumn("verified_at")
+		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn       = postgres.TimestampzColumn("updated_at")
 		allColumns            = postgres.ColumnList{IDColumn, UserIDColumn, CategoryIDColumn, PaymentMethodIDColumn, TitleColumn, DescriptionColumn, AmountColumn, CurrencyColumn, IncurredAtColumn, VerifiedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns        = postgres.ColumnList{UserIDColumn, CategoryIDColumn, PaymentMethodIDColumn, TitleColumn, DescriptionColumn, AmountColumn, CurrencyColumn, IncurredAtColumn, VerifiedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		defaultColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn}
