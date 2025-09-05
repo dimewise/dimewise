@@ -5,7 +5,7 @@
  * RESTful API for the Dimewise expense tracking application
  * OpenAPI spec version: 1.0.0
  */
-import type { PaginatedResponse } from './paginatedResponse';
+import type { CursorPaginatedResponse } from './cursorPaginatedResponse';
 import type { GetExpenses200AllOf } from './getExpenses200AllOf';
 
-export type GetExpenses200 = PaginatedResponse & GetExpenses200AllOf;
+export type GetExpenses200 = CursorPaginatedResponse & GetExpenses200AllOf;

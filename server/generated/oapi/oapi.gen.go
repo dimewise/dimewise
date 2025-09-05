@@ -184,6 +184,25 @@ type CategoryUpdate struct {
 // CurrencyType Supported currency types
 type CurrencyType string
 
+// CursorPaginatedResponse defines model for CursorPaginatedResponse.
+type CursorPaginatedResponse struct {
+	Data       []map[string]interface{} `json:"data"`
+	Pagination struct {
+		// HasNext Whether there are more items after the current cursor
+		HasNext bool `json:"has_next"`
+
+		// HasPrev Whether there are more items before the current cursor
+		HasPrev bool `json:"has_prev"`
+		Limit   int  `json:"limit"`
+
+		// NextCursor Cursor for the next page (null if has_next is false)
+		NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
+
+		// PrevCursor Cursor for the previous page (null if has_prev is false)
+		PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
+	} `json:"pagination"`
+}
+
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Code    string `json:"code"`
@@ -478,8 +497,8 @@ type GetCategoriesParams struct {
 
 // GetExpensesParams defines parameters for GetExpenses.
 type GetExpensesParams struct {
-	// Page Page number for pagination
-	Page *int `form:"page,omitempty" json:"page,omitempty"`
+	// Cursor Cursor for pagination (UUID of the last item from previous page)
+	Cursor *openapi_types.UUID `form:"cursor,omitempty" json:"cursor,omitempty"`
 
 	// Limit Number of items per page
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
@@ -1572,9 +1591,9 @@ func NewGetExpensesRequest(server string, params *GetExpensesParams) (*http.Requ
 	if params != nil {
 		queryValues := queryURL.Query()
 
-		if params.Page != nil {
+		if params.Cursor != nil {
 
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page", runtime.ParamLocationQuery, *params.Page); err != nil {
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cursor", runtime.ParamLocationQuery, *params.Cursor); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -2574,10 +2593,18 @@ type GetExpensesResponse struct {
 	JSON200      *struct {
 		Data       []ExpenseWithDetails `json:"data"`
 		Pagination struct {
-			Limit      int `json:"limit"`
-			Page       int `json:"page"`
-			Total      int `json:"total"`
-			TotalPages int `json:"total_pages"`
+			// HasNext Whether there are more items after the current cursor
+			HasNext bool `json:"has_next"`
+
+			// HasPrev Whether there are more items before the current cursor
+			HasPrev bool `json:"has_prev"`
+			Limit   int  `json:"limit"`
+
+			// NextCursor Cursor for the next page (null if has_next is false)
+			NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
+
+			// PrevCursor Cursor for the previous page (null if has_prev is false)
+			PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
 		} `json:"pagination"`
 	}
 	JSON401 *ErrorResponse
@@ -3534,10 +3561,18 @@ func ParseGetExpensesResponse(rsp *http.Response) (*GetExpensesResponse, error) 
 		var dest struct {
 			Data       []ExpenseWithDetails `json:"data"`
 			Pagination struct {
-				Limit      int `json:"limit"`
-				Page       int `json:"page"`
-				Total      int `json:"total"`
-				TotalPages int `json:"total_pages"`
+				// HasNext Whether there are more items after the current cursor
+				HasNext bool `json:"has_next"`
+
+				// HasPrev Whether there are more items before the current cursor
+				HasPrev bool `json:"has_prev"`
+				Limit   int  `json:"limit"`
+
+				// NextCursor Cursor for the next page (null if has_next is false)
+				NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
+
+				// PrevCursor Cursor for the previous page (null if has_prev is false)
+				PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
 			} `json:"pagination"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -4647,11 +4682,11 @@ func (siw *ServerInterfaceWrapper) GetExpenses(w http.ResponseWriter, r *http.Re
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetExpensesParams
 
-	// ------------- Optional query parameter "page" -------------
+	// ------------- Optional query parameter "cursor" -------------
 
-	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	err = runtime.BindQueryParameter("form", true, false, "cursor", r.URL.Query(), &params.Cursor)
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
 		return
 	}
 
@@ -5557,10 +5592,18 @@ type GetExpensesResponseObject interface {
 type GetExpenses200JSONResponse struct {
 	Data       []ExpenseWithDetails `json:"data"`
 	Pagination struct {
-		Limit      int `json:"limit"`
-		Page       int `json:"page"`
-		Total      int `json:"total"`
-		TotalPages int `json:"total_pages"`
+		// HasNext Whether there are more items after the current cursor
+		HasNext bool `json:"has_next"`
+
+		// HasPrev Whether there are more items before the current cursor
+		HasPrev bool `json:"has_prev"`
+		Limit   int  `json:"limit"`
+
+		// NextCursor Cursor for the next page (null if has_next is false)
+		NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
+
+		// PrevCursor Cursor for the previous page (null if has_prev is false)
+		PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
 	} `json:"pagination"`
 }
 

@@ -18,10 +18,11 @@ export const getGetExpensesResponseMock = (): GetExpenses200 => ({
       () => ({}),
     ),
     pagination: {
-      page: faker.number.int({ min: undefined, max: undefined }),
       limit: faker.number.int({ min: undefined, max: undefined }),
-      total: faker.number.int({ min: undefined, max: undefined }),
-      total_pages: faker.number.int({ min: undefined, max: undefined }),
+      has_next: faker.datatype.boolean(),
+      has_prev: faker.datatype.boolean(),
+      next_cursor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      prev_cursor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
     },
   },
   ...{
