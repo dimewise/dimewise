@@ -477,6 +477,42 @@ components:
       required:
         - data
         - pagination
+    CursorPaginatedResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+        pagination:
+          type: object
+          required:
+            - limit
+            - has_next
+            - has_prev
+          properties:
+            limit:
+              type: integer
+              example: 20
+            has_next:
+              type: boolean
+              description: Whether there are more items after the current cursor
+              example: true
+            has_prev:
+              type: boolean
+              description: Whether there are more items before the current cursor
+              example: false
+            next_cursor:
+              type: string
+              description: Encoded cursor for the next page (null if has_next is false)
+              example: "eyJpZCI6IjEyM2U0NTY3LWU4OWItMTJkMy1hNDU2LTQyNjYxNDE3NDAwMCIsInRpbWVzdGFtcCI6IjIwMjQtMDEtMTVUMTA6MzA6MDBaIn0="
+            prev_cursor:
+              type: string
+              description: Encoded cursor for the previous page (null if has_prev is false)
+              example: "eyJpZCI6IjEyM2U0NTY3LWU4OWItMTJkMy1hNDU2LTQyNjYxNDE3NDAwMCIsInRpbWVzdGFtcCI6IjIwMjQtMDEtMTVUMTA6MzA6MDBaIn0="
+      required:
+        - data
+        - pagination
 paths:
   /users/me:
     get:
@@ -913,14 +949,12 @@ paths:
       tags:
         - Expenses
       parameters:
-        - name: page
+        - name: cursor
           in: query
-          description: Page number for pagination
+          description: Encoded cursor for pagination (base64 encoded cursor from previous page)
           required: false
           schema:
-            type: integer
-            minimum: 1
-            default: 1
+            type: string
         - name: limit
           in: query
           description: Number of items per page
@@ -987,7 +1021,7 @@ paths:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - $ref: '#/components/schemas/CursorPaginatedResponse'
                   - type: object
                     properties:
                       data:

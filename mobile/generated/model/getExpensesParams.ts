@@ -9,10 +9,9 @@ import type { GetExpensesVerificationStatus } from './getExpensesVerificationSta
 
 export type GetExpensesParams = {
   /**
-   * Page number for pagination
-   * @minimum 1
+   * Cursor for pagination (UUID of the last item from previous page)
    */
-  page?: number;
+  cursor?: string;
   /**
    * Number of items per page
    * @minimum 1

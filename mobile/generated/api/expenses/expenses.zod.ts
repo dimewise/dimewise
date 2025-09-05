@@ -11,17 +11,16 @@ import { z as zod } from 'zod';
  * Retrieves expenses for the authenticated user with optional filtering
  * @summary Get user expenses
  */
-export const getExpensesQueryPageDefault = 1;
 export const getExpensesQueryLimitDefault = 20;
 export const getExpensesQueryLimitMax = 100;
 export const getExpensesQueryIncludeDeletedDefault = false;
 
 export const getExpensesQueryParams = zod.object({
-  page: zod
-    .number()
-    .min(1)
-    .default(getExpensesQueryPageDefault)
-    .describe('Page number for pagination'),
+  cursor: zod
+    .string()
+    .uuid()
+    .optional()
+    .describe('Cursor for pagination (UUID of the last item from previous page)'),
   limit: zod
     .number()
     .min(1)
@@ -44,10 +43,19 @@ export const getExpensesResponse = zod
   .object({
     data: zod.array(zod.object({})),
     pagination: zod.object({
-      page: zod.number(),
       limit: zod.number(),
-      total: zod.number(),
-      total_pages: zod.number(),
+      has_next: zod.boolean().describe('Whether there are more items after the current cursor'),
+      has_prev: zod.boolean().describe('Whether there are more items before the current cursor'),
+      next_cursor: zod
+        .string()
+        .uuid()
+        .optional()
+        .describe('Cursor for the next page (null if has_next is false)'),
+      prev_cursor: zod
+        .string()
+        .uuid()
+        .optional()
+        .describe('Cursor for the previous page (null if has_prev is false)'),
     }),
   })
   .and(
