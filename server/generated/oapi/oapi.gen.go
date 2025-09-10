@@ -187,20 +187,7 @@ type CurrencyType string
 // CursorPaginatedResponse defines model for CursorPaginatedResponse.
 type CursorPaginatedResponse struct {
 	Data       []map[string]interface{} `json:"data"`
-	Pagination struct {
-		// HasNext Whether there are more items after the current cursor
-		HasNext bool `json:"has_next"`
-
-		// HasPrev Whether there are more items before the current cursor
-		HasPrev bool `json:"has_prev"`
-		Limit   int  `json:"limit"`
-
-		// NextCursor Cursor for the next page (null if has_next is false)
-		NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
-
-		// PrevCursor Cursor for the previous page (null if has_prev is false)
-		PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
-	} `json:"pagination"`
+	Pagination Pagination               `json:"pagination"`
 }
 
 // ErrorResponse defines model for ErrorResponse.
@@ -338,15 +325,20 @@ type ExpenseWithDetails struct {
 	VerifiedAt *time.Time `json:"verified_at"`
 }
 
-// PaginatedResponse defines model for PaginatedResponse.
-type PaginatedResponse struct {
-	Data       []map[string]interface{} `json:"data"`
-	Pagination struct {
-		Limit      int `json:"limit"`
-		Page       int `json:"page"`
-		Total      int `json:"total"`
-		TotalPages int `json:"total_pages"`
-	} `json:"pagination"`
+// Pagination defines model for Pagination.
+type Pagination struct {
+	// HasNext Whether there are more items after the current cursor
+	HasNext bool `json:"has_next"`
+
+	// HasPrev Whether there are more items before the current cursor
+	HasPrev bool `json:"has_prev"`
+	Limit   int  `json:"limit"`
+
+	// NextCursor Encoded cursor for the next page (null if has_next is false)
+	NextCursor *string `json:"next_cursor,omitempty"`
+
+	// PrevCursor Encoded cursor for the previous page (null if has_prev is false)
+	PrevCursor *string `json:"prev_cursor,omitempty"`
 }
 
 // PaymentMethod defines model for PaymentMethod.
@@ -497,8 +489,8 @@ type GetCategoriesParams struct {
 
 // GetExpensesParams defines parameters for GetExpenses.
 type GetExpensesParams struct {
-	// Cursor Cursor for pagination (UUID of the last item from previous page)
-	Cursor *openapi_types.UUID `form:"cursor,omitempty" json:"cursor,omitempty"`
+	// Cursor Encoded cursor for pagination (base64 encoded cursor from previous page)
+	Cursor *string `form:"cursor,omitempty" json:"cursor,omitempty"`
 
 	// Limit Number of items per page
 	Limit *int `form:"limit,omitempty" json:"limit,omitempty"`
@@ -520,9 +512,6 @@ type GetExpensesParams struct {
 
 	// VerificationStatus Filter by verification status
 	VerificationStatus *GetExpensesParamsVerificationStatus `form:"verification_status,omitempty" json:"verification_status,omitempty"`
-
-	// IncludeDeleted Include soft-deleted expenses
-	IncludeDeleted *bool `form:"include_deleted,omitempty" json:"include_deleted,omitempty"`
 }
 
 // GetExpensesParamsVerificationStatus defines parameters for GetExpenses.
@@ -1719,22 +1708,6 @@ func NewGetExpensesRequest(server string, params *GetExpensesParams) (*http.Requ
 
 		}
 
-		if params.IncludeDeleted != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "include_deleted", runtime.ParamLocationQuery, *params.IncludeDeleted); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -2592,20 +2565,7 @@ type GetExpensesResponse struct {
 	HTTPResponse *http.Response
 	JSON200      *struct {
 		Data       []ExpenseWithDetails `json:"data"`
-		Pagination struct {
-			// HasNext Whether there are more items after the current cursor
-			HasNext bool `json:"has_next"`
-
-			// HasPrev Whether there are more items before the current cursor
-			HasPrev bool `json:"has_prev"`
-			Limit   int  `json:"limit"`
-
-			// NextCursor Cursor for the next page (null if has_next is false)
-			NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
-
-			// PrevCursor Cursor for the previous page (null if has_prev is false)
-			PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
-		} `json:"pagination"`
+		Pagination Pagination           `json:"pagination"`
 	}
 	JSON401 *ErrorResponse
 }
@@ -3560,20 +3520,7 @@ func ParseGetExpensesResponse(rsp *http.Response) (*GetExpensesResponse, error) 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
 			Data       []ExpenseWithDetails `json:"data"`
-			Pagination struct {
-				// HasNext Whether there are more items after the current cursor
-				HasNext bool `json:"has_next"`
-
-				// HasPrev Whether there are more items before the current cursor
-				HasPrev bool `json:"has_prev"`
-				Limit   int  `json:"limit"`
-
-				// NextCursor Cursor for the next page (null if has_next is false)
-				NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
-
-				// PrevCursor Cursor for the previous page (null if has_prev is false)
-				PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
-			} `json:"pagination"`
+			Pagination Pagination           `json:"pagination"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
@@ -4746,14 +4693,6 @@ func (siw *ServerInterfaceWrapper) GetExpenses(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// ------------- Optional query parameter "include_deleted" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "include_deleted", r.URL.Query(), &params.IncludeDeleted)
-	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "include_deleted", Err: err})
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetExpenses(w, r, params)
 	}))
@@ -5591,20 +5530,7 @@ type GetExpensesResponseObject interface {
 
 type GetExpenses200JSONResponse struct {
 	Data       []ExpenseWithDetails `json:"data"`
-	Pagination struct {
-		// HasNext Whether there are more items after the current cursor
-		HasNext bool `json:"has_next"`
-
-		// HasPrev Whether there are more items before the current cursor
-		HasPrev bool `json:"has_prev"`
-		Limit   int  `json:"limit"`
-
-		// NextCursor Cursor for the next page (null if has_next is false)
-		NextCursor *openapi_types.UUID `json:"next_cursor,omitempty"`
-
-		// PrevCursor Cursor for the previous page (null if has_prev is false)
-		PrevCursor *openapi_types.UUID `json:"prev_cursor,omitempty"`
-	} `json:"pagination"`
+	Pagination Pagination           `json:"pagination"`
 }
 
 func (response GetExpenses200JSONResponse) VisitGetExpensesResponse(w http.ResponseWriter) error {

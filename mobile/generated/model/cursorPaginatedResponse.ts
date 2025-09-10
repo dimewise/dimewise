@@ -6,9 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { CursorPaginatedResponseDataItem } from './cursorPaginatedResponseDataItem';
-import type { CursorPaginatedResponsePagination } from './cursorPaginatedResponsePagination';
+import type { Pagination } from './pagination';
 
 export interface CursorPaginatedResponse {
   data: CursorPaginatedResponseDataItem[];
-  pagination: CursorPaginatedResponsePagination;
+  pagination: Pagination;
 }

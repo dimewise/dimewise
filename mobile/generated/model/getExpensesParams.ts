@@ -9,7 +9,7 @@ import type { GetExpensesVerificationStatus } from './getExpensesVerificationSta
 
 export type GetExpensesParams = {
   /**
-   * Cursor for pagination (UUID of the last item from previous page)
+   * Encoded cursor for pagination (base64 encoded cursor from previous page)
    */
   cursor?: string;
   /**
@@ -42,8 +42,4 @@ export type GetExpensesParams = {
    * Filter by verification status
    */
   verification_status?: GetExpensesVerificationStatus;
-  /**
-   * Include soft-deleted expenses
-   */
-  include_deleted?: boolean;
 };

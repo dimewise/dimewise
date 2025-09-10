@@ -13,14 +13,12 @@ import { z as zod } from 'zod';
  */
 export const getExpensesQueryLimitDefault = 20;
 export const getExpensesQueryLimitMax = 100;
-export const getExpensesQueryIncludeDeletedDefault = false;
 
 export const getExpensesQueryParams = zod.object({
   cursor: zod
     .string()
-    .uuid()
     .optional()
-    .describe('Cursor for pagination (UUID of the last item from previous page)'),
+    .describe('Encoded cursor for pagination (base64 encoded cursor from previous page)'),
   limit: zod
     .number()
     .min(1)
@@ -36,7 +34,6 @@ export const getExpensesQueryParams = zod.object({
     .enum(['verified', 'unverified'])
     .optional()
     .describe('Filter by verification status'),
-  include_deleted: zod.boolean().optional().describe('Include soft-deleted expenses'),
 });
 
 export const getExpensesResponse = zod
@@ -48,14 +45,12 @@ export const getExpensesResponse = zod
       has_prev: zod.boolean().describe('Whether there are more items before the current cursor'),
       next_cursor: zod
         .string()
-        .uuid()
         .optional()
-        .describe('Cursor for the next page (null if has_next is false)'),
+        .describe('Encoded cursor for the next page (null if has_next is false)'),
       prev_cursor: zod
         .string()
-        .uuid()
         .optional()
-        .describe('Cursor for the previous page (null if has_prev is false)'),
+        .describe('Encoded cursor for the previous page (null if has_prev is false)'),
     }),
   })
   .and(
