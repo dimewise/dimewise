@@ -131,5 +131,34 @@ func (h *Handler) PutCategoryById(
 	ctx context.Context,
 	req oapi.PutCategoryByIdRequestObject,
 ) (oapi.PutCategoryByIdResponseObject, error) {
-	return oapi.PutCategoryById200JSONResponse{}, nil
+	res, err := categorysvc.UpdateCategoryByID(ctx, h.config, req.CategoryId, *req.Body)
+	if err != nil {
+		var se *service.Error
+		if errors.As(err, &se) {
+			switch se.Code {
+			case service.ErrCodeBadRequest:
+				return oapi.PutCategoryById400JSONResponse{
+					Code:    string(se.Code),
+					Success: false,
+				}, nil
+			case service.ErrCodeUnauthorized:
+				return oapi.PutCategoryById401JSONResponse{
+					Code:    string(se.Code),
+					Success: false,
+				}, nil
+			case service.ErrCodeForbidden:
+				fallthrough
+			case service.ErrCodeNotFound:
+				return oapi.PutCategoryById404JSONResponse{
+					Code:    string(se.Code),
+					Success: false,
+				}, nil
+			default:
+				return nil, err
+			}
+		}
+		return nil, err
+	}
+
+	return oapi.PutCategoryById200JSONResponse(*res), nil
 }
