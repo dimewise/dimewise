@@ -38,6 +38,7 @@ export * from './getPaymentMethodsParams';
 export * from './paginatedResponse';
 export * from './paginatedResponseDataItem';
 export * from './paginatedResponsePagination';
+export * from './pagination';
 export * from './paymentMethod';
 export * from './paymentMethodAllOf';
 export * from './paymentMethodBreakdown';

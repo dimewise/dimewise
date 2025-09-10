@@ -447,36 +447,6 @@ components:
         - success
         - error
         - code
-    PaginatedResponse:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            type: object
-        pagination:
-          type: object
-          required:
-            - page
-            - limit
-            - total
-            - total_pages
-          properties:
-            page:
-              type: integer
-              example: 1
-            limit:
-              type: integer
-              example: 20
-            total:
-              type: integer
-              example: 100
-            total_pages:
-              type: integer
-              example: 5
-      required:
-        - data
-        - pagination
     CursorPaginatedResponse:
       type: object
       properties:
@@ -485,34 +455,36 @@ components:
           items:
             type: object
         pagination:
-          type: object
-          required:
-            - limit
-            - has_next
-            - has_prev
-          properties:
-            limit:
-              type: integer
-              example: 20
-            has_next:
-              type: boolean
-              description: Whether there are more items after the current cursor
-              example: true
-            has_prev:
-              type: boolean
-              description: Whether there are more items before the current cursor
-              example: false
-            next_cursor:
-              type: string
-              description: Encoded cursor for the next page (null if has_next is false)
-              example: "eyJpZCI6IjEyM2U0NTY3LWU4OWItMTJkMy1hNDU2LTQyNjYxNDE3NDAwMCIsInRpbWVzdGFtcCI6IjIwMjQtMDEtMTVUMTA6MzA6MDBaIn0="
-            prev_cursor:
-              type: string
-              description: Encoded cursor for the previous page (null if has_prev is false)
-              example: "eyJpZCI6IjEyM2U0NTY3LWU4OWItMTJkMy1hNDU2LTQyNjYxNDE3NDAwMCIsInRpbWVzdGFtcCI6IjIwMjQtMDEtMTVUMTA6MzA6MDBaIn0="
+          $ref: '#/components/schemas/Pagination'
       required:
         - data
         - pagination
+    Pagination:
+      type: object
+      properties:
+          limit:
+            type: integer
+            example: 20
+          has_next:
+            type: boolean
+            description: Whether there are more items after the current cursor
+            example: true
+          has_prev:
+            type: boolean
+            description: Whether there are more items before the current cursor
+            example: false
+          next_cursor:
+            type: string
+            description: Encoded cursor for the next page (null if has_next is false)
+            example: eyJpZCI6IjEyM2U0NTY3LWU4OWItMTJkMy1hNDU2LTQyNjYxNDE3NDAwMCIsInRpbWVzdGFtcCI6IjIwMjQtMDEtMTVUMTA6MzA6MDBaIn0=
+          prev_cursor:
+            type: string
+            description: Encoded cursor for the previous page (null if has_prev is false)
+            example: eyJpZCI6IjEyM2U0NTY3LWU4OWItMTJkMy1hNDU2LTQyNjYxNDE3NDAwMCIsInRpbWVzdGFtcCI6IjIwMjQtMDEtMTVUMTA6MzA6MDBaIn0=
+      required:
+          - limit
+          - has_next
+          - has_prev
 paths:
   /users/me:
     get:
@@ -1007,13 +979,6 @@ paths:
             enum:
               - verified
               - unverified
-        - name: include_deleted
-          in: query
-          description: Include soft-deleted expenses
-          required: false
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: Expenses retrieved successfully
@@ -1275,7 +1240,7 @@ paths:
           required: false
           schema:
             type: integer
-            minimum: 2000
+            minimum: 1990
             maximum: 2100
             default: 2024
       responses:

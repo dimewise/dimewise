@@ -84,7 +84,7 @@ export const getAnalyticsCategoriesBreakdownQueryMonthMin = 0;
 
 export const getAnalyticsCategoriesBreakdownQueryMonthMax = 11;
 export const getAnalyticsCategoriesBreakdownQueryYearDefault = 2024;
-export const getAnalyticsCategoriesBreakdownQueryYearMin = 2000;
+export const getAnalyticsCategoriesBreakdownQueryYearMin = 1990;
 
 export const getAnalyticsCategoriesBreakdownQueryYearMax = 2100;
 

@@ -21,8 +21,14 @@ export const getGetExpensesResponseMock = (): GetExpenses200 => ({
       limit: faker.number.int({ min: undefined, max: undefined }),
       has_next: faker.datatype.boolean(),
       has_prev: faker.datatype.boolean(),
-      next_cursor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-      prev_cursor: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+      next_cursor: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
+      prev_cursor: faker.helpers.arrayElement([
+        faker.string.alpha({ length: { min: 10, max: 20 } }),
+        undefined,
+      ]),
     },
   },
   ...{

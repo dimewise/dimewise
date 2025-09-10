@@ -15,7 +15,7 @@ export type GetAnalyticsCategoriesBreakdownParams = {
   month?: number;
   /**
    * Year
-   * @minimum 2000
+   * @minimum 1990
    * @maximum 2100
    */
   year?: number;
