@@ -58,3 +58,15 @@ func BatchTransformModelCategoryToOAPICategory(categories []model.Category) []oa
 
 	return oapiCategories
 }
+
+func UpdateCategoryByForm(category model.Category, form oapi.CategoryUpdate) model.Category {
+	now := time.Now()
+
+	updatedCategory := category
+	updatedCategory.Amount = int64(form.Amount)
+	updatedCategory.Currency = model.CurrencyType(form.Currency)
+	updatedCategory.Title = form.Title
+	updatedCategory.UpdatedAt = now
+
+	return updatedCategory
+}

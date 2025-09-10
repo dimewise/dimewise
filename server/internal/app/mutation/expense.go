@@ -12,43 +12,43 @@ import (
 	"github.com/dimewise/dimewise/generated/dimewise/public/table"
 )
 
-func InsertCategoryByModel(
+func InsertExpenseByModel(
 	ctx context.Context,
 	db qrm.DB,
-	dto model.Category,
-) (*model.Category, error) {
-	tbl := table.Category
+	dto model.Expense,
+) (*model.Expense, error) {
+	tbl := table.Expense
 
 	stmt := tbl.INSERT(tbl.AllColumns).MODEL(dto).RETURNING(tbl.AllColumns)
 
-	dest := model.Category{}
+	dest := model.Expense{}
 	err := stmt.QueryContext(ctx, db, &dest)
 	if err != nil {
-		return nil, errors.Errorf("failed to insert category by model: %w", err)
+		return nil, errors.Errorf("failed to insert expense by model: %w", err)
 	}
 
 	return &dest, nil
 }
 
-func DeleteCategoryByID(
+func DeleteExpenseByID(
 	ctx context.Context,
 	db qrm.DB,
 	userID uuid.UUID,
-	categoryID uuid.UUID,
+	expenseID uuid.UUID,
 ) error {
-	tbl := table.Category
+	tbl := table.Expense
 
 	stmt := tbl.DELETE().
-		WHERE(tbl.UserID.EQ(postgres.UUID(userID)).AND(tbl.ID.EQ(postgres.UUID(categoryID))))
+		WHERE(tbl.UserID.EQ(postgres.UUID(userID)).AND(tbl.ID.EQ(postgres.UUID(expenseID))))
 
 	res, err := stmt.ExecContext(ctx, db)
 	if err != nil {
-		return errors.Errorf("failed to delete category by id: %w", err)
+		return errors.Errorf("failed to delete expense by id: %w", err)
 	}
 
 	affectedCount, err := res.RowsAffected()
 	if err != nil {
-		return errors.Errorf("failed to get rows affected after delete category: %w", err)
+		return errors.Errorf("failed to get rows affected after delete expense: %w", err)
 	}
 
 	if affectedCount != 1 {
@@ -58,24 +58,24 @@ func DeleteCategoryByID(
 	return nil
 }
 
-func UpdateCategoryByModel(
+func UpdateExpenseByModel(
 	ctx context.Context,
 	db qrm.DB,
-	updatedCategory model.Category,
-) (*model.Category, error) {
-	tbl := table.Category
+	updatedExpense model.Expense,
+) (*model.Expense, error) {
+	tbl := table.Expense
 
 	stmt := tbl.UPDATE(tbl.MutableColumns).
-		MODEL(updatedCategory).
-		WHERE(tbl.ID.EQ(postgres.UUID(updatedCategory.ID))).
+		MODEL(updatedExpense).
+		WHERE(tbl.ID.EQ(postgres.UUID(updatedExpense.ID))).
 		RETURNING(tbl.AllColumns)
 
-	dest := []model.Category{}
+	dest := []model.Expense{}
 	err := stmt.QueryContext(ctx, db, &dest)
 	if err != nil {
 		return nil, errors.Errorf(
-			"failed to update category with id '%s': %w",
-			updatedCategory.ID,
+			"failed to update expense with id '%s': %w",
+			updatedExpense.ID,
 			err,
 		)
 	}
