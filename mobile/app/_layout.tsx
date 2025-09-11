@@ -1,6 +1,7 @@
 if (__DEV__) {
   require('../ReactotronConfig');
 }
+
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useFonts } from 'expo-font';
@@ -16,6 +17,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { DATABASE_NAME, db, seedInitialData } from '../db/drizzle';
 import migrations from '../db/generated/migrations/migrations';
 import '../utils/i18n';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RefreshKeyProvider } from '../components/contexts/RefreshKeyContext';
 import { UserProvider } from '../components/contexts/UserContext';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -28,6 +30,8 @@ SplashScreen.setOptions({
   duration: 400,
   fade: true,
 });
+
+const queryClient = new QueryClient();
 
 export default function RootLayout() {
   // database
@@ -81,36 +85,38 @@ export default function RootLayout() {
       }}
     >
       <Suspense fallback={<ActivityIndicator size="large" />}>
-        <SQLiteProvider
-          databaseName={DATABASE_NAME}
-          options={{ enableChangeListener: true }}
-          useSuspense
-        >
-          <SafeAreaProvider>
-            <GestureHandlerRootView style={{ flex: 1 }}>
-              <PaperProvider theme={paperTheme}>
-                <BottomSheetModalProvider>
-                  <UserProvider>
-                    <RefreshKeyProvider>
-                      <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen
-                          name="(tabs)"
-                          options={{ headerShown: false }}
+        <QueryClientProvider client={queryClient}>
+          <SQLiteProvider
+            databaseName={DATABASE_NAME}
+            options={{ enableChangeListener: true }}
+            useSuspense
+          >
+            <SafeAreaProvider>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <PaperProvider theme={paperTheme}>
+                  <BottomSheetModalProvider>
+                    <UserProvider>
+                      <RefreshKeyProvider>
+                        <Stack screenOptions={{ headerShown: false }}>
+                          <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                          />
+                          <Stack.Screen name="+not-found" />
+                        </Stack>
+                        <StatusBar
+                          style={colorScheme === 'dark' ? 'light' : 'dark'}
+                          translucent
+                          backgroundColor={paperTheme.colors.surface}
                         />
-                        <Stack.Screen name="+not-found" />
-                      </Stack>
-                      <StatusBar
-                        style={colorScheme === 'dark' ? 'light' : 'dark'}
-                        translucent
-                        backgroundColor={paperTheme.colors.surface}
-                      />
-                    </RefreshKeyProvider>
-                  </UserProvider>
-                </BottomSheetModalProvider>
-              </PaperProvider>
-            </GestureHandlerRootView>
-          </SafeAreaProvider>
-        </SQLiteProvider>
+                      </RefreshKeyProvider>
+                    </UserProvider>
+                  </BottomSheetModalProvider>
+                </PaperProvider>
+              </GestureHandlerRootView>
+            </SafeAreaProvider>
+          </SQLiteProvider>
+        </QueryClientProvider>
       </Suspense>
     </ErrorBoundary>
   );
