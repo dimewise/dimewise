@@ -1,3 +1,6 @@
+if (__DEV__) {
+  require('../ReactotronConfig');
+}
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useFonts } from 'expo-font';
