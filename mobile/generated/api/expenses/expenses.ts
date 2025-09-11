@@ -21,9 +21,6 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-
 import type {
   ErrorResponse,
   ExpenseCreate,
@@ -34,18 +31,24 @@ import type {
   SuccessResponse,
 } from '../../model';
 
+import { customInstance } from '../../../api/mutator/custom-instance';
+import type { ErrorType, BodyType } from '../../../api/mutator/custom-instance';
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 /**
  * Retrieves expenses for the authenticated user with optional filtering
  * @summary Get user expenses
  */
 export const getExpenses = (
   params?: GetExpensesParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<GetExpenses200>> => {
-  return axios.get(`/expenses`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<GetExpenses200>(
+    { url: `/expenses`, method: 'GET', params, signal },
+    options,
+  );
 };
 
 export const getGetExpensesQueryKey = (params?: GetExpensesParams) => {
@@ -54,20 +57,20 @@ export const getGetExpensesQueryKey = (params?: GetExpensesParams) => {
 
 export const getGetExpensesQueryOptions = <
   TData = Awaited<ReturnType<typeof getExpenses>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetExpensesParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExpenses>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetExpensesQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getExpenses>>> = ({ signal }) =>
-    getExpenses(params, { signal, ...axiosOptions });
+    getExpenses(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getExpenses>>,
@@ -77,11 +80,11 @@ export const getGetExpensesQueryOptions = <
 };
 
 export type GetExpensesQueryResult = NonNullable<Awaited<ReturnType<typeof getExpenses>>>;
-export type GetExpensesQueryError = AxiosError<ErrorResponse>;
+export type GetExpensesQueryError = ErrorType<ErrorResponse>;
 
 export function useGetExpenses<
   TData = Awaited<ReturnType<typeof getExpenses>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params: undefined | GetExpensesParams,
   options: {
@@ -94,13 +97,13 @@ export function useGetExpenses<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetExpenses<
   TData = Awaited<ReturnType<typeof getExpenses>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetExpensesParams,
   options?: {
@@ -113,18 +116,18 @@ export function useGetExpenses<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetExpenses<
   TData = Awaited<ReturnType<typeof getExpenses>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetExpensesParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExpenses>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -134,12 +137,12 @@ export function useGetExpenses<
 
 export function useGetExpenses<
   TData = Awaited<ReturnType<typeof getExpenses>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetExpensesParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExpenses>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -159,73 +162,83 @@ export function useGetExpenses<
  * @summary Create a new expense
  */
 export const postExpense = (
-  expenseCreate: ExpenseCreate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<ExpenseWithDetails>> => {
-  return axios.post(`/expenses`, expenseCreate, options);
+  expenseCreate: BodyType<ExpenseCreate>,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ExpenseWithDetails>(
+    {
+      url: `/expenses`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: expenseCreate,
+      signal,
+    },
+    options,
+  );
 };
 
 export const getPostExpenseMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postExpense>>,
     TError,
-    { data: ExpenseCreate },
+    { data: BodyType<ExpenseCreate> },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postExpense>>,
   TError,
-  { data: ExpenseCreate },
+  { data: BodyType<ExpenseCreate> },
   TContext
 > => {
   const mutationKey = ['postExpense'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postExpense>>,
-    { data: ExpenseCreate }
+    { data: BodyType<ExpenseCreate> }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postExpense(data, axiosOptions);
+    return postExpense(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
 export type PostExpenseMutationResult = NonNullable<Awaited<ReturnType<typeof postExpense>>>;
-export type PostExpenseMutationBody = ExpenseCreate;
-export type PostExpenseMutationError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>;
+export type PostExpenseMutationBody = BodyType<ExpenseCreate>;
+export type PostExpenseMutationError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Create a new expense
  */
 export const usePostExpense = <
-  TError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postExpense>>,
       TError,
-      { data: ExpenseCreate },
+      { data: BodyType<ExpenseCreate> },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof postExpense>>,
   TError,
-  { data: ExpenseCreate },
+  { data: BodyType<ExpenseCreate> },
   TContext
 > => {
   const mutationOptions = getPostExpenseMutationOptions(options);
@@ -238,9 +251,13 @@ export const usePostExpense = <
  */
 export const getExpenseById = (
   expenseId: string,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<ExpenseWithDetails>> => {
-  return axios.get(`/expenses/${expenseId}`, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ExpenseWithDetails>(
+    { url: `/expenses/${expenseId}`, method: 'GET', signal },
+    options,
+  );
 };
 
 export const getGetExpenseByIdQueryKey = (expenseId?: string) => {
@@ -249,20 +266,20 @@ export const getGetExpenseByIdQueryKey = (expenseId?: string) => {
 
 export const getGetExpenseByIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getExpenseById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   expenseId: string,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExpenseById>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetExpenseByIdQueryKey(expenseId);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getExpenseById>>> = ({ signal }) =>
-    getExpenseById(expenseId, { signal, ...axiosOptions });
+    getExpenseById(expenseId, requestOptions, signal);
 
   return { queryKey, queryFn, enabled: !!expenseId, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getExpenseById>>,
@@ -272,11 +289,11 @@ export const getGetExpenseByIdQueryOptions = <
 };
 
 export type GetExpenseByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getExpenseById>>>;
-export type GetExpenseByIdQueryError = AxiosError<ErrorResponse | ErrorResponse>;
+export type GetExpenseByIdQueryError = ErrorType<ErrorResponse | ErrorResponse>;
 
 export function useGetExpenseById<
   TData = Awaited<ReturnType<typeof getExpenseById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   expenseId: string,
   options: {
@@ -289,13 +306,13 @@ export function useGetExpenseById<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetExpenseById<
   TData = Awaited<ReturnType<typeof getExpenseById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   expenseId: string,
   options?: {
@@ -308,18 +325,18 @@ export function useGetExpenseById<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetExpenseById<
   TData = Awaited<ReturnType<typeof getExpenseById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   expenseId: string,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExpenseById>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -329,12 +346,12 @@ export function useGetExpenseById<
 
 export function useGetExpenseById<
   TData = Awaited<ReturnType<typeof getExpenseById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   expenseId: string,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getExpenseById>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -355,73 +372,81 @@ export function useGetExpenseById<
  */
 export const putExpenseById = (
   expenseId: string,
-  expenseUpdate: ExpenseUpdate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<ExpenseWithDetails>> => {
-  return axios.put(`/expenses/${expenseId}`, expenseUpdate, options);
+  expenseUpdate: BodyType<ExpenseUpdate>,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<ExpenseWithDetails>(
+    {
+      url: `/expenses/${expenseId}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      data: expenseUpdate,
+    },
+    options,
+  );
 };
 
 export const getPutExpenseByIdMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putExpenseById>>,
     TError,
-    { expenseId: string; data: ExpenseUpdate },
+    { expenseId: string; data: BodyType<ExpenseUpdate> },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putExpenseById>>,
   TError,
-  { expenseId: string; data: ExpenseUpdate },
+  { expenseId: string; data: BodyType<ExpenseUpdate> },
   TContext
 > => {
   const mutationKey = ['putExpenseById'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putExpenseById>>,
-    { expenseId: string; data: ExpenseUpdate }
+    { expenseId: string; data: BodyType<ExpenseUpdate> }
   > = (props) => {
     const { expenseId, data } = props ?? {};
 
-    return putExpenseById(expenseId, data, axiosOptions);
+    return putExpenseById(expenseId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
 export type PutExpenseByIdMutationResult = NonNullable<Awaited<ReturnType<typeof putExpenseById>>>;
-export type PutExpenseByIdMutationBody = ExpenseUpdate;
-export type PutExpenseByIdMutationError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>;
+export type PutExpenseByIdMutationBody = BodyType<ExpenseUpdate>;
+export type PutExpenseByIdMutationError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Update expense
  */
 export const usePutExpenseById = <
-  TError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putExpenseById>>,
       TError,
-      { expenseId: string; data: ExpenseUpdate },
+      { expenseId: string; data: BodyType<ExpenseUpdate> },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof putExpenseById>>,
   TError,
-  { expenseId: string; data: ExpenseUpdate },
+  { expenseId: string; data: BodyType<ExpenseUpdate> },
   TContext
 > => {
   const mutationOptions = getPutExpenseByIdMutationOptions(options);
@@ -434,13 +459,16 @@ export const usePutExpenseById = <
  */
 export const deleteExpenseById = (
   expenseId: string,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<SuccessResponse>> => {
-  return axios.delete(`/expenses/${expenseId}`, options);
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<SuccessResponse>(
+    { url: `/expenses/${expenseId}`, method: 'DELETE' },
+    options,
+  );
 };
 
 export const getDeleteExpenseByIdMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -449,7 +477,7 @@ export const getDeleteExpenseByIdMutationOptions = <
     { expenseId: string },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deleteExpenseById>>,
   TError,
@@ -457,11 +485,11 @@ export const getDeleteExpenseByIdMutationOptions = <
   TContext
 > => {
   const mutationKey = ['deleteExpenseById'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deleteExpenseById>>,
@@ -469,7 +497,7 @@ export const getDeleteExpenseByIdMutationOptions = <
   > = (props) => {
     const { expenseId } = props ?? {};
 
-    return deleteExpenseById(expenseId, axiosOptions);
+    return deleteExpenseById(expenseId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -479,13 +507,13 @@ export type DeleteExpenseByIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteExpenseById>>
 >;
 
-export type DeleteExpenseByIdMutationError = AxiosError<ErrorResponse | ErrorResponse>;
+export type DeleteExpenseByIdMutationError = ErrorType<ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Delete expense
  */
 export const useDeleteExpenseById = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
@@ -495,7 +523,7 @@ export const useDeleteExpenseById = <
       { expenseId: string },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
@@ -514,13 +542,17 @@ export const useDeleteExpenseById = <
  */
 export const postVerifyExpenseById = (
   expenseId: string,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<ExpenseWithDetails>> => {
-  return axios.post(`/expenses/${expenseId}/verify`, undefined, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ExpenseWithDetails>(
+    { url: `/expenses/${expenseId}/verify`, method: 'POST', signal },
+    options,
+  );
 };
 
 export const getPostVerifyExpenseByIdMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -529,7 +561,7 @@ export const getPostVerifyExpenseByIdMutationOptions = <
     { expenseId: string },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postVerifyExpenseById>>,
   TError,
@@ -537,11 +569,11 @@ export const getPostVerifyExpenseByIdMutationOptions = <
   TContext
 > => {
   const mutationKey = ['postVerifyExpenseById'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postVerifyExpenseById>>,
@@ -549,7 +581,7 @@ export const getPostVerifyExpenseByIdMutationOptions = <
   > = (props) => {
     const { expenseId } = props ?? {};
 
-    return postVerifyExpenseById(expenseId, axiosOptions);
+    return postVerifyExpenseById(expenseId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -559,13 +591,13 @@ export type PostVerifyExpenseByIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof postVerifyExpenseById>>
 >;
 
-export type PostVerifyExpenseByIdMutationError = AxiosError<ErrorResponse | ErrorResponse>;
+export type PostVerifyExpenseByIdMutationError = ErrorType<ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Verify expense
  */
 export const usePostVerifyExpenseById = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
@@ -575,7 +607,7 @@ export const usePostVerifyExpenseById = <
       { expenseId: string },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
