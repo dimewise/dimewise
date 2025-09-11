@@ -21,9 +21,6 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-
 import type {
   ErrorResponse,
   GetPaymentMethodsParams,
@@ -33,18 +30,24 @@ import type {
   SuccessResponse,
 } from '../../model';
 
+import { customInstance } from '../../../api/mutator/custom-instance';
+import type { ErrorType, BodyType } from '../../../api/mutator/custom-instance';
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 /**
  * Retrieves all payment methods for the authenticated user
  * @summary Get user payment methods
  */
 export const getPaymentMethods = (
   params?: GetPaymentMethodsParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PaymentMethod[]>> => {
-  return axios.get(`/payment-methods`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PaymentMethod[]>(
+    { url: `/payment-methods`, method: 'GET', params, signal },
+    options,
+  );
 };
 
 export const getGetPaymentMethodsQueryKey = (params?: GetPaymentMethodsParams) => {
@@ -53,20 +56,20 @@ export const getGetPaymentMethodsQueryKey = (params?: GetPaymentMethodsParams) =
 
 export const getGetPaymentMethodsQueryOptions = <
   TData = Awaited<ReturnType<typeof getPaymentMethods>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetPaymentMethodsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentMethods>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetPaymentMethodsQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentMethods>>> = ({ signal }) =>
-    getPaymentMethods(params, { signal, ...axiosOptions });
+    getPaymentMethods(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getPaymentMethods>>,
@@ -78,11 +81,11 @@ export const getGetPaymentMethodsQueryOptions = <
 export type GetPaymentMethodsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getPaymentMethods>>
 >;
-export type GetPaymentMethodsQueryError = AxiosError<ErrorResponse>;
+export type GetPaymentMethodsQueryError = ErrorType<ErrorResponse>;
 
 export function useGetPaymentMethods<
   TData = Awaited<ReturnType<typeof getPaymentMethods>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params: undefined | GetPaymentMethodsParams,
   options: {
@@ -95,13 +98,13 @@ export function useGetPaymentMethods<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPaymentMethods<
   TData = Awaited<ReturnType<typeof getPaymentMethods>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetPaymentMethodsParams,
   options?: {
@@ -114,18 +117,18 @@ export function useGetPaymentMethods<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPaymentMethods<
   TData = Awaited<ReturnType<typeof getPaymentMethods>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetPaymentMethodsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentMethods>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -135,12 +138,12 @@ export function useGetPaymentMethods<
 
 export function useGetPaymentMethods<
   TData = Awaited<ReturnType<typeof getPaymentMethods>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetPaymentMethodsParams,
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaymentMethods>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -160,43 +163,53 @@ export function useGetPaymentMethods<
  * @summary Create a new payment method
  */
 export const postPaymentMethod = (
-  paymentMethodCreate: PaymentMethodCreate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PaymentMethod>> => {
-  return axios.post(`/payment-methods`, paymentMethodCreate, options);
+  paymentMethodCreate: BodyType<PaymentMethodCreate>,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PaymentMethod>(
+    {
+      url: `/payment-methods`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: paymentMethodCreate,
+      signal,
+    },
+    options,
+  );
 };
 
 export const getPostPaymentMethodMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPaymentMethod>>,
     TError,
-    { data: PaymentMethodCreate },
+    { data: BodyType<PaymentMethodCreate> },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postPaymentMethod>>,
   TError,
-  { data: PaymentMethodCreate },
+  { data: BodyType<PaymentMethodCreate> },
   TContext
 > => {
   const mutationKey = ['postPaymentMethod'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postPaymentMethod>>,
-    { data: PaymentMethodCreate }
+    { data: BodyType<PaymentMethodCreate> }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postPaymentMethod(data, axiosOptions);
+    return postPaymentMethod(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -205,30 +218,30 @@ export const getPostPaymentMethodMutationOptions = <
 export type PostPaymentMethodMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPaymentMethod>>
 >;
-export type PostPaymentMethodMutationBody = PaymentMethodCreate;
-export type PostPaymentMethodMutationError = AxiosError<ErrorResponse | ErrorResponse>;
+export type PostPaymentMethodMutationBody = BodyType<PaymentMethodCreate>;
+export type PostPaymentMethodMutationError = ErrorType<ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Create a new payment method
  */
 export const usePostPaymentMethod = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postPaymentMethod>>,
       TError,
-      { data: PaymentMethodCreate },
+      { data: BodyType<PaymentMethodCreate> },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof postPaymentMethod>>,
   TError,
-  { data: PaymentMethodCreate },
+  { data: BodyType<PaymentMethodCreate> },
   TContext
 > => {
   const mutationOptions = getPostPaymentMethodMutationOptions(options);
@@ -241,9 +254,13 @@ export const usePostPaymentMethod = <
  */
 export const getPaymentMethodById = (
   paymentMethodId: string,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PaymentMethod>> => {
-  return axios.get(`/payment-methods/${paymentMethodId}`, options);
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PaymentMethod>(
+    { url: `/payment-methods/${paymentMethodId}`, method: 'GET', signal },
+    options,
+  );
 };
 
 export const getGetPaymentMethodByIdQueryKey = (paymentMethodId?: string) => {
@@ -252,22 +269,22 @@ export const getGetPaymentMethodByIdQueryKey = (paymentMethodId?: string) => {
 
 export const getGetPaymentMethodByIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getPaymentMethodById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   paymentMethodId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPaymentMethodById>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetPaymentMethodByIdQueryKey(paymentMethodId);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaymentMethodById>>> = ({ signal }) =>
-    getPaymentMethodById(paymentMethodId, { signal, ...axiosOptions });
+    getPaymentMethodById(paymentMethodId, requestOptions, signal);
 
   return { queryKey, queryFn, enabled: !!paymentMethodId, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getPaymentMethodById>>,
@@ -279,11 +296,11 @@ export const getGetPaymentMethodByIdQueryOptions = <
 export type GetPaymentMethodByIdQueryResult = NonNullable<
   Awaited<ReturnType<typeof getPaymentMethodById>>
 >;
-export type GetPaymentMethodByIdQueryError = AxiosError<ErrorResponse | ErrorResponse>;
+export type GetPaymentMethodByIdQueryError = ErrorType<ErrorResponse | ErrorResponse>;
 
 export function useGetPaymentMethodById<
   TData = Awaited<ReturnType<typeof getPaymentMethodById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   paymentMethodId: string,
   options: {
@@ -298,13 +315,13 @@ export function useGetPaymentMethodById<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPaymentMethodById<
   TData = Awaited<ReturnType<typeof getPaymentMethodById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   paymentMethodId: string,
   options?: {
@@ -319,20 +336,20 @@ export function useGetPaymentMethodById<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetPaymentMethodById<
   TData = Awaited<ReturnType<typeof getPaymentMethodById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   paymentMethodId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPaymentMethodById>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -342,14 +359,14 @@ export function useGetPaymentMethodById<
 
 export function useGetPaymentMethodById<
   TData = Awaited<ReturnType<typeof getPaymentMethodById>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   paymentMethodId: string,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getPaymentMethodById>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -370,43 +387,51 @@ export function useGetPaymentMethodById<
  */
 export const putPaymentMethodById = (
   paymentMethodId: string,
-  paymentMethodUpdate: PaymentMethodUpdate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PaymentMethod>> => {
-  return axios.put(`/payment-methods/${paymentMethodId}`, paymentMethodUpdate, options);
+  paymentMethodUpdate: BodyType<PaymentMethodUpdate>,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<PaymentMethod>(
+    {
+      url: `/payment-methods/${paymentMethodId}`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      data: paymentMethodUpdate,
+    },
+    options,
+  );
 };
 
 export const getPutPaymentMethodByIdMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putPaymentMethodById>>,
     TError,
-    { paymentMethodId: string; data: PaymentMethodUpdate },
+    { paymentMethodId: string; data: BodyType<PaymentMethodUpdate> },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putPaymentMethodById>>,
   TError,
-  { paymentMethodId: string; data: PaymentMethodUpdate },
+  { paymentMethodId: string; data: BodyType<PaymentMethodUpdate> },
   TContext
 > => {
   const mutationKey = ['putPaymentMethodById'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putPaymentMethodById>>,
-    { paymentMethodId: string; data: PaymentMethodUpdate }
+    { paymentMethodId: string; data: BodyType<PaymentMethodUpdate> }
   > = (props) => {
     const { paymentMethodId, data } = props ?? {};
 
-    return putPaymentMethodById(paymentMethodId, data, axiosOptions);
+    return putPaymentMethodById(paymentMethodId, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -415,8 +440,8 @@ export const getPutPaymentMethodByIdMutationOptions = <
 export type PutPaymentMethodByIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof putPaymentMethodById>>
 >;
-export type PutPaymentMethodByIdMutationBody = PaymentMethodUpdate;
-export type PutPaymentMethodByIdMutationError = AxiosError<
+export type PutPaymentMethodByIdMutationBody = BodyType<PaymentMethodUpdate>;
+export type PutPaymentMethodByIdMutationError = ErrorType<
   ErrorResponse | ErrorResponse | ErrorResponse
 >;
 
@@ -424,23 +449,23 @@ export type PutPaymentMethodByIdMutationError = AxiosError<
  * @summary Update payment method
  */
 export const usePutPaymentMethodById = <
-  TError = AxiosError<ErrorResponse | ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putPaymentMethodById>>,
       TError,
-      { paymentMethodId: string; data: PaymentMethodUpdate },
+      { paymentMethodId: string; data: BodyType<PaymentMethodUpdate> },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof putPaymentMethodById>>,
   TError,
-  { paymentMethodId: string; data: PaymentMethodUpdate },
+  { paymentMethodId: string; data: BodyType<PaymentMethodUpdate> },
   TContext
 > => {
   const mutationOptions = getPutPaymentMethodByIdMutationOptions(options);
@@ -453,13 +478,16 @@ export const usePutPaymentMethodById = <
  */
 export const deletePaymentMethodById = (
   paymentMethodId: string,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<SuccessResponse>> => {
-  return axios.delete(`/payment-methods/${paymentMethodId}`, options);
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<SuccessResponse>(
+    { url: `/payment-methods/${paymentMethodId}`, method: 'DELETE' },
+    options,
+  );
 };
 
 export const getDeletePaymentMethodByIdMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
@@ -468,7 +496,7 @@ export const getDeletePaymentMethodByIdMutationOptions = <
     { paymentMethodId: string },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof deletePaymentMethodById>>,
   TError,
@@ -476,11 +504,11 @@ export const getDeletePaymentMethodByIdMutationOptions = <
   TContext
 > => {
   const mutationKey = ['deletePaymentMethodById'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof deletePaymentMethodById>>,
@@ -488,7 +516,7 @@ export const getDeletePaymentMethodByIdMutationOptions = <
   > = (props) => {
     const { paymentMethodId } = props ?? {};
 
-    return deletePaymentMethodById(paymentMethodId, axiosOptions);
+    return deletePaymentMethodById(paymentMethodId, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -498,13 +526,13 @@ export type DeletePaymentMethodByIdMutationResult = NonNullable<
   Awaited<ReturnType<typeof deletePaymentMethodById>>
 >;
 
-export type DeletePaymentMethodByIdMutationError = AxiosError<ErrorResponse | ErrorResponse>;
+export type DeletePaymentMethodByIdMutationError = ErrorType<ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Delete payment method
  */
 export const useDeletePaymentMethodById = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
@@ -514,7 +542,7 @@ export const useDeletePaymentMethodById = <
       { paymentMethodId: string },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<

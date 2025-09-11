@@ -11,6 +11,12 @@ export default defineConfig({
       schemas: './generated/model',
       client: 'react-query',
       mock: true,
+      override: {
+        mutator: {
+          path: './api/mutator/custom-instance.ts',
+          name: 'customInstance',
+        },
+      },
     },
     hooks: {
       afterAllFilesWrite: 'bunx biome format --write .',

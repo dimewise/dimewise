@@ -21,17 +21,22 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-
 import type { ErrorResponse, User, UserCreate, UserUpdate } from '../../model';
+
+import { customInstance } from '../../../api/mutator/custom-instance';
+import type { ErrorType, BodyType } from '../../../api/mutator/custom-instance';
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
  * Retrieves the profile of the currently authenticated user
  * @summary Get current user profile
  */
-export const getMeUser = (options?: AxiosRequestConfig): Promise<AxiosResponse<User>> => {
-  return axios.get(`/users/me`, options);
+export const getMeUser = (
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<User>({ url: `/users/me`, method: 'GET', signal }, options);
 };
 
 export const getGetMeUserQueryKey = () => {
@@ -40,17 +45,17 @@ export const getGetMeUserQueryKey = () => {
 
 export const getGetMeUserQueryOptions = <
   TData = Awaited<ReturnType<typeof getMeUser>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(options?: {
   query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeUser>>, TError, TData>>;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetMeUserQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeUser>>> = ({ signal }) =>
-    getMeUser({ signal, ...axiosOptions });
+    getMeUser(requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getMeUser>>,
@@ -60,11 +65,11 @@ export const getGetMeUserQueryOptions = <
 };
 
 export type GetMeUserQueryResult = NonNullable<Awaited<ReturnType<typeof getMeUser>>>;
-export type GetMeUserQueryError = AxiosError<ErrorResponse | ErrorResponse>;
+export type GetMeUserQueryError = ErrorType<ErrorResponse | ErrorResponse>;
 
 export function useGetMeUser<
   TData = Awaited<ReturnType<typeof getMeUser>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   options: {
     query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeUser>>, TError, TData>> &
@@ -76,13 +81,13 @@ export function useGetMeUser<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetMeUser<
   TData = Awaited<ReturnType<typeof getMeUser>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeUser>>, TError, TData>> &
@@ -94,17 +99,17 @@ export function useGetMeUser<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetMeUser<
   TData = Awaited<ReturnType<typeof getMeUser>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeUser>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -114,11 +119,11 @@ export function useGetMeUser<
 
 export function useGetMeUser<
   TData = Awaited<ReturnType<typeof getMeUser>>,
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
 >(
   options?: {
     query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMeUser>>, TError, TData>>;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -138,73 +143,83 @@ export function useGetMeUser<
  * @summary Create a new user
  */
 export const postMeUser = (
-  userCreate: UserCreate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<User>> => {
-  return axios.post(`/users/me`, userCreate, options);
+  userCreate: BodyType<UserCreate>,
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<User>(
+    {
+      url: `/users/me`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      data: userCreate,
+      signal,
+    },
+    options,
+  );
 };
 
 export const getPostMeUserMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postMeUser>>,
     TError,
-    { data: UserCreate },
+    { data: BodyType<UserCreate> },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof postMeUser>>,
   TError,
-  { data: UserCreate },
+  { data: BodyType<UserCreate> },
   TContext
 > => {
   const mutationKey = ['postMeUser'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof postMeUser>>,
-    { data: UserCreate }
+    { data: BodyType<UserCreate> }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postMeUser(data, axiosOptions);
+    return postMeUser(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
 export type PostMeUserMutationResult = NonNullable<Awaited<ReturnType<typeof postMeUser>>>;
-export type PostMeUserMutationBody = UserCreate;
-export type PostMeUserMutationError = AxiosError<ErrorResponse | ErrorResponse>;
+export type PostMeUserMutationBody = BodyType<UserCreate>;
+export type PostMeUserMutationError = ErrorType<ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Create a new user
  */
 export const usePostMeUser = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postMeUser>>,
       TError,
-      { data: UserCreate },
+      { data: BodyType<UserCreate> },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof postMeUser>>,
   TError,
-  { data: UserCreate },
+  { data: BodyType<UserCreate> },
   TContext
 > => {
   const mutationOptions = getPostMeUserMutationOptions(options);
@@ -216,73 +231,78 @@ export const usePostMeUser = <
  * @summary Update current user profile
  */
 export const putMeUser = (
-  userUpdate: UserUpdate,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<User>> => {
-  return axios.put(`/users/me`, userUpdate, options);
+  userUpdate: BodyType<UserUpdate>,
+  options?: SecondParameter<typeof customInstance>,
+) => {
+  return customInstance<User>(
+    {
+      url: `/users/me`,
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      data: userUpdate,
+    },
+    options,
+  );
 };
 
 export const getPutMeUserMutationOptions = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
+  TError = ErrorType<ErrorResponse | ErrorResponse>,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof putMeUser>>,
     TError,
-    { data: UserUpdate },
+    { data: BodyType<UserUpdate> },
     TContext
   >;
-  axios?: AxiosRequestConfig;
+  request?: SecondParameter<typeof customInstance>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof putMeUser>>,
   TError,
-  { data: UserUpdate },
+  { data: BodyType<UserUpdate> },
   TContext
 > => {
   const mutationKey = ['putMeUser'];
-  const { mutation: mutationOptions, axios: axiosOptions } = options
+  const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey
       ? options
       : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, axios: undefined };
+    : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof putMeUser>>,
-    { data: UserUpdate }
+    { data: BodyType<UserUpdate> }
   > = (props) => {
     const { data } = props ?? {};
 
-    return putMeUser(data, axiosOptions);
+    return putMeUser(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
 export type PutMeUserMutationResult = NonNullable<Awaited<ReturnType<typeof putMeUser>>>;
-export type PutMeUserMutationBody = UserUpdate;
-export type PutMeUserMutationError = AxiosError<ErrorResponse | ErrorResponse>;
+export type PutMeUserMutationBody = BodyType<UserUpdate>;
+export type PutMeUserMutationError = ErrorType<ErrorResponse | ErrorResponse>;
 
 /**
  * @summary Update current user profile
  */
-export const usePutMeUser = <
-  TError = AxiosError<ErrorResponse | ErrorResponse>,
-  TContext = unknown,
->(
+export const usePutMeUser = <TError = ErrorType<ErrorResponse | ErrorResponse>, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof putMeUser>>,
       TError,
-      { data: UserUpdate },
+      { data: BodyType<UserUpdate> },
       TContext
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof putMeUser>>,
   TError,
-  { data: UserUpdate },
+  { data: BodyType<UserUpdate> },
   TContext
 > => {
   const mutationOptions = getPutMeUserMutationOptions(options);

@@ -18,9 +18,6 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query';
 
-import axios from 'axios';
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-
 import type {
   BudgetOverview,
   CategoryBreakdown,
@@ -33,18 +30,24 @@ import type {
   PaymentMethodBreakdown,
 } from '../../model';
 
+import { customInstance } from '../../../api/mutator/custom-instance';
+import type { ErrorType } from '../../../api/mutator/custom-instance';
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
 /**
  * Retrieves budget overview for the specified month and year
  * @summary Get budget overview
  */
 export const getAnalyticsBudgetOverview = (
   params?: GetAnalyticsBudgetOverviewParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<BudgetOverview>> => {
-  return axios.get(`/analytics/budget-overview`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<BudgetOverview>(
+    { url: `/analytics/budget-overview`, method: 'GET', params, signal },
+    options,
+  );
 };
 
 export const getGetAnalyticsBudgetOverviewQueryKey = (
@@ -55,23 +58,23 @@ export const getGetAnalyticsBudgetOverviewQueryKey = (
 
 export const getGetAnalyticsBudgetOverviewQueryOptions = <
   TData = Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsBudgetOverviewParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetAnalyticsBudgetOverviewQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>> = ({
     signal,
-  }) => getAnalyticsBudgetOverview(params, { signal, ...axiosOptions });
+  }) => getAnalyticsBudgetOverview(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>,
@@ -83,11 +86,11 @@ export const getGetAnalyticsBudgetOverviewQueryOptions = <
 export type GetAnalyticsBudgetOverviewQueryResult = NonNullable<
   Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>
 >;
-export type GetAnalyticsBudgetOverviewQueryError = AxiosError<ErrorResponse>;
+export type GetAnalyticsBudgetOverviewQueryError = ErrorType<ErrorResponse>;
 
 export function useGetAnalyticsBudgetOverview<
   TData = Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params: undefined | GetAnalyticsBudgetOverviewParams,
   options: {
@@ -102,13 +105,13 @@ export function useGetAnalyticsBudgetOverview<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsBudgetOverview<
   TData = Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsBudgetOverviewParams,
   options?: {
@@ -123,20 +126,20 @@ export function useGetAnalyticsBudgetOverview<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsBudgetOverview<
   TData = Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsBudgetOverviewParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -146,14 +149,14 @@ export function useGetAnalyticsBudgetOverview<
 
 export function useGetAnalyticsBudgetOverview<
   TData = Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsBudgetOverviewParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsBudgetOverview>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -174,12 +177,13 @@ export function useGetAnalyticsBudgetOverview<
  */
 export const getAnalyticsCategoriesBreakdown = (
   params?: GetAnalyticsCategoriesBreakdownParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<CategoryBreakdown[]>> => {
-  return axios.get(`/analytics/categories-breakdown`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<CategoryBreakdown[]>(
+    { url: `/analytics/categories-breakdown`, method: 'GET', params, signal },
+    options,
+  );
 };
 
 export const getGetAnalyticsCategoriesBreakdownQueryKey = (
@@ -190,23 +194,23 @@ export const getGetAnalyticsCategoriesBreakdownQueryKey = (
 
 export const getGetAnalyticsCategoriesBreakdownQueryOptions = <
   TData = Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsCategoriesBreakdownParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetAnalyticsCategoriesBreakdownQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>> = ({
     signal,
-  }) => getAnalyticsCategoriesBreakdown(params, { signal, ...axiosOptions });
+  }) => getAnalyticsCategoriesBreakdown(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>,
@@ -218,11 +222,11 @@ export const getGetAnalyticsCategoriesBreakdownQueryOptions = <
 export type GetAnalyticsCategoriesBreakdownQueryResult = NonNullable<
   Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>
 >;
-export type GetAnalyticsCategoriesBreakdownQueryError = AxiosError<ErrorResponse>;
+export type GetAnalyticsCategoriesBreakdownQueryError = ErrorType<ErrorResponse>;
 
 export function useGetAnalyticsCategoriesBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params: undefined | GetAnalyticsCategoriesBreakdownParams,
   options: {
@@ -237,13 +241,13 @@ export function useGetAnalyticsCategoriesBreakdown<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsCategoriesBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsCategoriesBreakdownParams,
   options?: {
@@ -258,20 +262,20 @@ export function useGetAnalyticsCategoriesBreakdown<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsCategoriesBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsCategoriesBreakdownParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -281,14 +285,14 @@ export function useGetAnalyticsCategoriesBreakdown<
 
 export function useGetAnalyticsCategoriesBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsCategoriesBreakdownParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsCategoriesBreakdown>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -309,12 +313,13 @@ export function useGetAnalyticsCategoriesBreakdown<
  */
 export const getAnalyticsPaymentMethodsBreakdown = (
   params?: GetAnalyticsPaymentMethodsBreakdownParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<PaymentMethodBreakdown[]>> => {
-  return axios.get(`/analytics/payment-methods-breakdown`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<PaymentMethodBreakdown[]>(
+    { url: `/analytics/payment-methods-breakdown`, method: 'GET', params, signal },
+    options,
+  );
 };
 
 export const getGetAnalyticsPaymentMethodsBreakdownQueryKey = (
@@ -325,7 +330,7 @@ export const getGetAnalyticsPaymentMethodsBreakdownQueryKey = (
 
 export const getGetAnalyticsPaymentMethodsBreakdownQueryOptions = <
   TData = Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsPaymentMethodsBreakdownParams,
   options?: {
@@ -336,16 +341,16 @@ export const getGetAnalyticsPaymentMethodsBreakdownQueryOptions = <
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetAnalyticsPaymentMethodsBreakdownQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>> = ({
     signal,
-  }) => getAnalyticsPaymentMethodsBreakdown(params, { signal, ...axiosOptions });
+  }) => getAnalyticsPaymentMethodsBreakdown(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>,
@@ -357,11 +362,11 @@ export const getGetAnalyticsPaymentMethodsBreakdownQueryOptions = <
 export type GetAnalyticsPaymentMethodsBreakdownQueryResult = NonNullable<
   Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>
 >;
-export type GetAnalyticsPaymentMethodsBreakdownQueryError = AxiosError<ErrorResponse>;
+export type GetAnalyticsPaymentMethodsBreakdownQueryError = ErrorType<ErrorResponse>;
 
 export function useGetAnalyticsPaymentMethodsBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params: undefined | GetAnalyticsPaymentMethodsBreakdownParams,
   options: {
@@ -380,13 +385,13 @@ export function useGetAnalyticsPaymentMethodsBreakdown<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsPaymentMethodsBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsPaymentMethodsBreakdownParams,
   options?: {
@@ -405,13 +410,13 @@ export function useGetAnalyticsPaymentMethodsBreakdown<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsPaymentMethodsBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsPaymentMethodsBreakdownParams,
   options?: {
@@ -422,7 +427,7 @@ export function useGetAnalyticsPaymentMethodsBreakdown<
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -432,7 +437,7 @@ export function useGetAnalyticsPaymentMethodsBreakdown<
 
 export function useGetAnalyticsPaymentMethodsBreakdown<
   TData = Awaited<ReturnType<typeof getAnalyticsPaymentMethodsBreakdown>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsPaymentMethodsBreakdownParams,
   options?: {
@@ -443,7 +448,7 @@ export function useGetAnalyticsPaymentMethodsBreakdown<
         TData
       >
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -464,12 +469,13 @@ export function useGetAnalyticsPaymentMethodsBreakdown<
  */
 export const getAnalyticsRecentTransactions = (
   params?: GetAnalyticsRecentTransactionsParams,
-  options?: AxiosRequestConfig,
-): Promise<AxiosResponse<ExpenseWithDetails[]>> => {
-  return axios.get(`/analytics/recent-transactions`, {
-    ...options,
-    params: { ...params, ...options?.params },
-  });
+  options?: SecondParameter<typeof customInstance>,
+  signal?: AbortSignal,
+) => {
+  return customInstance<ExpenseWithDetails[]>(
+    { url: `/analytics/recent-transactions`, method: 'GET', params, signal },
+    options,
+  );
 };
 
 export const getGetAnalyticsRecentTransactionsQueryKey = (
@@ -480,23 +486,23 @@ export const getGetAnalyticsRecentTransactionsQueryKey = (
 
 export const getGetAnalyticsRecentTransactionsQueryOptions = <
   TData = Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsRecentTransactionsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
 ) => {
-  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+  const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey = queryOptions?.queryKey ?? getGetAnalyticsRecentTransactionsQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>> = ({
     signal,
-  }) => getAnalyticsRecentTransactions(params, { signal, ...axiosOptions });
+  }) => getAnalyticsRecentTransactions(params, requestOptions, signal);
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>,
@@ -508,11 +514,11 @@ export const getGetAnalyticsRecentTransactionsQueryOptions = <
 export type GetAnalyticsRecentTransactionsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>
 >;
-export type GetAnalyticsRecentTransactionsQueryError = AxiosError<ErrorResponse>;
+export type GetAnalyticsRecentTransactionsQueryError = ErrorType<ErrorResponse>;
 
 export function useGetAnalyticsRecentTransactions<
   TData = Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params: undefined | GetAnalyticsRecentTransactionsParams,
   options: {
@@ -527,13 +533,13 @@ export function useGetAnalyticsRecentTransactions<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsRecentTransactions<
   TData = Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsRecentTransactionsParams,
   options?: {
@@ -548,20 +554,20 @@ export function useGetAnalyticsRecentTransactions<
         >,
         'initialData'
       >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 export function useGetAnalyticsRecentTransactions<
   TData = Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsRecentTransactionsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
@@ -571,14 +577,14 @@ export function useGetAnalyticsRecentTransactions<
 
 export function useGetAnalyticsRecentTransactions<
   TData = Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>,
-  TError = AxiosError<ErrorResponse>,
+  TError = ErrorType<ErrorResponse>,
 >(
   params?: GetAnalyticsRecentTransactionsParams,
   options?: {
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsRecentTransactions>>, TError, TData>
     >;
-    axios?: AxiosRequestConfig;
+    request?: SecondParameter<typeof customInstance>;
   },
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
