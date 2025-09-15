@@ -7,10 +7,9 @@
  */
 import { faker } from '@faker-js/faker';
 
-import { HttpResponse, delay, http } from 'msw';
-
-import { CurrencyType, PaymentMethodType } from '../../model';
+import { delay, HttpResponse, http } from 'msw';
 import type { ExpenseWithDetails, GetExpenses200, SuccessResponse } from '../../model';
+import { CurrencyType, PaymentMethodType } from '../../model';
 
 export const getGetExpensesResponseMock = (): GetExpenses200 => ({
   ...{

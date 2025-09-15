@@ -7,10 +7,9 @@
  */
 import { faker } from '@faker-js/faker';
 
-import { HttpResponse, delay, http } from 'msw';
-
-import { CurrencyType, SupportedLanguage } from '../../model';
+import { delay, HttpResponse, http } from 'msw';
 import type { User } from '../../model';
+import { CurrencyType, SupportedLanguage } from '../../model';
 
 export const getGetMeUserResponseMock = (): User => ({
   ...{
