@@ -7,10 +7,9 @@
  */
 import { faker } from '@faker-js/faker';
 
-import { HttpResponse, delay, http } from 'msw';
-
-import { CurrencyType } from '../../model';
+import { delay, HttpResponse, http } from 'msw';
 import type { Category, SuccessResponse } from '../../model';
+import { CurrencyType } from '../../model';
 
 export const getGetCategoriesResponseMock = (): Category[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({

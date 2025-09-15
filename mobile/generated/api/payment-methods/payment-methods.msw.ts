@@ -7,10 +7,9 @@
  */
 import { faker } from '@faker-js/faker';
 
-import { HttpResponse, delay, http } from 'msw';
-
-import { PaymentMethodType } from '../../model';
+import { delay, HttpResponse, http } from 'msw';
 import type { PaymentMethod, SuccessResponse } from '../../model';
+import { PaymentMethodType } from '../../model';
 
 export const getGetPaymentMethodsResponseMock = (): PaymentMethod[] =>
   Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({

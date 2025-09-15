@@ -7,15 +7,14 @@
  */
 import { faker } from '@faker-js/faker';
 
-import { HttpResponse, delay, http } from 'msw';
-
-import { CurrencyType, PaymentMethodType } from '../../model';
+import { delay, HttpResponse, http } from 'msw';
 import type {
   BudgetOverview,
   CategoryBreakdown,
   ExpenseWithDetails,
   PaymentMethodBreakdown,
 } from '../../model';
+import { CurrencyType, PaymentMethodType } from '../../model';
 
 export const getGetAnalyticsBudgetOverviewResponseMock = (
   overrideResponse: Partial<BudgetOverview> = {},

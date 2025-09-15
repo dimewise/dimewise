@@ -5,7 +5,7 @@
  * RESTful API for the Dimewise expense tracking application
  * OpenAPI spec version: 1.0.0
  */
-import { useQuery } from '@tanstack/react-query';
+
 import type {
   DataTag,
   DefinedInitialDataOptions,
@@ -17,7 +17,10 @@ import type {
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import type { ErrorType } from '../../../api/mutator/custom-instance';
 
+import { customInstance } from '../../../api/mutator/custom-instance';
 import type {
   BudgetOverview,
   CategoryBreakdown,
@@ -29,9 +32,6 @@ import type {
   GetAnalyticsRecentTransactionsParams,
   PaymentMethodBreakdown,
 } from '../../model';
-
-import { customInstance } from '../../../api/mutator/custom-instance';
-import type { ErrorType } from '../../../api/mutator/custom-instance';
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
