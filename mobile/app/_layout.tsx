@@ -3,6 +3,7 @@ import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { Slot } from 'expo-router';
 import { Provider } from 'react-redux';
 import { store } from '@/store/store';
+import '../utils/localization/i18n';
 
 export default function RootLayout() {
   return (
