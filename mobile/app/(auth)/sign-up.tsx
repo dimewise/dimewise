@@ -1,110 +1,256 @@
 import { useSignUp } from '@clerk/clerk-expo';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from 'expo-router';
-import * as React from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import * as z from 'zod';
+
+// Zod schema for sign-up validation
+const signUpSchema = z.object({
+  emailAddress: z.string().email('Please enter a valid email address'),
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must include an uppercase letter')
+    .regex(/[a-z]/, 'Password must include a lowercase letter')
+    .regex(/\d/, 'Password must include a number'),
+});
+
+const verificationSchema = z.object({
+  code: z.string().min(1, 'Verification code is required'),
+});
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [pendingVerification, setPendingVerification] = React.useState(false);
-  const [code, setCode] = React.useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
 
-  // Handle submission of sign-up form
-  const onSignUpPress = async () => {
-    if (!isLoaded) return;
+  // Form for email and password
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(signUpSchema),
+  });
 
-    // Start sign-up process using email and password provided
-    try {
-      await signUp.create({
-        emailAddress,
-        password,
-      });
+  // Form for verification code
+  const {
+    control: codeControl,
+    handleSubmit: handleVerifySubmit,
+    formState: { errors: codeErrors },
+  } = useForm({
+    resolver: zodResolver(verificationSchema),
+  });
 
-      // Send user an email with verification code
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+  // Sign-up submission handler
+  const onSignUpPress = useCallback(
+    async (data) => {
+      setApiError('');
+      if (!isLoaded || loading) return;
 
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
-      setPendingVerification(true);
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
-    }
-  };
-
-  // Handle submission of verification form
-  const onVerifyPress = async () => {
-    if (!isLoaded) return;
-
-    try {
-      // Use the code the user provided to attempt verification
-      const signUpAttempt = await signUp.attemptEmailAddressVerification({
-        code,
-      });
-
-      // If verification was completed, set the session to active
-      // and redirect the user
-      if (signUpAttempt.status === 'complete') {
-        await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace('/');
-      } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2));
+      setLoading(true);
+      try {
+        await signUp.create({
+          emailAddress: data.emailAddress,
+          password: data.password,
+        });
+        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+        setPendingVerification(true);
+      } catch (err) {
+        setApiError('Failed to create account or send verification email');
+        console.error(JSON.stringify(err, null, 2));
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2));
-    }
-  };
+    },
+    [isLoaded, loading, signUp],
+  );
+
+  // Verification code submission handler
+  const onVerifyPress = useCallback(
+    async (data) => {
+      setApiError('');
+      if (!isLoaded || loading) return;
+
+      setLoading(true);
+      try {
+        const signUpAttempt = await signUp.attemptEmailAddressVerification({
+          code: data.code,
+        });
+        if (signUpAttempt.status === 'complete') {
+          await setActive({ session: signUpAttempt.createdSessionId });
+          router.replace('/');
+        } else {
+          setApiError('Additional verification steps required');
+          console.error(JSON.stringify(signUpAttempt, null, 2));
+        }
+      } catch (err) {
+        setApiError('Verification failed: Invalid code or network error');
+        console.error(JSON.stringify(err, null, 2));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isLoaded, loading, signUp, setActive, router],
+  );
 
   if (pendingVerification) {
     return (
-      <>
-        <Text>Verify your email</Text>
-        <TextInput
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={(code) => setCode(code)}
+      <View style={styles.container}>
+        <Text style={styles.title}>Verify your email</Text>
+
+        <Controller
+          control={codeControl}
+          name="code"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextInput
+              style={[styles.input, codeErrors.code && styles.inputError]}
+              placeholder="Enter your verification code"
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+              editable={!loading}
+            />
+          )}
         />
-        <TouchableOpacity onPress={onVerifyPress}>
-          <Text>Verify</Text>
+        {codeErrors.code && <Text style={styles.errorText}>{codeErrors.code.message}</Text>}
+
+        {!!apiError && <Text style={styles.errorText}>{apiError}</Text>}
+
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleVerifySubmit(onVerifyPress)}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.buttonText}>Verify</Text>
+          )}
         </TouchableOpacity>
-      </>
+      </View>
     );
   }
 
   return (
-    <View>
-      <>
-        <Text>Sign up</Text>
-        <TextInput
-          autoCapitalize="none"
-          value={emailAddress}
-          placeholder="Enter email"
-          onChangeText={(email) => setEmailAddress(email)}
-        />
-        <TextInput
-          value={password}
-          placeholder="Enter password"
-          secureTextEntry={true}
-          onChangeText={(password) => setPassword(password)}
-        />
-        <TouchableOpacity onPress={onSignUpPress}>
-          <Text>Continue</Text>
-        </TouchableOpacity>
-        <View style={{ display: 'flex', flexDirection: 'row', gap: 3 }}>
-          <Text>Already have an account?</Text>
-          <Link href="/sign-in">
-            <Text>Sign in</Text>
-          </Link>
-        </View>
-      </>
+    <View style={styles.container}>
+      <Text style={styles.title}>Sign up</Text>
+
+      <Controller
+        control={control}
+        name="emailAddress"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            style={[styles.input, errors.emailAddress && styles.inputError]}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholder="Enter email"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            editable={!loading}
+          />
+        )}
+      />
+      {errors.emailAddress && <Text style={styles.errorText}>{errors.emailAddress.message}</Text>}
+
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextInput
+            style={[styles.input, errors.password && styles.inputError]}
+            placeholder="Enter password"
+            secureTextEntry
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            editable={!loading}
+          />
+        )}
+      />
+      {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+
+      {!!apiError && <Text style={styles.errorText}>{apiError}</Text>}
+
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleSubmit(onSignUpPress)}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#FFF" />
+        ) : (
+          <Text style={styles.buttonText}>Continue</Text>
+        )}
+      </TouchableOpacity>
+
+      <View style={styles.linkContainer}>
+        <Text>Already have an account? </Text>
+        <Link href="/sign-in">
+          <Text style={styles.linkText}>Sign in</Text>
+        </Link>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    flex: 1,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 24,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    padding: 12,
+    marginBottom: 6,
+    fontSize: 16,
+  },
+  inputError: {
+    borderColor: 'red',
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 14,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  buttonDisabled: {
+    backgroundColor: '#a0a0a0',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 16,
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 12,
+  },
+  linkContainer: {
+    marginTop: 16,
+    flexDirection: 'row',
+  },
+  linkText: {
+    color: '#007AFF',
+  },
+});
