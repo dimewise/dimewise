@@ -19,8 +19,8 @@ export const getDeviceLanguage = (): string => {
 };
 
 export const resources = {
-  en: en,
-  ja: ja,
+  en: { translation: en },
+  ja: { translation: ja },
 };
 
 // Construct i18n instance
