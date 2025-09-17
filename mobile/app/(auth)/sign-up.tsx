@@ -1,35 +1,30 @@
 import { useSignUp } from '@clerk/clerk-expo';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import { Trans, useTranslation } from 'react-i18next';
+import { ActivityIndicator, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Logo from '@/assets/icons/splash-icon-light.png';
+import { FormSubmitButton } from '@/components/forms/FormSubmitButton';
+import { FormTextInput } from '@/components/forms/FormTextInput';
 import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import * as z from 'zod';
-
-// Zod schema for sign-up validation
-const signUpSchema = z.object({
-  emailAddress: z.string().email('Please enter a valid email address'),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must include an uppercase letter')
-    .regex(/[a-z]/, 'Password must include a lowercase letter')
-    .regex(/\d/, 'Password must include a number'),
-});
-
-const verificationSchema = z.object({
-  code: z.string().min(1, 'Verification code is required'),
-});
+  createSignUpSchema,
+  createVerificationSchema,
+  type signUpData,
+  type verificationData,
+} from '@/components/forms/schemas/auth';
+import { AuthLayout } from '@/components/layouts/AuthLayout';
+import { colors } from '@/theme/colors';
+import { sharedStyles } from '@/theme/stylesheets';
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [pendingVerification, setPendingVerification] = useState(false);
@@ -42,7 +37,7 @@ export default function SignUpScreen() {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(signUpSchema),
+    resolver: zodResolver(createSignUpSchema(t)),
   });
 
   // Form for verification code
@@ -51,12 +46,12 @@ export default function SignUpScreen() {
     handleSubmit: handleVerifySubmit,
     formState: { errors: codeErrors },
   } = useForm({
-    resolver: zodResolver(verificationSchema),
+    resolver: zodResolver(createVerificationSchema(t)),
   });
 
   // Sign-up submission handler
   const onSignUpPress = useCallback(
-    async (data) => {
+    async (data: signUpData) => {
       setApiError('');
       if (!isLoaded || loading) return;
 
@@ -80,7 +75,7 @@ export default function SignUpScreen() {
 
   // Verification code submission handler
   const onVerifyPress = useCallback(
-    async (data) => {
+    async (data: verificationData) => {
       setApiError('');
       if (!isLoaded || loading) return;
 
@@ -106,151 +101,228 @@ export default function SignUpScreen() {
     [isLoaded, loading, signUp, setActive, router],
   );
 
-  if (pendingVerification) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Verify your email</Text>
-
-        <Controller
-          control={codeControl}
-          name="code"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              style={[styles.input, codeErrors.code && styles.inputError]}
-              placeholder="Enter your verification code"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-              editable={!loading}
-            />
-          )}
-        />
-        {codeErrors.code && <Text style={styles.errorText}>{codeErrors.code.message}</Text>}
-
-        {!!apiError && <Text style={styles.errorText}>{apiError}</Text>}
-
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleVerifySubmit(onVerifyPress)}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.buttonText}>Verify</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign up</Text>
-
-      <Controller
-        control={control}
-        name="emailAddress"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[styles.input, errors.emailAddress && styles.inputError]}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholder="Enter email"
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
-            editable={!loading}
-          />
-        )}
+    <AuthLayout>
+      <View
+        style={[sharedStyles.authLinearGradient, { backgroundColor: colors.backgroundDefault }]}
       />
-      {errors.emailAddress && <Text style={styles.errorText}>{errors.emailAddress.message}</Text>}
+      <SafeAreaView style={sharedStyles.safeArea}>
+        <KeyboardAwareScrollView
+          bottomOffset={60}
+          disableScrollOnKeyboardHide={true}
+          style={{ flex: 1 }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              position: 'relative',
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => router.back()}
+              style={{ position: 'absolute', left: 0, zIndex: 10 }}
+            >
+              <FontAwesome5
+                name="arrow-left"
+                size={24}
+                color={colors.textPrimary}
+              />
+            </TouchableOpacity>
 
-      <Controller
-        control={control}
-        name="password"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[styles.input, errors.password && styles.inputError]}
-            placeholder="Enter password"
-            secureTextEntry
-            onBlur={onBlur}
-            onChangeText={onChange}
-            value={value}
-            editable={!loading}
-          />
-        )}
-      />
-      {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+            <Text
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                fontSize: 24,
+                fontWeight: '600',
+                color: colors.textPrimary,
+              }}
+            >
+              {t('auth_sign_up_create_account')}
+            </Text>
+          </View>
 
-      {!!apiError && <Text style={styles.errorText}>{apiError}</Text>}
+          <View style={{ flex: 1, width: '100%', gap: 24 }}>
+            <Image
+              source={Logo}
+              contentFit="contain"
+              style={{ width: 150, aspectRatio: 1, alignSelf: 'center', marginVertical: 24 }}
+            />
 
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleSubmit(onSignUpPress)}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="#FFF" />
-        ) : (
-          <Text style={styles.buttonText}>Continue</Text>
-        )}
-      </TouchableOpacity>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 16,
+              }}
+            >
+              {['facebook', 'google', 'apple', 'line'].map((name) => (
+                <TouchableOpacity
+                  key={name}
+                  style={{
+                    flex: 1,
+                    borderWidth: 1,
+                    padding: 12,
+                    borderRadius: 8,
+                    borderColor: colors.textPrimary,
+                    alignItems: 'center',
+                  }}
+                >
+                  <FontAwesome5
+                    name={name}
+                    size={24}
+                    color={colors.textPrimary}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
 
-      <View style={styles.linkContainer}>
-        <Text>Already have an account? </Text>
-        <Link href="/sign-in">
-          <Text style={styles.linkText}>Sign in</Text>
-        </Link>
-      </View>
-    </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
+              <Text style={{ marginHorizontal: 8, color: colors.textPrimary }}>or</Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
+            </View>
+
+            <View style={{ flex: 1, gap: 8 }}>
+              <FormTextInput
+                control={control}
+                name="emailAddress"
+                labelKey="common_email_address"
+                placeholderKey="common_email_address_prompt"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                loading={loading}
+                errors={errors}
+                colors={colors}
+                t={t}
+              />
+              <FormTextInput
+                control={control}
+                name="password"
+                labelKey="common_password"
+                placeholderKey="common_password_prompt"
+                secureTextEntry={true}
+                loading={loading}
+                errors={errors}
+                colors={colors}
+                t={t}
+                animateView
+              />
+
+              {!!apiError && <Text style={{ color: colors.error }}>{apiError}</Text>}
+
+              <FormSubmitButton
+                loading={loading}
+                onPress={handleSubmit(onSignUpPress)}
+                title={t('auth_sign_up_create_account')}
+              />
+            </View>
+
+            <View style={{ alignItems: 'center' }}>
+              <Text style={{ color: colors.textPrimary }}>
+                {t('auth_sign_up_already_have_an_account')}&nbsp;
+                <Link
+                  href="/sign-in"
+                  style={{
+                    color: colors.secondary,
+                    fontWeight: '600',
+                    textDecorationLine: 'underline',
+                  }}
+                >
+                  {t('auth_sign_in')}
+                </Link>
+              </Text>
+            </View>
+
+            <View style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: colors.textPrimary, textAlign: 'center', fontSize: 12 }}>
+                <Trans
+                  i18nKey="auth_sign_up_agreement"
+                  components={{
+                    terms: (
+                      <Link
+                        href="/terms-of-service"
+                        style={{
+                          color: colors.secondary,
+                          fontWeight: '600',
+                          textDecorationLine: 'underline',
+                        }}
+                      />
+                    ),
+                    privacy: (
+                      <Link
+                        href="/privacy-policy"
+                        style={{
+                          color: colors.secondary,
+                          fontWeight: '600',
+                          textDecorationLine: 'underline',
+                        }}
+                      />
+                    ),
+                  }}
+                />
+              </Text>
+            </View>
+          </View>
+        </KeyboardAwareScrollView>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={pendingVerification}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black overlay
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <View
+              style={{
+                width: '80%', // 80% of the screen width
+                backgroundColor: colors.backgroundDefault, // your modal background color
+                padding: 20,
+                borderRadius: 10, // rounded corners
+                elevation: 5, // shadow for Android
+                shadowColor: '#000', // shadow for iOS
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 4,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 24,
+                  marginBottom: 24,
+                  color: colors.textPrimary,
+                }}
+              >
+                {t('auth_sign_up_verify_your_email')}
+              </Text>
+              <FormTextInput
+                control={codeControl}
+                name="code"
+                labelKey="common_verification_code"
+                placeholderKey="common_verification_code_prompt"
+                loading={loading}
+                errors={codeErrors}
+                colors={colors}
+                t={t}
+              />
+              {!!apiError && <Text style={{ color: colors.error }}>{apiError}</Text>}
+              <FormSubmitButton
+                loading={loading}
+                onPress={handleVerifySubmit(onVerifyPress)}
+                title={t('common_verify')}
+                style={{ marginTop: 24 }}
+              />
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </AuthLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    flex: 1,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 24,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 6,
-    padding: 12,
-    marginBottom: 6,
-    fontSize: 16,
-  },
-  inputError: {
-    borderColor: 'red',
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 14,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  buttonDisabled: {
-    backgroundColor: '#a0a0a0',
-  },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 16,
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 12,
-  },
-  linkContainer: {
-    marginTop: 16,
-    flexDirection: 'row',
-  },
-  linkText: {
-    color: '#007AFF',
-  },
-});
