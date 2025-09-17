@@ -39,7 +39,6 @@ export default function WelcomeScreen() {
         <View
           style={{
             width: '100%',
-            padding: 20,
             paddingBottom: 48,
             position: 'absolute',
             bottom: 0,
