@@ -170,7 +170,6 @@ export default function SignUpScreen() {
                 <FormSSOButton
                   key={name}
                   social={name}
-                  action="signup"
                 />
               ))}
             </View>
