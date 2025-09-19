@@ -1,15 +1,18 @@
 import { useSignUp } from '@clerk/clerk-expo';
+import type { OAuthStrategy } from '@clerk/types';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { ActivityIndicator, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '@/assets/icons/splash-icon-light.png';
+import { FormSSOButton } from '@/components/forms/FormSSOButton';
 import { FormSubmitButton } from '@/components/forms/FormSubmitButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import {
@@ -19,10 +22,17 @@ import {
   type verificationData,
 } from '@/components/forms/schemas/auth';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
+import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
 import { colors } from '@/theme/colors';
 import { sharedStyles } from '@/theme/stylesheets';
+import { SOCIAL_AUTHS } from '@/utils/constants';
+
+// handle any pending authentication session
+WebBrowser.maybeCompleteAuthSession();
 
 export default function SignUpScreen() {
+  useWarmUpBrowser();
+
   const { isLoaded, signUp, setActive } = useSignUp();
   const { t } = useTranslation();
   const router = useRouter();
@@ -149,7 +159,6 @@ export default function SignUpScreen() {
               contentFit="contain"
               style={{ width: 150, aspectRatio: 1, alignSelf: 'center', marginVertical: 24 }}
             />
-
             <View
               style={{
                 flexDirection: 'row',
@@ -158,33 +167,20 @@ export default function SignUpScreen() {
                 gap: 16,
               }}
             >
-              {['facebook', 'google', 'apple', 'line'].map((name) => (
-                <TouchableOpacity
+              {SOCIAL_AUTHS.map((name) => (
+                <FormSSOButton
                   key={name}
-                  style={{
-                    flex: 1,
-                    borderWidth: 1,
-                    padding: 12,
-                    borderRadius: 8,
-                    borderColor: colors.textPrimary,
-                    alignItems: 'center',
-                  }}
-                >
-                  <FontAwesome5
-                    name={name}
-                    size={24}
-                    color={colors.textPrimary}
-                  />
-                </TouchableOpacity>
+                  social={name}
+                  action="signup"
+                />
               ))}
             </View>
-
             <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16 }}>
               <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
               <Text style={{ marginHorizontal: 8, color: colors.textPrimary }}>or</Text>
               <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
             </View>
-
+            {/* Email & Password Form */}
             <View style={{ flex: 1, gap: 8 }}>
               <FormTextInput
                 control={control}
@@ -210,16 +206,13 @@ export default function SignUpScreen() {
                 t={t}
                 animateView
               />
-
               {!!apiError && <Text style={{ color: colors.error }}>{apiError}</Text>}
-
               <FormSubmitButton
                 loading={loading}
                 onPress={handleSubmit(onSignUpPress)}
                 title={t('auth_sign_up_create_account')}
               />
             </View>
-
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: colors.textPrimary }}>
                 {t('auth_sign_up_already_have_an_account')}&nbsp;
@@ -235,7 +228,6 @@ export default function SignUpScreen() {
                 </Link>
               </Text>
             </View>
-
             <View style={{ alignItems: 'center', marginTop: 16 }}>
               <Text style={{ color: colors.textPrimary, textAlign: 'center', fontSize: 12 }}>
                 <Trans
