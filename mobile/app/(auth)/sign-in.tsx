@@ -123,7 +123,6 @@ export default function SignInScreen() {
                 <FormSSOButton
                   key={name}
                   social={name}
-                  action="signin"
                 />
               ))}
             </View>

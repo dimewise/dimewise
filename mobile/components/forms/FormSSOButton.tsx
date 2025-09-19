@@ -10,9 +10,8 @@ import type { SocialAuthType } from '@/utils/constants';
 
 interface Props {
   social: SocialAuthType;
-  action: 'signin' | 'signup';
 }
-export const FormSSOButton = ({ social, action }: Props) => {
+export const FormSSOButton = ({ social }: Props) => {
   const { startSSOFlow } = useSSO();
   const router = useRouter();
 
@@ -23,7 +22,7 @@ export const FormSSOButton = ({ social, action }: Props) => {
     try {
       setIsLoading(true);
       // Start the authentication process by calling `startSSOFlow()`
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
+      const { createdSessionId, setActive } = await startSSOFlow({
         strategy: authStrategy,
         // For web, defaults to current path
         // For native, you must pass a scheme, like AuthSession.makeRedirectUri({ scheme, path })
@@ -33,6 +32,7 @@ export const FormSSOButton = ({ social, action }: Props) => {
 
       // If sign in was successful, set the active session
       if (createdSessionId && setActive) {
+        console.log('entered here');
         setActive({
           session: createdSessionId,
           navigate: async ({ session }) => {
@@ -47,6 +47,7 @@ export const FormSSOButton = ({ social, action }: Props) => {
           },
         });
       } else {
+        console.log('entered else');
         // If there is no `createdSessionId`,
         // there are missing requirements, such as MFA
         // Use the `signIn` or `signUp` returned from `startSSOFlow`
