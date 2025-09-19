@@ -6,16 +6,18 @@ import { Link, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '@/assets/icons/splash-icon-light.png';
+import { FormSSOButton } from '@/components/forms/FormSSOButton';
 import { FormSubmitButton } from '@/components/forms/FormSubmitButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import { createSignInSchema, type signInData } from '@/components/forms/schemas/auth';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { colors } from '@/theme/colors';
 import { sharedStyles } from '@/theme/stylesheets';
+import { SOCIAL_AUTHS } from '@/utils/constants';
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -70,7 +72,7 @@ export default function SignInScreen() {
         <KeyboardAwareScrollView
           bottomOffset={60}
           disableScrollOnKeyboardHide={true}
-          style={{ flex: 1 }}
+          style={{ flex: 1, width: '100%' }}
         >
           <View
             style={{
@@ -109,7 +111,6 @@ export default function SignInScreen() {
               contentFit="contain"
               style={{ width: 150, aspectRatio: 1, alignSelf: 'center', marginVertical: 24 }}
             />
-            {/* SNS login buttons */}
             <View
               style={{
                 flexDirection: 'row',
@@ -118,28 +119,14 @@ export default function SignInScreen() {
                 gap: 16,
               }}
             >
-              {['facebook', 'google', 'apple', 'line'].map((name) => (
-                <TouchableOpacity
+              {SOCIAL_AUTHS.map((name) => (
+                <FormSSOButton
                   key={name}
-                  style={{
-                    flex: 1,
-                    borderWidth: 1,
-                    padding: 12,
-                    borderRadius: 8,
-                    borderColor: colors.textPrimary,
-                    alignItems: 'center',
-                  }}
-                >
-                  <FontAwesome5
-                    name={name}
-                    size={24}
-                    color={colors.textPrimary}
-                  />
-                </TouchableOpacity>
+                  social={name}
+                  action="signin"
+                />
               ))}
             </View>
-
-            {/* OR separator */}
             <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16 }}>
               <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
               <Text style={{ marginHorizontal: 8, color: colors.textPrimary }}>
@@ -183,8 +170,6 @@ export default function SignInScreen() {
                 title={t('common_continue')}
               />
             </View>
-
-            {/* Bottom link */}
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: colors.textPrimary }}>
                 {t('auth_sign_in_no_account')}&nbsp;

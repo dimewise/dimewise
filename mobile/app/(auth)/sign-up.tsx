@@ -1,5 +1,4 @@
 import { useSignUp } from '@clerk/clerk-expo';
-import type { OAuthStrategy } from '@clerk/types';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Image } from 'expo-image';
@@ -120,7 +119,7 @@ export default function SignUpScreen() {
         <KeyboardAwareScrollView
           bottomOffset={60}
           disableScrollOnKeyboardHide={true}
-          style={{ flex: 1 }}
+          style={{ flex: 1, width: '100%' }}
         >
           <View
             style={{
