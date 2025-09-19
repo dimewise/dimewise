@@ -32,7 +32,6 @@ export const FormSSOButton = ({ social }: Props) => {
 
       // If sign in was successful, set the active session
       if (createdSessionId && setActive) {
-        console.log('entered here');
         setActive({
           session: createdSessionId,
           navigate: async ({ session }) => {
@@ -47,7 +46,6 @@ export const FormSSOButton = ({ social }: Props) => {
           },
         });
       } else {
-        console.log('entered else');
         // If there is no `createdSessionId`,
         // there are missing requirements, such as MFA
         // Use the `signIn` or `signUp` returned from `startSSOFlow`
