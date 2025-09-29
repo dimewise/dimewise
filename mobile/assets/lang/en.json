@@ -25,5 +25,8 @@
   "error_missing_uppercase_password": "Password must include a uppercase letter", 
   "error_missing_lowercase_password": "Password must include a lowercase letter", 
   "error_missing_number_password": "Password must include a number", 
-  "error_required_verification_code": "Verification code is required"
+  "error_required_verification_code": "Verification code is required", 
+  "nav_overview": "Overview", 
+  "nav_transactions": "Transactions", 
+  "nav_settings": "Settings"
 }

@@ -25,5 +25,8 @@
   "error_missing_uppercase_password": "パスワードには大文字を含める必要があります",
   "error_missing_lowercase_password": "パスワードには小文字を含める必要があります",
   "error_missing_number_password": "パスワードには数字を含める必要があります",
-  "error_required_verification_code": "確認コードは必須です"
+  "error_required_verification_code": "確認コードは必須です",
+  "nav_overview": "概要",
+  "nav_transactions": "取引",
+  "nav_settings": "設定"
 }

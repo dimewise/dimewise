@@ -9,5 +9,12 @@ export default function Layout() {
     return <Redirect href={'/welcome'} />;
   }
 
-  return <Stack />;
+  return (
+    <Stack>
+      <Stack.Screen
+        name="(tabs)"
+        options={{ headerShown: false }}
+      />
+    </Stack>
+  );
 }
