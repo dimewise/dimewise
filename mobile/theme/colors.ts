@@ -21,6 +21,8 @@ export const colors = {
   success: '#27AE60',
   successTextOn: '#121212',
   disabled: '#A0A0A0',
+  warning: '#F1C40F', // Vibrant yellow for alert/warning
+  warningTextOn: '#121212', // Dark text on yellow backgrounds
 
   // Text colors
   textPrimary: '#E0E0E0', // Primary text on dark backgrounds
