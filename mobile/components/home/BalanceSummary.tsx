@@ -48,6 +48,7 @@ export const BalanceSummary = ({ selectedMonth, selectedYear }: Props) => {
         gap: 40,
         alignItems: 'center',
         justifyContent: 'center',
+        marginTop: 40,
       }}
     >
       <View style={{ alignItems: 'center' }}>
