@@ -8,17 +8,25 @@ import { PaymentBlock } from '@/components/home/PaymentBlock';
 import { TransactionBlock } from '@/components/home/TransactionBlock';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import {
+  type CategoryBreakdown,
+  type ExpenseWithDetails,
+  type PaymentMethodBreakdown,
   useGetAnalyticsCategoriesBreakdownQuery,
   useGetAnalyticsPaymentMethodsBreakdownQuery,
   useGetAnalyticsRecentTransactionsQuery,
 } from '@/generated/api/api';
-import {
-  fakeCategoryBreakdown,
-  fakePaymentMethodBreakdown,
-  fakeRecentTransactions,
-} from '@/utils/mocks/mockAnalyticsData';
-import { fakeCategoriesBreakdown } from '@/utils/mocks/mockCategoryBreakdown';
 
+// import {
+//   fakeCategoryBreakdown,
+//   fakePaymentMethodBreakdown,
+//   fakeRecentTransactions,
+// } from '@/utils/mocks/mockAnalyticsData';
+
+type HeaderItem = { type: 'header' };
+type CategoryItem = { type: 'categories'; data: CategoryBreakdown[] };
+type PaymentItem = { type: 'payments'; data: PaymentMethodBreakdown[] };
+type TransactionItem = { type: 'transactions'; data: ExpenseWithDetails[] };
+type Section = HeaderItem | CategoryItem | PaymentItem | TransactionItem;
 type SelectedMonthYearType = {
   month: number;
   year: number;
@@ -31,27 +39,24 @@ export default function HomeScreen() {
     year: now.year,
   });
 
-  /* ----- data ----- */
   const { data: categories = [] } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
   const { data: payments = [] } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
   const { data: transactions = [] } = useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
 
-  /* ----- compose one flat array for the list ----- */
-  const data = useMemo(
+  const data: Section[] = useMemo(
     () => [
       { type: 'header' }, // 0
-      // { type: 'categories', data: categories }, // 1
-      // { type: 'payments', data: payments }, // 2
-      // { type: 'transactions', data: transactions }, // 3
-      { type: 'categories', data: fakeCategoryBreakdown(5) }, // 1
-      { type: 'payments', data: fakePaymentMethodBreakdown(4) }, // 2
-      { type: 'transactions', data: fakeRecentTransactions(12) }, // 3
+      { type: 'categories', data: categories }, // 1
+      { type: 'payments', data: payments }, // 2
+      { type: 'transactions', data: transactions }, // 3
+      // { type: 'categories', data: fakeCategoryBreakdown(5) }, // 1
+      // { type: 'payments', data: fakePaymentMethodBreakdown(4) }, // 2
+      // { type: 'transactions', data: fakeRecentTransactions(12) }, // 3
     ],
     [categories, payments, transactions],
   );
 
-  /* ----- render item ----- */
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: { item: Section }) => {
     switch (item.type) {
       case 'header':
         return (
@@ -86,8 +91,8 @@ export default function HomeScreen() {
           data={data}
           keyExtractor={(item, i) => item.type + i}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingBottom: 32 }}
           showsVerticalScrollIndicator={false}
+          style={{ width: '100%' }}
         />
       </SafeAreaView>
     </AppLayout>

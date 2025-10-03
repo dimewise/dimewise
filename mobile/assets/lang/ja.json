@@ -20,6 +20,8 @@
   "common_verify": "確認",
   "common_continue": "続ける",
   "common_or": "または",
+  "common_categories": "カテゴリ",
+  "common_payment_methods": "支払い方法",
   "error_invalid_email": "有効なメールアドレスを入力してください",
   "error_min_password": "パスワードは8文字以上でなければなりません",
   "error_missing_uppercase_password": "パスワードには大文字を含める必要があります",
@@ -28,5 +30,12 @@
   "error_required_verification_code": "確認コードは必須です",
   "nav_overview": "概要",
   "nav_transactions": "取引",
-  "nav_settings": "設定"
+  "nav_settings": "設定",
+  "overview_recent_transactions": "最近の取引",
+  "overview_recent_transactions_empty": "最近のトランザクションがありません",
+  "overview_recent_transactions_empty_hint": "支出を記録すると、履歴が表示されます。",
+  "categories_empty": "カテゴリがありません",
+  "categories_empty_hint": "追跡を始めると、予算の内訳が表示されます。",
+  "payment_methods_empty": "支払い方法がありません",
+  "payment_methods_empty_hint": "支払いを追加すると、ここに表示されます。"
 }
