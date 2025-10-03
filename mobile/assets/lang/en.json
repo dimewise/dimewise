@@ -20,6 +20,8 @@
   "common_verify": "Verify",
   "common_continue": "Continue" ,
   "common_or": "or", 
+  "common_categories": "Categories", 
+  "common_payment_methods": "Payment methods", 
   "error_invalid_email": "Please enter a valid email address", 
   "error_min_password": "Password must be at least 8 characters", 
   "error_missing_uppercase_password": "Password must include a uppercase letter", 
@@ -28,5 +30,12 @@
   "error_required_verification_code": "Verification code is required", 
   "nav_overview": "Overview", 
   "nav_transactions": "Transactions", 
-  "nav_settings": "Settings"
+  "nav_settings": "Settings",
+  "overview_recent_transactions": "Recent transactions", 
+  "overview_recent_transactions_empty": "No recent transactions",
+  "overview_recent_transactions_empty_hint": "Record an expense and your history will appear here.",
+  "categories_empty": "No categories yet",
+  "categories_empty_hint": "Start tracking to see your budget breakdown.",
+  "payment_methods_empty": "No payment methods yet",
+  "payment_methods_empty_hint": "Add a payment method to see them here."
 }

@@ -1,53 +1,113 @@
-import type React from 'react';
+import { useLocales } from 'expo-localization';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import type { CategoryBreakdown } from '@/generated/api/api';
+import { colors } from '@/theme/colors';
+import { formatCurrency } from '@/utils/localization/currencies';
 
-type Props = { items: CategoryBreakdown[] };
-export const CategoryBlock: React.FC<Props> = ({ items }) => (
-  <View style={{ paddingHorizontal: 16, marginBottom: 24 }}>
-    <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 12 }}>Categories</Text>
-    {items.map((c) => (
-      <View
-        key={c.category_id}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: 10,
-          backgroundColor: '#fff',
-          borderRadius: 8,
-          padding: 12,
-          elevation: 1,
-          shadowColor: '#000',
-          shadowOpacity: 0.05,
-          shadowRadius: 2,
-          shadowOffset: { width: 0, height: 1 },
-        }}
-      >
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 15, fontWeight: '500' }}>{c.category_title}</Text>
-          <Text style={{ fontSize: 13, color: '#555' }}>
-            {(c.spent / 100).toLocaleString('en-US', {
-              style: 'currency',
-              currency: c.currency,
-            })}
+interface Props {
+  items: CategoryBreakdown[];
+}
+
+export const CategoryBlock = ({ items }: Props) => {
+  const locales = useLocales();
+  const primaryLocale = locales[0];
+  const { t } = useTranslation();
+
+  const spentPercent = (spent: number, budget: number) =>
+    budget ? Math.min((spent / budget) * 100, 100) : 0;
+
+  const barColor = (percent: number) => {
+    if (percent > 75) return colors.error; // > 75 % spent  → red
+    if (percent >= 50) return colors.warning; // 50-75 % spent → amber
+    return colors.primary; // < 50 % spent  → green
+  };
+
+  if (items.length === 0) {
+    return (
+      <View style={{ margin: 24 }}>
+        <Text
+          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 16 }}
+        >
+          {t('common_categories')}
+        </Text>
+
+        {/* gentle placeholder */}
+        <View
+          style={{
+            backgroundColor: colors.backgroundSurface,
+            borderRadius: 8,
+            padding: 24,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 14, color: colors.disabled, textAlign: 'center' }}>
+            {t('categories_empty')}
+          </Text>
+          <Text
+            style={{
+              fontSize: 12,
+              color: colors.disabled,
+              marginTop: 4,
+              textAlign: 'center',
+            }}
+          >
+            {t('categories_empty_hint')}
           </Text>
         </View>
-
-        {/* tiny progress bar */}
-        <View style={{ width: 80, height: 6, backgroundColor: '#e5e7eb', borderRadius: 3 }}>
-          <View
-            style={{
-              height: '100%',
-              backgroundColor: '#6366f1', // swap with colors.primary
-              borderRadius: 3,
-              width: `${Math.min((c.spent / c.budget) * 100, 100)}%`,
-            }}
-          />
-        </View>
-        <Text style={{ marginLeft: 8, fontSize: 12, fontWeight: '600', color: '#6366f1' }}>
-          {Math.round((c.spent / c.budget) * 100)}%
-        </Text>
       </View>
-    ))}
-  </View>
-);
+    );
+  }
+
+  return (
+    <View style={{ margin: 24 }}>
+      <Text
+        style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 16 }}
+      >
+        {t('common_categories')}
+      </Text>
+      <View style={{ gap: 8 }}>
+        {items.map((c) => {
+          const pct = spentPercent(c.spent, c.budget);
+          const color = barColor(pct);
+          return (
+            <View
+              key={c.category_id}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: colors.backgroundSurface,
+                borderRadius: 8,
+                padding: 16,
+              }}
+            >
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={{ fontSize: 16, fontWeight: '500', color: colors.textPrimary }}>
+                  {c.category_title}
+                </Text>
+                <Text style={{ fontSize: 12, color: colors.disabled }}>
+                  {formatCurrency(c.spent, c.currency, primaryLocale.languageTag)}
+                </Text>
+              </View>
+
+              {/* tinted progress bar */}
+              <View style={{ width: 80, height: 8, backgroundColor: '#e5e7eb', borderRadius: 4 }}>
+                <View
+                  style={{
+                    height: '100%',
+                    backgroundColor: color,
+                    borderRadius: 4,
+                    width: `${pct}%`,
+                  }}
+                />
+              </View>
+              <Text style={{ marginLeft: 8, fontSize: 14, fontWeight: '600', color }}>
+                {Math.round(pct)}%
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
