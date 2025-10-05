@@ -1,14 +1,115 @@
-import { Text } from 'react-native';
+import { useLocales } from 'expo-localization';
+import { DateTime } from 'luxon';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
+import { ExpenseRow } from '@/components/transactions/ExpenseRow';
+import { FilterBar } from '@/components/transactions/FilterBar';
+import { useGetExpensesQuery, useLazyGetExpensesQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
-import { sharedStyles } from '@/theme/stylesheets';
+import { fakeRecentTransactions } from '@/utils/mocks/mockAnalyticsData';
+
+export type Filter = {
+  search?: string;
+  categoryId?: string;
+  paymentMethodId?: string;
+  dateFrom?: string; // YYYY-MM-DD
+  dateTo?: string; // YYYY-MM-DD
+  verificationStatus?: 'verified' | 'unverified';
+};
+const LIMIT = 20;
 
 export default function ExpensesScreen() {
+  const locales = useLocales();
+  const primaryLocale = locales[0];
+
+  const [filter, setFilter] = useState<Filter>({});
+  const queryArgs = useMemo(() => {
+    const now = DateTime.now();
+    return {
+      limit: LIMIT,
+      ...filter,
+      dateFrom: filter.dateFrom ?? now.startOf('month').toISODate(),
+      dateTo: filter.dateTo ?? now.endOf('month').toISODate(),
+    };
+  }, [filter]);
+
+  /* ---------- query ---------- */
+  const { data, error, isLoading, isFetching } = useGetExpensesQuery(queryArgs, {
+    refetchOnMountOrArgChange: true,
+  });
+  const [fetchNext] = useLazyGetExpensesQuery();
+
+  /* ---------- pagination ---------- */
+  const loadMore = useCallback(async () => {
+    if (!data?.pagination.has_next) return;
+    await fetchNext({
+      cursor: data.pagination.next_cursor,
+      ...queryArgs, // memoised args (include limit, dates, filters)
+    });
+  }, [data, queryArgs, fetchNext]);
+
+  /* ---------- data ---------- */
+  // const expenses = useMemo(() => data?.data ?? [], [data]);
+  const expenses = useMemo(() => fakeRecentTransactions(12), []);
+
+  const ListFooter = useMemo(() => {
+    if (!data?.pagination.has_next) return null;
+    return (
+      <Pressable
+        onPress={loadMore}
+        style={{
+          marginHorizontal: 16,
+          marginTop: 16,
+          padding: 12,
+          backgroundColor: colors.backgroundSurface,
+          borderRadius: 8,
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: colors.primary, fontWeight: '600' }}>
+          {isFetching ? 'Loading…' : 'Load more'}
+        </Text>
+      </Pressable>
+    );
+  }, [data?.pagination.has_next, isFetching, loadMore]);
+
   return (
     <AppLayout>
-      <SafeAreaView style={sharedStyles.safeArea}>
-        <Text style={{ color: colors.textPrimary }}>Categories there</Text>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          width: '100%',
+          paddingHorizontal: 24,
+        }}
+        edges={['top']}
+      >
+        <FilterBar
+          filter={filter}
+          setFilter={setFilter}
+        />
+        <FlatList
+          data={expenses}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <ExpenseRow
+              item={item}
+              locale={primaryLocale}
+            />
+          )}
+          contentContainerStyle={{ paddingBottom: 32 }}
+          ListFooterComponent={ListFooter}
+          ListEmptyComponent={
+            <View style={{ margin: 24, alignItems: 'center' }}>
+              <Text style={{ color: colors.disabled }}>No transactions found.</Text>
+            </View>
+          }
+          showsVerticalScrollIndicator={false}
+          style={{ width: '100%' }}
+        />
       </SafeAreaView>
     </AppLayout>
   );
