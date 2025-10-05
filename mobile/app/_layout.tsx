@@ -1,3 +1,7 @@
+if (__DEV__) {
+  require('../ReactotronConfig');
+}
+
 import { ClerkProvider } from '@clerk/clerk-expo';
 import { tokenCache } from '@clerk/clerk-expo/token-cache';
 import { Slot } from 'expo-router';
