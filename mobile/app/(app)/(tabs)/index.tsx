@@ -1,7 +1,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { DateTime } from 'luxon';
 import { useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BalanceSummary } from '@/components/home/BalanceSummary';
 import { CategoryBlock } from '@/components/home/CategoryBlock';
@@ -18,11 +18,6 @@ import {
   useGetAnalyticsPaymentMethodsBreakdownQuery,
   useGetAnalyticsRecentTransactionsQuery,
 } from '@/generated/api/api';
-import {
-  fakeCategoryBreakdown,
-  fakePaymentMethodBreakdown,
-  fakeRecentTransactions,
-} from '@/utils/mocks/mockAnalyticsData';
 
 type HeaderItem = { type: 'header' };
 type CategoryItem = { type: 'categories'; data: CategoryBreakdown[] };
@@ -44,19 +39,16 @@ export default function HomeScreen() {
 
   const openPicker = () => sheetRef.current?.present();
 
-  const { data: categories = [] } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
-  const { data: payments = [] } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
-  const { data: transactions = [] } = useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
+  const { data: categories } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
+  const { data: payments } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
+  const { data: transactions } = useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
 
   const data: Section[] = useMemo(
     () => [
       { type: 'header' }, // 0
-      // { type: 'categories', data: categories }, // 1
-      // { type: 'payments', data: payments }, // 2
-      // { type: 'transactions', data: transactions }, // 3
-      { type: 'categories', data: fakeCategoryBreakdown(5) }, // 1
-      { type: 'payments', data: fakePaymentMethodBreakdown(4) }, // 2
-      { type: 'transactions', data: fakeRecentTransactions(12) }, // 3
+      { type: 'categories', data: categories ?? [] }, // 1
+      { type: 'payments', data: payments ?? [] }, // 2
+      { type: 'transactions', data: transactions ?? [] }, // 3
     ],
     [categories, payments, transactions],
   );
