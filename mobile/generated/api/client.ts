@@ -7,9 +7,11 @@ const paramsSerializer = (params: Record<string, any>): string => {
   return qs.stringify(params, { arrayFormat: 'repeat', skipNulls: true });
 };
 
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/v1';
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
-    baseUrl: '/v1',
+    baseUrl: BASE_URL,
     credentials: 'include',
     prepareHeaders: (headers) => {
       headers.set('Accept', 'application/json');
