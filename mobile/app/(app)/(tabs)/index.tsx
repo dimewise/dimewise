@@ -1,9 +1,12 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { DateTime } from 'luxon';
-import { useMemo, useState } from 'react';
-import { FlatList } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BalanceSummary } from '@/components/home/BalanceSummary';
 import { CategoryBlock } from '@/components/home/CategoryBlock';
+import { Header } from '@/components/home/Header';
+import { MonthYearPicker } from '@/components/home/MonthYearPicker';
 import { PaymentBlock } from '@/components/home/PaymentBlock';
 import { TransactionBlock } from '@/components/home/TransactionBlock';
 import { AppLayout } from '@/components/layouts/AppLayout';
@@ -15,12 +18,11 @@ import {
   useGetAnalyticsPaymentMethodsBreakdownQuery,
   useGetAnalyticsRecentTransactionsQuery,
 } from '@/generated/api/api';
-
-// import {
-//   fakeCategoryBreakdown,
-//   fakePaymentMethodBreakdown,
-//   fakeRecentTransactions,
-// } from '@/utils/mocks/mockAnalyticsData';
+import {
+  fakeCategoryBreakdown,
+  fakePaymentMethodBreakdown,
+  fakeRecentTransactions,
+} from '@/utils/mocks/mockAnalyticsData';
 
 type HeaderItem = { type: 'header' };
 type CategoryItem = { type: 'categories'; data: CategoryBreakdown[] };
@@ -38,6 +40,9 @@ export default function HomeScreen() {
     month: now.month,
     year: now.year,
   });
+  const sheetRef = useRef<BottomSheetModal>(null);
+
+  const openPicker = () => sheetRef.current?.present();
 
   const { data: categories = [] } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
   const { data: payments = [] } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
@@ -46,12 +51,12 @@ export default function HomeScreen() {
   const data: Section[] = useMemo(
     () => [
       { type: 'header' }, // 0
-      { type: 'categories', data: categories }, // 1
-      { type: 'payments', data: payments }, // 2
-      { type: 'transactions', data: transactions }, // 3
-      // { type: 'categories', data: fakeCategoryBreakdown(5) }, // 1
-      // { type: 'payments', data: fakePaymentMethodBreakdown(4) }, // 2
-      // { type: 'transactions', data: fakeRecentTransactions(12) }, // 3
+      // { type: 'categories', data: categories }, // 1
+      // { type: 'payments', data: payments }, // 2
+      // { type: 'transactions', data: transactions }, // 3
+      { type: 'categories', data: fakeCategoryBreakdown(5) }, // 1
+      { type: 'payments', data: fakePaymentMethodBreakdown(4) }, // 2
+      { type: 'transactions', data: fakeRecentTransactions(12) }, // 3
     ],
     [categories, payments, transactions],
   );
@@ -87,12 +92,23 @@ export default function HomeScreen() {
         }}
         edges={['top']}
       >
+        <Header
+          selectedMonth={selectedMonthYear.month}
+          selectedYear={selectedMonthYear.year}
+          setOpen={openPicker}
+        />
         <FlatList
           data={data}
           keyExtractor={(item, i) => item.type + i}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           style={{ width: '100%' }}
+        />
+        <MonthYearPicker
+          ref={sheetRef}
+          initialMonth={selectedMonthYear.month}
+          initialYear={selectedMonthYear.year}
+          onChange={(m, y) => setSelectedMonthYear({ month: m, year: y })}
         />
       </SafeAreaView>
     </AppLayout>
