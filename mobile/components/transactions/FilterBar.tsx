@@ -23,7 +23,7 @@ export const FilterBar = ({ filter, setFilter }: Props) => {
   }, [debouncedSearch, setFilter]);
 
   return (
-    <View style={{ padding: 16, gap: 8 }}>
+    <View style={{ paddingVertical: 16, gap: 8 }}>
       <TextInput
         placeholder="Search transactions…"
         value={search}
