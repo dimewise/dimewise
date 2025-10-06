@@ -87,10 +87,15 @@ export default function ExpensesScreen() {
         }}
         edges={['top']}
       >
-        <FilterBar
-          filter={filter}
-          setFilter={setFilter}
-        />
+        <View style={{ width: '100%', paddingVertical: 16 }}>
+          <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>
+            Transactions
+          </Text>
+          <FilterBar
+            filter={filter}
+            setFilter={setFilter}
+          />
+        </View>
         <FlatList
           data={expenses}
           keyExtractor={(item) => item.id}
