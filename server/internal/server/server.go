@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 
@@ -22,6 +23,7 @@ type Server struct {
 }
 
 func NewServer(config *config.Config) *Server {
+	clerk.SetKey(config.Env().ClerkSecretKey())
 	h := handler.NewHandler(config)
 	portAddr := fmt.Sprintf(":%s", config.Env().ServerPort())
 

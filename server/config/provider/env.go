@@ -50,3 +50,7 @@ func (e *EnvProvider) AppEnv() string {
 func (e *EnvProvider) ServerPort() string {
 	return e.serverPort
 }
+
+func (e *EnvProvider) ClerkSecretKey() string {
+	return e.clerkSecretKey
+}
