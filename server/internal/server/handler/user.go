@@ -39,7 +39,7 @@ func (h *Handler) PostMeUser(
 
 func (h *Handler) GetMeUser(
 	ctx context.Context,
-	req oapi.GetMeUserRequestObject,
+	_ oapi.GetMeUserRequestObject,
 ) (oapi.GetMeUserResponseObject, error) {
 	res, err := usersvc.GetUser(ctx, h.config)
 	if err != nil {
