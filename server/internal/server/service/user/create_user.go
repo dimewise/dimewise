@@ -19,7 +19,7 @@ func CreateUser(
 	c *config.Config,
 	form oapi.UserCreate,
 ) (*oapi.User, error) {
-	user, ok := middleware.GetAppUserFromContext(ctx)
+	clerkUser, ok := middleware.GetClerkUserFromContext(ctx)
 	if !ok {
 		return nil, service.NewError(
 			service.ErrCodeUnauthorized,
@@ -37,7 +37,7 @@ func CreateUser(
 		)
 	}
 
-	newUser := dto.NewUser(user.ClerkID, form)
+	newUser := dto.NewUser(clerkUser.ID, form)
 	insertedUser, err := mutation.InsertUserByModel(ctx, c.DB(), newUser)
 	if err != nil {
 		return nil, err

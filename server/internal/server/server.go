@@ -40,6 +40,7 @@ func NewServer(config *config.Config) *Server {
 
 		// clerk auth middleware
 		r.Use(middleware.NewClerkAuthMiddleware(config))
+		r.Use(middleware.NewLoadAppUserMiddleware(config))
 
 		// TODO: add StrictHTTPServerOptions
 		strictHandler := oapi.NewStrictHandlerWithOptions(

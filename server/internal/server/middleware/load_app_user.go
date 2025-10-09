@@ -25,6 +25,12 @@ func NewLoadAppUserMiddleware(c *config.Config) func(next http.Handler) http.Han
 				return
 			}
 
+			// exception handling, create user only requires clerk authentication
+			if r.Method == http.MethodPost && r.URL.Path == "/v1/users/me" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			appUser, err := repository.GetUserByClerkID(r.Context(), c.DB(), clerkUser.ID)
 			if err != nil {
 				http.Error(w, "Unauthorized: failed to find user", http.StatusUnauthorized)
