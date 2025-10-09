@@ -1,3 +1,4 @@
+import { getClerkInstance, useAuth } from '@clerk/clerk-expo';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import qs from 'qs';
 
@@ -13,7 +14,13 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
     credentials: 'include',
-    prepareHeaders: (headers) => {
+    prepareHeaders: async (headers) => {
+      const clerkInstance = getClerkInstance();
+      const token = await clerkInstance.session?.getToken();
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+
       headers.set('Accept', 'application/json');
       headers.set('Content-Type', 'application/json');
       return headers;
