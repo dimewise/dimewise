@@ -21,6 +21,7 @@ func NewConfig() *Config {
 
 	config.env = provider.NewEnvProvider()
 	config.logger = provider.NewLoggerProvider(config.env)
+	config.db = provider.NewDBProvider(config.env)
 
 	return &config
 }
