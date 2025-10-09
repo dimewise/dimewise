@@ -37,5 +37,14 @@
   "categories_empty": "カテゴリがありません",
   "categories_empty_hint": "追跡を始めると、予算の内訳が表示されます。",
   "payment_methods_empty": "支払い方法がありません",
-  "payment_methods_empty_hint": "支払いを追加すると、ここに表示されます。"
+  "payment_methods_empty_hint": "支払いを追加すると、ここに表示されます。",
+  "finish_title": "あと少しで完了です…",
+  "finish_currency_label": "デフォルト通貨",
+  "finish_currency_helper": "すべての取引に使用される通貨です。後から変更できます。",
+  "finish_language_label": "優先言語",
+  "finish_language_helper": "日付、数値、メッセージの表示言語です。いつでも変更できます。",
+  "finish_language_warning": "これにより金額の書式も変更されます。",
+  "finish_cta": "完了",
+  "finish_select_currency": "通貨を選択",
+  "finish_select_language": "言語を選択"
 }
