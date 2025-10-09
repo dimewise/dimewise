@@ -37,5 +37,14 @@
   "categories_empty": "No categories yet",
   "categories_empty_hint": "Start tracking to see your budget breakdown.",
   "payment_methods_empty": "No payment methods yet",
-  "payment_methods_empty_hint": "Add a payment method to see them here."
+  "payment_methods_empty_hint": "Add a payment method to see them here.",
+  "finish_title": "Just a couple more details...",
+  "finish_currency_label": "Default Currency",
+  "finish_currency_helper": "Currency used for all transactions. You can change it later.",
+  "finish_language_label": "Preferred Language",
+  "finish_language_helper": "Language for dates, numbers and messages. Change it any time.",
+  "finish_language_warning": "This also changes how monetary amounts are formatted.",
+  "finish_cta": "Finish",
+  "finish_select_currency": "Select Currency",
+  "finish_select_language": "Select Language"
 }

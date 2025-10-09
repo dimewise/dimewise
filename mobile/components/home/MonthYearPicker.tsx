@@ -70,7 +70,7 @@ export const MonthYearPicker = forwardRef<BottomSheetModal, Props>(
               <Picker
                 selectedValue={month}
                 onValueChange={setMonth}
-                style={{ height: 120 }}
+                style={{ height: 200 }}
               >
                 {MONTHS.map((m, idx) => (
                   <Picker.Item
@@ -88,7 +88,7 @@ export const MonthYearPicker = forwardRef<BottomSheetModal, Props>(
               <Picker
                 selectedValue={year}
                 onValueChange={(val) => setYear(val)}
-                style={{ height: 120 }}
+                style={{ height: 200 }}
               >
                 {Array.from({ length: 11 }, (_, i) => {
                   const y = DateTime.now().year - 5 + i;
@@ -114,7 +114,7 @@ export const MonthYearPicker = forwardRef<BottomSheetModal, Props>(
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: '600' }}>Done</Text>
+            <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>Done</Text>
           </Pressable>
         </BottomSheetView>
       </BottomSheetModal>

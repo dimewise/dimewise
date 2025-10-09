@@ -42,7 +42,8 @@ export const FormSSOButton = ({ social }: Props) => {
               return;
             }
 
-            router.push('/');
+            // on successful
+            router.replace('/(onboarding)/finish');
           },
         });
       } else {
