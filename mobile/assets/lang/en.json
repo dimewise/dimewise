@@ -46,5 +46,10 @@
   "finish_language_warning": "This also changes how monetary amounts are formatted.",
   "finish_cta": "Finish",
   "finish_select_currency": "Select Currency",
-  "finish_select_language": "Select Language"
+  "finish_select_language": "Select Language",
+  "error_title": "Something went wrong",
+  "error_support": "If the problem keeps happening, email us at support@dimewise.app — we’ll fix it fast.",
+  "error_retry": "Try again",
+  "lang_en": "English",
+  "lang_ja": "Japanese"
 }

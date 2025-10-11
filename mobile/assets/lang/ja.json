@@ -46,5 +46,10 @@
   "finish_language_warning": "これにより金額の書式も変更されます。",
   "finish_cta": "完了",
   "finish_select_currency": "通貨を選択",
-  "finish_select_language": "言語を選択"
+  "finish_select_language": "言語を選択",
+  "error_title": "エラーが発生しました",
+  "error_support": "問題が続く場合は、support@dimewise.app までお問い合わせください。迅速に対応いたします。",
+  "error_retry": "もう一度試す",
+  "lang_en": "英語",
+  "lang_ja": "日本語"
 }

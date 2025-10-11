@@ -68,7 +68,7 @@ export const CurrencyLanguagePicker = forwardRef<BottomSheetModal, Props>(
               {items.map((i) => (
                 <Picker.Item
                   key={i}
-                  label={i}
+                  label={i === 'en' ? 'English' : i === 'ja' ? '日本語' : i}
                   value={i}
                 />
               ))}
