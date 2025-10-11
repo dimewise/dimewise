@@ -1,5 +1,6 @@
 import type { CurrencyType, SupportedLanguage } from '@/generated/api/api';
 
+export const SUPPORT_MAIL = 'support@dimewise.app';
 export const SOCIAL_AUTHS = ['facebook', 'google', 'apple', 'line'] as const;
 export type SocialAuthType = (typeof SOCIAL_AUTHS)[number];
 export const CURRENCIES: CurrencyType[] = [
