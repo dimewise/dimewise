@@ -162,9 +162,6 @@ type CategoryCreate struct {
 	// Amount Budget amount in cents
 	Amount int `json:"amount"`
 
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
-
 	// Title Category title
 	Title string `json:"title"`
 }

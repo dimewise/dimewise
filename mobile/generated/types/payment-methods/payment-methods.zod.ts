@@ -19,18 +19,18 @@ export const getPaymentMethodsQueryParams = zod.object({
 
 export const getPaymentMethodsResponseItem = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      user_id: zod.string().uuid().describe('User ID'),
+      user_id: zod.uuid().describe('User ID'),
       title: zod.string().describe('Payment method name'),
       method_type: zod
         .enum(['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'])
         .describe('Payment method types'),
-      deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+      deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
     }),
   );
 export const getPaymentMethodsResponse = zod.array(getPaymentMethodsResponseItem);
@@ -51,23 +51,23 @@ export const postPaymentMethodBody = zod.object({
  * @summary Get payment method by ID
  */
 export const getPaymentMethodByIdParams = zod.object({
-  paymentMethodId: zod.string().uuid(),
+  paymentMethodId: zod.uuid(),
 });
 
 export const getPaymentMethodByIdResponse = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      user_id: zod.string().uuid().describe('User ID'),
+      user_id: zod.uuid().describe('User ID'),
       title: zod.string().describe('Payment method name'),
       method_type: zod
         .enum(['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'])
         .describe('Payment method types'),
-      deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+      deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
     }),
   );
 
@@ -76,7 +76,7 @@ export const getPaymentMethodByIdResponse = zod
  * @summary Update payment method
  */
 export const putPaymentMethodByIdParams = zod.object({
-  paymentMethodId: zod.string().uuid(),
+  paymentMethodId: zod.uuid(),
 });
 
 export const putPaymentMethodByIdBody = zod.object({
@@ -88,18 +88,18 @@ export const putPaymentMethodByIdBody = zod.object({
 
 export const putPaymentMethodByIdResponse = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      user_id: zod.string().uuid().describe('User ID'),
+      user_id: zod.uuid().describe('User ID'),
       title: zod.string().describe('Payment method name'),
       method_type: zod
         .enum(['credit_card', 'debit_card', 'cash', 'bank_transfer', 'digital_wallet', 'other'])
         .describe('Payment method types'),
-      deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+      deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
     }),
   );
 
@@ -108,7 +108,7 @@ export const putPaymentMethodByIdResponse = zod
  * @summary Delete payment method
  */
 export const deletePaymentMethodByIdParams = zod.object({
-  paymentMethodId: zod.string().uuid(),
+  paymentMethodId: zod.uuid(),
 });
 
 export const deletePaymentMethodByIdResponse = zod.object({

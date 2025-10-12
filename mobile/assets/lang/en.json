@@ -22,6 +22,11 @@
   "common_or": "or", 
   "common_categories": "Categories", 
   "common_payment_methods": "Payment methods", 
+  "common_done": "Done",
+  "common_category_name": "Category Name", 
+  "common_category_name_prompt": "e.g. Groceries", 
+  "common_budget_amount": "Budget Amount", 
+  "common_budget_amount_prompt": "e.g. 5000", 
   "error_invalid_email": "Please enter a valid email address", 
   "error_min_password": "Password must be at least 8 characters", 
   "error_missing_uppercase_password": "Password must include a uppercase letter", 
@@ -51,5 +56,14 @@
   "error_support": "If the problem keeps happening, email us at support@dimewise.app — we’ll fix it fast.",
   "error_retry": "Try again",
   "lang_en": "English",
-  "lang_ja": "Japanese"
+  "lang_ja": "Japanese", 
+  "settings_currency": "Default Currency",
+  "settings_language": "Default Language",
+  "settings_select_currency": "Select Currency",
+  "settings_select_language": "Select Language",
+  "settings_cat_pay_title": "Categories & Budgets",
+  "settings_pay_methods_title": "Payment Methods",
+  "settings_add_category": "Add",
+  "settings_add_payment": "Add",
+  "settings_logout": "Log out"
 }

@@ -19,13 +19,13 @@ export const getCategoriesQueryParams = zod.object({
 
 export const getCategoriesResponseItem = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      user_id: zod.string().uuid().describe('User ID'),
+      user_id: zod.uuid().describe('User ID'),
       title: zod.string().describe('Category title'),
       amount: zod.number().describe('Budget amount in cents'),
       currency: zod
@@ -62,7 +62,7 @@ export const getCategoriesResponseItem = zod
           'HUF',
         ])
         .describe('Supported currency types'),
-      deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+      deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
     }),
   );
 export const getCategoriesResponse = zod.array(getCategoriesResponseItem);
@@ -74,40 +74,6 @@ export const getCategoriesResponse = zod.array(getCategoriesResponseItem);
 export const postCategoryBody = zod.object({
   title: zod.string().describe('Category title'),
   amount: zod.number().describe('Budget amount in cents'),
-  currency: zod
-    .enum([
-      'USD',
-      'EUR',
-      'GBP',
-      'JPY',
-      'KRW',
-      'CAD',
-      'AUD',
-      'CHF',
-      'CNY',
-      'SEK',
-      'NOK',
-      'MXN',
-      'NZD',
-      'SGD',
-      'HKD',
-      'INR',
-      'RUB',
-      'ZAR',
-      'TRY',
-      'BRL',
-      'PLN',
-      'MYR',
-      'THB',
-      'VND',
-      'IDR',
-      'PHP',
-      'TWD',
-      'DKK',
-      'CZK',
-      'HUF',
-    ])
-    .describe('Supported currency types'),
 });
 
 /**
@@ -115,18 +81,18 @@ export const postCategoryBody = zod.object({
  * @summary Get category by ID
  */
 export const getCategoryByIdParams = zod.object({
-  categoryId: zod.string().uuid(),
+  categoryId: zod.uuid(),
 });
 
 export const getCategoryByIdResponse = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      user_id: zod.string().uuid().describe('User ID'),
+      user_id: zod.uuid().describe('User ID'),
       title: zod.string().describe('Category title'),
       amount: zod.number().describe('Budget amount in cents'),
       currency: zod
@@ -163,7 +129,7 @@ export const getCategoryByIdResponse = zod
           'HUF',
         ])
         .describe('Supported currency types'),
-      deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+      deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
     }),
   );
 
@@ -172,7 +138,7 @@ export const getCategoryByIdResponse = zod
  * @summary Update category
  */
 export const putCategoryByIdParams = zod.object({
-  categoryId: zod.string().uuid(),
+  categoryId: zod.uuid(),
 });
 
 export const putCategoryByIdBody = zod.object({
@@ -216,13 +182,13 @@ export const putCategoryByIdBody = zod.object({
 
 export const putCategoryByIdResponse = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      user_id: zod.string().uuid().describe('User ID'),
+      user_id: zod.uuid().describe('User ID'),
       title: zod.string().describe('Category title'),
       amount: zod.number().describe('Budget amount in cents'),
       currency: zod
@@ -259,7 +225,7 @@ export const putCategoryByIdResponse = zod
           'HUF',
         ])
         .describe('Supported currency types'),
-      deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+      deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
     }),
   );
 
@@ -268,7 +234,7 @@ export const putCategoryByIdResponse = zod
  * @summary Delete category
  */
 export const deleteCategoryByIdParams = zod.object({
-  categoryId: zod.string().uuid(),
+  categoryId: zod.uuid(),
 });
 
 export const deleteCategoryByIdResponse = zod.object({
