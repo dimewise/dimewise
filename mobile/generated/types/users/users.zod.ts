@@ -13,9 +13,9 @@ import { z as zod } from 'zod';
  */
 export const getMeUserResponse = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
@@ -143,9 +143,9 @@ export const putMeUserBody = zod.object({
 
 export const putMeUserResponse = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({

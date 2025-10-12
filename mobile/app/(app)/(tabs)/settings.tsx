@@ -1,65 +1,129 @@
+import { useClerk } from '@clerk/clerk-expo';
 import Octicons from '@expo/vector-icons/Octicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useLocales } from 'expo-localization';
-import { useMemo } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
+import { SingleSelectPicker, type SingleSelectPickerRef } from '@/components/SingleSelectPicker';
 import {
+  CreateCategorySheet,
+  type CreateCategorySheetRef,
+} from '@/components/settings/CreateCategorySheet';
+import {
+  type CategoryCreate,
   type CurrencyType,
+  type PaymentMethodCreate,
   type SupportedLanguage,
-  type User,
   useGetCategoriesQuery,
   useGetPaymentMethodsQuery,
   useGetUsersMeQuery,
-  usePostUsersMeMutation,
+  usePostCategoriesMutation,
+  usePostPaymentMethodsMutation,
+  usePutUsersMeMutation,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
+import { CURRENCIES } from '@/utils/constants';
 import { formatCurrency } from '@/utils/localization/currencies';
 
 type RootStackParamList = { Login: undefined };
 
 export default function SettingsScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const router = useRouter();
+  const { t } = useTranslation();
+  const { signOut } = useClerk();
   const { data: cats } = useGetCategoriesQuery({ includeDeleted: false });
   const { data: pms } = useGetPaymentMethodsQuery({ includeDeleted: false });
-  const { data } = useGetUsersMeQuery();
-  const [updateUser] = usePostUsersMeMutation();
+  const { data: user } = useGetUsersMeQuery();
+
+  const [updateUser] = usePutUsersMeMutation();
+  const [createCategory] = usePostCategoriesMutation();
+  const [createPaymentMethod] = usePostPaymentMethodsMutation();
+  const [isLoading, setIsLoading] = useState(false);
   const locales = useLocales();
   const primary = locales[0];
 
-  const openAddCategorySheet = () => {};
-  const openAddPaymentMethodSheet = () => {};
+  const currencyPickerRef = useRef<SingleSelectPickerRef>(null);
+  const languagePickerRef = useRef<SingleSelectPickerRef>(null);
+  const categorySheetRef = useRef<CreateCategorySheetRef>(null);
+  const paymentSheetRef = useRef<CreateCategorySheetRef>(null);
 
-  /* ---------- handlers ---------- */
   const onChangeCurrency = (c: CurrencyType) => {
+    setIsLoading(true);
     if (!user) return;
-    updateUser({ userCreate: { currency: c, preferred_language: user.preferred_language } });
+    updateUser({ userUpdate: { currency: c, preferred_language: user.preferred_language } }).then(
+      () => setIsLoading(false),
+    );
   };
-
   const onChangeLanguage = (l: SupportedLanguage) => {
+    setIsLoading(true);
     if (!user) return;
-    updateUser({ userCreate: { currency: user.currency, preferred_language: l } });
+    updateUser({ userUpdate: { currency: user.currency, preferred_language: l } }).then(() =>
+      setIsLoading(false),
+    );
+  };
+  const onCreateCategory = async (body: CategoryCreate) => {
+    setIsLoading(true);
+    await createCategory({ categoryCreate: body })
+      .unwrap()
+      .then(() => setIsLoading(false));
+  };
+  const onCreatePaymentMethod = async (body: PaymentMethodCreate) => {
+    setIsLoading(true);
+    await createPaymentMethod({ paymentMethodCreate: body })
+      .unwrap()
+      .then(() => setIsLoading(false));
+  };
+  const onLogout = async () => {
+    try {
+      await signOut();
+      router.replace('/welcome');
+    } catch (err) {
+      throw new Error(JSON.stringify(err, null, 2));
+    }
   };
 
-  const onLogout = () => {
-    /* clear tokens / reset nav stack */
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
-
-  /* ---------- sections ---------- */
   const sections = useMemo(
     () => [
-      { title: 'Categories & Budgets', data: cats ?? [] },
-      { title: 'Payment Methods', data: pms ?? [] },
+      {
+        title: 'Categories & Budgets',
+        data: cats ?? [],
+        action: () => categorySheetRef.current?.open(),
+      },
+      {
+        title: 'Payment Methods',
+        data: pms ?? [],
+        action: () => categorySheetRef.current?.open(),
+      },
     ],
     [cats, pms],
   );
 
-  /* ---------- loading ---------- */
-  // if (!user) return null; // or a spinner
-  const user: User = { currency: 'JPY', preferred_language: 'ja' };
+  const currencyRow = (
+    <Pressable
+      onPress={() => currencyPickerRef.current?.open()}
+      style={styles.row}
+    >
+      <Text style={styles.rowLabel}>{t('settings_currency')}</Text>
+      <Text style={styles.rowValue}>{user?.currency}</Text>
+    </Pressable>
+  );
+
+  const languageRow = (
+    <Pressable
+      onPress={() => languagePickerRef.current?.open()}
+      style={styles.row}
+    >
+      <Text style={styles.rowLabel}>{t('settings_language')}</Text>
+      <Text style={styles.rowValue}>{t(`lang_${user?.preferred_language}`)}</Text>
+    </Pressable>
+  );
+
+  if (!user) return null; // or a spinner
 
   return (
     <AppLayout>
@@ -73,7 +137,11 @@ export default function SettingsScreen() {
           </Text>
         </View>
         <ScrollView contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}>
-          {/* 1.  Categories & Payment Methods */}
+          <View style={styles.section}>
+            {currencyRow}
+            {languageRow}
+          </View>
+
           {sections.map((sec) => (
             <View
               key={sec.title}
@@ -91,17 +159,27 @@ export default function SettingsScreen() {
                   {sec.title}
                 </Text>
                 <Pressable
-                  onPress={() =>
-                    sec.title.includes('Categories')
-                      ? openAddCategorySheet()
-                      : openAddPaymentMethodSheet()
-                  }
+                  onPress={sec.action}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: pressed ? `${colors.primary}20` : colors.primary,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 8,
+                  })}
                 >
                   <Octicons
-                    name="plus-circle"
-                    size={24}
-                    color={colors.primary}
+                    name="plus"
+                    size={16}
+                    color={colors.backgroundDefault}
+                    style={{ marginRight: 6 }}
                   />
+                  <Text
+                    style={{ fontSize: 14, fontWeight: '600', color: colors.backgroundDefault }}
+                  >
+                    Add
+                  </Text>
                 </Pressable>
               </View>
 
@@ -148,92 +226,11 @@ export default function SettingsScreen() {
             </View>
           ))}
 
-          {/* 2.  Default Currency */}
-          <View style={{ marginBottom: 24 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: '600',
-                marginBottom: 8,
-                color: colors.textPrimary,
-              }}
-            >
-              Default Currency
-            </Text>
-            <View style={{ gap: 8 }}>
-              {(['USD', 'EUR', 'JPY'] as CurrencyType[]).map((c) => (
-                <Pressable
-                  key={c}
-                  onPress={() => onChangeCurrency(c)}
-                  style={{
-                    backgroundColor: colors.backgroundSurface,
-                    borderRadius: 8,
-                    padding: 12,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text style={{ color: colors.textPrimary }}>{c}</Text>
-                  {user.currency === c && (
-                    <Octicons
-                      name="check"
-                      size={16}
-                      color={colors.primary}
-                    />
-                  )}
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
-          {/* 3.  Default Language */}
-          <View style={{ marginBottom: 24 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: '600',
-                marginBottom: 8,
-                color: colors.textPrimary,
-              }}
-            >
-              Default Language
-            </Text>
-            <View style={{ gap: 8 }}>
-              {[
-                { code: 'en' as const, label: 'English' },
-                { code: 'ja' as const, label: '日本語' },
-              ].map((l) => (
-                <Pressable
-                  key={l.code}
-                  onPress={() => onChangeLanguage(l.code)}
-                  style={{
-                    backgroundColor: colors.backgroundSurface,
-                    borderRadius: 8,
-                    padding: 12,
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text style={{ color: colors.textPrimary }}>{l.label}</Text>
-                  {user.preferred_language === l.code && (
-                    <Octicons
-                      name="check"
-                      size={16}
-                      color={colors.primary}
-                    />
-                  )}
-                </Pressable>
-              ))}
-            </View>
-          </View>
-
           {/* 4.  Log Out */}
           <Pressable
             onPress={onLogout}
             style={{
-              backgroundColor: colors.error + '20',
+              backgroundColor: `${colors.error}20`,
               borderRadius: 8,
               padding: 12,
               alignItems: 'center',
@@ -244,6 +241,50 @@ export default function SettingsScreen() {
           </Pressable>
         </ScrollView>
       </SafeAreaView>
+
+      <SingleSelectPicker
+        ref={currencyPickerRef}
+        items={CURRENCIES.map((c) => ({ label: c, value: c }))}
+        selected={user?.currency ?? 'USD'}
+        onChange={onChangeCurrency}
+        title={t('settings_select_currency')}
+        loading={isLoading}
+      />
+      <SingleSelectPicker
+        ref={languagePickerRef}
+        items={[
+          { label: t('lang_en'), value: 'en' },
+          { label: t('lang_ja'), value: 'ja' },
+        ]}
+        selected={user?.preferred_language ?? 'en'}
+        onChange={onChangeLanguage}
+        title={t('settings_select_language')}
+        loading={isLoading}
+      />
+      <CreateCategorySheet
+        ref={categorySheetRef}
+        onSubmit={onCreateCategory}
+      />
     </AppLayout>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, paddingHorizontal: 24 },
+  header: { fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginVertical: 16 },
+  scroll: { paddingBottom: 32 },
+  section: { marginBottom: 24 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.backgroundSurface,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 8,
+  },
+  rowLabel: { fontSize: 16, color: colors.textPrimary },
+  rowValue: { fontSize: 16, color: colors.textSecondary },
+  logout: { backgroundColor: `${colors.error}20`, marginTop: 16 },
+});

@@ -156,12 +156,9 @@ components:
         amount:
           type: integer
           description: Budget amount in cents
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
       required:
         - title
         - amount
-        - currency
     CategoryUpdate:
       type: object
       properties:

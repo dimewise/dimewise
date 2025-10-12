@@ -24,6 +24,17 @@ func NewUser(clerkID string, form oapi.UserCreate) model.User {
 	return newUser
 }
 
+func UpdateUserByUpdateForm(user model.User, form oapi.UserUpdate) model.User {
+	now := time.Now()
+
+	updatedUser := user
+	updatedUser.Currency = model.CurrencyType(form.Currency)
+	updatedUser.PreferredLanguage = model.SupportedLanguage(form.PreferredLanguage)
+	updatedUser.UpdatedAt = now
+
+	return updatedUser
+}
+
 func TransformModelUserToOAPIUser(user model.User) oapi.User {
 	return oapi.User{
 		Id:                user.ID,

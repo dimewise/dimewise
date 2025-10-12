@@ -7,6 +7,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import type React from 'react';
 import { forwardRef, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
@@ -20,6 +21,7 @@ type Props = {
 
 export const CurrencyLanguagePicker = forwardRef<BottomSheetModal, Props>(
   ({ items, selected, onChange, title }, ref) => {
+    const { t } = useTranslation();
     const [inner, setInner] = useState(selected);
 
     /* keep inner in sync when sheet re-opens */
@@ -85,7 +87,7 @@ export const CurrencyLanguagePicker = forwardRef<BottomSheetModal, Props>(
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>Done</Text>
+            <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>{t('common_done')}</Text>
           </Pressable>
         </BottomSheetView>
       </BottomSheetModal>

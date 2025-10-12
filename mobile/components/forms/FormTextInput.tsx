@@ -10,7 +10,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useGradualAnimation } from '@/hooks/useGradualAnimation';
 import { sharedStyles } from '@/theme/stylesheets';
 
-interface Props<TFieldValues extends FieldValues = FieldValues> {
+interface Props<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
   name: Path<TFieldValues>;
   labelKey: string;

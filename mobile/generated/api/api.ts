@@ -478,7 +478,6 @@ export type CategoryCreate = {
   title: string;
   /** Budget amount in cents */
   amount: number;
-  currency: CurrencyType;
 };
 export type CategoryUpdate = {
   /** Category title */

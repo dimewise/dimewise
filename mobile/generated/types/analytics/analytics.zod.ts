@@ -104,7 +104,7 @@ export const getAnalyticsCategoriesBreakdownQueryParams = zod.object({
 });
 
 export const getAnalyticsCategoriesBreakdownResponseItem = zod.object({
-  category_id: zod.string().uuid(),
+  category_id: zod.uuid(),
   category_title: zod.string(),
   budget: zod.number().describe('Budget amount in cents'),
   spent: zod.number().describe('Spent amount in cents'),
@@ -177,7 +177,7 @@ export const getAnalyticsPaymentMethodsBreakdownQueryParams = zod.object({
 });
 
 export const getAnalyticsPaymentMethodsBreakdownResponseItem = zod.object({
-  payment_method_id: zod.string().uuid(),
+  payment_method_id: zod.uuid(),
   payment_method_title: zod.string(),
   total_spent: zod.number().describe('Total spent amount in cents'),
   currency: zod
@@ -257,15 +257,15 @@ export const getAnalyticsRecentTransactionsQueryParams = zod.object({
 
 export const getAnalyticsRecentTransactionsResponseItem = zod
   .object({
-    id: zod.string().uuid().describe('Unique identifier'),
-    created_at: zod.string().datetime({}).describe('Creation timestamp'),
-    updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+    id: zod.uuid().describe('Unique identifier'),
+    created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+    updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
   })
   .and(
     zod.object({
-      user_id: zod.string().uuid().describe('User ID'),
-      category_id: zod.string().uuid().describe('Category ID'),
-      payment_method_id: zod.string().uuid().describe('Payment method ID'),
+      user_id: zod.uuid().describe('User ID'),
+      category_id: zod.uuid().describe('Category ID'),
+      payment_method_id: zod.uuid().describe('Payment method ID'),
       title: zod.string().describe('Expense title'),
       description: zod.string().nullish().describe('Expense description'),
       amount: zod.number().describe('Amount in cents'),
@@ -303,21 +303,21 @@ export const getAnalyticsRecentTransactionsResponseItem = zod
           'HUF',
         ])
         .describe('Supported currency types'),
-      incurred_at: zod.string().datetime({}).describe('When the expense was incurred'),
-      verified_at: zod.string().datetime({}).nullish().describe('Verification timestamp'),
+      incurred_at: zod.iso.datetime({}).describe('When the expense was incurred'),
+      verified_at: zod.iso.datetime({}).nullish().describe('Verification timestamp'),
     }),
   )
   .and(
     zod.object({
       category: zod
         .object({
-          id: zod.string().uuid().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+          id: zod.uuid().describe('Unique identifier'),
+          created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+          updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
-            user_id: zod.string().uuid().describe('User ID'),
+            user_id: zod.uuid().describe('User ID'),
             title: zod.string().describe('Category title'),
             amount: zod.number().describe('Budget amount in cents'),
             currency: zod
@@ -354,18 +354,18 @@ export const getAnalyticsRecentTransactionsResponseItem = zod
                 'HUF',
               ])
               .describe('Supported currency types'),
-            deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+            deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
         ),
       payment_method: zod
         .object({
-          id: zod.string().uuid().describe('Unique identifier'),
-          created_at: zod.string().datetime({}).describe('Creation timestamp'),
-          updated_at: zod.string().datetime({}).describe('Last update timestamp'),
+          id: zod.uuid().describe('Unique identifier'),
+          created_at: zod.iso.datetime({}).describe('Creation timestamp'),
+          updated_at: zod.iso.datetime({}).describe('Last update timestamp'),
         })
         .and(
           zod.object({
-            user_id: zod.string().uuid().describe('User ID'),
+            user_id: zod.uuid().describe('User ID'),
             title: zod.string().describe('Payment method name'),
             method_type: zod
               .enum([
@@ -377,7 +377,7 @@ export const getAnalyticsRecentTransactionsResponseItem = zod
                 'other',
               ])
               .describe('Payment method types'),
-            deleted_at: zod.string().datetime({}).nullish().describe('Soft deletion timestamp'),
+            deleted_at: zod.iso.datetime({}).nullish().describe('Soft deletion timestamp'),
           }),
         ),
     }),

@@ -31,6 +31,27 @@ func InsertUserByModel(
 	return &dest, nil
 }
 
+func UpdateUserByModel(
+	ctx context.Context,
+	db qrm.DB,
+	user model.User,
+) (*model.User, error) {
+	tbl := table.User
+
+	stmt := tbl.UPDATE(tbl.MutableColumns).
+		MODEL(user).
+		WHERE(tbl.ID.EQ(postgres.UUID(user.ID))).
+		RETURNING(tbl.AllColumns)
+
+	dest := model.User{}
+	err := stmt.QueryContext(ctx, db, &dest)
+	if err != nil {
+		return nil, errors.Errorf("failed to update user by model: %w", err)
+	}
+
+	return &dest, nil
+}
+
 func UpdateUserByClerkID(
 	ctx context.Context,
 	db qrm.DB,

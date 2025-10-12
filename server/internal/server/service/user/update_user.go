@@ -2,6 +2,7 @@ package usersvc
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/go-errors/errors"
 
@@ -9,7 +10,6 @@ import (
 	"github.com/dimewise/dimewise/generated/oapi"
 	"github.com/dimewise/dimewise/internal/app/dto"
 	"github.com/dimewise/dimewise/internal/app/mutation"
-	"github.com/dimewise/dimewise/internal/app/repository"
 	"github.com/dimewise/dimewise/internal/app/validate"
 	"github.com/dimewise/dimewise/internal/server/middleware"
 	"github.com/dimewise/dimewise/internal/server/service"
@@ -38,21 +38,15 @@ func UpdateUser(
 		)
 	}
 
-	updatedUser, err := mutation.UpdateUserByClerkID(ctx, c.DB(), user.ClerkID, form)
+	updatedUser := dto.UpdateUserByUpdateForm(*user, form)
+	savedUser, err := mutation.UpdateUserByModel(ctx, c.DB(), updatedUser)
 	if err != nil {
-		var re *repository.Error
-		if errors.As(err, &re) {
-			switch re.Code {
-			case repository.ErrCodeNotFound:
-				return nil, service.NewError(service.ErrCodeNotFound, "user not found", err)
-			default:
-				return nil, err
-			}
-		}
 		return nil, err
 	}
 
-	oapiUser := dto.TransformModelUserToOAPIUser(*updatedUser)
+	slog.Default().Info("here")
+
+	oapiUser := dto.TransformModelUserToOAPIUser(*savedUser)
 
 	return &oapiUser, nil
 }
