@@ -1,11 +1,20 @@
 import { useAuth } from '@clerk/clerk-expo';
 import { Redirect } from 'expo-router';
 import { Stack } from 'expo-router/stack';
+import { useEffect } from 'react';
 import { useGetUsersMeQuery } from '@/generated/api/api';
+import { syncLanguageWithUser } from '@/utils/localization/i18n';
 
 export default function RootLayout() {
   const { isSignedIn } = useAuth();
   const { data: user, isLoading } = useGetUsersMeQuery(undefined, { skip: !isSignedIn });
+
+  // Sync i18n language with user's preferred language
+  useEffect(() => {
+    if (user?.preferred_language) {
+      syncLanguageWithUser(user.preferred_language);
+    }
+  }, [user?.preferred_language]);
 
   if (!isSignedIn) return <Redirect href="/welcome" />;
   if (isLoading) return null; // or a spinner
@@ -21,6 +30,34 @@ export default function RootLayout() {
       <Stack.Screen
         name="(tabs)"
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="modals/category-form"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="modals/payment-method-form"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="modals/currency-selector"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="modals/language-selector"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
       />
     </Stack>
   );

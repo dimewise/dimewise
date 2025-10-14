@@ -24,11 +24,13 @@ export const sharedStyles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: colors.textPrimary,
-    borderRadius: 6,
-    padding: 12,
+    borderRadius: 8,
+    padding: 16,
     fontSize: 16,
     width: '100%',
     color: colors.textPrimary,
+    backgroundColor: colors.backgroundSurface,
+    placeholderTextColor: colors.disabled,
   },
   inputError: {
     borderColor: 'red',
