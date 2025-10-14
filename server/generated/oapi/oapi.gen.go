@@ -94,9 +94,6 @@ type BaseEntity struct {
 
 // BudgetOverview defines model for BudgetOverview.
 type BudgetOverview struct {
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
-
 	// Month Month (1-12)
 	Month int `json:"month"`
 
@@ -121,9 +118,6 @@ type Category struct {
 	// CreatedAt Creation timestamp
 	CreatedAt time.Time `json:"created_at"`
 
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
-
 	// DeletedAt Soft deletion timestamp
 	DeletedAt *time.Time `json:"deleted_at"`
 
@@ -147,9 +141,6 @@ type CategoryBreakdown struct {
 	CategoryId    openapi_types.UUID `json:"category_id"`
 	CategoryTitle string             `json:"category_title"`
 
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
-
 	// Remaining Remaining budget in cents
 	Remaining int `json:"remaining"`
 
@@ -170,9 +161,6 @@ type CategoryCreate struct {
 type CategoryUpdate struct {
 	// Amount Budget amount in cents
 	Amount int `json:"amount"`
-
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
 
 	// Title Category title
 	Title string `json:"title"`
@@ -204,9 +192,6 @@ type Expense struct {
 
 	// CreatedAt Creation timestamp
 	CreatedAt time.Time `json:"created_at"`
-
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
 
 	// Description Expense description
 	Description *string `json:"description"`
@@ -241,9 +226,6 @@ type ExpenseCreate struct {
 	// CategoryId Category ID
 	CategoryId openapi_types.UUID `json:"category_id"`
 
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
-
 	// Description Expense description
 	Description *string `json:"description"`
 
@@ -264,9 +246,6 @@ type ExpenseUpdate struct {
 
 	// CategoryId Category ID
 	CategoryId openapi_types.UUID `json:"category_id"`
-
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
 
 	// Description Expense description
 	Description *string `json:"description"`
@@ -292,9 +271,6 @@ type ExpenseWithDetails struct {
 
 	// CreatedAt Creation timestamp
 	CreatedAt time.Time `json:"created_at"`
-
-	// Currency Supported currency types
-	Currency CurrencyType `json:"currency"`
 
 	// Description Expense description
 	Description *string `json:"description"`
@@ -364,8 +340,6 @@ type PaymentMethod struct {
 
 // PaymentMethodBreakdown defines model for PaymentMethodBreakdown.
 type PaymentMethodBreakdown struct {
-	// Currency Supported currency types
-	Currency           CurrencyType       `json:"currency"`
 	PaymentMethodId    openapi_types.UUID `json:"payment_method_id"`
 	PaymentMethodTitle string             `json:"payment_method_title"`
 

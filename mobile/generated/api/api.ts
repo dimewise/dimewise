@@ -469,7 +469,6 @@ export type Category = BaseEntity & {
   title: string;
   /** Budget amount in cents */
   amount: number;
-  currency: CurrencyType;
   /** Soft deletion timestamp */
   deleted_at?: string | null;
 };
@@ -484,7 +483,6 @@ export type CategoryUpdate = {
   title: string;
   /** Budget amount in cents */
   amount: number;
-  currency: CurrencyType;
 };
 export type SuccessResponse = {
   success: boolean;
@@ -544,7 +542,6 @@ export type Expense = BaseEntity & {
   description?: string | null;
   /** Amount in cents */
   amount: number;
-  currency: CurrencyType;
   /** When the expense was incurred */
   incurred_at: string;
   /** Verification timestamp */
@@ -565,7 +562,6 @@ export type ExpenseCreate = {
   description?: string | null;
   /** Amount in cents */
   amount: number;
-  currency: CurrencyType;
   /** When the expense was incurred */
   incurred_at: string;
 };
@@ -580,7 +576,6 @@ export type ExpenseUpdate = {
   description?: string | null;
   /** Amount in cents */
   amount: number;
-  currency: CurrencyType;
   /** When the expense was incurred */
   incurred_at: string;
 };
@@ -591,7 +586,6 @@ export type BudgetOverview = {
   totalSpent: number;
   /** Remaining budget in cents */
   remainingBudget: number;
-  currency: CurrencyType;
   /** Month (1-12) */
   month: number;
   /** Year */
@@ -606,14 +600,12 @@ export type CategoryBreakdown = {
   spent: number;
   /** Remaining budget in cents */
   remaining: number;
-  currency: CurrencyType;
 };
 export type PaymentMethodBreakdown = {
   payment_method_id: string;
   payment_method_title: string;
   /** Total spent amount in cents */
   total_spent: number;
-  currency: CurrencyType;
 };
 export const {
   useGetUsersMeQuery,
