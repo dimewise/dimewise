@@ -1,16 +1,15 @@
-import { useLocales } from 'expo-localization';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import type { PaymentMethodBreakdown } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
+import { useUserLocale } from '@/hooks/useUserLocale';
 
 type Props = { items: PaymentMethodBreakdown[] };
 
 export const PaymentBlock = ({ items }: Props) => {
   const { t } = useTranslation();
-  const locales = useLocales();
-  const primaryLocale = locales[0];
+  const { currency, locale } = useUserLocale();
 
   if (items.length === 0) {
     return (
@@ -71,7 +70,7 @@ export const PaymentBlock = ({ items }: Props) => {
               {p.payment_method_title}
             </Text>
             <Text style={{ fontSize: 16, color: colors.disabled }}>
-              {formatCurrency(p.total_spent, p.currency, primaryLocale.languageTag)}
+              {formatCurrency(p.total_spent, p.currency, locale)}
             </Text>
           </View>
         ))}

@@ -3,10 +3,12 @@ import { Text, View } from 'react-native';
 import type { ExpenseWithDetails } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
+import { useUserLocale } from '@/hooks/useUserLocale';
 
-type Props = { item: ExpenseWithDetails; locale: { languageTag: string } };
+type Props = { item: ExpenseWithDetails };
 
-export const ExpenseRow = ({ item, locale }: Props) => {
+export const ExpenseRow = ({ item }: Props) => {
+  const { locale } = useUserLocale();
   return (
     <View
       style={{

@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import { ExpenseRow } from '@/components/transactions/ExpenseRow';
 import { FilterBar } from '@/components/transactions/FilterBar';
@@ -21,6 +22,7 @@ export type Filter = {
 const LIMIT = 20;
 
 export default function ExpensesScreen() {
+  const { t } = useTranslation();
   const locales = useLocales();
   const primaryLocale = locales[0];
 
@@ -69,7 +71,7 @@ export default function ExpensesScreen() {
         }}
       >
         <Text style={{ color: colors.primary, fontWeight: '600' }}>
-          {isFetching ? 'Loading…' : 'Load more'}
+          {isFetching ? t('transactions_loading') : t('transactions_load_more')}
         </Text>
       </Pressable>
     );
@@ -89,7 +91,7 @@ export default function ExpensesScreen() {
       >
         <View style={{ width: '100%', paddingVertical: 16 }}>
           <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>
-            Transactions
+            {t('page_title_transactions')}
           </Text>
           <FilterBar
             filter={filter}
@@ -109,7 +111,7 @@ export default function ExpensesScreen() {
           ListFooterComponent={ListFooter}
           ListEmptyComponent={
             <View style={{ margin: 24, alignItems: 'center' }}>
-              <Text style={{ color: colors.disabled }}>No transactions found.</Text>
+              <Text style={{ color: colors.disabled }}>{t('transactions_empty')}</Text>
             </View>
           }
           showsVerticalScrollIndicator={false}

@@ -1,4 +1,3 @@
-import { useLocales } from 'expo-localization';
 import { DateTime } from 'luxon';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,13 +5,13 @@ import { Text, View } from 'react-native';
 import type { ExpenseWithDetails } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
+import { useUserLocale } from '@/hooks/useUserLocale';
 
 type Props = { items: ExpenseWithDetails[] };
 
 export const TransactionBlock: React.FC<Props> = ({ items }) => {
-  const locales = useLocales();
-  const primaryLocale = locales[0];
   const { t } = useTranslation();
+  const { currency, locale } = useUserLocale();
 
   if (items.length === 0) {
     return (
@@ -85,7 +84,7 @@ export const TransactionBlock: React.FC<Props> = ({ items }) => {
                 color: colors.textPrimary,
               }}
             >
-              {formatCurrency(t.amount, t.currency, primaryLocale.languageTag)}
+              {formatCurrency(t.amount, t.currency, locale)}
             </Text>
           </View>
         ))}

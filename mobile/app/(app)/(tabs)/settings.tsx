@@ -2,33 +2,26 @@ import { useClerk } from '@clerk/clerk-expo';
 import Octicons from '@expo/vector-icons/Octicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useLocales } from 'expo-localization';
 import { useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
-import { SingleSelectPicker, type SingleSelectPickerRef } from '@/components/SingleSelectPicker';
 import {
-  CreateCategorySheet,
-  type CreateCategorySheetRef,
-} from '@/components/settings/CreateCategorySheet';
-import {
-  type CategoryCreate,
   type CurrencyType,
-  type PaymentMethodCreate,
   type SupportedLanguage,
   useGetCategoriesQuery,
   useGetPaymentMethodsQuery,
   useGetUsersMeQuery,
-  usePostCategoriesMutation,
-  usePostPaymentMethodsMutation,
   usePutUsersMeMutation,
+  useDeleteCategoriesByCategoryIdMutation,
+  useDeletePaymentMethodsByPaymentMethodIdMutation,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { CURRENCIES } from '@/utils/constants';
 import { formatCurrency } from '@/utils/localization/currencies';
+import { useUserLocale } from '@/hooks/useUserLocale';
 
 type RootStackParamList = { Login: undefined };
 
@@ -39,44 +32,117 @@ export default function SettingsScreen() {
   const { data: cats } = useGetCategoriesQuery({ includeDeleted: false });
   const { data: pms } = useGetPaymentMethodsQuery({ includeDeleted: false });
   const { data: user } = useGetUsersMeQuery();
+  const { currency, locale } = useUserLocale();
+
+  // Calculate total monthly budget
+  const totalBudget = useMemo(() => {
+    if (!cats) return 0;
+    return cats.reduce((sum, cat) => sum + (cat.amount || 0), 0);
+  }, [cats]);
 
   const [updateUser] = usePutUsersMeMutation();
-  const [createCategory] = usePostCategoriesMutation();
-  const [createPaymentMethod] = usePostPaymentMethodsMutation();
+  const [deleteCategory] = useDeleteCategoriesByCategoryIdMutation();
+  const [deletePaymentMethod] = useDeletePaymentMethodsByPaymentMethodIdMutation();
   const [isLoading, setIsLoading] = useState(false);
-  const locales = useLocales();
-  const primary = locales[0];
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
+  const [deletingPaymentMethodId, setDeletingPaymentMethodId] = useState<string | null>(null);
+  const [deletedCategoryId, setDeletedCategoryId] = useState<string | null>(null);
+  const [deletedPaymentMethodId, setDeletedPaymentMethodId] = useState<string | null>(null);
 
-  const currencyPickerRef = useRef<SingleSelectPickerRef>(null);
-  const languagePickerRef = useRef<SingleSelectPickerRef>(null);
-  const categorySheetRef = useRef<CreateCategorySheetRef>(null);
-  const paymentSheetRef = useRef<CreateCategorySheetRef>(null);
 
-  const onChangeCurrency = (c: CurrencyType) => {
-    setIsLoading(true);
-    if (!user) return;
-    updateUser({ userUpdate: { currency: c, preferred_language: user.preferred_language } }).then(
-      () => setIsLoading(false),
+  // Clear deleted states when items are no longer in the data
+  useEffect(() => {
+    if (deletedCategoryId && cats && !cats.find(cat => cat.id === deletedCategoryId)) {
+      setDeletedCategoryId(null);
+      setDeletingCategoryId(null);
+    }
+  }, [deletedCategoryId, cats]);
+
+  useEffect(() => {
+    if (deletedPaymentMethodId && pms && !pms.find(pm => pm.id === deletedPaymentMethodId)) {
+      setDeletedPaymentMethodId(null);
+      setDeletingPaymentMethodId(null);
+    }
+  }, [deletedPaymentMethodId, pms]);
+
+  const onSelectCurrency = () => {
+    router.push('/(app)/modals/currency-selector');
+  };
+
+  const onSelectLanguage = () => {
+    router.push('/(app)/modals/language-selector');
+  };
+
+  const onEditCategory = (categoryId: string, title: string, amount: number) => {
+    router.push({
+      pathname: '/(app)/modals/category-form',
+      params: { id: categoryId, title, amount: amount.toString() },
+    });
+  };
+
+  const onEditPaymentMethod = (paymentMethodId: string, title: string, method_type: string) => {
+    router.push({
+      pathname: '/(app)/modals/payment-method-form',
+      params: { id: paymentMethodId, title, method_type },
+    });
+  };
+
+  const onAddCategory = () => {
+    router.push('/(app)/modals/category-form');
+  };
+
+  const onAddPaymentMethod = () => {
+    router.push('/(app)/modals/payment-method-form');
+  };
+
+  const onDeleteCategory = (categoryId: string, title: string) => {
+    Alert.alert(
+      t('settings_delete_confirm_title'),
+      t('settings_delete_category_confirm'),
+      [
+        { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
+        {
+          text: t('settings_delete_confirm_delete'),
+          style: 'destructive',
+          onPress: async () => {
+            setDeletingCategoryId(categoryId);
+            try {
+              await deleteCategory({ categoryId }).unwrap();
+              setDeletedCategoryId(categoryId);
+            } catch (error) {
+              console.error('Error deleting category:', error);
+              Alert.alert('Error', 'Failed to delete category. Please try again.');
+              setDeletingCategoryId(null);
+            }
+          },
+        },
+      ]
     );
   };
-  const onChangeLanguage = (l: SupportedLanguage) => {
-    setIsLoading(true);
-    if (!user) return;
-    updateUser({ userUpdate: { currency: user.currency, preferred_language: l } }).then(() =>
-      setIsLoading(false),
+
+  const onDeletePaymentMethod = (paymentMethodId: string, title: string) => {
+    Alert.alert(
+      t('settings_delete_confirm_title'),
+      t('settings_delete_payment_method_confirm'),
+      [
+        { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
+        {
+          text: t('settings_delete_confirm_delete'),
+          style: 'destructive',
+          onPress: async () => {
+            setDeletingPaymentMethodId(paymentMethodId);
+            try {
+              await deletePaymentMethod({ paymentMethodId }).unwrap();
+              setDeletedPaymentMethodId(paymentMethodId);
+            } catch (error) {
+              console.error('Error deleting payment method:', error);
+              Alert.alert('Error', 'Failed to delete payment method. Please try again.');
+              setDeletingPaymentMethodId(null);
+            }
+          },
+        },
+      ]
     );
-  };
-  const onCreateCategory = async (body: CategoryCreate) => {
-    setIsLoading(true);
-    await createCategory({ categoryCreate: body })
-      .unwrap()
-      .then(() => setIsLoading(false));
-  };
-  const onCreatePaymentMethod = async (body: PaymentMethodCreate) => {
-    setIsLoading(true);
-    await createPaymentMethod({ paymentMethodCreate: body })
-      .unwrap()
-      .then(() => setIsLoading(false));
   };
   const onLogout = async () => {
     try {
@@ -90,22 +156,24 @@ export default function SettingsScreen() {
   const sections = useMemo(
     () => [
       {
-        title: 'Categories & Budgets',
+        title: t('settings_cat_pay_title'),
         data: cats ?? [],
-        action: () => categorySheetRef.current?.open(),
+        action: onAddCategory,
+        type: 'categories' as const,
       },
       {
-        title: 'Payment Methods',
+        title: t('settings_pay_methods_title'),
         data: pms ?? [],
-        action: () => categorySheetRef.current?.open(),
+        action: onAddPaymentMethod,
+        type: 'payment_methods' as const,
       },
     ],
-    [cats, pms],
+    [cats, pms, t],
   );
 
   const currencyRow = (
     <Pressable
-      onPress={() => currencyPickerRef.current?.open()}
+      onPress={onSelectCurrency}
       style={styles.row}
     >
       <Text style={styles.rowLabel}>{t('settings_currency')}</Text>
@@ -115,7 +183,7 @@ export default function SettingsScreen() {
 
   const languageRow = (
     <Pressable
-      onPress={() => languagePickerRef.current?.open()}
+      onPress={onSelectLanguage}
       style={styles.row}
     >
       <Text style={styles.rowLabel}>{t('settings_language')}</Text>
@@ -133,7 +201,7 @@ export default function SettingsScreen() {
       >
         <View style={{ width: '100%', paddingVertical: 16 }}>
           <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>
-            Settings
+            {t('page_title_settings')}
           </Text>
         </View>
         <ScrollView contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}>
@@ -155,9 +223,16 @@ export default function SettingsScreen() {
                   marginBottom: 8,
                 }}
               >
-                <Text style={{ fontSize: 18, fontWeight: '600', color: colors.textPrimary }}>
-                  {sec.title}
-                </Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '600', color: colors.textPrimary }}>
+                    {sec.title}
+                  </Text>
+                  {sec.type === 'categories' && totalBudget > 0 && (
+                    <Text style={{ fontSize: 14, color: colors.textSecondary, marginTop: 2 }}>
+                      {t('settings_total_budget')}: {formatCurrency(totalBudget, currency, locale)}
+                    </Text>
+                  )}
+                </View>
                 <Pressable
                   onPress={sec.action}
                   style={({ pressed }) => ({
@@ -178,7 +253,7 @@ export default function SettingsScreen() {
                   <Text
                     style={{ fontSize: 14, fontWeight: '600', color: colors.backgroundDefault }}
                   >
-                    Add
+                    {sec.type === 'categories' ? t('settings_add_category') : t('settings_add_payment')}
                   </Text>
                 </Pressable>
               </View>
@@ -194,9 +269,9 @@ export default function SettingsScreen() {
                   }}
                 >
                   <Text style={{ fontSize: 14, color: colors.disabled }}>
-                    {sec.title.includes('Categories')
-                      ? 'No categories yet'
-                      : 'No payment methods yet'}
+                    {sec.type === 'categories'
+                      ? t('categories_empty')
+                      : t('payment_methods_empty')}
                   </Text>
                 </View>
               ) : (
@@ -213,12 +288,59 @@ export default function SettingsScreen() {
                         alignItems: 'center',
                       }}
                     >
-                      <Text style={{ color: colors.textPrimary }}>{item.title}</Text>
-                      {sec.title.includes('Categories') && (
-                        <Text style={{ color: colors.disabled, fontSize: 12 }}>
-                          {formatCurrency(item.amount, item.currency, primary.languageTag)}
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '500' }}>
+                          {item.title}
                         </Text>
-                      )}
+                        {sec.type === 'categories' && 'amount' in item && (
+                          <Text style={{ color: colors.disabled, fontSize: 12, marginTop: 2 }}>
+                            {formatCurrency(item.amount, currency, locale)}
+                          </Text>
+                        )}
+                        {sec.type === 'payment_methods' && 'method_type' in item && (
+                          <Text style={{ color: colors.disabled, fontSize: 12, marginTop: 2 }}>
+                            {t(`payment_method_${item.method_type}`)}
+                          </Text>
+                        )}
+                      </View>
+                      <View style={{ flexDirection: 'row', gap: 8 }}>
+                        {(sec.type === 'categories' && (deletingCategoryId === item.id || deletedCategoryId === item.id)) ||
+                         (sec.type === 'payment_methods' && (deletingPaymentMethodId === item.id || deletedPaymentMethodId === item.id)) ? (
+                          <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="small" color={colors.primary} />
+                            <Text style={styles.loadingText}>Deleting...</Text>
+                          </View>
+                        ) : (
+                          <>
+                            <Pressable
+                              onPress={() => {
+                                if (sec.type === 'categories' && 'amount' in item) {
+                                  onEditCategory(item.id, item.title, item.amount);
+                                } else if (sec.type === 'payment_methods' && 'method_type' in item) {
+                                  onEditPaymentMethod(item.id, item.title, item.method_type);
+                                }
+                              }}
+                              style={styles.actionButton}
+                            >
+                              <Text style={styles.actionButtonText}>{t('settings_edit')}</Text>
+                            </Pressable>
+                            <Pressable
+                              onPress={() => {
+                                if (sec.type === 'categories') {
+                                  onDeleteCategory(item.id, item.title);
+                                } else {
+                                  onDeletePaymentMethod(item.id, item.title);
+                                }
+                              }}
+                              style={[styles.actionButton, styles.deleteButton]}
+                            >
+                              <Text style={[styles.actionButtonText, styles.deleteButtonText]}>
+                                {t('settings_delete')}
+                              </Text>
+                            </Pressable>
+                          </>
+                        )}
+                      </View>
                     </View>
                   ))}
                 </View>
@@ -237,34 +359,12 @@ export default function SettingsScreen() {
               marginTop: 8,
             }}
           >
-            <Text style={{ color: colors.error, fontWeight: '600' }}>Log out</Text>
+            <Text style={{ color: colors.error, fontWeight: '600' }}>{t('settings_logout')}</Text>
           </Pressable>
         </ScrollView>
       </SafeAreaView>
 
-      <SingleSelectPicker
-        ref={currencyPickerRef}
-        items={CURRENCIES.map((c) => ({ label: c, value: c }))}
-        selected={user?.currency ?? 'USD'}
-        onChange={onChangeCurrency}
-        title={t('settings_select_currency')}
-        loading={isLoading}
-      />
-      <SingleSelectPicker
-        ref={languagePickerRef}
-        items={[
-          { label: t('lang_en'), value: 'en' },
-          { label: t('lang_ja'), value: 'ja' },
-        ]}
-        selected={user?.preferred_language ?? 'en'}
-        onChange={onChangeLanguage}
-        title={t('settings_select_language')}
-        loading={isLoading}
-      />
-      <CreateCategorySheet
-        ref={categorySheetRef}
-        onSubmit={onCreateCategory}
-      />
+      
     </AppLayout>
   );
 }
@@ -287,4 +387,36 @@ const styles = StyleSheet.create({
   rowLabel: { fontSize: 16, color: colors.textPrimary },
   rowValue: { fontSize: 16, color: colors.textSecondary },
   logout: { backgroundColor: `${colors.error}20`, marginTop: 16 },
+  actionButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  actionButtonText: {
+    color: colors.backgroundDefault,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: `${colors.error}20`,
+  },
+  deleteButtonText: {
+    color: colors.error,
+  },
+  loadingButton: {
+    opacity: 0.6,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    fontWeight: '500',
+  },
 });

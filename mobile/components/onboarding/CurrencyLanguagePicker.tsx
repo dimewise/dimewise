@@ -72,6 +72,7 @@ export const CurrencyLanguagePicker = forwardRef<BottomSheetModal, Props>(
                   key={i}
                   label={i === 'en' ? 'English' : i === 'ja' ? '日本語' : i}
                   value={i}
+                  color={colors.textPrimary}
                 />
               ))}
             </Picker>

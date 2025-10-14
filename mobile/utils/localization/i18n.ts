@@ -41,4 +41,14 @@ i18n.use(initReactI18next).init({
   },
 });
 
+/**
+ * Syncs i18n language with user's preferred language from backend
+ * Call this when user data is loaded or when user changes language preference
+ */
+export const syncLanguageWithUser = (language: string) => {
+  if (SUPPORTED_LANGUAGES.includes(language) && i18n.language !== language) {
+    i18n.changeLanguage(language);
+  }
+};
+
 export default i18n;
