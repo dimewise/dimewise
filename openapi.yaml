@@ -135,8 +135,6 @@ components:
             amount:
               type: integer
               description: Budget amount in cents
-            currency:
-              $ref: '#/components/schemas/CurrencyType'
             deleted_at:
               type: string
               format: date-time
@@ -146,7 +144,6 @@ components:
             - user_id
             - title
             - amount
-            - currency
     CategoryCreate:
       type: object
       properties:
@@ -168,12 +165,9 @@ components:
         amount:
           type: integer
           description: Budget amount in cents
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
       required:
         - title
         - amount
-        - currency
     PaymentMethod:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
@@ -246,8 +240,6 @@ components:
             amount:
               type: integer
               description: Amount in cents
-            currency:
-              $ref: '#/components/schemas/CurrencyType'
             incurred_at:
               type: string
               format: date-time
@@ -263,7 +255,6 @@ components:
             - payment_method_id
             - title
             - amount
-            - currency
             - incurred_at
     ExpenseCreate:
       type: object
@@ -286,8 +277,6 @@ components:
         amount:
           type: integer
           description: Amount in cents
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
         incurred_at:
           type: string
           format: date-time
@@ -297,7 +286,6 @@ components:
         - payment_method_id
         - title
         - amount
-        - currency
         - incurred_at
     ExpenseUpdate:
       type: object
@@ -320,8 +308,6 @@ components:
         amount:
           type: integer
           description: Amount in cents
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
         incurred_at:
           type: string
           format: date-time
@@ -331,7 +317,6 @@ components:
         - payment_method_id
         - title
         - amount
-        - currency
         - incurred_at
     ExpenseWithDetails:
       allOf:
@@ -357,8 +342,6 @@ components:
         remainingBudget:
           type: integer
           description: Remaining budget in cents
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
         month:
           type: integer
           description: Month (1-12)
@@ -369,7 +352,6 @@ components:
         - totalBudget
         - totalSpent
         - remainingBudget
-        - currency
         - month
         - year
     CategoryBreakdown:
@@ -389,15 +371,12 @@ components:
         remaining:
           type: integer
           description: Remaining budget in cents
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
       required:
         - category_id
         - category_title
         - budget
         - spent
         - remaining
-        - currency
     PaymentMethodBreakdown:
       type: object
       properties:
@@ -409,13 +388,10 @@ components:
         total_spent:
           type: integer
           description: Total spent amount in cents
-        currency:
-          $ref: '#/components/schemas/CurrencyType'
       required:
         - payment_method_id
         - payment_method_title
         - total_spent
-        - currency
     SuccessResponse:
       type: object
       properties:
