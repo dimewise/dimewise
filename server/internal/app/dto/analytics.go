@@ -39,7 +39,6 @@ func TransformBudgetOverviewToOAPI(overview BudgetOverview) oapi.BudgetOverview 
 		TotalBudget:     overview.TotalBudget,
 		TotalSpent:      overview.TotalSpent,
 		RemainingBudget: overview.RemainingBudget,
-		Currency:        oapi.CurrencyType(overview.Currency),
 		Month:           overview.Month,
 		Year:            overview.Year,
 	}
@@ -53,7 +52,6 @@ func TransformCategoryBreakdownToOAPI(breakdown CategoryBreakdown) oapi.Category
 		Budget:        breakdown.Budget,
 		Spent:         breakdown.Spent,
 		Remaining:     breakdown.Remaining,
-		Currency:      oapi.CurrencyType(breakdown.Currency),
 	}
 }
 
@@ -65,7 +63,6 @@ func TransformPaymentMethodBreakdownToOAPI(
 		PaymentMethodId:    breakdown.PaymentMethodID,
 		PaymentMethodTitle: breakdown.PaymentMethodTitle,
 		TotalSpent:         breakdown.TotalSpent,
-		Currency:           oapi.CurrencyType(breakdown.Currency),
 	}
 }
 

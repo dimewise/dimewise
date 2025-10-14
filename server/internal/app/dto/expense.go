@@ -26,7 +26,6 @@ func NewExpense(userID uuid.UUID, form oapi.ExpenseCreate) model.Expense {
 		Title:           form.Title,
 		Description:     form.Description,
 		Amount:          int64(form.Amount),
-		Currency:        model.CurrencyType(form.Currency),
 		IncurredAt:      form.IncurredAt,
 		VerifiedAt:      nil,
 		CreatedAt:       now,
@@ -50,7 +49,6 @@ func BatchTransformDTOExpenseFullToOAPIExpenseWithDetails(
 			Title:           ele.Expense.Title,
 			Description:     ele.Expense.Description,
 			Amount:          int(ele.Expense.Amount),
-			Currency:        oapi.CurrencyType(ele.Expense.Currency),
 			IncurredAt:      ele.Expense.IncurredAt,
 			VerifiedAt:      ele.Expense.VerifiedAt,
 			CreatedAt:       ele.Expense.CreatedAt,
@@ -74,7 +72,6 @@ func TransformExpenseFullToOAPIExpenseWithDetails(expenseFull ExpenseFull) oapi.
 		Title:           expenseFull.Expense.Title,
 		Description:     expenseFull.Expense.Description,
 		Amount:          int(expenseFull.Expense.Amount),
-		Currency:        oapi.CurrencyType(expenseFull.Expense.Currency),
 		IncurredAt:      expenseFull.Expense.IncurredAt,
 		VerifiedAt:      expenseFull.Expense.VerifiedAt,
 		CreatedAt:       expenseFull.Expense.CreatedAt,
@@ -90,7 +87,6 @@ func UpdateExpenseByForm(expense model.Expense, form oapi.ExpenseUpdate) model.E
 	updatedExpense := expense
 	updatedExpense.Amount = int64(form.Amount)
 	updatedExpense.CategoryID = form.CategoryId
-	updatedExpense.Currency = model.CurrencyType(form.Currency)
 	updatedExpense.Description = form.Description
 	updatedExpense.IncurredAt = form.IncurredAt
 	updatedExpense.PaymentMethodID = form.PaymentMethodId

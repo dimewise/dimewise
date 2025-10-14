@@ -12,9 +12,6 @@ func ValidCategoryCreate(
 	if form.Amount <= 0 {
 		return errors.Errorf("amount must be positive")
 	}
-	if form.Currency == "" {
-		return errors.Errorf("currency is required")
-	}
 	if len(form.Title) == 0 {
 		return errors.Errorf("title is required")
 	}
@@ -32,9 +29,6 @@ func ValidCategoryUpdate(
 ) error {
 	if form.Amount <= 0 {
 		return errors.Errorf("amount must be positive")
-	}
-	if form.Currency == "" {
-		return errors.Errorf("currency is required")
 	}
 	if len(form.Title) == 0 {
 		return errors.Errorf("title is required")
