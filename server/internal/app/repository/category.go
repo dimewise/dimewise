@@ -23,7 +23,7 @@ func GetCategoriesByUserID(
 
 	cond := tbl.UserID.EQ(postgres.UUID(userID))
 	if params.IncludeDeleted != nil && !*params.IncludeDeleted {
-		cond = cond.AND(tbl.DeletedAt.IS_NOT_NULL())
+		cond = cond.AND(tbl.DeletedAt.IS_NULL())
 	}
 
 	stmt := tbl.SELECT(tbl.AllColumns).WHERE(cond)
