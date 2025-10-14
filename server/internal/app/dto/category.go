@@ -17,7 +17,6 @@ func NewCategory(userID uuid.UUID, form oapi.CategoryCreate) model.Category {
 		UserID:    userID,
 		Title:     form.Title,
 		Amount:    int64(form.Amount),
-		Currency:  model.CurrencyType(form.Currency),
 		DeletedAt: nil,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -32,7 +31,6 @@ func TransformModelCategoryToOAPICategory(category model.Category) oapi.Category
 		UserId:    category.UserID,
 		Title:     category.Title,
 		Amount:    int(category.Amount),
-		Currency:  oapi.CurrencyType(category.Currency),
 		CreatedAt: category.CreatedAt,
 		UpdatedAt: category.UpdatedAt,
 		DeletedAt: category.DeletedAt,
@@ -48,7 +46,6 @@ func BatchTransformModelCategoryToOAPICategory(categories []model.Category) []oa
 			UserId:    category.UserID,
 			Title:     category.Title,
 			Amount:    int(category.Amount),
-			Currency:  oapi.CurrencyType(category.Currency),
 			CreatedAt: category.CreatedAt,
 			UpdatedAt: category.UpdatedAt,
 			DeletedAt: category.DeletedAt,
@@ -64,7 +61,6 @@ func UpdateCategoryByForm(category model.Category, form oapi.CategoryUpdate) mod
 
 	updatedCategory := category
 	updatedCategory.Amount = int64(form.Amount)
-	updatedCategory.Currency = model.CurrencyType(form.Currency)
 	updatedCategory.Title = form.Title
 	updatedCategory.UpdatedAt = now
 
