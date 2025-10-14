@@ -22,7 +22,6 @@ type Expense struct {
 	Title           string
 	Description     *string
 	Amount          int64
-	Currency        CurrencyType
 	IncurredAt      time.Time
 	VerifiedAt      *time.Time
 	CreatedAt       time.Time

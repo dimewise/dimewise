@@ -19,7 +19,6 @@ type Category struct {
 	UserID    uuid.UUID
 	Title     string
 	Amount    int64
-	Currency  CurrencyType
 	DeletedAt *time.Time
 	CreatedAt time.Time
 	UpdatedAt time.Time
