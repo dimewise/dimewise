@@ -25,7 +25,6 @@ type expenseTable struct {
 	Title           postgres.ColumnString
 	Description     postgres.ColumnString
 	Amount          postgres.ColumnInteger
-	Currency        postgres.ColumnString
 	IncurredAt      postgres.ColumnTimestampz
 	VerifiedAt      postgres.ColumnTimestampz
 	CreatedAt       postgres.ColumnTimestampz
@@ -78,13 +77,12 @@ func newExpenseTableImpl(schemaName, tableName, alias string) expenseTable {
 		TitleColumn           = postgres.StringColumn("title")
 		DescriptionColumn     = postgres.StringColumn("description")
 		AmountColumn          = postgres.IntegerColumn("amount")
-		CurrencyColumn        = postgres.StringColumn("currency")
 		IncurredAtColumn      = postgres.TimestampzColumn("incurred_at")
 		VerifiedAtColumn      = postgres.TimestampzColumn("verified_at")
 		CreatedAtColumn       = postgres.TimestampzColumn("created_at")
 		UpdatedAtColumn       = postgres.TimestampzColumn("updated_at")
-		allColumns            = postgres.ColumnList{IDColumn, UserIDColumn, CategoryIDColumn, PaymentMethodIDColumn, TitleColumn, DescriptionColumn, AmountColumn, CurrencyColumn, IncurredAtColumn, VerifiedAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns        = postgres.ColumnList{UserIDColumn, CategoryIDColumn, PaymentMethodIDColumn, TitleColumn, DescriptionColumn, AmountColumn, CurrencyColumn, IncurredAtColumn, VerifiedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns            = postgres.ColumnList{IDColumn, UserIDColumn, CategoryIDColumn, PaymentMethodIDColumn, TitleColumn, DescriptionColumn, AmountColumn, IncurredAtColumn, VerifiedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns        = postgres.ColumnList{UserIDColumn, CategoryIDColumn, PaymentMethodIDColumn, TitleColumn, DescriptionColumn, AmountColumn, IncurredAtColumn, VerifiedAtColumn, CreatedAtColumn, UpdatedAtColumn}
 		defaultColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
@@ -99,7 +97,6 @@ func newExpenseTableImpl(schemaName, tableName, alias string) expenseTable {
 		Title:           TitleColumn,
 		Description:     DescriptionColumn,
 		Amount:          AmountColumn,
-		Currency:        CurrencyColumn,
 		IncurredAt:      IncurredAtColumn,
 		VerifiedAt:      VerifiedAtColumn,
 		CreatedAt:       CreatedAtColumn,

@@ -36,7 +36,6 @@ CREATE TABLE "category" (
   "user_id" UUID NOT NULL,
   "title" TEXT NOT NULL,
   "amount" BIGINT NOT NULL,
-  "currency" currency_type NOT NULL,
   "deleted_at" timestamptz,
   "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
   "updated_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP)
@@ -62,7 +61,6 @@ CREATE TABLE "expense" (
   "title" TEXT NOT NULL,
   "description" TEXT,
   "amount" BIGINT NOT NULL,
-  "currency" currency_type NOT NULL,
   "incurred_at" timestamptz NOT NULL,
   "verified_at" timestamptz,
   "created_at" timestamptz NOT NULL DEFAULT (CURRENT_TIMESTAMP),
