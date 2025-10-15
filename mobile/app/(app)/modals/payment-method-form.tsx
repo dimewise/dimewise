@@ -100,7 +100,7 @@ export default function PaymentMethodFormModal() {
 
   return (
     <AppLayout>
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.content}>
           <Text style={styles.title}>
             {isEdit ? t('settings_edit_payment_method') : t('settings_add_new_payment_method')}
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     gap: 12,
-    paddingBottom: 16,
+    paddingTop: 16,
   },
   cancelButton: {
     flex: 1,

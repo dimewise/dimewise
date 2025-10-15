@@ -67,7 +67,7 @@ export default function CurrencySelectorModal() {
 
   return (
     <AppLayout>
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.content}>
           <Text style={styles.title}>{t('settings_select_currency')}</Text>
 
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     gap: 12,
-    paddingBottom: 16,
+    paddingTop: 16,
   },
   cancelButton: {
     flex: 1,
