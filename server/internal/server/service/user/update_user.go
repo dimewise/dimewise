@@ -2,7 +2,6 @@ package usersvc
 
 import (
 	"context"
-	"log/slog"
 
 	"github.com/go-errors/errors"
 
@@ -43,8 +42,6 @@ func UpdateUser(
 	if err != nil {
 		return nil, err
 	}
-
-	slog.Default().Info("here")
 
 	oapiUser := dto.TransformModelUserToOAPIUser(*savedUser)
 
