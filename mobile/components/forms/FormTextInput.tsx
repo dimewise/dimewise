@@ -9,6 +9,7 @@ import { type KeyboardTypeOptions, Text, TextInput, View } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useGradualAnimation } from '@/hooks/useGradualAnimation';
 import { sharedStyles } from '@/theme/stylesheets';
+import { colors as themeColors } from '@/theme/colors';
 
 interface Props<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -66,6 +67,7 @@ export const FormTextInput = <TFieldValues extends FieldValues = FieldValues>({
               keyboardType={keyboardType}
               secureTextEntry={secureTextEntry}
               placeholder={t(placeholderKey)}
+              placeholderTextColor={themeColors.disabled}
               onBlur={onBlur}
               onChangeText={onChange}
               value={value}

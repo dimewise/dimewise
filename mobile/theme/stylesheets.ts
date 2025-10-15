@@ -30,7 +30,6 @@ export const sharedStyles = StyleSheet.create({
     width: '100%',
     color: colors.textPrimary,
     backgroundColor: colors.backgroundSurface,
-    placeholderTextColor: colors.disabled,
   },
   inputError: {
     borderColor: 'red',
