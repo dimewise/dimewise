@@ -106,5 +106,15 @@
   "settings_logout": "ログアウト",
   "budget_remainder": "残り",
   "budget_used": "使用済み",
-  "budget_total": "総予算"
+  "budget_total": "総予算",
+  "form_expense_title": "支出タイトル",
+  "form_expense_title_prompt": "支出タイトルを入力してください",
+  "form_expense_description": "説明",
+  "form_expense_description_prompt": "説明を追加（任意）",
+  "form_expense_amount": "金額",
+  "form_expense_category": "カテゴリ",
+  "form_expense_payment_method": "支払い方法",
+  "form_expense_date": "日付",
+  "settings_add_new_expense": "新しい支出を追加",
+  "settings_edit_expense": "支出を編集"
 }

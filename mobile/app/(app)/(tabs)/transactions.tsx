@@ -4,7 +4,9 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 import { AppLayout } from '@/components/layouts/AppLayout';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ExpenseRow } from '@/components/transactions/ExpenseRow';
 import { FilterBar } from '@/components/transactions/FilterBar';
 import { useGetExpensesQuery, useLazyGetExpensesQuery } from '@/generated/api/api';
@@ -23,10 +25,12 @@ const LIMIT = 20;
 
 export default function ExpensesScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const locales = useLocales();
   const primaryLocale = locales[0];
 
   const [filter, setFilter] = useState<Filter>({});
+  const openExpenseForm = () => router.push('/modals/expense-form');
   const queryArgs = useMemo(() => {
     const now = DateTime.now();
     return {
@@ -107,7 +111,7 @@ export default function ExpensesScreen() {
               locale={primaryLocale}
             />
           )}
-          contentContainerStyle={{ paddingBottom: 32 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
           ListFooterComponent={ListFooter}
           ListEmptyComponent={
             <View style={{ margin: 24, alignItems: 'center' }}>
@@ -117,6 +121,7 @@ export default function ExpensesScreen() {
           showsVerticalScrollIndicator={false}
           style={{ width: '100%' }}
         />
+        <FloatingActionButton onPress={openExpenseForm} />
       </SafeAreaView>
     </AppLayout>
   );
