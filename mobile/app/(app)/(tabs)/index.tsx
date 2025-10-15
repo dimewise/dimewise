@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import { useMemo, useRef, useState } from 'react';
 import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { BalanceSummary } from '@/components/home/BalanceSummary';
 import { CategoryBlock } from '@/components/home/CategoryBlock';
 import { Header } from '@/components/home/Header';
@@ -10,6 +11,7 @@ import { MonthYearPicker } from '@/components/home/MonthYearPicker';
 import { PaymentBlock } from '@/components/home/PaymentBlock';
 import { TransactionBlock } from '@/components/home/TransactionBlock';
 import { AppLayout } from '@/components/layouts/AppLayout';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 import {
   type CategoryBreakdown,
   type ExpenseWithDetails,
@@ -30,6 +32,7 @@ type SelectedMonthYearType = {
 };
 
 export default function HomeScreen() {
+  const router = useRouter();
   const now = DateTime.local();
   const [selectedMonthYear, setSelectedMonthYear] = useState<SelectedMonthYearType>({
     month: now.month,
@@ -38,6 +41,7 @@ export default function HomeScreen() {
   const sheetRef = useRef<BottomSheetModal>(null);
 
   const openPicker = () => sheetRef.current?.present();
+  const openExpenseForm = () => router.push('/modals/expense-form');
 
   const { data: categories } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
   const { data: payments } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
@@ -95,7 +99,9 @@ export default function HomeScreen() {
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           style={{ width: '100%' }}
+          contentContainerStyle={{ paddingBottom: 100 }}
         />
+        <FloatingActionButton onPress={openExpenseForm} />
         <MonthYearPicker
           ref={sheetRef}
           initialMonth={selectedMonthYear.month}
