@@ -178,6 +178,7 @@ export default function CategoryFormModal() {
                       value={displayValue}
                       onChangeText={handleTextChange}
                       onBlur={handleBlur}
+                      placeholderTextColor={colors.textPrimary}
                     />
                     {errors?.amount && (
                       <Text style={{ color: colors.error }}>{String(errors.amount?.message ?? '')}</Text>
