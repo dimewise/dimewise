@@ -352,8 +352,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     padding: 24,
-    borderTopWidth: 1,
-    borderTopColor: colors.textPrimary,
   },
   applyFooterButton: {
     flex: 1,

@@ -128,5 +128,8 @@
   "transactions_filter_title": "Filters",
   "transactions_filter_apply": "Apply",
   "transactions_filter_clear_all": "Clear All",
-  "transactions_search_placeholder": "Search transactions…"
+  "transactions_search_placeholder": "Search transactions…",
+  "form_loading": "Loading...",
+  "form_select_category": "Select category",
+  "form_select_payment_method": "Select payment method"
 }
