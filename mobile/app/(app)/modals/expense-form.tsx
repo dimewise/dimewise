@@ -34,7 +34,7 @@ type FormData = z.infer<typeof postExpenseBody>;
 export default function ExpenseFormModal() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { currency } = useUserLocale();
+  const { currency, locale } = useUserLocale();
   const [displayValue, setDisplayValue] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [expandedField, setExpandedField] = useState<string | null>(null);
@@ -103,17 +103,17 @@ export default function ExpenseFormModal() {
   };
 
   const formatDate = (dateString: string) => {
-    return DateTime.fromISO(dateString).toLocaleString(DateTime.DATE_MED);
+    return DateTime.fromISO(dateString).setLocale(locale).toLocaleString(DateTime.DATE_MED);
   };
 
   const getSelectedCategoryTitle = () => {
     const category = categories?.find(cat => cat.id === watch('category_id'));
-    return category?.title || 'Select category';
+    return category?.title || t('form_select_category');
   };
 
   const getSelectedPaymentMethodTitle = () => {
     const method = paymentMethods?.find(method => method.id === watch('payment_method_id'));
-    return method?.title || 'Select payment method';
+    return method?.title || t('form_select_payment_method');
   };
 
 
@@ -172,6 +172,7 @@ export default function ExpenseFormModal() {
                       style={styles.datePicker}
                       textColor={colors.textPrimary}
                       themeVariant="dark"
+                      locale={locale}
                     />
                     </View>
                   )}
@@ -206,7 +207,7 @@ export default function ExpenseFormModal() {
                         itemStyle={styles.pickerItem}
                       >
                         <Picker.Item
-                          label={categoriesLoading ? 'Loading...' : 'Select category'}
+                          label={categoriesLoading ? t('form_loading') : t('form_select_category')}
                           value=""
                           color={colors.disabled}
                         />
@@ -252,7 +253,7 @@ export default function ExpenseFormModal() {
                         itemStyle={styles.pickerItem}
                       >
                         <Picker.Item
-                          label={paymentMethodsLoading ? 'Loading...' : 'Select payment method'}
+                          label={paymentMethodsLoading ? t('form_loading') : t('form_select_payment_method')}
                           value=""
                           color={colors.disabled}
                         />
