@@ -103,7 +103,6 @@
   "transactions_loading": "Loading…",
   "transactions_load_more": "Load more",
   "transactions_empty": "No transactions found.",
-  "settings_logout": "Log out",
   "budget_remainder": "Remainder",
   "budget_used": "Used",
   "budget_total": "Total Budget",
@@ -116,5 +115,18 @@
   "form_expense_payment_method": "Payment Method",
   "form_expense_date": "Date",
   "settings_add_new_expense": "Add New Expense",
-  "settings_edit_expense": "Edit Expense"
+  "settings_edit_expense": "Edit Expense",
+  "transactions_filter_category": "Category",
+  "transactions_filter_payment_method": "Payment Method",
+  "transactions_filter_date_from": "From Date",
+  "transactions_filter_date_to": "To Date",
+  "transactions_filter_verification_status": "Status",
+  "transactions_filter_clear": "Clear",
+  "transactions_filter_verified": "Verified",
+  "transactions_filter_unverified": "Unverified",
+  "transactions_filter_all": "All",
+  "transactions_filter_title": "Filters",
+  "transactions_filter_apply": "Apply",
+  "transactions_filter_clear_all": "Clear All",
+  "transactions_search_placeholder": "Search transactions…"
 }

@@ -103,7 +103,6 @@
   "transactions_loading": "読み込み中…",
   "transactions_load_more": "さらに読み込む",
   "transactions_empty": "取引が見つかりません。",
-  "settings_logout": "ログアウト",
   "budget_remainder": "残り",
   "budget_used": "使用済み",
   "budget_total": "総予算",
@@ -116,5 +115,18 @@
   "form_expense_payment_method": "支払い方法",
   "form_expense_date": "日付",
   "settings_add_new_expense": "新しい支出を追加",
-  "settings_edit_expense": "支出を編集"
+  "settings_edit_expense": "支出を編集",
+  "transactions_filter_category": "カテゴリ",
+  "transactions_filter_payment_method": "支払い方法",
+  "transactions_filter_date_from": "開始日",
+  "transactions_filter_date_to": "終了日",
+  "transactions_filter_verification_status": "ステータス",
+  "transactions_filter_clear": "クリア",
+  "transactions_filter_verified": "確認済み",
+  "transactions_filter_unverified": "未確認",
+  "transactions_filter_all": "すべて",
+  "transactions_filter_title": "フィルター",
+  "transactions_filter_apply": "適用",
+  "transactions_filter_clear_all": "すべてクリア",
+  "transactions_search_placeholder": "取引を検索…"
 }

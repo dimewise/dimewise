@@ -9,9 +9,9 @@ import { AppLayout } from '@/components/layouts/AppLayout';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ExpenseRow } from '@/components/transactions/ExpenseRow';
 import { FilterBar } from '@/components/transactions/FilterBar';
+import { FilterModal } from '@/components/transactions/FilterModal';
 import { useGetExpensesQuery, useLazyGetExpensesQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
-import { fakeRecentTransactions } from '@/utils/mocks/mockAnalyticsData';
 
 export type Filter = {
   search?: string;
@@ -30,6 +30,7 @@ export default function ExpensesScreen() {
   const primaryLocale = locales[0];
 
   const [filter, setFilter] = useState<Filter>({});
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const openExpenseForm = () => router.push('/modals/expense-form');
   const queryArgs = useMemo(() => {
     const now = DateTime.now();
@@ -57,8 +58,7 @@ export default function ExpensesScreen() {
   }, [data, queryArgs, fetchNext]);
 
   /* ---------- data ---------- */
-  // const expenses = useMemo(() => data?.data ?? [], [data]);
-  const expenses = useMemo(() => fakeRecentTransactions(12), []);
+  const expenses = useMemo(() => data?.data ?? [], [data]);
 
   const ListFooter = useMemo(() => {
     if (!data?.pagination.has_next) return null;
@@ -100,6 +100,8 @@ export default function ExpensesScreen() {
           <FilterBar
             filter={filter}
             setFilter={setFilter}
+            onOpenFilterModal={() => setShowFilterModal(true)}
+            onFilterChange={setFilter}
           />
         </View>
         <FlatList
@@ -108,7 +110,6 @@ export default function ExpensesScreen() {
           renderItem={({ item }) => (
             <ExpenseRow
               item={item}
-              locale={primaryLocale}
             />
           )}
           contentContainerStyle={{ paddingBottom: 100 }}
@@ -120,8 +121,18 @@ export default function ExpensesScreen() {
           }
           showsVerticalScrollIndicator={false}
           style={{ width: '100%' }}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
         />
         <FloatingActionButton onPress={openExpenseForm} />
+        
+        {/* Filter Modal */}
+        <FilterModal
+          visible={showFilterModal}
+          onClose={() => setShowFilterModal(false)}
+          onApply={setFilter}
+          currentFilters={filter}
+        />
       </SafeAreaView>
     </AppLayout>
   );

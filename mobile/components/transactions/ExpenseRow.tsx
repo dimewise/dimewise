@@ -8,7 +8,7 @@ import { useUserLocale } from '@/hooks/useUserLocale';
 type Props = { item: ExpenseWithDetails };
 
 export const ExpenseRow = ({ item }: Props) => {
-  const { locale } = useUserLocale();
+  const { currency, locale } = useUserLocale();
   return (
     <View
       style={{
@@ -25,7 +25,7 @@ export const ExpenseRow = ({ item }: Props) => {
           </Text>
           <Text style={{ fontSize: 12, color: colors.disabled, marginTop: 2 }}>
             {item.category.title} · {item.payment_method.title} ·{' '}
-            {DateTime.fromISO(item.incurred_at).toLocaleString(DateTime.DATE_MED)}
+            {DateTime.fromISO(item.incurred_at).setLocale(locale).toLocaleString(DateTime.DATE_MED)}
           </Text>
         </View>
         <Text
@@ -35,7 +35,7 @@ export const ExpenseRow = ({ item }: Props) => {
             color: colors.textPrimary,
           }}
         >
-          {formatCurrency(item.amount, item.currency, locale.languageTag)}
+          {formatCurrency(item.amount, currency, locale)}
         </Text>
       </View>
     </View>
