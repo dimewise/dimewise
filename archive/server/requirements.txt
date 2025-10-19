@@ -1,9 +1,0 @@
-litestar[jwt]
-uvicorn
-pydantic
-pydantic-settings
-advanced-alchemy
-asyncpg
-
-black
-ruff

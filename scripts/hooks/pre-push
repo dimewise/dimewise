@@ -1,8 +1,0 @@
-#!/bin/bash
-
-# Run the lint script before pushing changes
-cd client
-bun run check
-
-# Exit with the exit code of the npm run lint command
-exit $?
