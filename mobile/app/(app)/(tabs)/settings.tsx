@@ -320,9 +320,9 @@ export default function SettingsScreen() {
                                   onEditPaymentMethod(item.id, item.title, item.method_type);
                                 }
                               }}
-                              style={styles.actionButton}
+                              style={styles.iconButton}
                             >
-                              <Text style={styles.actionButtonText}>{t('settings_edit')}</Text>
+                              <Octicons name="pencil" size={18} color={colors.backgroundDefault} />
                             </Pressable>
                             <Pressable
                               onPress={() => {
@@ -332,11 +332,9 @@ export default function SettingsScreen() {
                                   onDeletePaymentMethod(item.id, item.title);
                                 }
                               }}
-                              style={[styles.actionButton, styles.deleteButton]}
+                              style={[styles.iconButton, styles.deleteIconButton]}
                             >
-                              <Text style={[styles.actionButtonText, styles.deleteButtonText]}>
-                                {t('settings_delete')}
-                              </Text>
+                              <Octicons name="trash" size={18} color={colors.backgroundDefault} />
                             </Pressable>
                           </>
                         )}
@@ -397,6 +395,19 @@ const styles = StyleSheet.create({
     color: colors.backgroundDefault,
     fontSize: 12,
     fontWeight: '600',
+  },
+  iconButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 40,
+    minHeight: 40,
+  },
+  deleteIconButton: {
+    backgroundColor: colors.error,
   },
   deleteButton: {
     backgroundColor: `${colors.error}20`,
