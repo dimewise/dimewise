@@ -10,7 +10,7 @@ import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ExpenseRow } from '@/components/transactions/ExpenseRow';
 import { FilterBar } from '@/components/transactions/FilterBar';
 import { FilterModal } from '@/components/transactions/FilterModal';
-import { useGetExpensesQuery, useLazyGetExpensesQuery } from '@/generated/api/api';
+import { useGetExpensesQuery, useLazyGetExpensesQuery, type ExpenseWithDetails } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 
 export type Filter = {
@@ -32,6 +32,11 @@ export default function ExpensesScreen() {
   const [filter, setFilter] = useState<Filter>({});
   const [showFilterModal, setShowFilterModal] = useState(false);
   const openExpenseForm = () => router.push('/modals/expense-form');
+  
+  const handleExpensePress = (expense: ExpenseWithDetails) => {
+    router.push(`/modals/transaction-details?expenseId=${expense.id}`);
+  };
+
   const queryArgs = useMemo(() => {
     const now = DateTime.now();
     return {
@@ -110,6 +115,7 @@ export default function ExpensesScreen() {
           renderItem={({ item }) => (
             <ExpenseRow
               item={item}
+              onPress={handleExpensePress}
             />
           )}
           contentContainerStyle={{ paddingBottom: 100 }}

@@ -308,7 +308,7 @@ export default function SettingsScreen() {
                          (sec.type === 'payment_methods' && (deletingPaymentMethodId === item.id || deletedPaymentMethodId === item.id)) ? (
                           <View style={styles.loadingContainer}>
                             <ActivityIndicator size="small" color={colors.primary} />
-                            <Text style={styles.loadingText}>Deleting...</Text>
+                            <Text style={styles.loadingText}>{t('settings_deleting')}</Text>
                           </View>
                         ) : (
                           <>
