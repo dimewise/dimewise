@@ -33,9 +33,6 @@ export default function ExpensesScreen() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const openExpenseForm = () => router.push('/modals/expense-form');
   
-  const handleExpensePress = (expense: ExpenseWithDetails) => {
-    router.push(`/modals/transaction-details?expenseId=${expense.id}`);
-  };
 
   const queryArgs = useMemo(() => {
     const now = DateTime.now();
@@ -115,7 +112,6 @@ export default function ExpensesScreen() {
           renderItem={({ item }) => (
             <ExpenseRow
               item={item}
-              onPress={handleExpensePress}
             />
           )}
           contentContainerStyle={{ paddingBottom: 100 }}
