@@ -99,66 +99,78 @@ export default function PaymentMethodFormModal() {
   const isLoading = isCreating || isUpdating;
 
   return (
-    <AppLayout>
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <View style={styles.content}>
-          <Text style={styles.title}>
-            {isEdit ? t('settings_edit_payment_method') : t('settings_add_new_payment_method')}
-          </Text>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>
+          {isEdit ? t('settings_edit_payment_method') : t('settings_add_new_payment_method')}
+        </Text>
+      </View>
 
-          <View style={styles.form}>
-            <FormTextInput
-              control={control}
-              name="title"
-              labelKey="form_payment_method_title"
-              placeholderKey="form_payment_method_title_prompt"
-              colors={colors}
-              t={t}
-              errors={errors}
-              animateView
-            />
-            
-            <Controller
-              control={control}
-              name="method_type"
-              render={({ field: { onChange, value } }) => (
-                <View style={styles.methodTypeContainer}>
-                  <Text style={styles.label}>{t('form_payment_method_type')}</Text>
-                  <View style={styles.pickerContainer}>
-                    <Picker
-                      selectedValue={value}
-                      onValueChange={onChange}
-                      style={styles.picker}
-                      itemStyle={styles.pickerItem}
-                    >
-                      {PAYMENT_METHOD_TYPES.map((type) => (
-                        <Picker.Item
-                          key={type.value}
-                          label={t(type.labelKey)}
-                          value={type.value}
-                          color={colors.textPrimary}
-                        />
-                      ))}
-                    </Picker>
-                  </View>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.form}>
+          <FormTextInput
+            control={control}
+            name="title"
+            labelKey="form_payment_method_title"
+            placeholderKey="form_payment_method_title_prompt"
+            colors={colors}
+            t={t}
+            errors={errors}
+            animateView
+          />
+          
+          <Controller
+            control={control}
+            name="method_type"
+            render={({ field: { onChange, value } }) => (
+              <View style={styles.methodTypeContainer}>
+                <Text style={styles.label}>{t('form_payment_method_type')}</Text>
+                <View style={styles.pickerContainer}>
+                  <Picker
+                    selectedValue={value}
+                    onValueChange={onChange}
+                    style={styles.picker}
+                    itemStyle={styles.pickerItem}
+                  >
+                    {PAYMENT_METHOD_TYPES.map((type) => (
+                      <Picker.Item
+                        key={type.value}
+                        label={t(type.labelKey)}
+                        value={type.value}
+                        color={colors.textPrimary}
+                      />
+                    ))}
+                  </Picker>
                 </View>
-              )}
-            />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Pressable onPress={onCancel} style={[styles.cancelButton, isLoading && styles.disabledButton]} disabled={isLoading}>
-              <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>{t('form_cancel')}</Text>
-            </Pressable>
-            <Pressable onPress={onSubmit} style={[styles.saveButton, isLoading && styles.disabledButton]} disabled={isLoading}>
-              <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
-                {isLoading ? '...' : t('form_save')}
-              </Text>
-            </Pressable>
-          </View>
+              </View>
+            )}
+          />
         </View>
-      </SafeAreaView>
-    </AppLayout>
+      </ScrollView>
+
+      {/* Action Buttons */}
+      <View style={styles.buttonContainer}>
+        <Pressable 
+          onPress={onCancel} 
+          style={[styles.cancelButton, isLoading && styles.disabledButton]} 
+          disabled={isLoading}
+        >
+          <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>
+            {t('form_cancel')}
+          </Text>
+        </Pressable>
+        <Pressable 
+          onPress={onSubmit} 
+          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+          disabled={isLoading}
+        >
+          <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
+            {isLoading ? '...' : t('form_save')}
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -166,35 +178,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.backgroundDefault,
-    width: "100%",
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.backgroundSurface,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 32,
   },
   form: {
+    padding: 24,
     gap: 20,
-    marginBottom: 32,
   },
   methodTypeContainer: {
     gap: 8,
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.textPrimary,
   },
   pickerContainer: {
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.textPrimary,
     overflow: 'hidden',
@@ -209,36 +223,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
+    padding: 24,
     gap: 12,
-    paddingTop: 16,
   },
   cancelButton: {
     flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.textPrimary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.textPrimary,
   },
   saveButton: {
     flex: 1,
     backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    shadowColor: colors.textPrimary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.backgroundDefault,
   },
   disabledButton: {

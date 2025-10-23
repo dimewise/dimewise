@@ -98,9 +98,6 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={handleClose} style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>{t('form_cancel')}</Text>
-          </Pressable>
           <Text style={styles.title}>{t('transactions_filter_title')}</Text>
           <Pressable onPress={handleClear} style={styles.clearButton}>
             <Text style={styles.clearButtonText}>{t('transactions_filter_clear')}</Text>
@@ -248,10 +245,19 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
           </View>
         </ScrollView>
 
-        {/* Footer Buttons */}
-        <View style={styles.footer}>
-          <Pressable onPress={handleApply} style={styles.applyFooterButton}>
-            <Text style={styles.applyFooterButtonText}>{t('transactions_filter_apply')}</Text>
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <Pressable 
+            onPress={handleClose} 
+            style={styles.cancelButton}
+          >
+            <Text style={styles.cancelButtonText}>{t('form_cancel')}</Text>
+          </Pressable>
+          <Pressable 
+            onPress={handleApply} 
+            style={styles.applyButton}
+          >
+            <Text style={styles.applyButtonText}>{t('transactions_filter_apply')}</Text>
           </Pressable>
         </View>
       </View>
@@ -265,24 +271,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundDefault,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'space-between' as const,
     paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  closeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    color: colors.textPrimary,
-    fontWeight: '600',
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.backgroundSurface,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '700' as const,
     color: colors.textPrimary,
   },
   clearButton: {
@@ -292,7 +291,7 @@ const styles = StyleSheet.create({
   clearButtonText: {
     fontSize: 16,
     color: colors.error,
-    fontWeight: '600',
+    fontWeight: '600' as const,
   },
   content: {
     flex: 1,
@@ -305,30 +304,30 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   collapsibleHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
     paddingVertical: 16,
     paddingHorizontal: 16,
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.textPrimary,
   },
   collapsibleLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.textPrimary,
   },
   collapsibleValue: {
     fontSize: 16,
     color: colors.textPrimary,
     flex: 1,
-    textAlign: 'right',
+    textAlign: 'right' as const,
   },
   pickerWrapper: {
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.textPrimary,
     overflow: 'hidden',
@@ -346,22 +345,45 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: colors.backgroundSurface,
   },
-  footer: {
-    flexDirection: 'row',
-    gap: 12,
+  buttonContainer: {
+    flexDirection: 'row' as const,
     padding: 24,
+    gap: 12,
   },
-  applyFooterButton: {
+  cancelButton: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: colors.textPrimary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.textPrimary,
+  },
+  applyButton: {
     flex: 1,
     backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    shadowColor: colors.textPrimary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  applyFooterButtonText: {
+  applyButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.backgroundDefault,
   },
 });

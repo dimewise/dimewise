@@ -163,26 +163,21 @@ export default function ExpenseFormModal() {
 
 
   return (
-    <AppLayout>
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <TouchableWithoutFeedback onPress={() => setExpandedField(null)}>
-          <View style={styles.content}>
-            <Text style={styles.title}>
-              {isEditMode ? t('settings_edit_expense') : t('settings_add_new_expense')}
-            </Text>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>
+          {isEditMode ? t('settings_edit_expense') : t('settings_add_new_expense')}
+        </Text>
+      </View>
 
-            <ScrollView 
-              style={styles.scrollView}
-              contentContainerStyle={styles.scrollContent}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              scrollEventThrottle={16}
-              bounces={true}
-              alwaysBounceVertical={false}
-              nestedScrollEnabled={true}
-              removeClippedSubviews={false}
-            >
-            <View style={styles.form}>
+      <TouchableWithoutFeedback onPress={() => setExpandedField(null)}>
+        <ScrollView 
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.form}>
             <FormTextInput
               control={control}
               name="title"
@@ -193,7 +188,6 @@ export default function ExpenseFormModal() {
               errors={errors}
               animateView
             />
-
 
             <Controller
               control={control}
@@ -222,7 +216,7 @@ export default function ExpenseFormModal() {
                     </View>
                   )}
                   {errors?.incurred_at && (
-                    <Text style={{ color: colors.error }}>{String(errors.incurred_at?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>{String(errors.incurred_at?.message ?? '')}</Text>
                   )}
                 </View>
               )}
@@ -268,7 +262,7 @@ export default function ExpenseFormModal() {
                     </View>
                   )}
                   {errors?.category_id && (
-                    <Text style={{ color: colors.error }}>{String(errors.category_id?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>{String(errors.category_id?.message ?? '')}</Text>
                   )}
                 </View>
               )}
@@ -314,7 +308,7 @@ export default function ExpenseFormModal() {
                     </View>
                   )}
                   {errors?.payment_method_id && (
-                    <Text style={{ color: colors.error }}>{String(errors.payment_method_id?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>{String(errors.payment_method_id?.message ?? '')}</Text>
                   )}
                 </View>
               )}
@@ -362,12 +356,12 @@ export default function ExpenseFormModal() {
                 };
                 
                 return (
-                  <View style={{ gap: 8 }}>
-                    <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>
                       {t('form_expense_amount')} ({currency})
                     </Text>
                     <TextInput
-                      style={[sharedStyles.input, errors?.amount && sharedStyles.inputError]}
+                      style={[styles.input, errors?.amount && styles.inputError]}
                       keyboardType="numeric"
                       placeholder={getCurrencyPlaceholder(currency)}
                       value={displayValue}
@@ -376,26 +370,25 @@ export default function ExpenseFormModal() {
                       placeholderTextColor={colors.disabled}
                     />
                     {errors?.amount && (
-                      <Text style={{ color: colors.error }}>{String(errors.amount?.message ?? '')}</Text>
+                      <Text style={styles.errorText}>{String(errors.amount?.message ?? '')}</Text>
                     )}
                   </View>
                 );
               }}
             />
 
-                        
             <Controller
               control={control}
               name="description"
               render={({ field: { onChange, onBlur, value } }) => (
-                <View style={{ gap: 8 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>
                     {t('form_expense_description')}
                   </Text>
                   <TextInput
                     style={[
-                      sharedStyles.input, 
-                      errors?.description && sharedStyles.inputError,
+                      styles.input, 
+                      errors?.description && styles.inputError,
                       { minHeight: 80, textAlignVertical: 'top' }
                     ]}
                     placeholder={t('form_expense_description_prompt')}
@@ -407,29 +400,37 @@ export default function ExpenseFormModal() {
                     numberOfLines={3}
                   />
                   {errors?.description && (
-                    <Text style={{ color: colors.error }}>{String(errors.description?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>{String(errors.description?.message ?? '')}</Text>
                   )}
                 </View>
               )}
             />
-
-            </View>
-            </ScrollView>
-
-            <View style={styles.buttonContainer}>
-              <Pressable onPress={onCancel} style={[styles.cancelButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} disabled={isCreating || isUpdating || isLoadingExpense}>
-                <Text style={[styles.cancelButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>{t('form_cancel')}</Text>
-              </Pressable>
-              <Pressable onPress={onSubmit} style={[styles.saveButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} disabled={isCreating || isUpdating || isLoadingExpense}>
-                <Text style={[styles.saveButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>
-                  {isLoadingExpense ? t('form_loading') : (isCreating || isUpdating) ? '...' : t('form_save')}
-                </Text>
-              </Pressable>
-            </View>
           </View>
-        </TouchableWithoutFeedback>
-      </SafeAreaView>
-    </AppLayout>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+
+      {/* Action Buttons */}
+      <View style={styles.buttonContainer}>
+        <Pressable 
+          onPress={onCancel} 
+          style={[styles.cancelButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} 
+          disabled={isCreating || isUpdating || isLoadingExpense}
+        >
+          <Text style={[styles.cancelButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>
+            {t('form_cancel')}
+          </Text>
+        </Pressable>
+        <Pressable 
+          onPress={onSubmit} 
+          style={[styles.saveButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} 
+          disabled={isCreating || isUpdating || isLoadingExpense}
+        >
+          <Text style={[styles.saveButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>
+            {isLoadingExpense ? t('form_loading') : (isCreating || isUpdating) ? '...' : t('form_save')}
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -437,42 +438,83 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.backgroundDefault,
-    width: "100%",
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.backgroundSurface,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
   },
   form: {
+    padding: 24,
     gap: 20,
-    paddingBottom: 20,
-    minHeight: '100%',
   },
-  pickerContainer: {
+  inputContainer: {
     gap: 8,
   },
-  label: {
+  inputLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.textPrimary,
+  },
+  input: {
+    backgroundColor: colors.backgroundSurface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.textPrimary,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: colors.textPrimary,
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    fontSize: 14,
+    color: colors.error,
+    marginTop: 4,
+  },
+  collapsibleContainer: {
+    gap: 8,
+  },
+  collapsibleHeader: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    backgroundColor: colors.backgroundSurface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.textPrimary,
+  },
+  collapsibleLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.textPrimary,
+  },
+  collapsibleValue: {
+    fontSize: 16,
+    color: colors.textPrimary,
+    flex: 1,
+    textAlign: 'right' as const,
+  },
+  placeholderText: {
+    color: colors.disabled,
   },
   pickerWrapper: {
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.textPrimary,
     overflow: 'hidden',
@@ -486,69 +528,49 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontSize: 16,
   },
-  collapsibleContainer: {
-    gap: 8,
-  },
-  collapsibleHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.textPrimary,
-  },
-  collapsibleLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-  collapsibleValue: {
-    fontSize: 16,
-    color: colors.textPrimary,
-    flex: 1,
-    textAlign: 'right',
-  },
-  placeholderText: {
-    color: colors.disabled,
-  },
   datePicker: {
     height: 200,
     backgroundColor: colors.backgroundSurface,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
+    padding: 24,
     gap: 12,
-    paddingTop: 16,
   },
   cancelButton: {
     flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.textPrimary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.textPrimary,
   },
   saveButton: {
     flex: 1,
     backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    shadowColor: colors.textPrimary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.backgroundDefault,
   },
   disabledButton: {
@@ -558,3 +580,4 @@ const styles = StyleSheet.create({
     // Keep original text colors but with reduced opacity
   },
 });
+
