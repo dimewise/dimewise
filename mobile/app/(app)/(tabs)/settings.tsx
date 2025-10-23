@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import {
@@ -29,9 +29,9 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { signOut } = useClerk();
-  const { data: cats } = useGetCategoriesQuery({ includeDeleted: false });
-  const { data: pms } = useGetPaymentMethodsQuery({ includeDeleted: false });
-  const { data: user } = useGetUsersMeQuery();
+  const { data: cats, refetch: refetchCategories } = useGetCategoriesQuery({ includeDeleted: false });
+  const { data: pms, refetch: refetchPaymentMethods } = useGetPaymentMethodsQuery({ includeDeleted: false });
+  const { data: user, refetch: refetchUser } = useGetUsersMeQuery();
   const { currency, locale } = useUserLocale();
 
   // Calculate total monthly budget
@@ -71,6 +71,14 @@ export default function SettingsScreen() {
 
   const onSelectLanguage = () => {
     router.push('/(app)/modals/language-selector');
+  };
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchCategories(),
+      refetchPaymentMethods(),
+      refetchUser(),
+    ]);
   };
 
   const onEditCategory = (categoryId: string, title: string, amount: number) => {
@@ -204,7 +212,17 @@ export default function SettingsScreen() {
             {t('page_title_settings')}
           </Text>
         </View>
-        <ScrollView contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}>
+        <ScrollView 
+          contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={false}
+              onRefresh={handleRefresh}
+              tintColor={colors.textPrimary}
+              colors={[colors.textPrimary]}
+            />
+          }
+        >
           <View style={styles.section}>
             {currencyRow}
             {languageRow}
