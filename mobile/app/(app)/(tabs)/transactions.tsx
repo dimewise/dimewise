@@ -1,7 +1,7 @@
 import { useLocales } from 'expo-localization';
 import { DateTime } from 'luxon';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -45,7 +45,7 @@ export default function ExpensesScreen() {
   }, [filter]);
 
   /* ---------- query ---------- */
-  const { data, error, isLoading, isFetching } = useGetExpensesQuery(queryArgs, {
+  const { data, error, isLoading, isFetching, refetch } = useGetExpensesQuery(queryArgs, {
     refetchOnMountOrArgChange: true,
   });
   const [fetchNext] = useLazyGetExpensesQuery();
@@ -125,6 +125,14 @@ export default function ExpensesScreen() {
           style={{ width: '100%' }}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={isFetching}
+              onRefresh={refetch}
+              tintColor={colors.textPrimary}
+              colors={[colors.textPrimary]}
+            />
+          }
         />
         <FloatingActionButton onPress={openExpenseForm} />
         

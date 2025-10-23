@@ -1,7 +1,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { DateTime } from 'luxon';
 import { useMemo, useRef, useState } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { BalanceSummary } from '@/components/home/BalanceSummary';
@@ -20,6 +20,7 @@ import {
   useGetAnalyticsPaymentMethodsBreakdownQuery,
   useGetAnalyticsRecentTransactionsQuery,
 } from '@/generated/api/api';
+import { colors } from '@/theme/colors';
 
 type HeaderItem = { type: 'header' };
 type CategoryItem = { type: 'categories'; data: CategoryBreakdown[] };
@@ -43,9 +44,17 @@ export default function HomeScreen() {
   const openPicker = () => sheetRef.current?.present();
   const openExpenseForm = () => router.push('/modals/expense-form');
 
-  const { data: categories } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
-  const { data: payments } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
-  const { data: transactions } = useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchCategories(),
+      refetchPayments(),
+      refetchTransactions(),
+    ]);
+  };
+
+  const { data: categories, refetch: refetchCategories } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
+  const { data: payments, refetch: refetchPayments } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
+  const { data: transactions, refetch: refetchTransactions } = useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
 
   const data: Section[] = useMemo(
     () => [
@@ -100,6 +109,14 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           style={{ width: '100%' }}
           contentContainerStyle={{ paddingBottom: 100 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={false}
+              onRefresh={handleRefresh}
+              tintColor={colors.textPrimary}
+              colors={[colors.textPrimary]}
+            />
+          }
         />
         <FloatingActionButton onPress={openExpenseForm} />
         <MonthYearPicker
