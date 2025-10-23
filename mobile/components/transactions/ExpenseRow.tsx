@@ -3,6 +3,7 @@ import { Text, View, Pressable, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Octicons from '@expo/vector-icons/Octicons';
 import type { ExpenseWithDetails } from '@/generated/api/api';
 import { 
   usePostExpensesByExpenseIdVerifyMutation,
@@ -73,12 +74,15 @@ export const ExpenseRow = ({ item, onPress }: Props) => {
   const renderRightActions = () => (
     <View style={styles.rightActions}>
       <Pressable style={[styles.actionButton, styles.verifyAction]} onPress={handleVerify}>
+        <Octicons name="check" size={20} color={colors.backgroundDefault} />
         <Text style={styles.actionButtonText}>{t('transaction_swipe_verify')}</Text>
       </Pressable>
       <Pressable style={[styles.actionButton, styles.editAction]} onPress={handleEdit}>
+        <Octicons name="pencil" size={20} color={colors.backgroundDefault} />
         <Text style={styles.actionButtonText}>{t('transaction_swipe_edit')}</Text>
       </Pressable>
       <Pressable style={[styles.actionButton, styles.deleteAction]} onPress={handleDelete}>
+        <Octicons name="trash" size={20} color={colors.backgroundDefault} />
         <Text style={styles.actionButtonText}>{t('transaction_swipe_delete')}</Text>
       </Pressable>
     </View>
@@ -141,30 +145,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     marginBottom: 8,
+    marginLeft: 8,
+    marginTop: 2,
+    marginRight: 2,
+    gap: 8,
   },
   actionButton: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingVertical: 12,
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    minWidth: 80,
+    minWidth: 65,
+    gap: 4,
+    borderRadius: 8,
   },
   verifyAction: {
     backgroundColor: colors.success || '#4CAF50',
-    borderTopLeftRadius: 8,
-    borderBottomLeftRadius: 8,
   },
   editAction: {
     backgroundColor: colors.primary,
   },
   deleteAction: {
     backgroundColor: colors.error,
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
   },
   actionButtonText: {
     color: colors.backgroundDefault,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600' as const,
+    textAlign: 'center' as const,
   },
 });
