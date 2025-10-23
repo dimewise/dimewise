@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
@@ -14,7 +14,10 @@ import {
   useGetCategoriesQuery,
   useGetPaymentMethodsQuery,
   usePostExpensesMutation,
+  useGetExpensesByExpenseIdQuery,
+  usePutExpensesByExpenseIdMutation,
   type ExpenseCreate,
+  type ExpenseUpdate,
 } from '@/generated/api/api';
 import { postExpenseBody } from '@/generated/types/expenses/expenses.zod';
 import { z } from 'zod';
@@ -33,16 +36,26 @@ type FormData = z.infer<typeof postExpenseBody>;
 
 export default function ExpenseFormModal() {
   const router = useRouter();
+  const { expenseId } = useLocalSearchParams<{ expenseId?: string }>();
   const { t } = useTranslation();
   const { currency, locale } = useUserLocale();
   const [displayValue, setDisplayValue] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [expandedField, setExpandedField] = useState<string | null>(null);
   
+  const isEditMode = !!expenseId;
+  
   // API hooks
   const { data: categories, isLoading: categoriesLoading } = useGetCategoriesQuery({ includeDeleted: false });
   const { data: paymentMethods, isLoading: paymentMethodsLoading } = useGetPaymentMethodsQuery({ includeDeleted: false });
   const [createExpense, { isLoading: isCreating }] = usePostExpensesMutation();
+  const [updateExpense, { isLoading: isUpdating }] = usePutExpensesByExpenseIdMutation();
+  
+  // Fetch existing expense data for edit mode
+  const { data: existingExpense, isLoading: isLoadingExpense } = useGetExpensesByExpenseIdQuery(
+    { expenseId: expenseId! },
+    { skip: !isEditMode }
+  );
 
   const {
     control,
@@ -50,6 +63,7 @@ export default function ExpenseFormModal() {
     formState: { errors },
     watch,
     setValue,
+    reset,
   } = useForm<FormData>({
     resolver: zodResolver(postExpenseBody),
     defaultValues: {
@@ -62,22 +76,53 @@ export default function ExpenseFormModal() {
     },
   });
 
+  // Prefill form when existing expense data is loaded
+  useEffect(() => {
+    if (existingExpense) {
+      const expense = existingExpense;
+      reset({
+        title: expense.title,
+        description: expense.description || null,
+        amount: expense.amount,
+        category_id: expense.category_id,
+        payment_method_id: expense.payment_method_id,
+        incurred_at: expense.incurred_at,
+      });
+      setSelectedDate(DateTime.fromISO(expense.incurred_at).toJSDate());
+      setDisplayValue(formatCurrencyForInput(expense.amount, currency).toString());
+    }
+  }, [existingExpense, reset, currency]);
+
   const watchedDate = watch('incurred_at');
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       const amountToSave = parseCurrencyInput(data.amount.toString(), currency);
       
-      const createData: ExpenseCreate = {
-        title: data.title,
-        description: data.description || null,
-        amount: amountToSave,
-        category_id: data.category_id,
-        payment_method_id: data.payment_method_id,
-        incurred_at: data.incurred_at,
-      };
+      if (isEditMode && expenseId) {
+        const updateData: ExpenseUpdate = {
+          title: data.title,
+          description: data.description || null,
+          amount: amountToSave,
+          category_id: data.category_id,
+          payment_method_id: data.payment_method_id,
+          incurred_at: data.incurred_at,
+        };
+        
+        await updateExpense({ expenseId, expenseUpdate: updateData }).unwrap();
+      } else {
+        const createData: ExpenseCreate = {
+          title: data.title,
+          description: data.description || null,
+          amount: amountToSave,
+          category_id: data.category_id,
+          payment_method_id: data.payment_method_id,
+          incurred_at: data.incurred_at,
+        };
+        
+        await createExpense({ expenseCreate: createData }).unwrap();
+      }
       
-      await createExpense({ expenseCreate: createData }).unwrap();
       router.back();
     } catch (error) {
       console.error('Error saving expense:', error);
@@ -123,7 +168,7 @@ export default function ExpenseFormModal() {
         <TouchableWithoutFeedback onPress={() => setExpandedField(null)}>
           <View style={styles.content}>
             <Text style={styles.title}>
-              {t('settings_add_new_expense')}
+              {isEditMode ? t('settings_edit_expense') : t('settings_add_new_expense')}
             </Text>
 
             <ScrollView 
@@ -372,12 +417,12 @@ export default function ExpenseFormModal() {
             </ScrollView>
 
             <View style={styles.buttonContainer}>
-              <Pressable onPress={onCancel} style={[styles.cancelButton, isCreating && styles.disabledButton]} disabled={isCreating}>
-                <Text style={[styles.cancelButtonText, isCreating && styles.disabledButtonText]}>{t('form_cancel')}</Text>
+              <Pressable onPress={onCancel} style={[styles.cancelButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} disabled={isCreating || isUpdating || isLoadingExpense}>
+                <Text style={[styles.cancelButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>{t('form_cancel')}</Text>
               </Pressable>
-              <Pressable onPress={onSubmit} style={[styles.saveButton, isCreating && styles.disabledButton]} disabled={isCreating}>
-                <Text style={[styles.saveButtonText, isCreating && styles.disabledButtonText]}>
-                  {isCreating ? '...' : t('form_save')}
+              <Pressable onPress={onSubmit} style={[styles.saveButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} disabled={isCreating || isUpdating || isLoadingExpense}>
+                <Text style={[styles.saveButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>
+                  {isLoadingExpense ? t('form_loading') : (isCreating || isUpdating) ? '...' : t('form_save')}
                 </Text>
               </Pressable>
             </View>

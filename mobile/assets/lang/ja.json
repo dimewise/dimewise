@@ -131,5 +131,22 @@
   "transactions_search_placeholder": "取引を検索…",
   "form_loading": "読み込み中...",
   "form_select_category": "カテゴリを選択",
-  "form_select_payment_method": "支払い方法を選択"
+  "form_select_payment_method": "支払い方法を選択",
+  "transaction_details_title": "取引詳細",
+  "transaction_details_verified": "確認済み",
+  "transaction_details_unverified": "未確認",
+  "transaction_details_mark_verified": "確認済みにする",
+  "transaction_details_edit": "編集",
+  "transaction_details_delete": "削除",
+  "transaction_details_delete_confirm": "この取引を削除してもよろしいですか？",
+  "transaction_details_delete_confirm_title": "取引を削除",
+  "transaction_details_time": "時間",
+  "transaction_details_transaction_details": "取引詳細",
+  "transaction_details_status": "ステータス",
+  "transaction_details_verifying": "確認中...",
+  "transaction_details_deleting": "削除中...",
+  "settings_deleting": "削除中...",
+  "transaction_swipe_verify": "確認",
+  "transaction_swipe_edit": "編集",
+  "transaction_swipe_delete": "削除"
 }
