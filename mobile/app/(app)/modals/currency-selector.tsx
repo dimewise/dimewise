@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
@@ -66,41 +66,53 @@ export default function CurrencySelectorModal() {
   };
 
   return (
-    <AppLayout>
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <View style={styles.content}>
-          <Text style={styles.title}>{t('settings_select_currency')}</Text>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>{t('settings_select_currency')}</Text>
+      </View>
 
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedCurrency}
-              onValueChange={setSelectedCurrency}
-              style={styles.picker}
-            >
-              {CURRENCIES.map((currency) => (
-                <Picker.Item
-                  key={currency}
-                  label={currency}
-                  value={currency}
-                  color={colors.textPrimary}
-                />
-              ))}
-            </Picker>
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Pressable onPress={onCancel} style={[styles.cancelButton, isLoading && styles.disabledButton]} disabled={isLoading}>
-              <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>{t('form_cancel')}</Text>
-            </Pressable>
-            <Pressable onPress={onSave} style={[styles.saveButton, isLoading && styles.disabledButton]} disabled={isLoading}>
-              <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
-                {isLoading ? '...' : t('form_save')}
-              </Text>
-            </Pressable>
-          </View>
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={selectedCurrency}
+            onValueChange={setSelectedCurrency}
+            style={styles.picker}
+          >
+            {CURRENCIES.map((currency) => (
+              <Picker.Item
+                key={currency}
+                label={currency}
+                value={currency}
+                color={colors.textPrimary}
+              />
+            ))}
+          </Picker>
         </View>
-      </SafeAreaView>
-    </AppLayout>
+      </ScrollView>
+
+      {/* Action Buttons */}
+      <View style={styles.buttonContainer}>
+        <Pressable 
+          onPress={onCancel} 
+          style={[styles.cancelButton, isLoading && styles.disabledButton]} 
+          disabled={isLoading}
+        >
+          <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>
+            {t('form_cancel')}
+          </Text>
+        </Pressable>
+        <Pressable 
+          onPress={onSave} 
+          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+          disabled={isLoading}
+        >
+          <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
+            {isLoading ? '...' : t('form_save')}
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -108,63 +120,73 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.backgroundDefault,
-    width: '100%',
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.backgroundSurface,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 32,
   },
   pickerContainer: {
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.textPrimary,
     overflow: 'hidden',
-    marginBottom: 32,
+    margin: 24,
   },
   picker: {
     height: 200,
     color: colors.textPrimary,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
+    padding: 24,
     gap: 12,
-    paddingTop: 16,
   },
   cancelButton: {
     flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.textPrimary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.textPrimary,
   },
   saveButton: {
     flex: 1,
     backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    shadowColor: colors.textPrimary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.backgroundDefault,
   },
   disabledButton: {

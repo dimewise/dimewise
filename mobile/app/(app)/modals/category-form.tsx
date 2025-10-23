@@ -107,101 +107,113 @@ export default function CategoryFormModal() {
   const isLoading = isCreating || isUpdating;
 
   return (
-    <AppLayout>
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        <View style={styles.content}>
-          <Text style={styles.title}>
-            {isEdit ? t('settings_edit_category') : t('settings_add_new_category')}
-          </Text>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>
+          {isEdit ? t('settings_edit_category') : t('settings_add_new_category')}
+        </Text>
+      </View>
 
-          <View style={styles.form}>
-            <FormTextInput
-              control={control}
-              name="title"
-              labelKey="form_category_title"
-              placeholderKey="form_category_title_prompt"
-              colors={colors}
-              t={t}
-              errors={errors}
-              animateView
-            />
-            
-            <Controller
-              control={control}
-              name="amount"
-              render={({ field: { onChange, onBlur } }) => {
-                const handleTextChange = (text: string) => {
-                  if (!currencyUsesDecimals(currency)) {
-                    // For non-decimal currencies (JPY, KRW, etc.), just allow natural number input
-                    setDisplayValue(text);
-                    const numValue = text ? parseFloat(text) : 0;
-                    onChange(numValue);
-                    return;
-                  }
-                  
-                  // For decimal currencies, handle decimal formatting
-                  // Remove any non-numeric characters except decimal point
-                  const cleanText = text.replace(/[^0-9.]/g, '');
-                  
-                  // Handle decimal point logic
-                  if (cleanText.includes('.')) {
-                    const parts = cleanText.split('.');
-                    if (parts.length <= 2) {
-                      // Allow up to 2 decimal places
-                      const decimalPart = parts[1] ? parts[1].substring(0, 2) : '';
-                      const formattedText = parts[0] + '.' + decimalPart;
-                      setDisplayValue(formattedText);
-                      const numValue = formattedText ? parseFloat(formattedText) : 0;
-                      onChange(numValue); // Store display value
-                    }
-                  } else {
-                    // No decimal point, just numbers
-                    setDisplayValue(cleanText);
-                    const numValue = cleanText ? parseFloat(cleanText) : 0;
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.form}>
+          <FormTextInput
+            control={control}
+            name="title"
+            labelKey="form_category_title"
+            placeholderKey="form_category_title_prompt"
+            colors={colors}
+            t={t}
+            errors={errors}
+            animateView
+          />
+          
+          <Controller
+            control={control}
+            name="amount"
+            render={({ field: { onChange, onBlur } }) => {
+              const handleTextChange = (text: string) => {
+                if (!currencyUsesDecimals(currency)) {
+                  // For non-decimal currencies (JPY, KRW, etc.), just allow natural number input
+                  setDisplayValue(text);
+                  const numValue = text ? parseFloat(text) : 0;
+                  onChange(numValue);
+                  return;
+                }
+                
+                // For decimal currencies, handle decimal formatting
+                // Remove any non-numeric characters except decimal point
+                const cleanText = text.replace(/[^0-9.]/g, '');
+                
+                // Handle decimal point logic
+                if (cleanText.includes('.')) {
+                  const parts = cleanText.split('.');
+                  if (parts.length <= 2) {
+                    // Allow up to 2 decimal places
+                    const decimalPart = parts[1] ? parts[1].substring(0, 2) : '';
+                    const formattedText = parts[0] + '.' + decimalPart;
+                    setDisplayValue(formattedText);
+                    const numValue = formattedText ? parseFloat(formattedText) : 0;
                     onChange(numValue); // Store display value
                   }
-                };
-                
-                const handleBlur = () => {
-                  onBlur();
-                };
-                
-                return (
-                  <View style={{ gap: 8 }}>
-                    <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>
-                      {t('form_budget_amount')} ({currency})
-                    </Text>
-                    <TextInput
-                      style={[sharedStyles.input, errors?.amount && sharedStyles.inputError]}
-                      keyboardType="numeric"
-                      placeholder={getCurrencyPlaceholder(currency)}
-                      value={displayValue}
-                      onChangeText={handleTextChange}
-                      onBlur={handleBlur}
-                      placeholderTextColor={colors.textPrimary}
-                    />
-                    {errors?.amount && (
-                      <Text style={{ color: colors.error }}>{String(errors.amount?.message ?? '')}</Text>
-                    )}
-                  </View>
-                );
-              }}
-            />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Pressable onPress={onCancel} style={[styles.cancelButton, isLoading && styles.disabledButton]} disabled={isLoading}>
-              <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>{t('form_cancel')}</Text>
-            </Pressable>
-            <Pressable onPress={onSubmit} style={[styles.saveButton, isLoading && styles.disabledButton]} disabled={isLoading}>
-              <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
-                {isLoading ? '...' : t('form_save')}
-              </Text>
-            </Pressable>
-          </View>
+                } else {
+                  // No decimal point, just numbers
+                  setDisplayValue(cleanText);
+                  const numValue = cleanText ? parseFloat(cleanText) : 0;
+                  onChange(numValue); // Store display value
+                }
+              };
+              
+              const handleBlur = () => {
+                onBlur();
+              };
+              
+              return (
+                <View style={styles.inputContainer}>
+                  <Text style={styles.inputLabel}>
+                    {t('form_budget_amount')} ({currency})
+                  </Text>
+                  <TextInput
+                    style={[styles.input, errors?.amount && styles.inputError]}
+                    keyboardType="numeric"
+                    placeholder={getCurrencyPlaceholder(currency)}
+                    value={displayValue}
+                    onChangeText={handleTextChange}
+                    onBlur={handleBlur}
+                    placeholderTextColor={colors.disabled}
+                  />
+                  {errors?.amount && (
+                    <Text style={styles.errorText}>{String(errors.amount?.message ?? '')}</Text>
+                  )}
+                </View>
+              );
+            }}
+          />
         </View>
-      </SafeAreaView>
-    </AppLayout>
+      </ScrollView>
+
+      {/* Action Buttons */}
+      <View style={styles.buttonContainer}>
+        <Pressable 
+          onPress={onCancel} 
+          style={[styles.cancelButton, isLoading && styles.disabledButton]} 
+          disabled={isLoading}
+        >
+          <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>
+            {t('form_cancel')}
+          </Text>
+        </Pressable>
+        <Pressable 
+          onPress={onSubmit} 
+          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+          disabled={isLoading}
+        >
+          <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
+            {isLoading ? '...' : t('form_save')}
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -209,55 +221,91 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.backgroundDefault,
-    width: "100%",
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.backgroundSurface,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: colors.textPrimary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 32,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 32,
   },
   form: {
+    padding: 24,
     gap: 20,
-    marginBottom: 32,
+  },
+  inputContainer: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.textPrimary,
+  },
+  input: {
+    backgroundColor: colors.backgroundSurface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.textPrimary,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: colors.textPrimary,
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    fontSize: 14,
+    color: colors.error,
+    marginTop: 4,
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
+    padding: 24,
     gap: 12,
-    paddingTop: 16,
   },
   cancelButton: {
     flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.textPrimary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.textPrimary,
   },
   saveButton: {
     flex: 1,
     backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    shadowColor: colors.textPrimary,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   saveButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.backgroundDefault,
   },
   disabledButton: {
