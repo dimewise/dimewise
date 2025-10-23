@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon';
-import { Text, View, Pressable, Alert, StyleSheet } from 'react-native';
+import { Text, View, Pressable, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useRef } from 'react';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Octicons from '@expo/vector-icons/Octicons';
 import type { ExpenseWithDetails } from '@/generated/api/api';
@@ -15,23 +16,25 @@ import { useUserLocale } from '@/hooks/useUserLocale';
 
 type Props = { 
   item: ExpenseWithDetails;
-  onPress?: (item: ExpenseWithDetails) => void;
 };
 
-export const ExpenseRow = ({ item, onPress }: Props) => {
+export const ExpenseRow = ({ item }: Props) => {
   const { t } = useTranslation();
   const router = useRouter();
   const { currency, locale } = useUserLocale();
-  const [verifyExpense] = usePostExpensesByExpenseIdVerifyMutation();
+  const [verifyExpense, { isLoading: isVerifying }] = usePostExpensesByExpenseIdVerifyMutation();
   const [deleteExpense] = useDeleteExpensesByExpenseIdMutation();
+  const swipeableRef = useRef<any>(null);
 
   const isVerified = !!item.verified_at;
 
   const handleVerify = async () => {
-    if (isVerified) return;
+    if (isVerified || isVerifying) return;
     
     try {
       await verifyExpense({ expenseId: item.id }).unwrap();
+      // Close the swipe actions after successful verification
+      swipeableRef.current?.close();
     } catch (error) {
       console.error('Error verifying expense:', error);
       Alert.alert('Error', 'Failed to verify expense. Please try again.');
@@ -73,10 +76,22 @@ export const ExpenseRow = ({ item, onPress }: Props) => {
 
   const renderRightActions = () => (
     <View style={styles.rightActions}>
-      <Pressable style={[styles.actionButton, styles.verifyAction]} onPress={handleVerify}>
-        <Octicons name="check" size={20} color={colors.backgroundDefault} />
-        <Text style={styles.actionButtonText}>{t('transaction_swipe_verify')}</Text>
-      </Pressable>
+      {!isVerified && (
+        <Pressable 
+          style={[styles.actionButton, styles.verifyAction, isVerifying && styles.disabledButton]} 
+          onPress={handleVerify}
+          disabled={isVerifying}
+        >
+          {isVerifying ? (
+            <ActivityIndicator size="small" color={colors.backgroundDefault} />
+          ) : (
+            <Octicons name="check" size={20} color={colors.backgroundDefault} />
+          )}
+          <Text style={styles.actionButtonText}>
+            {isVerifying ? t('transaction_details_verifying') : t('transaction_swipe_verify')}
+          </Text>
+        </Pressable>
+      )}
       <Pressable style={[styles.actionButton, styles.editAction]} onPress={handleEdit}>
         <Octicons name="pencil" size={20} color={colors.backgroundDefault} />
         <Text style={styles.actionButtonText}>{t('transaction_swipe_edit')}</Text>
@@ -89,7 +104,7 @@ export const ExpenseRow = ({ item, onPress }: Props) => {
   );
 
   return (
-    <ReanimatedSwipeable renderRightActions={renderRightActions}>
+    <ReanimatedSwipeable ref={swipeableRef} renderRightActions={renderRightActions}>
       <Pressable
         onPress={handleViewDetails}
         style={[
@@ -173,5 +188,8 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600' as const,
     textAlign: 'center' as const,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
