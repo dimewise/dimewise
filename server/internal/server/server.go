@@ -43,10 +43,21 @@ func NewServer(config *config.Config) *Server {
 		r.Use(middleware.NewLoadAppUserMiddleware(config))
 
 		// TODO: add StrictHTTPServerOptions
+		serverOptions := oapi.StrictHTTPServerOptions{
+			RequestErrorHandlerFunc: func(w http.ResponseWriter, _ *http.Request, err error) {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+			},
+			ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+				errMsg := "Internal server error occurred"
+				slog.Default().ErrorContext(r.Context(), errMsg, slog.Any("err", err))
+
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			},
+		}
 		strictHandler := oapi.NewStrictHandlerWithOptions(
 			h,
 			[]oapi.StrictMiddlewareFunc{},
-			oapi.StrictHTTPServerOptions{},
+			serverOptions,
 		)
 
 		oapi.HandlerFromMuxWithBaseURL(strictHandler, r, baseURL)
