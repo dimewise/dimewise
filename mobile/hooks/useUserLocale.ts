@@ -14,4 +14,3 @@ export const useUserLocale = () => {
     locale: getLocaleFromLanguage(user?.preferred_language || 'en'),
   };
 };
-

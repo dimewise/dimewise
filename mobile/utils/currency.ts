@@ -3,11 +3,37 @@
  * Some currencies don't use decimal places (like JPY, KRW, VND, etc.)
  */
 
-export type CurrencyType = 
-  | 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD' | 'CHF' | 'CNY' | 'SEK' | 'NOK' 
-  | 'MXN' | 'NZD' | 'SGD' | 'HKD' | 'INR' | 'RUB' | 'ZAR' | 'TRY' | 'BRL' 
-  | 'PLN' | 'MYR' | 'THB' | 'DKK' | 'CZK' | 'HUF'
-  | 'JPY' | 'KRW' | 'VND' | 'IDR' | 'PHP' | 'TWD';
+export type CurrencyType =
+  | 'USD'
+  | 'EUR'
+  | 'GBP'
+  | 'CAD'
+  | 'AUD'
+  | 'CHF'
+  | 'CNY'
+  | 'SEK'
+  | 'NOK'
+  | 'MXN'
+  | 'NZD'
+  | 'SGD'
+  | 'HKD'
+  | 'INR'
+  | 'RUB'
+  | 'ZAR'
+  | 'TRY'
+  | 'BRL'
+  | 'PLN'
+  | 'MYR'
+  | 'THB'
+  | 'DKK'
+  | 'CZK'
+  | 'HUF'
+  | 'JPY'
+  | 'KRW'
+  | 'VND'
+  | 'IDR'
+  | 'PHP'
+  | 'TWD';
 
 // Currencies that don't use decimal places (no cents)
 const NO_DECIMAL_CURRENCIES: CurrencyType[] = [
@@ -65,7 +91,7 @@ export const formatCurrencyForInput = (value: number, currency: CurrencyType): n
  * Get placeholder text for currency input
  */
 export const getCurrencyPlaceholder = (currency: CurrencyType): string => {
-  return currencyUsesDecimals(currency) ? "1000.00" : "1000";
+  return currencyUsesDecimals(currency) ? '1000.00' : '1000';
 };
 
 /**
@@ -74,13 +100,13 @@ export const getCurrencyPlaceholder = (currency: CurrencyType): string => {
 export const validateCurrencyInput = (input: string, currency: CurrencyType): boolean => {
   const numValue = parseFloat(input);
   if (isNaN(numValue) || numValue < 0) return false;
-  
+
   if (currencyUsesDecimals(currency)) {
     // For decimal currencies, allow up to 2 decimal places
     const parts = input.split('.');
     return parts.length <= 2 && (!parts[1] || parts[1].length <= 2);
   }
-  
+
   // For non-decimal currencies, no decimal point allowed
   return !input.includes('.');
 };

@@ -13,7 +13,11 @@ export const FloatingActionButton = ({ onPress }: Props) => {
       onPress={onPress}
       android_ripple={{ color: colors.primaryLight, radius: 30 }}
     >
-      <Octicons name="plus" size={24} color={colors.backgroundDefault} />
+      <Octicons
+        name="plus"
+        size={24}
+        color={colors.backgroundDefault}
+      />
     </Pressable>
   );
 };

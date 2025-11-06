@@ -26,7 +26,7 @@ export const FilterBar = ({ filter, setFilter, onOpenFilterModal, onFilterChange
 
   /* only sync to parent when debounced value changes */
   useEffect(() => {
-    setFilter(prev => {
+    setFilter((prev) => {
       if (debouncedSearch) return { ...prev, search: debouncedSearch };
       const { search: _, ...rest } = prev;
       return rest;
@@ -79,7 +79,11 @@ export const FilterBar = ({ filter, setFilter, onOpenFilterModal, onFilterChange
             justifyContent: 'center',
           }}
         >
-          <Ionicons name="filter" size={20} color={colors.textPrimary} />
+          <Ionicons
+            name="filter"
+            size={20}
+            color={colors.textPrimary}
+          />
         </Pressable>
       </View>
 

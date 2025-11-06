@@ -19,12 +19,12 @@ import { postCategoryBody } from '@/generated/types/categories/categories.zod';
 import { colors } from '@/theme/colors';
 import { sharedStyles } from '@/theme/stylesheets';
 import { useUserLocale } from '@/hooks/useUserLocale';
-import { 
-  currencyUsesDecimals, 
-  parseCurrencyInput, 
-  formatCurrencyForInput, 
+import {
+  currencyUsesDecimals,
+  parseCurrencyInput,
+  formatCurrencyForInput,
   formatCurrencyForDisplay,
-  getCurrencyPlaceholder 
+  getCurrencyPlaceholder,
 } from '@/utils/currency';
 
 type FormData = {
@@ -38,14 +38,14 @@ export default function CategoryFormModal() {
   const params = useLocalSearchParams<{ id?: string; title?: string; amount?: string }>();
   const { currency } = useUserLocale();
   const [displayValue, setDisplayValue] = useState('');
-  
+
   const isEdit = !!params.id;
   const categoryId = params.id;
 
   // API hooks
   const { data: existingCategory } = useGetCategoriesByCategoryIdQuery(
     { categoryId: categoryId! },
-    { skip: !isEdit }
+    { skip: !isEdit },
   );
   const [createCategory, { isLoading: isCreating }] = usePostCategoriesMutation();
   const [updateCategory, { isLoading: isUpdating }] = usePutCategoriesByCategoryIdMutation();
@@ -78,7 +78,7 @@ export default function CategoryFormModal() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const amountToSave = parseCurrencyInput(data.amount.toString(), currency);
-      
+
       if (isEdit && categoryId) {
         const updateData: CategoryUpdate = {
           title: data.title,
@@ -92,7 +92,7 @@ export default function CategoryFormModal() {
         };
         await createCategory({ categoryCreate: createData }).unwrap();
       }
-      
+
       router.back();
     } catch (error) {
       console.error('Error saving category:', error);
@@ -107,7 +107,10 @@ export default function CategoryFormModal() {
   const isLoading = isCreating || isUpdating;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top', 'bottom']}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>
@@ -115,7 +118,10 @@ export default function CategoryFormModal() {
         </Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.form}>
           <FormTextInput
             control={control}
@@ -127,7 +133,7 @@ export default function CategoryFormModal() {
             errors={errors}
             animateView
           />
-          
+
           <Controller
             control={control}
             name="amount"
@@ -140,11 +146,11 @@ export default function CategoryFormModal() {
                   onChange(numValue);
                   return;
                 }
-                
+
                 // For decimal currencies, handle decimal formatting
                 // Remove any non-numeric characters except decimal point
                 const cleanText = text.replace(/[^0-9.]/g, '');
-                
+
                 // Handle decimal point logic
                 if (cleanText.includes('.')) {
                   const parts = cleanText.split('.');
@@ -163,11 +169,11 @@ export default function CategoryFormModal() {
                   onChange(numValue); // Store display value
                 }
               };
-              
+
               const handleBlur = () => {
                 onBlur();
               };
-              
+
               return (
                 <View style={styles.inputContainer}>
                   <Text style={styles.inputLabel}>
@@ -194,18 +200,18 @@ export default function CategoryFormModal() {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <Pressable 
-          onPress={onCancel} 
-          style={[styles.cancelButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onCancel}
+          style={[styles.cancelButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>
             {t('form_cancel')}
           </Text>
         </Pressable>
-        <Pressable 
-          onPress={onSubmit} 
-          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onSubmit}
+          style={[styles.saveButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
