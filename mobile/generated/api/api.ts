@@ -158,7 +158,7 @@ const injectedRtkApi = api
             method: "POST",
             body: queryArg.expenseCreate,
           }),
-          invalidatesTags: ["Expenses"],
+          invalidatesTags: ["Expenses", "Analytics"],
         },
       ),
       getExpensesByExpenseId: build.query<
@@ -177,7 +177,7 @@ const injectedRtkApi = api
           method: "PUT",
           body: queryArg.expenseUpdate,
         }),
-        invalidatesTags: ["Expenses"],
+        invalidatesTags: ["Expenses", "Analytics"],
       }),
       deleteExpensesByExpenseId: build.mutation<
         DeleteExpensesByExpenseIdApiResponse,
@@ -187,7 +187,7 @@ const injectedRtkApi = api
           url: `/expenses/${queryArg.expenseId}`,
           method: "DELETE",
         }),
-        invalidatesTags: ["Expenses"],
+        invalidatesTags: ["Expenses", "Analytics"],
       }),
       postExpensesByExpenseIdVerify: build.mutation<
         PostExpensesByExpenseIdVerifyApiResponse,
@@ -197,7 +197,7 @@ const injectedRtkApi = api
           url: `/expenses/${queryArg.expenseId}/verify`,
           method: "POST",
         }),
-        invalidatesTags: ["Expenses"],
+        invalidatesTags: ["Expenses", "Analytics"],
       }),
       getAnalyticsBudgetOverview: build.query<
         GetAnalyticsBudgetOverviewApiResponse,

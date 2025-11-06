@@ -978,6 +978,7 @@ paths:
       description: Creates a new expense for the authenticated user
       tags:
         - Expenses
+        - Analytics
       requestBody:
         required: true
         content:
@@ -1048,6 +1049,7 @@ paths:
       description: Updates a specific expense
       tags:
         - Expenses
+        - Analytics
       parameters:
         - name: expenseId
           in: path
@@ -1092,6 +1094,7 @@ paths:
       description: Soft deletes an expense (sets deleted_at timestamp)
       tags:
         - Expenses
+        - Analytics
       parameters:
         - name: expenseId
           in: path
@@ -1125,6 +1128,7 @@ paths:
       description: Marks an expense as verified
       tags:
         - Expenses
+        - Analytics
       parameters:
         - name: expenseId
           in: path
