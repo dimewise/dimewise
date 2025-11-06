@@ -1,10 +1,18 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, Alert, ActivityIndicator } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DateTime } from 'luxon';
 import { useTranslation } from 'react-i18next';
-import { 
+import {
   useGetExpensesByExpenseIdQuery,
   usePostExpensesByExpenseIdVerifyMutation,
   useDeleteExpensesByExpenseIdMutation,
@@ -22,10 +30,11 @@ export default function TransactionDetailsModal() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch expense data
-  const { data: expense, isLoading, error } = useGetExpensesByExpenseIdQuery(
-    { expenseId: expenseId! },
-    { skip: !expenseId }
-  );
+  const {
+    data: expense,
+    isLoading,
+    error,
+  } = useGetExpensesByExpenseIdQuery({ expenseId: expenseId! }, { skip: !expenseId });
 
   const [verifyExpense] = usePostExpensesByExpenseIdVerifyMutation();
   const [deleteExpense] = useDeleteExpensesByExpenseIdMutation();
@@ -40,7 +49,10 @@ export default function TransactionDetailsModal() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView
+        style={styles.container}
+        edges={['top', 'bottom']}
+      >
         <View style={styles.header}>
           <Text style={styles.title}>{t('transaction_details_title')}</Text>
         </View>
@@ -53,13 +65,19 @@ export default function TransactionDetailsModal() {
 
   if (error || !expense) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView
+        style={styles.container}
+        edges={['top', 'bottom']}
+      >
         <View style={styles.header}>
           <Text style={styles.title}>{t('transaction_details_title')}</Text>
         </View>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Failed to load transaction details</Text>
-          <Pressable onPress={onClose} style={styles.retryButton}>
+          <Pressable
+            onPress={onClose}
+            style={styles.retryButton}
+          >
             <Text style={styles.retryButtonText}>Close</Text>
           </Pressable>
         </View>
@@ -71,7 +89,7 @@ export default function TransactionDetailsModal() {
 
   const handleVerify = async () => {
     if (isVerified || isVerifying) return;
-    
+
     try {
       setIsVerifying(true);
       await verifyExpense({ expenseId: expense.id }).unwrap();
@@ -112,7 +130,7 @@ export default function TransactionDetailsModal() {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -125,114 +143,124 @@ export default function TransactionDetailsModal() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('transaction_details_title')}</Text>
-        </View>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top', 'bottom']}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>{t('transaction_details_title')}</Text>
+      </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.detailsContainer}>
-            {/* Amount - Hero Section */}
-            <View style={styles.heroSection}>
-              <Text style={styles.heroAmount}>
-                {formatCurrency(expense.amount, currency, locale)}
-              </Text>
-              <Text style={styles.heroTitle}>{expense.title}</Text>
-              {isVerified && (
-                <View style={styles.verifiedBadge}>
-                  <Text style={styles.verifiedBadgeText}>✓ {t('transaction_details_verified')}</Text>
-                </View>
-              )}
-            </View>
-
-            {/* Description */}
-            {expense.description && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>{t('form_expense_description')}</Text>
-                <View style={styles.infoCard}>
-                  <Text style={styles.descriptionText}>{expense.description}</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Transaction Info */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('transaction_details_transaction_details')}</Text>
-              <View style={styles.infoCard}>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>{t('form_expense_date')}</Text>
-                  <Text style={styles.infoValue}>{formatDate(expense.incurred_at)}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>{t('transaction_details_time')}</Text>
-                  <Text style={styles.infoValue}>{formatTime(expense.incurred_at)}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>{t('form_expense_category')}</Text>
-                  <Text style={styles.infoValue}>{expense.category.title}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>{t('form_expense_payment_method')}</Text>
-                  <Text style={styles.infoValue}>{expense.payment_method.title}</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Verification Status */}
-            {!isVerified && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>{t('transaction_details_status')}</Text>
-                <View style={styles.statusCard}>
-                  <Text style={styles.statusText}>{t('transaction_details_unverified')}</Text>
-                  {isVerifying ? (
-                    <View style={styles.verifyingContainer}>
-                      <ActivityIndicator size="small" color={colors.backgroundDefault} />
-                      <Text style={styles.verifyingText}>{t('transaction_details_verifying')}</Text>
-                    </View>
-                  ) : (
-                    <Pressable 
-                      onPress={handleVerify} 
-                      style={styles.verifyButtonInline}
-                    >
-                      <Text style={styles.verifyButtonInlineText}>
-                        {t('transaction_details_mark_verified')}
-                      </Text>
-                    </Pressable>
-                  )}
-                </View>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.detailsContainer}>
+          {/* Amount - Hero Section */}
+          <View style={styles.heroSection}>
+            <Text style={styles.heroAmount}>
+              {formatCurrency(expense.amount, currency, locale)}
+            </Text>
+            <Text style={styles.heroTitle}>{expense.title}</Text>
+            {isVerified && (
+              <View style={styles.verifiedBadge}>
+                <Text style={styles.verifiedBadgeText}>✓ {t('transaction_details_verified')}</Text>
               </View>
             )}
           </View>
-        </ScrollView>
 
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          <Pressable 
-            onPress={handleDelete} 
-            style={[styles.deleteButton]}
-            disabled={isVerifying || isDeleting}
-          >
-            {isDeleting ? (
-              <View style={styles.deletingContainer}>
-                <ActivityIndicator size="small" color={colors.backgroundDefault} />
-                <Text style={styles.deletingText}>{t('transaction_details_deleting')}</Text>
+          {/* Description */}
+          {expense.description && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('form_expense_description')}</Text>
+              <View style={styles.infoCard}>
+                <Text style={styles.descriptionText}>{expense.description}</Text>
               </View>
-            ) : (
-              <Text style={styles.deleteButtonText}>
-                {t('transaction_details_delete')}
-              </Text>
-            )}
-          </Pressable>
+            </View>
+          )}
 
-          <Pressable 
-            onPress={handleEdit} 
-            style={[styles.actionButton, styles.editButton]}
-            disabled={isDeleting}
-          >
-            <Text style={styles.actionButtonText}>{t('transaction_details_edit')}</Text>
-          </Pressable>
+          {/* Transaction Info */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('transaction_details_transaction_details')}</Text>
+            <View style={styles.infoCard}>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>{t('form_expense_date')}</Text>
+                <Text style={styles.infoValue}>{formatDate(expense.incurred_at)}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>{t('transaction_details_time')}</Text>
+                <Text style={styles.infoValue}>{formatTime(expense.incurred_at)}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>{t('form_expense_category')}</Text>
+                <Text style={styles.infoValue}>{expense.category.title}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>{t('form_expense_payment_method')}</Text>
+                <Text style={styles.infoValue}>{expense.payment_method.title}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Verification Status */}
+          {!isVerified && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{t('transaction_details_status')}</Text>
+              <View style={styles.statusCard}>
+                <Text style={styles.statusText}>{t('transaction_details_unverified')}</Text>
+                {isVerifying ? (
+                  <View style={styles.verifyingContainer}>
+                    <ActivityIndicator
+                      size="small"
+                      color={colors.backgroundDefault}
+                    />
+                    <Text style={styles.verifyingText}>{t('transaction_details_verifying')}</Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={handleVerify}
+                    style={styles.verifyButtonInline}
+                  >
+                    <Text style={styles.verifyButtonInlineText}>
+                      {t('transaction_details_mark_verified')}
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          )}
         </View>
+      </ScrollView>
+
+      {/* Action Buttons */}
+      <View style={styles.buttonContainer}>
+        <Pressable
+          onPress={handleDelete}
+          style={[styles.deleteButton]}
+          disabled={isVerifying || isDeleting}
+        >
+          {isDeleting ? (
+            <View style={styles.deletingContainer}>
+              <ActivityIndicator
+                size="small"
+                color={colors.backgroundDefault}
+              />
+              <Text style={styles.deletingText}>{t('transaction_details_deleting')}</Text>
+            </View>
+          ) : (
+            <Text style={styles.deleteButtonText}>{t('transaction_details_delete')}</Text>
+          )}
+        </Pressable>
+
+        <Pressable
+          onPress={handleEdit}
+          style={[styles.actionButton, styles.editButton]}
+          disabled={isDeleting}
+        >
+          <Text style={styles.actionButtonText}>{t('transaction_details_edit')}</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }

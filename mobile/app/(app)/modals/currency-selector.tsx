@@ -4,10 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
-import {
-  useGetUsersMeQuery,
-  usePutUsersMeMutation,
-} from '@/generated/api/api';
+import { useGetUsersMeQuery, usePutUsersMeMutation } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { CURRENCIES } from '@/utils/constants';
 import { useState } from 'react';
@@ -21,23 +18,19 @@ export default function CurrencySelectorModal() {
 
   const onSave = async () => {
     if (!user) return;
-    
+
     // Show destructive action alert if currency is changing
     if (selectedCurrency !== user.currency) {
-      Alert.alert(
-        t('currency_change_title'),
-        t('currency_change_message'),
-        [
-          { text: t('currency_change_cancel'), style: 'cancel' },
-          { 
-            text: t('currency_change_continue'), 
-            style: 'destructive',
-            onPress: async () => {
-              await performCurrencyUpdate();
-            }
+      Alert.alert(t('currency_change_title'), t('currency_change_message'), [
+        { text: t('currency_change_cancel'), style: 'cancel' },
+        {
+          text: t('currency_change_continue'),
+          style: 'destructive',
+          onPress: async () => {
+            await performCurrencyUpdate();
           },
-        ]
-      );
+        },
+      ]);
     } else {
       // No change, just close
       router.back();
@@ -46,7 +39,7 @@ export default function CurrencySelectorModal() {
 
   const performCurrencyUpdate = async () => {
     if (!user) return;
-    
+
     try {
       await updateUser({
         userUpdate: {
@@ -66,13 +59,19 @@ export default function CurrencySelectorModal() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top', 'bottom']}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{t('settings_select_currency')}</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={selectedCurrency}
@@ -93,18 +92,18 @@ export default function CurrencySelectorModal() {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <Pressable 
-          onPress={onCancel} 
-          style={[styles.cancelButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onCancel}
+          style={[styles.cancelButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>
             {t('form_cancel')}
           </Text>
         </Pressable>
-        <Pressable 
-          onPress={onSave} 
-          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onSave}
+          style={[styles.saveButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>

@@ -32,18 +32,23 @@ const PAYMENT_METHOD_TYPES: { value: PaymentMethodType; labelKey: string }[] = [
 export default function PaymentMethodFormModal() {
   const router = useRouter();
   const { t } = useTranslation();
-  const params = useLocalSearchParams<{ id?: string; title?: string; method_type?: PaymentMethodType }>();
-  
+  const params = useLocalSearchParams<{
+    id?: string;
+    title?: string;
+    method_type?: PaymentMethodType;
+  }>();
+
   const isEdit = !!params.id;
   const paymentMethodId = params.id;
 
   // API hooks
   const { data: existingPaymentMethod } = useGetPaymentMethodsByPaymentMethodIdQuery(
     { paymentMethodId: paymentMethodId! },
-    { skip: !isEdit }
+    { skip: !isEdit },
   );
   const [createPaymentMethod, { isLoading: isCreating }] = usePostPaymentMethodsMutation();
-  const [updatePaymentMethod, { isLoading: isUpdating }] = usePutPaymentMethodsByPaymentMethodIdMutation();
+  const [updatePaymentMethod, { isLoading: isUpdating }] =
+    usePutPaymentMethodsByPaymentMethodIdMutation();
 
   const {
     control,
@@ -83,7 +88,7 @@ export default function PaymentMethodFormModal() {
         };
         await createPaymentMethod({ paymentMethodCreate: createData }).unwrap();
       }
-      
+
       router.back();
     } catch (error) {
       console.error('Error saving payment method:', error);
@@ -95,11 +100,13 @@ export default function PaymentMethodFormModal() {
     router.back();
   };
 
-
   const isLoading = isCreating || isUpdating;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top', 'bottom']}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>
@@ -107,7 +114,10 @@ export default function PaymentMethodFormModal() {
         </Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.form}>
           <FormTextInput
             control={control}
@@ -119,7 +129,7 @@ export default function PaymentMethodFormModal() {
             errors={errors}
             animateView
           />
-          
+
           <Controller
             control={control}
             name="method_type"
@@ -151,18 +161,18 @@ export default function PaymentMethodFormModal() {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <Pressable 
-          onPress={onCancel} 
-          style={[styles.cancelButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onCancel}
+          style={[styles.cancelButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>
             {t('form_cancel')}
           </Text>
         </Pressable>
-        <Pressable 
-          onPress={onSubmit} 
-          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onSubmit}
+          style={[styles.saveButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>

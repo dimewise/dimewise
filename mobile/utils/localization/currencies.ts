@@ -43,18 +43,18 @@ export const formatCurrency = (
  */
 export const parseCurrencyInput = (input: string | number, currency: string): number => {
   const numValue = typeof input === 'string' ? parseFloat(input) : input;
-  
+
   if (isNaN(numValue)) {
     return 0;
   }
-  
+
   // JPY and KRW don't use fractional units
   const fractionDigits = ['JPY', 'KRW'].includes(currency) ? 0 : 2;
-  
+
   if (fractionDigits === 0) {
     return Math.round(numValue);
   }
-  
+
   // Convert dollars to cents
   return Math.round(numValue * 100);
 };
@@ -67,10 +67,10 @@ export const parseCurrencyInput = (input: string | number, currency: string): nu
  */
 export const centsToUnits = (cents: number, currency: string): string => {
   const fractionDigits = ['JPY', 'KRW'].includes(currency) ? 0 : 2;
-  
+
   if (fractionDigits === 0) {
     return cents.toString();
   }
-  
+
   return (cents / 100).toFixed(2);
 };

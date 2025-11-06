@@ -3,7 +3,16 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
@@ -24,11 +33,11 @@ import { z } from 'zod';
 import { colors } from '@/theme/colors';
 import { sharedStyles } from '@/theme/stylesheets';
 import { useUserLocale } from '@/hooks/useUserLocale';
-import { 
-  currencyUsesDecimals, 
-  parseCurrencyInput, 
+import {
+  currencyUsesDecimals,
+  parseCurrencyInput,
   formatCurrencyForInput,
-  getCurrencyPlaceholder 
+  getCurrencyPlaceholder,
 } from '@/utils/currency';
 
 // Use the generated zod schema directly
@@ -42,19 +51,23 @@ export default function ExpenseFormModal() {
   const [displayValue, setDisplayValue] = useState('');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [expandedField, setExpandedField] = useState<string | null>(null);
-  
+
   const isEditMode = !!expenseId;
-  
+
   // API hooks
-  const { data: categories, isLoading: categoriesLoading } = useGetCategoriesQuery({ includeDeleted: false });
-  const { data: paymentMethods, isLoading: paymentMethodsLoading } = useGetPaymentMethodsQuery({ includeDeleted: false });
+  const { data: categories, isLoading: categoriesLoading } = useGetCategoriesQuery({
+    includeDeleted: false,
+  });
+  const { data: paymentMethods, isLoading: paymentMethodsLoading } = useGetPaymentMethodsQuery({
+    includeDeleted: false,
+  });
   const [createExpense, { isLoading: isCreating }] = usePostExpensesMutation();
   const [updateExpense, { isLoading: isUpdating }] = usePutExpensesByExpenseIdMutation();
-  
+
   // Fetch existing expense data for edit mode
   const { data: existingExpense, isLoading: isLoadingExpense } = useGetExpensesByExpenseIdQuery(
     { expenseId: expenseId! },
-    { skip: !isEditMode }
+    { skip: !isEditMode },
   );
 
   const {
@@ -98,7 +111,7 @@ export default function ExpenseFormModal() {
   const onSubmit = handleSubmit(async (data) => {
     try {
       const amountToSave = parseCurrencyInput(data.amount.toString(), currency);
-      
+
       if (isEditMode && expenseId) {
         const updateData: ExpenseUpdate = {
           title: data.title,
@@ -108,7 +121,7 @@ export default function ExpenseFormModal() {
           payment_method_id: data.payment_method_id,
           incurred_at: data.incurred_at,
         };
-        
+
         await updateExpense({ expenseId, expenseUpdate: updateData }).unwrap();
       } else {
         const createData: ExpenseCreate = {
@@ -119,10 +132,10 @@ export default function ExpenseFormModal() {
           payment_method_id: data.payment_method_id,
           incurred_at: data.incurred_at,
         };
-        
+
         await createExpense({ expenseCreate: createData }).unwrap();
       }
-      
+
       router.back();
     } catch (error) {
       console.error('Error saving expense:', error);
@@ -152,18 +165,20 @@ export default function ExpenseFormModal() {
   };
 
   const getSelectedCategoryTitle = () => {
-    const category = categories?.find(cat => cat.id === watch('category_id'));
+    const category = categories?.find((cat) => cat.id === watch('category_id'));
     return category?.title || t('form_select_category');
   };
 
   const getSelectedPaymentMethodTitle = () => {
-    const method = paymentMethods?.find(method => method.id === watch('payment_method_id'));
+    const method = paymentMethods?.find((method) => method.id === watch('payment_method_id'));
     return method?.title || t('form_select_payment_method');
   };
 
-
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top', 'bottom']}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>
@@ -172,7 +187,7 @@ export default function ExpenseFormModal() {
       </View>
 
       <TouchableWithoutFeedback onPress={() => setExpandedField(null)}>
-        <ScrollView 
+        <ScrollView
           style={styles.content}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -203,25 +218,27 @@ export default function ExpenseFormModal() {
                   </Pressable>
                   {expandedField === 'date' && (
                     <View style={styles.pickerWrapper}>
-                    <DateTimePicker
-                      value={selectedDate}
-                      mode="date"
-                      display="spinner"
-                      onChange={onDateChange}
-                      style={styles.datePicker}
-                      textColor={colors.textPrimary}
-                      themeVariant="dark"
-                      locale={locale}
-                    />
+                      <DateTimePicker
+                        value={selectedDate}
+                        mode="date"
+                        display="spinner"
+                        onChange={onDateChange}
+                        style={styles.datePicker}
+                        textColor={colors.textPrimary}
+                        themeVariant="dark"
+                        locale={locale}
+                      />
                     </View>
                   )}
                   {errors?.incurred_at && (
-                    <Text style={styles.errorText}>{String(errors.incurred_at?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>
+                      {String(errors.incurred_at?.message ?? '')}
+                    </Text>
                   )}
                 </View>
               )}
             />
-            
+
             {/* Category - Collapsible */}
             <Controller
               control={control}
@@ -262,7 +279,9 @@ export default function ExpenseFormModal() {
                     </View>
                   )}
                   {errors?.category_id && (
-                    <Text style={styles.errorText}>{String(errors.category_id?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>
+                      {String(errors.category_id?.message ?? '')}
+                    </Text>
                   )}
                 </View>
               )}
@@ -292,7 +311,11 @@ export default function ExpenseFormModal() {
                         itemStyle={styles.pickerItem}
                       >
                         <Picker.Item
-                          label={paymentMethodsLoading ? t('form_loading') : t('form_select_payment_method')}
+                          label={
+                            paymentMethodsLoading
+                              ? t('form_loading')
+                              : t('form_select_payment_method')
+                          }
                           value=""
                           color={colors.disabled}
                         />
@@ -308,7 +331,9 @@ export default function ExpenseFormModal() {
                     </View>
                   )}
                   {errors?.payment_method_id && (
-                    <Text style={styles.errorText}>{String(errors.payment_method_id?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>
+                      {String(errors.payment_method_id?.message ?? '')}
+                    </Text>
                   )}
                 </View>
               )}
@@ -327,11 +352,11 @@ export default function ExpenseFormModal() {
                     onChange(numValue);
                     return;
                   }
-                  
+
                   // For decimal currencies, handle decimal formatting
                   // Remove any non-numeric characters except decimal point
                   const cleanText = text.replace(/[^0-9.]/g, '');
-                  
+
                   // Handle decimal point logic
                   if (cleanText.includes('.')) {
                     const parts = cleanText.split('.');
@@ -350,11 +375,11 @@ export default function ExpenseFormModal() {
                     onChange(numValue);
                   }
                 };
-                
+
                 const handleBlur = () => {
                   onBlur();
                 };
-                
+
                 return (
                   <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>
@@ -382,14 +407,12 @@ export default function ExpenseFormModal() {
               name="description"
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={styles.inputContainer}>
-                  <Text style={styles.inputLabel}>
-                    {t('form_expense_description')}
-                  </Text>
+                  <Text style={styles.inputLabel}>{t('form_expense_description')}</Text>
                   <TextInput
                     style={[
-                      styles.input, 
+                      styles.input,
                       errors?.description && styles.inputError,
-                      { minHeight: 80, textAlignVertical: 'top' }
+                      { minHeight: 80, textAlignVertical: 'top' },
                     ]}
                     placeholder={t('form_expense_description_prompt')}
                     placeholderTextColor={colors.disabled}
@@ -400,7 +423,9 @@ export default function ExpenseFormModal() {
                     numberOfLines={3}
                   />
                   {errors?.description && (
-                    <Text style={styles.errorText}>{String(errors.description?.message ?? '')}</Text>
+                    <Text style={styles.errorText}>
+                      {String(errors.description?.message ?? '')}
+                    </Text>
                   )}
                 </View>
               )}
@@ -411,22 +436,42 @@ export default function ExpenseFormModal() {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <Pressable 
-          onPress={onCancel} 
-          style={[styles.cancelButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} 
+        <Pressable
+          onPress={onCancel}
+          style={[
+            styles.cancelButton,
+            (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton,
+          ]}
           disabled={isCreating || isUpdating || isLoadingExpense}
         >
-          <Text style={[styles.cancelButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>
+          <Text
+            style={[
+              styles.cancelButtonText,
+              (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText,
+            ]}
+          >
             {t('form_cancel')}
           </Text>
         </Pressable>
-        <Pressable 
-          onPress={onSubmit} 
-          style={[styles.saveButton, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton]} 
+        <Pressable
+          onPress={onSubmit}
+          style={[
+            styles.saveButton,
+            (isCreating || isUpdating || isLoadingExpense) && styles.disabledButton,
+          ]}
           disabled={isCreating || isUpdating || isLoadingExpense}
         >
-          <Text style={[styles.saveButtonText, (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText]}>
-            {isLoadingExpense ? t('form_loading') : (isCreating || isUpdating) ? '...' : t('form_save')}
+          <Text
+            style={[
+              styles.saveButtonText,
+              (isCreating || isUpdating || isLoadingExpense) && styles.disabledButtonText,
+            ]}
+          >
+            {isLoadingExpense
+              ? t('form_loading')
+              : isCreating || isUpdating
+                ? '...'
+                : t('form_save')}
           </Text>
         </Pressable>
       </View>
@@ -580,4 +625,3 @@ const styles = StyleSheet.create({
     // Keep original text colors but with reduced opacity
   },
 });
-

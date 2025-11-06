@@ -44,33 +44,33 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
   };
 
   const getSelectedCategoryTitle = () => {
-    const category = categories?.find(cat => cat.id === tempFilters.categoryId);
+    const category = categories?.find((cat) => cat.id === tempFilters.categoryId);
     return category?.title || t('transactions_filter_all');
   };
 
   const getSelectedPaymentMethodTitle = () => {
-    const method = paymentMethods?.find(method => method.id === tempFilters.paymentMethodId);
+    const method = paymentMethods?.find((method) => method.id === tempFilters.paymentMethodId);
     return method?.title || t('transactions_filter_all');
   };
 
   const getVerificationStatusTitle = () => {
     if (!tempFilters.verificationStatus) return t('transactions_filter_all');
-    return tempFilters.verificationStatus === 'verified' 
-      ? t('transactions_filter_verified') 
+    return tempFilters.verificationStatus === 'verified'
+      ? t('transactions_filter_verified')
       : t('transactions_filter_unverified');
   };
 
   const onDateFromChange = (event: any, selectedDate?: Date) => {
     if (selectedDate) {
       const isoDate = DateTime.fromJSDate(selectedDate).toISODate();
-      setTempFilters(prev => ({ ...prev, dateFrom: isoDate || undefined }));
+      setTempFilters((prev) => ({ ...prev, dateFrom: isoDate || undefined }));
     }
   };
 
   const onDateToChange = (event: any, selectedDate?: Date) => {
     if (selectedDate) {
       const isoDate = DateTime.fromJSDate(selectedDate).toISODate();
-      setTempFilters(prev => ({ ...prev, dateTo: isoDate || undefined }));
+      setTempFilters((prev) => ({ ...prev, dateTo: isoDate || undefined }));
     }
   };
 
@@ -99,12 +99,18 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>{t('transactions_filter_title')}</Text>
-          <Pressable onPress={handleClear} style={styles.clearButton}>
+          <Pressable
+            onPress={handleClear}
+            style={styles.clearButton}
+          >
             <Text style={styles.clearButtonText}>{t('transactions_filter_clear')}</Text>
           </Pressable>
         </View>
 
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.form}>
             {/* Category Filter */}
             <View style={styles.collapsibleContainer}>
@@ -119,11 +125,17 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                 <View style={styles.pickerWrapper}>
                   <Picker
                     selectedValue={tempFilters.categoryId || ''}
-                    onValueChange={(value) => setTempFilters(prev => ({ ...prev, categoryId: value || undefined }))}
+                    onValueChange={(value) =>
+                      setTempFilters((prev) => ({ ...prev, categoryId: value || undefined }))
+                    }
                     style={styles.picker}
                     itemStyle={styles.pickerItem}
                   >
-                    <Picker.Item label={t('transactions_filter_all')} value="" color={colors.disabled} />
+                    <Picker.Item
+                      label={t('transactions_filter_all')}
+                      value=""
+                      color={colors.disabled}
+                    />
                     {categories?.map((category) => (
                       <Picker.Item
                         key={category.id}
@@ -143,18 +155,26 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                 style={styles.collapsibleHeader}
                 onPress={() => toggleField('payment_method')}
               >
-                <Text style={styles.collapsibleLabel}>{t('transactions_filter_payment_method')}</Text>
+                <Text style={styles.collapsibleLabel}>
+                  {t('transactions_filter_payment_method')}
+                </Text>
                 <Text style={styles.collapsibleValue}>{getSelectedPaymentMethodTitle()}</Text>
               </Pressable>
               {expandedField === 'payment_method' && (
                 <View style={styles.pickerWrapper}>
                   <Picker
                     selectedValue={tempFilters.paymentMethodId || ''}
-                    onValueChange={(value) => setTempFilters(prev => ({ ...prev, paymentMethodId: value || undefined }))}
+                    onValueChange={(value) =>
+                      setTempFilters((prev) => ({ ...prev, paymentMethodId: value || undefined }))
+                    }
                     style={styles.picker}
                     itemStyle={styles.pickerItem}
                   >
-                    <Picker.Item label={t('transactions_filter_all')} value="" color={colors.disabled} />
+                    <Picker.Item
+                      label={t('transactions_filter_all')}
+                      value=""
+                      color={colors.disabled}
+                    />
                     {paymentMethods?.map((method) => (
                       <Picker.Item
                         key={method.id}
@@ -180,7 +200,11 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
               {expandedField === 'date_from' && (
                 <View style={styles.pickerWrapper}>
                   <DateTimePicker
-                    value={tempFilters.dateFrom ? DateTime.fromISO(tempFilters.dateFrom).toJSDate() : new Date()}
+                    value={
+                      tempFilters.dateFrom
+                        ? DateTime.fromISO(tempFilters.dateFrom).toJSDate()
+                        : new Date()
+                    }
                     mode="date"
                     display="spinner"
                     onChange={onDateFromChange}
@@ -205,7 +229,11 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
               {expandedField === 'date_to' && (
                 <View style={styles.pickerWrapper}>
                   <DateTimePicker
-                    value={tempFilters.dateTo ? DateTime.fromISO(tempFilters.dateTo).toJSDate() : new Date()}
+                    value={
+                      tempFilters.dateTo
+                        ? DateTime.fromISO(tempFilters.dateTo).toJSDate()
+                        : new Date()
+                    }
                     mode="date"
                     display="spinner"
                     onChange={onDateToChange}
@@ -224,20 +252,40 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                 style={styles.collapsibleHeader}
                 onPress={() => toggleField('verification_status')}
               >
-                <Text style={styles.collapsibleLabel}>{t('transactions_filter_verification_status')}</Text>
+                <Text style={styles.collapsibleLabel}>
+                  {t('transactions_filter_verification_status')}
+                </Text>
                 <Text style={styles.collapsibleValue}>{getVerificationStatusTitle()}</Text>
               </Pressable>
               {expandedField === 'verification_status' && (
                 <View style={styles.pickerWrapper}>
                   <Picker
                     selectedValue={tempFilters.verificationStatus || ''}
-                    onValueChange={(value) => setTempFilters(prev => ({ ...prev, verificationStatus: value === 'verified' || value === 'unverified' ? value : undefined }))}
+                    onValueChange={(value) =>
+                      setTempFilters((prev) => ({
+                        ...prev,
+                        verificationStatus:
+                          value === 'verified' || value === 'unverified' ? value : undefined,
+                      }))
+                    }
                     style={styles.picker}
                     itemStyle={styles.pickerItem}
                   >
-                    <Picker.Item label={t('transactions_filter_all')} value="" color={colors.disabled} />
-                    <Picker.Item label={t('transactions_filter_verified')} value="verified" color={colors.textPrimary} />
-                    <Picker.Item label={t('transactions_filter_unverified')} value="unverified" color={colors.textPrimary} />
+                    <Picker.Item
+                      label={t('transactions_filter_all')}
+                      value=""
+                      color={colors.disabled}
+                    />
+                    <Picker.Item
+                      label={t('transactions_filter_verified')}
+                      value="verified"
+                      color={colors.textPrimary}
+                    />
+                    <Picker.Item
+                      label={t('transactions_filter_unverified')}
+                      value="unverified"
+                      color={colors.textPrimary}
+                    />
                   </Picker>
                 </View>
               )}
@@ -247,14 +295,14 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
 
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
-          <Pressable 
-            onPress={handleClose} 
+          <Pressable
+            onPress={handleClose}
             style={styles.cancelButton}
           >
             <Text style={styles.cancelButtonText}>{t('form_cancel')}</Text>
           </Pressable>
-          <Pressable 
-            onPress={handleApply} 
+          <Pressable
+            onPress={handleApply}
             style={styles.applyButton}
           >
             <Text style={styles.applyButtonText}>{t('transactions_filter_apply')}</Text>

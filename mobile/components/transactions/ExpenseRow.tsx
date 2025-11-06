@@ -6,15 +6,15 @@ import { useRef } from 'react';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Octicons from '@expo/vector-icons/Octicons';
 import type { ExpenseWithDetails } from '@/generated/api/api';
-import { 
+import {
   usePostExpensesByExpenseIdVerifyMutation,
-  useDeleteExpensesByExpenseIdMutation 
+  useDeleteExpensesByExpenseIdMutation,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
 
-type Props = { 
+type Props = {
   item: ExpenseWithDetails;
 };
 
@@ -30,7 +30,7 @@ export const ExpenseRow = ({ item }: Props) => {
 
   const handleVerify = async () => {
     if (isVerified || isVerifying) return;
-    
+
     try {
       await verifyExpense({ expenseId: item.id }).unwrap();
       // Close the swipe actions after successful verification
@@ -70,49 +70,72 @@ export const ExpenseRow = ({ item }: Props) => {
             }
           },
         },
-      ]
+      ],
     );
   };
 
   const renderRightActions = () => (
     <View style={styles.rightActions}>
       {!isVerified && (
-        <Pressable 
-          style={[styles.actionButton, styles.verifyAction, isVerifying && styles.disabledButton]} 
+        <Pressable
+          style={[styles.actionButton, styles.verifyAction, isVerifying && styles.disabledButton]}
           onPress={handleVerify}
           disabled={isVerifying}
         >
           {isVerifying ? (
-            <ActivityIndicator size="small" color={colors.backgroundDefault} />
+            <ActivityIndicator
+              size="small"
+              color={colors.backgroundDefault}
+            />
           ) : (
-            <Octicons name="check" size={20} color={colors.backgroundDefault} />
+            <Octicons
+              name="check"
+              size={20}
+              color={colors.backgroundDefault}
+            />
           )}
           <Text style={styles.actionButtonText}>
             {isVerifying ? t('transaction_details_verifying') : t('transaction_swipe_verify')}
           </Text>
         </Pressable>
       )}
-      <Pressable style={[styles.actionButton, styles.editAction]} onPress={handleEdit}>
-        <Octicons name="pencil" size={20} color={colors.backgroundDefault} />
+      <Pressable
+        style={[styles.actionButton, styles.editAction]}
+        onPress={handleEdit}
+      >
+        <Octicons
+          name="pencil"
+          size={20}
+          color={colors.backgroundDefault}
+        />
         <Text style={styles.actionButtonText}>{t('transaction_swipe_edit')}</Text>
       </Pressable>
-      <Pressable style={[styles.actionButton, styles.deleteAction]} onPress={handleDelete}>
-        <Octicons name="trash" size={20} color={colors.backgroundDefault} />
+      <Pressable
+        style={[styles.actionButton, styles.deleteAction]}
+        onPress={handleDelete}
+      >
+        <Octicons
+          name="trash"
+          size={20}
+          color={colors.backgroundDefault}
+        />
         <Text style={styles.actionButtonText}>{t('transaction_swipe_delete')}</Text>
       </Pressable>
     </View>
   );
 
   return (
-    <ReanimatedSwipeable ref={swipeableRef} renderRightActions={renderRightActions}>
+    <ReanimatedSwipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+    >
       <Pressable
         onPress={handleViewDetails}
-        style={[
-          styles.container,
-          isVerified && styles.verifiedContainer
-        ]}
+        style={[styles.container, isVerified && styles.verifiedContainer]}
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+        >
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Text style={{ fontSize: 15, fontWeight: '600', color: colors.textPrimary }}>
@@ -122,7 +145,9 @@ export const ExpenseRow = ({ item }: Props) => {
             </View>
             <Text style={{ fontSize: 12, color: colors.disabled, marginTop: 2 }}>
               {item.category.title} · {item.payment_method.title} ·{' '}
-              {DateTime.fromISO(item.incurred_at).setLocale(locale).toLocaleString(DateTime.DATE_MED)}
+              {DateTime.fromISO(item.incurred_at)
+                .setLocale(locale)
+                .toLocaleString(DateTime.DATE_MED)}
             </Text>
           </View>
           <Text

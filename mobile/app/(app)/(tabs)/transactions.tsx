@@ -10,7 +10,11 @@ import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ExpenseRow } from '@/components/transactions/ExpenseRow';
 import { FilterBar } from '@/components/transactions/FilterBar';
 import { FilterModal } from '@/components/transactions/FilterModal';
-import { useGetExpensesQuery, useLazyGetExpensesQuery, type ExpenseWithDetails } from '@/generated/api/api';
+import {
+  useGetExpensesQuery,
+  useLazyGetExpensesQuery,
+  type ExpenseWithDetails,
+} from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 
 export type Filter = {
@@ -32,7 +36,6 @@ export default function ExpensesScreen() {
   const [filter, setFilter] = useState<Filter>({});
   const [showFilterModal, setShowFilterModal] = useState(false);
   const openExpenseForm = () => router.push('/modals/expense-form');
-  
 
   const queryArgs = useMemo(() => {
     const now = DateTime.now();
@@ -109,11 +112,7 @@ export default function ExpensesScreen() {
         <FlatList
           data={expenses}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ExpenseRow
-              item={item}
-            />
-          )}
+          renderItem={({ item }) => <ExpenseRow item={item} />}
           contentContainerStyle={{ paddingBottom: 100 }}
           ListFooterComponent={ListFooter}
           ListEmptyComponent={
@@ -135,7 +134,7 @@ export default function ExpensesScreen() {
           }
         />
         <FloatingActionButton onPress={openExpenseForm} />
-        
+
         {/* Filter Modal */}
         <FilterModal
           visible={showFilterModal}

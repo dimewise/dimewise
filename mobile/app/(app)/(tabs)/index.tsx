@@ -45,16 +45,15 @@ export default function HomeScreen() {
   const openExpenseForm = () => router.push('/modals/expense-form');
 
   const handleRefresh = async () => {
-    await Promise.all([
-      refetchCategories(),
-      refetchPayments(),
-      refetchTransactions(),
-    ]);
+    await Promise.all([refetchCategories(), refetchPayments(), refetchTransactions()]);
   };
 
-  const { data: categories, refetch: refetchCategories } = useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
-  const { data: payments, refetch: refetchPayments } = useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
-  const { data: transactions, refetch: refetchTransactions } = useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
+  const { data: categories, refetch: refetchCategories } =
+    useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
+  const { data: payments, refetch: refetchPayments } =
+    useGetAnalyticsPaymentMethodsBreakdownQuery(selectedMonthYear);
+  const { data: transactions, refetch: refetchTransactions } =
+    useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
 
   const data: Section[] = useMemo(
     () => [

@@ -5,7 +5,16 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useRouter } from 'expo-router';
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator, RefreshControl } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import {
@@ -29,8 +38,12 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { signOut } = useClerk();
-  const { data: cats, refetch: refetchCategories } = useGetCategoriesQuery({ includeDeleted: false });
-  const { data: pms, refetch: refetchPaymentMethods } = useGetPaymentMethodsQuery({ includeDeleted: false });
+  const { data: cats, refetch: refetchCategories } = useGetCategoriesQuery({
+    includeDeleted: false,
+  });
+  const { data: pms, refetch: refetchPaymentMethods } = useGetPaymentMethodsQuery({
+    includeDeleted: false,
+  });
   const { data: user, refetch: refetchUser } = useGetUsersMeQuery();
   const { currency, locale } = useUserLocale();
 
@@ -49,17 +62,16 @@ export default function SettingsScreen() {
   const [deletedCategoryId, setDeletedCategoryId] = useState<string | null>(null);
   const [deletedPaymentMethodId, setDeletedPaymentMethodId] = useState<string | null>(null);
 
-
   // Clear deleted states when items are no longer in the data
   useEffect(() => {
-    if (deletedCategoryId && cats && !cats.find(cat => cat.id === deletedCategoryId)) {
+    if (deletedCategoryId && cats && !cats.find((cat) => cat.id === deletedCategoryId)) {
       setDeletedCategoryId(null);
       setDeletingCategoryId(null);
     }
   }, [deletedCategoryId, cats]);
 
   useEffect(() => {
-    if (deletedPaymentMethodId && pms && !pms.find(pm => pm.id === deletedPaymentMethodId)) {
+    if (deletedPaymentMethodId && pms && !pms.find((pm) => pm.id === deletedPaymentMethodId)) {
       setDeletedPaymentMethodId(null);
       setDeletingPaymentMethodId(null);
     }
@@ -74,11 +86,7 @@ export default function SettingsScreen() {
   };
 
   const handleRefresh = async () => {
-    await Promise.all([
-      refetchCategories(),
-      refetchPaymentMethods(),
-      refetchUser(),
-    ]);
+    await Promise.all([refetchCategories(), refetchPaymentMethods(), refetchUser()]);
   };
 
   const onEditCategory = (categoryId: string, title: string, amount: number) => {
@@ -104,53 +112,45 @@ export default function SettingsScreen() {
   };
 
   const onDeleteCategory = (categoryId: string, title: string) => {
-    Alert.alert(
-      t('settings_delete_confirm_title'),
-      t('settings_delete_category_confirm'),
-      [
-        { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
-        {
-          text: t('settings_delete_confirm_delete'),
-          style: 'destructive',
-          onPress: async () => {
-            setDeletingCategoryId(categoryId);
-            try {
-              await deleteCategory({ categoryId }).unwrap();
-              setDeletedCategoryId(categoryId);
-            } catch (error) {
-              console.error('Error deleting category:', error);
-              Alert.alert('Error', 'Failed to delete category. Please try again.');
-              setDeletingCategoryId(null);
-            }
-          },
+    Alert.alert(t('settings_delete_confirm_title'), t('settings_delete_category_confirm'), [
+      { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
+      {
+        text: t('settings_delete_confirm_delete'),
+        style: 'destructive',
+        onPress: async () => {
+          setDeletingCategoryId(categoryId);
+          try {
+            await deleteCategory({ categoryId }).unwrap();
+            setDeletedCategoryId(categoryId);
+          } catch (error) {
+            console.error('Error deleting category:', error);
+            Alert.alert('Error', 'Failed to delete category. Please try again.');
+            setDeletingCategoryId(null);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const onDeletePaymentMethod = (paymentMethodId: string, title: string) => {
-    Alert.alert(
-      t('settings_delete_confirm_title'),
-      t('settings_delete_payment_method_confirm'),
-      [
-        { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
-        {
-          text: t('settings_delete_confirm_delete'),
-          style: 'destructive',
-          onPress: async () => {
-            setDeletingPaymentMethodId(paymentMethodId);
-            try {
-              await deletePaymentMethod({ paymentMethodId }).unwrap();
-              setDeletedPaymentMethodId(paymentMethodId);
-            } catch (error) {
-              console.error('Error deleting payment method:', error);
-              Alert.alert('Error', 'Failed to delete payment method. Please try again.');
-              setDeletingPaymentMethodId(null);
-            }
-          },
+    Alert.alert(t('settings_delete_confirm_title'), t('settings_delete_payment_method_confirm'), [
+      { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
+      {
+        text: t('settings_delete_confirm_delete'),
+        style: 'destructive',
+        onPress: async () => {
+          setDeletingPaymentMethodId(paymentMethodId);
+          try {
+            await deletePaymentMethod({ paymentMethodId }).unwrap();
+            setDeletedPaymentMethodId(paymentMethodId);
+          } catch (error) {
+            console.error('Error deleting payment method:', error);
+            Alert.alert('Error', 'Failed to delete payment method. Please try again.');
+            setDeletingPaymentMethodId(null);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
   const onLogout = async () => {
     try {
@@ -212,7 +212,7 @@ export default function SettingsScreen() {
             {t('page_title_settings')}
           </Text>
         </View>
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
           refreshControl={
             <RefreshControl
@@ -271,7 +271,9 @@ export default function SettingsScreen() {
                   <Text
                     style={{ fontSize: 14, fontWeight: '600', color: colors.backgroundDefault }}
                   >
-                    {sec.type === 'categories' ? t('settings_add_category') : t('settings_add_payment')}
+                    {sec.type === 'categories'
+                      ? t('settings_add_category')
+                      : t('settings_add_payment')}
                   </Text>
                 </Pressable>
               </View>
@@ -287,9 +289,7 @@ export default function SettingsScreen() {
                   }}
                 >
                   <Text style={{ fontSize: 14, color: colors.disabled }}>
-                    {sec.type === 'categories'
-                      ? t('categories_empty')
-                      : t('payment_methods_empty')}
+                    {sec.type === 'categories' ? t('categories_empty') : t('payment_methods_empty')}
                   </Text>
                 </View>
               ) : (
@@ -307,7 +307,9 @@ export default function SettingsScreen() {
                       }}
                     >
                       <View style={{ flex: 1 }}>
-                        <Text style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '500' }}>
+                        <Text
+                          style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '500' }}
+                        >
                           {item.title}
                         </Text>
                         {sec.type === 'categories' && 'amount' in item && (
@@ -322,10 +324,16 @@ export default function SettingsScreen() {
                         )}
                       </View>
                       <View style={{ flexDirection: 'row', gap: 8 }}>
-                        {(sec.type === 'categories' && (deletingCategoryId === item.id || deletedCategoryId === item.id)) ||
-                         (sec.type === 'payment_methods' && (deletingPaymentMethodId === item.id || deletedPaymentMethodId === item.id)) ? (
+                        {(sec.type === 'categories' &&
+                          (deletingCategoryId === item.id || deletedCategoryId === item.id)) ||
+                        (sec.type === 'payment_methods' &&
+                          (deletingPaymentMethodId === item.id ||
+                            deletedPaymentMethodId === item.id)) ? (
                           <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="small" color={colors.primary} />
+                            <ActivityIndicator
+                              size="small"
+                              color={colors.primary}
+                            />
                             <Text style={styles.loadingText}>{t('settings_deleting')}</Text>
                           </View>
                         ) : (
@@ -334,13 +342,20 @@ export default function SettingsScreen() {
                               onPress={() => {
                                 if (sec.type === 'categories' && 'amount' in item) {
                                   onEditCategory(item.id, item.title, item.amount);
-                                } else if (sec.type === 'payment_methods' && 'method_type' in item) {
+                                } else if (
+                                  sec.type === 'payment_methods' &&
+                                  'method_type' in item
+                                ) {
                                   onEditPaymentMethod(item.id, item.title, item.method_type);
                                 }
                               }}
                               style={styles.iconButton}
                             >
-                              <Octicons name="pencil" size={18} color={colors.backgroundDefault} />
+                              <Octicons
+                                name="pencil"
+                                size={18}
+                                color={colors.backgroundDefault}
+                              />
                             </Pressable>
                             <Pressable
                               onPress={() => {
@@ -352,7 +367,11 @@ export default function SettingsScreen() {
                               }}
                               style={[styles.iconButton, styles.deleteIconButton]}
                             >
-                              <Octicons name="trash" size={18} color={colors.backgroundDefault} />
+                              <Octicons
+                                name="trash"
+                                size={18}
+                                color={colors.backgroundDefault}
+                              />
                             </Pressable>
                           </>
                         )}
@@ -379,8 +398,6 @@ export default function SettingsScreen() {
           </Pressable>
         </ScrollView>
       </SafeAreaView>
-
-      
     </AppLayout>
   );
 }

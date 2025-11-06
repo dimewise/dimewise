@@ -4,10 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
-import {
-  useGetUsersMeQuery,
-  usePutUsersMeMutation,
-} from '@/generated/api/api';
+import { useGetUsersMeQuery, usePutUsersMeMutation } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { useState } from 'react';
 
@@ -25,7 +22,7 @@ export default function LanguageSelectorModal() {
 
   const onSave = async () => {
     if (!user) return;
-    
+
     try {
       await updateUser({
         userUpdate: {
@@ -45,13 +42,19 @@ export default function LanguageSelectorModal() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView
+      style={styles.container}
+      edges={['top', 'bottom']}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{t('settings_select_language')}</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={selectedLanguage}
@@ -72,18 +75,18 @@ export default function LanguageSelectorModal() {
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
-        <Pressable 
-          onPress={onCancel} 
-          style={[styles.cancelButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onCancel}
+          style={[styles.cancelButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.cancelButtonText, isLoading && styles.disabledButtonText]}>
             {t('form_cancel')}
           </Text>
         </Pressable>
-        <Pressable 
-          onPress={onSave} 
-          style={[styles.saveButton, isLoading && styles.disabledButton]} 
+        <Pressable
+          onPress={onSave}
+          style={[styles.saveButton, isLoading && styles.disabledButton]}
           disabled={isLoading}
         >
           <Text style={[styles.saveButtonText, isLoading && styles.disabledButtonText]}>
