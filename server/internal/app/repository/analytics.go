@@ -9,92 +9,57 @@ import (
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/google/uuid"
 
+	"github.com/dimewise/dimewise/generated/dimewise/public/model"
 	"github.com/dimewise/dimewise/generated/dimewise/public/table"
 	"github.com/dimewise/dimewise/generated/oapi"
 	"github.com/dimewise/dimewise/internal/app/dto"
 )
 
-func GetBudgetOverview(
+// GetTotalBudgetByUserID returns the sum of all category amounts for a user
+func GetTotalBudgetByUserID(
 	ctx context.Context,
 	db qrm.DB,
 	userID uuid.UUID,
-	params oapi.GetAnalyticsBudgetOverviewParams,
-) (*dto.BudgetOverview, error) {
-	// Set default values
-	month := time.Now().Month()
-	year := time.Now().Year()
-	if params.Month != nil {
-		month = time.Month(*params.Month)
-	}
-	if params.Year != nil {
-		year = *params.Year
-	}
-
-	// Calculate date range for the month
-	startDate := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
-	var endDate time.Time
-	if month == 12 {
-		endDate = time.Date(year+1, 1, 1, 0, 0, 0, 0, time.UTC)
-	} else {
-		endDate = time.Date(year, month+1, 1, 0, 0, 0, 0, time.UTC)
-	}
-
-	// Get total budget from categories
-	categoryTbl := table.Category
-	categoryStmt := categoryTbl.SELECT(postgres.SUM(categoryTbl.Amount)).
+) (*dto.BudgetSumResult, error) {
+	categoryTbl := table.Category.AS("category")
+	categoryStmt := postgres.SELECT(postgres.SUM(categoryTbl.Amount).AS("category.sum")).
+		FROM(categoryTbl).
 		WHERE(categoryTbl.UserID.EQ(postgres.UUID(userID)).
 			AND(categoryTbl.DeletedAt.IS_NULL()))
 
-	var totalBudget *int64
-	err := categoryStmt.QueryContext(ctx, db, &totalBudget)
+	var result dto.BudgetSumResult
+	err := categoryStmt.QueryContext(ctx, db, &result)
 	if err != nil {
 		return nil, errors.Errorf("failed to get total budget: %w", err)
 	}
 
-	if totalBudget == nil {
-		totalBudget = new(int64)
-	}
+	// SUM always returns one row (even if NULL), so we can return the result directly
+	return &result, nil
+}
 
-	// Get total spent from expenses
-	expenseTbl := table.Expense
-	expenseStmt := expenseTbl.SELECT(postgres.SUM(expenseTbl.Amount)).
+// GetTotalSpentByUserIDAndDateRange returns the sum of all expense amounts for a user within a date range
+func GetTotalSpentByUserIDAndDateRange(
+	ctx context.Context,
+	db qrm.DB,
+	userID uuid.UUID,
+	startDate time.Time,
+	endDate time.Time,
+) (*dto.SpentSumResult, error) {
+	expenseTbl := table.Expense.AS("expense")
+	expenseStmt := postgres.SELECT(postgres.SUM(expenseTbl.Amount).AS("expense.sum")).
+		FROM(expenseTbl).
 		WHERE(expenseTbl.UserID.EQ(postgres.UUID(userID)).
 			AND(expenseTbl.IncurredAt.GT_EQ(postgres.TimestampzT(startDate))).
 			AND(expenseTbl.IncurredAt.LT(postgres.TimestampzT(endDate))))
 
-	var totalSpent *int64
-	err = expenseStmt.QueryContext(ctx, db, &totalSpent)
+	var result dto.SpentSumResult
+	err := expenseStmt.QueryContext(ctx, db, &result)
 	if err != nil {
 		return nil, errors.Errorf("failed to get total spent: %w", err)
 	}
 
-	if totalSpent == nil {
-		totalSpent = new(int64)
-	}
-
-	remainingBudget := *totalBudget - *totalSpent
-
-	// Get user's currency from user table
-	userTbl := table.User
-	userStmt := userTbl.SELECT(userTbl.Currency).
-		WHERE(userTbl.ID.EQ(postgres.UUID(userID)))
-
-	var currency string
-	err = userStmt.QueryContext(ctx, db, &currency)
-	if err != nil {
-		return nil, errors.Errorf("failed to get user currency: %w", err)
-	}
-
-	budgetOverview := &dto.BudgetOverview{
-		TotalBudget:     int(*totalBudget),
-		TotalSpent:      int(*totalSpent),
-		RemainingBudget: int(remainingBudget),
-		Currency:        currency,
-		Month:           int(month),
-		Year:            year,
-	}
-
-	return budgetOverview, nil
+	// SUM always returns one row (even if NULL), so we can return the result directly
+	return &result, nil
 }
 
 func GetCategoriesBreakdown(
@@ -124,14 +89,18 @@ func GetCategoriesBreakdown(
 
 	// Get user's currency from user table
 	userTbl := table.User
-	userStmt := userTbl.SELECT(userTbl.Currency).
+	userStmt := userTbl.SELECT(userTbl.AllColumns).
 		WHERE(userTbl.ID.EQ(postgres.UUID(userID)))
 
-	var currency string
-	err := userStmt.QueryContext(ctx, db, &currency)
+	userDest := []model.User{}
+	err := userStmt.QueryContext(ctx, db, &userDest)
 	if err != nil {
 		return nil, errors.Errorf("failed to get user currency: %w", err)
 	}
+	if len(userDest) == 0 {
+		return nil, errors.Errorf("user not found")
+	}
+	currency := string(userDest[0].Currency)
 
 	// Get categories with their spending breakdown
 	categoryTbl := table.Category
@@ -161,7 +130,7 @@ func GetCategoriesBreakdown(
 		Spent  int64     `sql:"spent"`
 	}
 
-	var results []CategoryBreakdownResult
+	results := []CategoryBreakdownResult{}
 	err = stmt.QueryContext(ctx, db, &results)
 	if err != nil {
 		return nil, errors.Errorf("failed to get categories breakdown: %w", err)
@@ -211,14 +180,18 @@ func GetPaymentMethodsBreakdown(
 
 	// Get user's currency from user table
 	userTbl := table.User
-	userStmt := userTbl.SELECT(userTbl.Currency).
+	userStmt := userTbl.SELECT(userTbl.AllColumns).
 		WHERE(userTbl.ID.EQ(postgres.UUID(userID)))
 
-	var currency string
-	err := userStmt.QueryContext(ctx, db, &currency)
+	userDest := []model.User{}
+	err := userStmt.QueryContext(ctx, db, &userDest)
 	if err != nil {
 		return nil, errors.Errorf("failed to get user currency: %w", err)
 	}
+	if len(userDest) == 0 {
+		return nil, errors.Errorf("user not found")
+	}
+	currency := string(userDest[0].Currency)
 
 	// Get payment methods with their spending breakdown
 	paymentTbl := table.PaymentMethod
@@ -246,7 +219,7 @@ func GetPaymentMethodsBreakdown(
 		TotalSpent int64     `sql:"total_spent"`
 	}
 
-	var results []PaymentMethodBreakdownResult
+	results := []PaymentMethodBreakdownResult{}
 	err = stmt.QueryContext(ctx, db, &results)
 	if err != nil {
 		return nil, errors.Errorf("failed to get payment methods breakdown: %w", err)
