@@ -1,17 +1,34 @@
 import { DateTime } from 'luxon';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import type { ExpenseWithDetails } from '@/generated/api/api';
+import { ExpenseRow } from '@/components/transactions/ExpenseRow';
 import { colors } from '@/theme/colors';
-import { formatCurrency } from '@/utils/localization/currencies';
-import { useUserLocale } from '@/hooks/useUserLocale';
 
-type Props = { items: ExpenseWithDetails[] };
+type Props = {
+  items: ExpenseWithDetails[];
+  selectedMonth: number; // 1-based month (1-12)
+  selectedYear: number;
+};
 
-export const TransactionBlock: React.FC<Props> = ({ items }) => {
+export const TransactionBlock: React.FC<Props> = ({ items, selectedMonth, selectedYear }) => {
   const { t } = useTranslation();
-  const { currency, locale } = useUserLocale();
+  const router = useRouter();
+
+  const handleSeeMore = () => {
+    // Calculate date range for the selected month/year
+    const startDate = DateTime.fromObject({ year: selectedYear, month: selectedMonth, day: 1 })
+      .startOf('month')
+      .toISODate();
+    const endDate = DateTime.fromObject({ year: selectedYear, month: selectedMonth, day: 1 })
+      .endOf('month')
+      .toISODate();
+
+    // Navigate to transactions page with date filters
+    router.push(`/(tabs)/transactions?dateFrom=${startDate}&dateTo=${endDate}`);
+  };
 
   if (items.length === 0) {
     return (
@@ -49,44 +66,34 @@ export const TransactionBlock: React.FC<Props> = ({ items }) => {
   }
   return (
     <View style={{ margin: 24, marginTop: 0 }}>
-      <Text
-        style={{ fontSize: 24, fontWeight: '600', marginBottom: 16, color: colors.textPrimary }}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 16,
+        }}
       >
-        {t('overview_recent_transactions')}
-      </Text>
-      <View style={{ gap: 8 }}>
-        {items.map((t) => (
-          <View
-            key={t.id}
+        <Text
+          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}
+        >
+          {t('overview_recent_transactions')}
+        </Text>
+        <Pressable onPress={handleSeeMore}>
+          <Text
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              backgroundColor: colors.backgroundSurface,
-              borderRadius: 8,
-              padding: 16,
+              fontSize: 14,
+              fontWeight: '500',
+              color: colors.primary,
             }}
           >
-            <View style={{ flex: 1, gap: 8 }}>
-              <Text style={{ fontSize: 16, fontWeight: '500', color: colors.textPrimary }}>
-                {t.title}
-              </Text>
-              <Text style={{ fontSize: 12, color: colors.disabled }}>
-                {DateTime.fromISO(t.incurred_at).toLocaleString(DateTime.DATE_MED)} ·{' '}
-                {t.category.title} · {t.payment_method.title}
-              </Text>
-            </View>
-
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: '600',
-                color: colors.textPrimary,
-              }}
-            >
-              {formatCurrency(t.amount, t.currency, locale)}
-            </Text>
-          </View>
+            {t('common_see_more')}
+          </Text>
+        </Pressable>
+      </View>
+      <View style={{ gap: 8 }}>
+        {items.map((item) => (
+          <ExpenseRow key={item.id} item={item} />
         ))}
       </View>
     </View>

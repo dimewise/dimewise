@@ -208,37 +208,22 @@ func GetRecentTransactions(
 	ctx context.Context,
 	db qrm.DB,
 	userID uuid.UUID,
-	params oapi.GetAnalyticsRecentTransactionsParams,
+	limit int,
+	startDate *time.Time,
+	endDate *time.Time,
 ) (*[]dto.ExpenseFull, error) {
 	// Aliases for joined tables
 	expenseTbl := table.Expense
 	categoryTbl := table.Category
 	paymentTbl := table.PaymentMethod
 
-	limit := 10
-	if params.Limit != nil {
-		limit = *params.Limit
-	}
-
 	cond := expenseTbl.UserID.EQ(postgres.UUID(userID))
 
-	// Filter by month and year if provided
-	if params.Month != nil && params.Year != nil {
-		// Convert 0-based month to 1-based month
-		month := *params.Month + 1
-		year := *params.Year
-
-		startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-		var endDate time.Time
-		if month == 12 {
-			endDate = time.Date(year+1, 1, 1, 0, 0, 0, 0, time.UTC)
-		} else {
-			endDate = time.Date(year, time.Month(month+1), 1, 0, 0, 0, 0, time.UTC)
-		}
-
+	// Filter by date range if provided
+	if startDate != nil && endDate != nil {
 		cond = cond.AND(
-			expenseTbl.IncurredAt.GT_EQ(postgres.TimestampzT(startDate)).AND(
-				expenseTbl.IncurredAt.LT(postgres.TimestampzT(endDate)),
+			expenseTbl.IncurredAt.GT_EQ(postgres.TimestampzT(*startDate)).AND(
+				expenseTbl.IncurredAt.LT(postgres.TimestampzT(*endDate)),
 			),
 		)
 	}
