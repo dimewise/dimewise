@@ -74,9 +74,21 @@ export default function HomeScreen() {
           />
         );
       case 'categories':
-        return <CategoryBlock items={item.data} />;
+        return (
+          <CategoryBlock
+            items={item.data}
+            selectedMonth={selectedMonthYear.month}
+            selectedYear={selectedMonthYear.year}
+          />
+        );
       case 'payments':
-        return <PaymentBlock items={item.data} />;
+        return (
+          <PaymentBlock
+            items={item.data}
+            selectedMonth={selectedMonthYear.month}
+            selectedYear={selectedMonthYear.year}
+          />
+        );
       case 'transactions':
         return (
           <TransactionBlock
