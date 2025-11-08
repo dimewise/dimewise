@@ -2,6 +2,7 @@ import Octicons from '@expo/vector-icons/Octicons';
 import { DateTime } from 'luxon';
 import { Pressable, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
+import { useUserLocale } from '@/hooks/useUserLocale';
 
 interface Props {
   selectedMonth: number;
@@ -10,7 +11,10 @@ interface Props {
 }
 
 export const Header = ({ selectedMonth, selectedYear, setOpen }: Props) => {
-  const monthYearLabel = DateTime.local(selectedYear, selectedMonth).toFormat('MMMM yyyy');
+  const { locale } = useUserLocale();
+  const dt = DateTime.local(selectedYear, selectedMonth, 1).setLocale(locale);
+  const monthYearLabel =
+  locale === 'ja-JP' ? dt.toFormat('M月yyyy年') : dt.toFormat('MMMM yyyy');
 
   return (
     <View

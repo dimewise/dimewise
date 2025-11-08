@@ -1,94 +1,96 @@
-import {
-  BottomSheetBackdrop,
-  type BottomSheetBackdropProps,
-  BottomSheetModal,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
-import { Picker } from '@react-native-picker/picker'; // or any wheel picker
-import { DateTime } from 'luxon';
-import { forwardRef, useEffect, useMemo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { DateTime, Info } from 'luxon';
+import { useEffect, useMemo, useState } from 'react';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
+import { useUserLocale } from '@/hooks/useUserLocale';
 
 type Props = {
-  ref: React.RefObject<BottomSheetModal>;
+  visible: boolean;
+  onClose: () => void;
   onChange: (month: number, year: number) => void;
   initialMonth: number;
   initialYear: number;
 };
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+export const MonthYearPicker = ({
+  visible,
+  onClose,
+  onChange,
+  initialMonth,
+  initialYear,
+}: Props) => {
+  const { t } = useTranslation();
+  const { locale } = useUserLocale();
+  const [month, setMonth] = useState(initialMonth);
+  const [year, setYear] = useState(initialYear);
 
-export const MonthYearPicker = forwardRef<BottomSheetModal, Props>(
-  ({ onChange, initialMonth, initialYear }, ref) => {
-    const [month, setMonth] = useState(initialMonth);
-    const [year, setYear] = useState(initialYear);
-
-    /* keep local state in sync when sheet re-opens */
-    useEffect(() => {
+  // Keep local state in sync when modal re-opens
+  useEffect(() => {
+    if (visible) {
       setMonth(initialMonth);
       setYear(initialYear);
-    }, [initialMonth, initialYear]);
+    }
+  }, [visible, initialMonth, initialYear]);
 
-    const snapPoints = useMemo(() => ['50%'], []);
+  // Generate localized month names
+  const months = useMemo(() => {
+    return Info.months('long', { locale });
+  }, [locale]);
 
-    const close = () => (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+  const handleDone = () => {
+    onChange(month, year);
+    onClose();
+  };
 
-    const done = () => {
-      onChange(month, year);
-      close();
-    };
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{t('common_select_month_year') || 'Select month & year'}</Text>
+        </View>
 
-    const renderBackdrop = (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        pressBehavior="close"
-      />
-    );
-
-    return (
-      <BottomSheetModal
-        ref={ref}
-        snapPoints={snapPoints}
-        backdropComponent={renderBackdrop}
-        handleIndicatorStyle={{ backgroundColor: colors.primary }}
-        backgroundStyle={{ backgroundColor: colors.backgroundSurface }}
-        enableDismissOnClose
-      >
-        <BottomSheetView style={{ flex: 1, paddingHorizontal: 24, gap: 24 }}>
-          <Text
-            style={{ fontSize: 18, fontWeight: '600', marginBottom: 16, color: colors.textPrimary }}
-          >
-            Select month & year
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 16 }}>
+        <ScrollView
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.pickerContainer}>
             {/* Month */}
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12, color: colors.disabled, marginBottom: 4 }}>Month</Text>
+            <View style={styles.pickerWrapper}>
+              <Text style={styles.label}>{t('common_month') || 'Month'}</Text>
               <Picker
                 selectedValue={month}
                 onValueChange={setMonth}
-                style={{ height: 200 }}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
               >
-                {MONTHS.map((m, idx) => (
+                {months.map((monthName, idx) => (
                   <Picker.Item
-                    key={m}
-                    label={m}
-                    value={idx + 1} // TODO: fix oapi to accept correct value
+                    key={idx}
+                    label={monthName}
+                    value={idx + 1}
+                    color={colors.textPrimary}
                   />
                 ))}
               </Picker>
             </View>
 
             {/* Year */}
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 12, color: colors.disabled, marginBottom: 4 }}>Year</Text>
+            <View style={styles.pickerWrapper}>
+              <Text style={styles.label}>{t('common_year') || 'Year'}</Text>
               <Picker
                 selectedValue={year}
-                onValueChange={(val) => setYear(val)}
-                style={{ height: 200 }}
+                onValueChange={setYear}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
               >
                 {Array.from({ length: 11 }, (_, i) => {
                   const y = DateTime.now().year - 5 + i;
@@ -97,27 +99,100 @@ export const MonthYearPicker = forwardRef<BottomSheetModal, Props>(
                       key={y}
                       label={String(y)}
                       value={y}
+                      color={colors.textPrimary}
                     />
                   );
                 })}
               </Picker>
             </View>
           </View>
+        </ScrollView>
 
+        {/* Footer */}
+        <View style={styles.footer}>
           <Pressable
-            onPress={done}
-            style={{
-              marginBottom: 48,
-              backgroundColor: colors.primary,
-              paddingVertical: 12,
-              borderRadius: 8,
-              alignItems: 'center',
-            }}
+            onPress={onClose}
+            style={[styles.button, styles.cancelButton]}
           >
-            <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>Done</Text>
+            <Text style={styles.cancelButtonText}>{t('form_cancel')}</Text>
           </Pressable>
-        </BottomSheetView>
-      </BottomSheetModal>
-    );
+          <Pressable
+            onPress={handleDone}
+            style={[styles.button, styles.doneButton]}
+          >
+            <Text style={styles.doneButtonText}>{t('common_done')}</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.backgroundDefault,
   },
-);
+  header: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.backgroundSurface,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  content: {
+    flex: 1,
+  },
+  pickerContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    gap: 16,
+  },
+  pickerWrapper: {
+    flex: 1,
+  },
+  label: {
+    fontSize: 12,
+    color: colors.disabled,
+    marginBottom: 8,
+  },
+  picker: {
+    height: 200,
+  },
+  pickerItem: {
+    color: colors.textPrimary,
+  },
+  footer: {
+    flexDirection: 'row',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.backgroundSurface,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: colors.backgroundSurface,
+  },
+  cancelButtonText: {
+    color: colors.textPrimary,
+    fontWeight: '600',
+  },
+  doneButton: {
+    backgroundColor: colors.primary,
+  },
+  doneButtonText: {
+    color: colors.textPrimary,
+    fontWeight: '600',
+  },
+});
