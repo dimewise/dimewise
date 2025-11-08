@@ -29,6 +29,7 @@ import {
   type PaymentMethodType,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { CURRENCIES } from '@/utils/constants';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
@@ -231,16 +232,16 @@ export default function SettingsScreen() {
   return (
     <AppLayout>
       <SafeAreaView
-        style={{ flex: 1, width: '100%', paddingHorizontal: 24 }}
+        style={{ flex: 1, width: '100%', paddingHorizontal: spacing.lg }}
         edges={['top']}
       >
-        <View style={{ width: '100%', paddingVertical: 16 }}>
+        <View style={{ width: '100%', paddingVertical: spacing.md }}>
           <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>
             {t('page_title_settings')}
           </Text>
         </View>
         <ScrollView
-          contentContainerStyle={{ paddingTop: 16, paddingBottom: 32 }}
+          contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xl }}
           refreshControl={
             <RefreshControl
               refreshing={false}
@@ -466,19 +467,19 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 24 },
-  header: { fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginVertical: 16 },
-  scroll: { paddingBottom: 32 },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.textPrimary, marginBottom: 8 },
+  container: { flex: 1, paddingHorizontal: spacing.lg },
+  header: { fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginVertical: spacing.md },
+  scroll: { paddingBottom: spacing.xl },
+  section: { marginBottom: spacing.lg },
+  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.sm },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: colors.backgroundSurface,
     borderRadius: 8,
-    padding: 16,
-    marginBottom: 8,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
   },
   rowLabel: { fontSize: 16, color: colors.textPrimary },
   rowValue: { fontSize: 16, color: colors.textSecondary },

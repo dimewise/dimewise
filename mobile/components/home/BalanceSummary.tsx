@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useGetAnalyticsBudgetOverviewQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
 
@@ -40,10 +41,11 @@ export const BalanceSummary = ({ selectedMonth, selectedYear }: Props) => {
     <View
       style={{
         width: '100%',
-        gap: 40,
+        gap: spacing.xxl,
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 40,
+        marginTop: spacing.md,
+        marginBottom: spacing.xl,
       }}
     >
       <View style={{ alignItems: 'center' }}>

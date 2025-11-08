@@ -2,6 +2,7 @@ import Octicons from '@expo/vector-icons/Octicons';
 import { DateTime } from 'luxon';
 import { Pressable, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { useUserLocale } from '@/hooks/useUserLocale';
 
 interface Props {
@@ -20,7 +21,7 @@ export const Header = ({ selectedMonth, selectedYear, setOpen }: Props) => {
     <View
       style={{
         width: '100%',
-        padding: 24,
+        padding: spacing.lg,
         flexDirection: 'row',
         justifyContent: 'flex-end',
         alignItems: 'center',
