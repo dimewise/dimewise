@@ -1,5 +1,7 @@
+import { DateTime } from 'luxon';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import type { CategoryBreakdown } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
@@ -7,11 +9,14 @@ import { useUserLocale } from '@/hooks/useUserLocale';
 
 interface Props {
   items: CategoryBreakdown[];
+  selectedMonth: number; // 1-based month (1-12)
+  selectedYear: number;
 }
 
-export const CategoryBlock = ({ items }: Props) => {
+export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => {
   const { t } = useTranslation();
   const { currency, locale } = useUserLocale();
+  const router = useRouter();
 
   const spentPercent = (spent: number, budget: number) =>
     budget ? Math.min((spent / budget) * 100, 100) : 0;
@@ -76,15 +81,41 @@ export const CategoryBlock = ({ items }: Props) => {
           const pct = spentPercent(c.spent, c.budget);
           const color = barColor(pct);
           const badgeText = badgeTextColor(pct);
+
+          const handlePress = () => {
+            // Calculate date range for the selected month/year
+            const startDate = DateTime.fromObject({
+              year: selectedYear,
+              month: selectedMonth,
+              day: 1,
+            })
+              .startOf('month')
+              .toISODate();
+            const endDate = DateTime.fromObject({
+              year: selectedYear,
+              month: selectedMonth,
+              day: 1,
+            })
+              .endOf('month')
+              .toISODate();
+
+            // Navigate to transactions page with category filter and date filters
+            router.push(
+              `/(tabs)/transactions?categoryId=${c.category_id}&dateFrom=${startDate}&dateTo=${endDate}`,
+            );
+          };
+
           return (
-            <View
+            <Pressable
               key={c.category_id}
-              style={{
+              onPress={handlePress}
+              style={({ pressed }) => ({
                 backgroundColor: colors.backgroundSurface,
                 borderRadius: 8,
                 padding: 16,
                 gap: 8,
-              }}
+                opacity: pressed ? 0.7 : 1,
+              })}
             >
               {/* Top row: Title and Percentage badge */}
               <View
@@ -184,7 +215,7 @@ export const CategoryBlock = ({ items }: Props) => {
                   }}
                 />
               </View>
-            </View>
+            </Pressable>
           );
         })}
       </View>

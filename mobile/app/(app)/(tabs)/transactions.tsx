@@ -1,6 +1,6 @@
 import { useLocales } from 'expo-localization';
 import { DateTime } from 'luxon';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Pressable, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -32,14 +32,38 @@ export default function ExpensesScreen() {
   const router = useRouter();
   const locales = useLocales();
   const primaryLocale = locales[0];
-  const params = useLocalSearchParams<{ dateFrom?: string; dateTo?: string }>();
+  const params = useLocalSearchParams<{
+    dateFrom?: string;
+    dateTo?: string;
+    categoryId?: string;
+    paymentMethodId?: string;
+  }>();
 
   const [filter, setFilter] = useState<Filter>(() => ({
     dateFrom: params.dateFrom,
     dateTo: params.dateTo,
+    categoryId: params.categoryId,
+    paymentMethodId: params.paymentMethodId,
   }));
   const [showFilterModal, setShowFilterModal] = useState(false);
   const openExpenseForm = () => router.push('/modals/expense-form');
+
+  // Sync filter state with URL params when they change
+  useEffect(() => {
+    setFilter((prev) => {
+      const newFilter: Filter = {
+        // Preserve filters that aren't in URL params
+        search: prev.search,
+        verificationStatus: prev.verificationStatus,
+        // Update filters from URL params (use undefined if param doesn't exist)
+        dateFrom: params.dateFrom,
+        dateTo: params.dateTo,
+        categoryId: params.categoryId,
+        paymentMethodId: params.paymentMethodId,
+      };
+      return newFilter;
+    });
+  }, [params.dateFrom, params.dateTo, params.categoryId, params.paymentMethodId]);
 
   const queryArgs = useMemo(() => {
     const now = DateTime.now();
