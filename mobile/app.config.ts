@@ -29,26 +29,14 @@ const getAppName = () => {
 
 const getIOSAppIcon = () => {
   if (IS_DEV) {
-    return {
-      light: './assets/icons/dev-ios-light.png',
-      dark: './assets/icons/dev-ios-dark.png',
-      tinted: './assets/icons/dev-ios-tinted.png',
-    };
+    return './assets/icons/dev-ios-composer.icon'
   }
 
   if (IS_PREVIEW) {
-    return {
-      light: './assets/icons/preview-ios-light.png',
-      dark: './assets/icons/preview-ios-dark.png',
-      tinted: './assets/icons/preview-ios-tinted.png',
-    };
+    return './assets/icons/preview-ios-composer.icon'
   }
 
-  return {
-    light: './assets/icons/ios-light.png',
-    dark: './assets/icons/ios-dark.png',
-    tinted: './assets/icons/ios-tinted.png',
-  };
+  return './assets/icons/prod-ios-composer.icon'
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -69,6 +57,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: false,
     bundleIdentifier: getUniqueIdentifier(),
     icon: getIOSAppIcon(),
+    usesAppleSignIn: true,
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
