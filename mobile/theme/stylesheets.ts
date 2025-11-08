@@ -22,17 +22,17 @@ export const sharedStyles = StyleSheet.create({
     height: '100%',
   },
   input: {
-    borderWidth: 1,
-    borderColor: colors.textPrimary,
-    borderRadius: 8,
-    padding: 16,
+    borderWidth: 0,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
     width: '100%',
     color: colors.textPrimary,
     backgroundColor: colors.backgroundSurface,
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: colors.error,
   },
 
   // Contained Button - filled background, rounded corners, centered text

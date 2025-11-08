@@ -6,7 +6,8 @@ import { useRouter } from 'expo-router';
 import { BalanceSummary } from '@/components/home/BalanceSummary';
 import { CategoryBlock } from '@/components/home/CategoryBlock';
 import { Header } from '@/components/home/Header';
-import { MonthYearPicker } from '@/components/home/MonthYearPicker';
+import { MonthYearPicker } from '@/components/modals/MonthYearPicker';
+import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 import { PaymentBlock } from '@/components/home/PaymentBlock';
 import { TransactionBlock } from '@/components/home/TransactionBlock';
 import { AppLayout } from '@/components/layouts/AppLayout';
@@ -39,9 +40,10 @@ export default function HomeScreen() {
     year: now.year,
   });
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
 
   const openPicker = () => setShowMonthPicker(true);
-  const openExpenseForm = () => router.push('/modals/expense-form');
+  const openExpenseForm = () => setShowExpenseForm(true);
 
   const handleRefresh = async () => {
     await Promise.all([refetchCategories(), refetchPayments(), refetchTransactions()]);
@@ -141,6 +143,15 @@ export default function HomeScreen() {
           initialMonth={selectedMonthYear.month}
           initialYear={selectedMonthYear.year}
           onChange={(m, y) => setSelectedMonthYear({ month: m, year: y })}
+        />
+        <ExpenseFormModal
+          visible={showExpenseForm}
+          onClose={() => setShowExpenseForm(false)}
+          onSuccess={() => {
+            refetchCategories();
+            refetchPayments();
+            refetchTransactions();
+          }}
         />
       </SafeAreaView>
     </AppLayout>

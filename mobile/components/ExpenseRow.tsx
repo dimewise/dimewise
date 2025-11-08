@@ -2,7 +2,7 @@ import { DateTime } from 'luxon';
 import { Text, View, Pressable, Alert, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Octicons from '@expo/vector-icons/Octicons';
 import type { ExpenseWithDetails } from '@/generated/api/api';
@@ -13,6 +13,7 @@ import {
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
+import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 
 type Props = {
   item: ExpenseWithDetails;
@@ -25,6 +26,7 @@ export const ExpenseRow = ({ item }: Props) => {
   const [verifyExpense, { isLoading: isVerifying }] = usePostExpensesByExpenseIdVerifyMutation();
   const [deleteExpense] = useDeleteExpensesByExpenseIdMutation();
   const swipeableRef = useRef<any>(null);
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
 
   const isVerified = !!item.verified_at;
 
@@ -42,7 +44,8 @@ export const ExpenseRow = ({ item }: Props) => {
   };
 
   const handleEdit = () => {
-    router.push(`/modals/expense-form?expenseId=${item.id}`);
+    setShowExpenseForm(true);
+    swipeableRef.current?.close();
   };
 
   const handleViewDetails = () => {
@@ -161,6 +164,11 @@ export const ExpenseRow = ({ item }: Props) => {
           </Text>
         </View>
       </Pressable>
+      <ExpenseFormModal
+        visible={showExpenseForm}
+        onClose={() => setShowExpenseForm(false)}
+        expenseId={item.id}
+      />
     </ReanimatedSwipeable>
   );
 };

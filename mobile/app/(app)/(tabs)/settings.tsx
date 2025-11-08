@@ -26,11 +26,16 @@ import {
   usePutUsersMeMutation,
   useDeleteCategoriesByCategoryIdMutation,
   useDeletePaymentMethodsByPaymentMethodIdMutation,
+  type PaymentMethodType,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { CURRENCIES } from '@/utils/constants';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
+import { CategoryFormModal } from '@/components/settings/CategoryFormModal';
+import { PaymentMethodFormModal } from '@/components/settings/PaymentMethodFormModal';
+import { CurrencySelectorModal } from '@/components/settings/CurrencySelectorModal';
+import { LanguageSelectorModal } from '@/components/settings/LanguageSelectorModal';
 
 type RootStackParamList = { Login: undefined };
 
@@ -62,6 +67,22 @@ export default function SettingsScreen() {
   const [deletedCategoryId, setDeletedCategoryId] = useState<string | null>(null);
   const [deletedPaymentMethodId, setDeletedPaymentMethodId] = useState<string | null>(null);
 
+  // Modal visibility states
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
+  const [categoryModalProps, setCategoryModalProps] = useState<{
+    categoryId?: string;
+    initialTitle?: string;
+    initialAmount?: string;
+  }>({});
+  const [paymentMethodModalProps, setPaymentMethodModalProps] = useState<{
+    paymentMethodId?: string;
+    initialTitle?: string;
+    initialMethodType?: PaymentMethodType;
+  }>({});
+
   // Clear deleted states when items are no longer in the data
   useEffect(() => {
     if (deletedCategoryId && cats && !cats.find((cat) => cat.id === deletedCategoryId)) {
@@ -78,11 +99,11 @@ export default function SettingsScreen() {
   }, [deletedPaymentMethodId, pms]);
 
   const onSelectCurrency = () => {
-    router.push('/(app)/modals/currency-selector');
+    setShowCurrencyModal(true);
   };
 
   const onSelectLanguage = () => {
-    router.push('/(app)/modals/language-selector');
+    setShowLanguageModal(true);
   };
 
   const handleRefresh = async () => {
@@ -90,25 +111,31 @@ export default function SettingsScreen() {
   };
 
   const onEditCategory = (categoryId: string, title: string, amount: number) => {
-    router.push({
-      pathname: '/(app)/modals/category-form',
-      params: { id: categoryId, title, amount: amount.toString() },
+    setCategoryModalProps({
+      categoryId,
+      initialTitle: title,
+      initialAmount: amount.toString(),
     });
+    setShowCategoryModal(true);
   };
 
   const onEditPaymentMethod = (paymentMethodId: string, title: string, method_type: string) => {
-    router.push({
-      pathname: '/(app)/modals/payment-method-form',
-      params: { id: paymentMethodId, title, method_type },
+    setPaymentMethodModalProps({
+      paymentMethodId,
+      initialTitle: title,
+      initialMethodType: method_type as PaymentMethodType,
     });
+    setShowPaymentMethodModal(true);
   };
 
   const onAddCategory = () => {
-    router.push('/(app)/modals/category-form');
+    setCategoryModalProps({});
+    setShowCategoryModal(true);
   };
 
   const onAddPaymentMethod = () => {
-    router.push('/(app)/modals/payment-method-form');
+    setPaymentMethodModalProps({});
+    setShowPaymentMethodModal(true);
   };
 
   const onDeleteCategory = (categoryId: string, title: string) => {
@@ -398,6 +425,42 @@ export default function SettingsScreen() {
           </Pressable>
         </ScrollView>
       </SafeAreaView>
+
+      {/* Modals */}
+      <CurrencySelectorModal
+        visible={showCurrencyModal}
+        onClose={() => setShowCurrencyModal(false)}
+        onSuccess={() => {
+          refetchUser();
+        }}
+      />
+      <LanguageSelectorModal
+        visible={showLanguageModal}
+        onClose={() => setShowLanguageModal(false)}
+        onSuccess={() => {
+          refetchUser();
+        }}
+      />
+      <CategoryFormModal
+        visible={showCategoryModal}
+        onClose={() => setShowCategoryModal(false)}
+        categoryId={categoryModalProps.categoryId}
+        initialTitle={categoryModalProps.initialTitle}
+        initialAmount={categoryModalProps.initialAmount}
+        onSuccess={() => {
+          refetchCategories();
+        }}
+      />
+      <PaymentMethodFormModal
+        visible={showPaymentMethodModal}
+        onClose={() => setShowPaymentMethodModal(false)}
+        paymentMethodId={paymentMethodModalProps.paymentMethodId}
+        initialTitle={paymentMethodModalProps.initialTitle}
+        initialMethodType={paymentMethodModalProps.initialMethodType}
+        onSuccess={() => {
+          refetchPaymentMethods();
+        }}
+      />
     </AppLayout>
   );
 }
