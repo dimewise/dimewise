@@ -1,4 +1,4 @@
-import { getClerkInstance, useAuth } from '@clerk/clerk-expo';
+import { getClerkInstance } from '@clerk/clerk-expo';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import qs from 'qs';
 
