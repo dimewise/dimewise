@@ -1,14 +1,14 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
-import { useRef } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@//theme/colors';
 import { AppLayout } from '@/components/layouts/AppLayout';
-import { CurrencyLanguagePicker } from '@/components/onboarding/CurrencyLanguagePicker';
+import { CurrencyPickerModal } from '@/components/onboarding/CurrencyPickerModal';
+import { LanguagePickerModal } from '@/components/onboarding/LanguagePickerModal';
 import {
   type CurrencyType,
   type SupportedLanguage,
@@ -16,15 +16,14 @@ import {
 } from '@/generated/api/api';
 import { postMeUserBody } from '@/generated/types/users/users.zod';
 import { sharedStyles } from '@/theme/stylesheets';
-import { CURRENCIES, LANGUAGES } from '@/utils/constants';
 
 type Form = { currency: CurrencyType; preferred_language: SupportedLanguage };
 
 export default function FinishScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const currencyRef = useRef<BottomSheetModal>(null);
-  const languageRef = useRef<BottomSheetModal>(null);
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [showLanguagePicker, setShowLanguagePicker] = useState(false);
   const [update, { isLoading }] = usePostUsersMeMutation();
 
   const {
@@ -49,8 +48,8 @@ export default function FinishScreen() {
     router.replace('/(app)');
   });
 
-  const openCurrency = () => currencyRef.current?.present();
-  const openLanguage = () => languageRef.current?.present();
+  const openCurrency = () => setShowCurrencyPicker(true);
+  const openLanguage = () => setShowLanguagePicker(true);
 
   return (
     <AppLayout>
@@ -151,21 +150,19 @@ export default function FinishScreen() {
         </Pressable>
       </SafeAreaView>
 
-      <CurrencyLanguagePicker
-        ref={currencyRef}
-        items={CURRENCIES}
+      <CurrencyPickerModal
+        visible={showCurrencyPicker}
+        onClose={() => setShowCurrencyPicker(false)}
         selected={currency}
         onChange={(v) => setValue('currency', v as CurrencyType, { shouldValidate: true })}
-        title={t('finish_select_currency')}
       />
-      <CurrencyLanguagePicker
-        ref={languageRef}
-        items={LANGUAGES}
+      <LanguagePickerModal
+        visible={showLanguagePicker}
+        onClose={() => setShowLanguagePicker(false)}
         selected={language}
         onChange={(v) =>
           setValue('preferred_language', v as SupportedLanguage, { shouldValidate: true })
         }
-        title={t('finish_select_language')}
       />
     </AppLayout>
   );
