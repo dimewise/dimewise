@@ -19,3 +19,10 @@ type CategoryBreakdownResult struct {
 	Budget int64     `alias:"category.amount"`
 	Spent  int64     `alias:"expense.spent"`
 }
+
+// PaymentMethodBreakdownResult represents the result of a payment method breakdown query
+type PaymentMethodBreakdownResult struct {
+	ID         uuid.UUID `alias:"payment_method.id"`
+	Title      string    `alias:"payment_method.title"`
+	TotalSpent int64     `alias:"expense.total_spent"`
+}
