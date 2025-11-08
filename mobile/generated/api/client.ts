@@ -10,6 +10,11 @@ const paramsSerializer = (params: Record<string, any>): string => {
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/v1';
 
+// Log the API URL for debugging (only in development)
+if (__DEV__) {
+  console.log('[API Client] Base URL:', BASE_URL);
+}
+
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,

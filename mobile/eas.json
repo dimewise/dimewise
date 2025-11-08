@@ -9,16 +9,16 @@
       "distribution": "internal", 
       "environment": "development",
       "ios": { 
-        "simulator": true 
+        "simulator": false 
       }
     },
     "preview": {
       "distribution": "internal",
-      "environment": "preview",
+      "environment": "preview"
     },
     "production": {
       "autoIncrement": true,
-      "environment": "production",
+      "environment": "production"
     }
   },
   "submit": {
