@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { ExpenseWithDetails } from '@/generated/api/api';
-import { ExpenseRow } from '@/components/transactions/ExpenseRow';
+import { ExpenseRow } from '@/components/ExpenseRow';
 import { colors } from '@/theme/colors';
 
 type Props = {

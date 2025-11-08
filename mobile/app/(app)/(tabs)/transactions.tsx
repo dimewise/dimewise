@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { ExpenseRow } from '@/components/transactions/ExpenseRow';
+import { ExpenseRow } from '@/components/ExpenseRow';
 import { FilterBar } from '@/components/transactions/FilterBar';
 import { FilterModal } from '@/components/transactions/FilterModal';
 import {
