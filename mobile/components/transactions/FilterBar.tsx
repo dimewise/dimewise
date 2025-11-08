@@ -68,16 +68,15 @@ export const FilterBar = ({ filter, setFilter, onOpenFilterModal, onFilterChange
         />
         <Pressable
           onPress={onOpenFilterModal}
-          style={{
+          style={({ pressed }) => ({
             width: 40,
             height: 40,
             backgroundColor: colors.backgroundSurface,
             borderRadius: 8,
-            borderWidth: 1,
-            borderColor: colors.textPrimary,
             alignItems: 'center',
             justifyContent: 'center',
-          }}
+            opacity: pressed ? 0.7 : 1,
+          })}
         >
           <Ionicons
             name="filter"

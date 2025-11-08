@@ -98,7 +98,10 @@ export const FilterChips = ({
             </Text>
             <Pressable
               onPress={() => onRemoveFilter(chip.key)}
-              style={styles.removeButton}
+              style={({ pressed }) => [
+                styles.removeButton,
+                pressed && styles.removeButtonPressed,
+              ]}
             >
               <Text style={styles.removeButtonText}>×</Text>
             </Pressable>
@@ -109,7 +112,10 @@ export const FilterChips = ({
       {chips.length > 1 && (
         <Pressable
           onPress={onClearAll}
-          style={styles.clearAllButton}
+          style={({ pressed }) => [
+            styles.clearAllButton,
+            pressed && styles.clearAllButtonPressed,
+          ]}
         >
           <Text style={styles.clearAllButtonText}>{t('transactions_filter_clear_all')}</Text>
         </Pressable>
@@ -122,7 +128,7 @@ const styles = {
   container: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: 8,
+    gap: 12,
     flexWrap: 'wrap' as const,
   },
   chipsContainer: {
@@ -135,41 +141,41 @@ const styles = {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: colors.textPrimary,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderWidth: 0,
   },
   chipText: {
-    fontSize: 12,
+    fontSize: 13,
     color: colors.textPrimary,
-    marginRight: 6,
+    marginRight: 8,
   },
   removeButton: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: colors.textPrimary,
+    width: 18,
+    height: 18,
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
+  removeButtonPressed: {
+    opacity: 0.6,
+  },
   removeButtonText: {
-    fontSize: 12,
-    color: colors.backgroundDefault,
-    fontWeight: 'bold' as const,
+    fontSize: 18,
+    color: colors.disabled,
+    fontWeight: '300' as const,
+    lineHeight: 18,
   },
   clearAllButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.textPrimary,
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  clearAllButtonPressed: {
+    opacity: 0.6,
   },
   clearAllButtonText: {
-    fontSize: 12,
-    color: colors.textPrimary,
-    fontWeight: '600' as const,
+    fontSize: 13,
+    color: colors.disabled,
+    fontWeight: '500' as const,
   },
 };
