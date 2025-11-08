@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { PaymentMethodBreakdown } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
 
@@ -20,9 +21,9 @@ export const PaymentBlock = ({ items, selectedMonth, selectedYear }: Props) => {
 
   if (items.length === 0) {
     return (
-      <View style={{ margin: 24, marginTop: 0 }}>
+      <View style={{ margin: spacing.lg, marginTop: 0 }}>
         <Text
-          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 16 }}
+          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.md }}
         >
           {t('common_payment_methods')}
         </Text>
@@ -31,7 +32,7 @@ export const PaymentBlock = ({ items, selectedMonth, selectedYear }: Props) => {
           style={{
             backgroundColor: colors.backgroundSurface,
             borderRadius: 8,
-            padding: 24,
+            padding: spacing.lg,
             alignItems: 'center',
           }}
         >
@@ -54,13 +55,13 @@ export const PaymentBlock = ({ items, selectedMonth, selectedYear }: Props) => {
   }
 
   return (
-    <View style={{ margin: 24, marginTop: 0 }}>
+    <View style={{ margin: spacing.lg, marginTop: 0 }}>
       <Text
-        style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 16 }}
+        style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.md }}
       >
         {t('common_payment_methods')}
       </Text>
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: spacing.sm }}>
         {items.map((p) => {
           const handlePress = () => {
             // Calculate date range for the selected month/year
@@ -95,7 +96,7 @@ export const PaymentBlock = ({ items, selectedMonth, selectedYear }: Props) => {
                 alignItems: 'center',
                 backgroundColor: colors.backgroundSurface,
                 borderRadius: 8,
-                padding: 16,
+                padding: spacing.md,
                 opacity: pressed ? 0.7 : 1,
               })}
             >

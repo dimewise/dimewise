@@ -4,6 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { CategoryBreakdown } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
 
@@ -35,9 +36,9 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
 
   if (items.length === 0) {
     return (
-      <View style={{ margin: 24 }}>
+      <View style={{ margin: spacing.lg }}>
         <Text
-          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 16 }}
+          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.md }}
         >
           {t('common_categories')}
         </Text>
@@ -47,7 +48,7 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
           style={{
             backgroundColor: colors.backgroundSurface,
             borderRadius: 8,
-            padding: 24,
+            padding: spacing.lg,
             alignItems: 'center',
           }}
         >
@@ -70,13 +71,13 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
   }
 
   return (
-    <View style={{ margin: 24 }}>
+    <View style={{ margin: spacing.lg, marginTop: 0 }}>
       <Text
-        style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 16 }}
+        style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.md }}
       >
         {t('common_categories')}
       </Text>
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: spacing.sm }}>
         {items.map((c) => {
           const pct = spentPercent(c.spent, c.budget);
           const color = barColor(pct);
@@ -112,8 +113,8 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
               style={({ pressed }) => ({
                 backgroundColor: colors.backgroundSurface,
                 borderRadius: 8,
-                padding: 16,
-                gap: 8,
+                padding: spacing.md,
+                gap: spacing.sm,
                 opacity: pressed ? 0.7 : 1,
               })}
             >

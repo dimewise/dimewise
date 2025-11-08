@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import type { ExpenseWithDetails } from '@/generated/api/api';
 import { ExpenseRow } from '@/components/ExpenseRow';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 type Props = {
   items: ExpenseWithDetails[];
@@ -32,9 +33,9 @@ export const TransactionBlock: React.FC<Props> = ({ items, selectedMonth, select
 
   if (items.length === 0) {
     return (
-      <View style={{ margin: 24, marginTop: 0 }}>
+      <View style={{ margin: spacing.lg, marginTop: 0 }}>
         <Text
-          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: 16 }}
+          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.md }}
         >
           {t('overview_recent_transactions')}
         </Text>
@@ -43,7 +44,7 @@ export const TransactionBlock: React.FC<Props> = ({ items, selectedMonth, select
           style={{
             backgroundColor: colors.backgroundSurface,
             borderRadius: 8,
-            padding: 24,
+            padding: spacing.lg,
             alignItems: 'center',
           }}
         >
@@ -65,13 +66,13 @@ export const TransactionBlock: React.FC<Props> = ({ items, selectedMonth, select
     );
   }
   return (
-    <View style={{ margin: 24, marginTop: 0 }}>
+    <View style={{ margin: spacing.lg, marginTop: 0 }}>
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 16,
+          marginBottom: spacing.md,
         }}
       >
         <Text
@@ -91,7 +92,7 @@ export const TransactionBlock: React.FC<Props> = ({ items, selectedMonth, select
           </Text>
         </Pressable>
       </View>
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: spacing.sm }}>
         {items.map((item) => (
           <ExpenseRow key={item.id} item={item} />
         ))}

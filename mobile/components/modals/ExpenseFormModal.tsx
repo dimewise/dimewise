@@ -40,6 +40,7 @@ import { ModalContainer } from './ModalContainer';
 import { ModalHeader } from './ModalHeader';
 import { ModalFooter } from './ModalFooter';
 import { ModalButton } from './ModalButton';
+import { spacing } from '@/theme/spacing';
 
 // Use the generated zod schema directly
 type FormData = z.infer<typeof postExpenseBody>;
@@ -472,8 +473,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   form: {
-    padding: 24,
-    gap: 20,
+    padding: spacing.lg,
+    gap: spacing.md + spacing.xs, // 16 + 4 = 20 (matches original)
   },
   inputContainer: {
     gap: 8,

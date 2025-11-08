@@ -9,18 +9,23 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { DateTime } from 'luxon';
 import { useTranslation } from 'react-i18next';
+import Octicons from '@expo/vector-icons/Octicons';
 import {
   useGetExpensesByExpenseIdQuery,
   usePostExpensesByExpenseIdVerifyMutation,
   useDeleteExpensesByExpenseIdMutation,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { useUserLocale } from '@/hooks/useUserLocale';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
+import { ModalContainer } from '@/components/modals/ModalContainer';
+import { ModalHeader } from '@/components/modals/ModalHeader';
+import { ModalFooter } from '@/components/modals/ModalFooter';
+import { ModalButton } from '@/components/modals/ModalButton';
 
 export default function TransactionDetailsModal() {
   const router = useRouter();
@@ -50,29 +55,19 @@ export default function TransactionDetailsModal() {
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={styles.container}
-        edges={['top', 'bottom']}
-      >
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('transaction_details_title')}</Text>
-        </View>
+      <ModalContainer>
+        <ModalHeader title={t('transaction_details_title')} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>{t('form_loading')}</Text>
         </View>
-      </SafeAreaView>
+      </ModalContainer>
     );
   }
 
   if (error || !expense) {
     return (
-      <SafeAreaView
-        style={styles.container}
-        edges={['top', 'bottom']}
-      >
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('transaction_details_title')}</Text>
-        </View>
+      <ModalContainer>
+        <ModalHeader title={t('transaction_details_title')} />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Failed to load transaction details</Text>
           <Pressable
@@ -82,7 +77,7 @@ export default function TransactionDetailsModal() {
             <Text style={styles.retryButtonText}>Close</Text>
           </Pressable>
         </View>
-      </SafeAreaView>
+      </ModalContainer>
     );
   }
 
@@ -146,14 +141,19 @@ export default function TransactionDetailsModal() {
   };
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={['top', 'bottom']}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>{t('transaction_details_title')}</Text>
-      </View>
+    <ModalContainer>
+      <ModalHeader
+        title={t('transaction_details_title')}
+        rightAction={
+          <Pressable onPress={handleEdit} style={styles.editIconButton}>
+            <Octicons
+              name="pencil"
+              size={20}
+              color={colors.textPrimary}
+            />
+          </Pressable>
+        }
+      />
 
       <ScrollView
         style={styles.content}
@@ -236,11 +236,10 @@ export default function TransactionDetailsModal() {
         </View>
       </ScrollView>
 
-      {/* Action Buttons */}
-      <View style={styles.buttonContainer}>
-        <Pressable
+      <ModalFooter>
+        <ModalButton
           onPress={handleDelete}
-          style={[styles.deleteButton]}
+          variant="error"
           disabled={isVerifying || isDeleting}
         >
           {isDeleting ? (
@@ -252,18 +251,17 @@ export default function TransactionDetailsModal() {
               <Text style={styles.deletingText}>{t('transaction_details_deleting')}</Text>
             </View>
           ) : (
-            <Text style={styles.deleteButtonText}>{t('transaction_details_delete')}</Text>
+            t('transaction_details_delete')
           )}
-        </Pressable>
-
-        <Pressable
+        </ModalButton>
+        <ModalButton
           onPress={handleEdit}
-          style={[styles.actionButton, styles.editButton]}
+          variant="primary"
           disabled={isDeleting}
         >
-          <Text style={styles.actionButtonText}>{t('transaction_details_edit')}</Text>
-        </Pressable>
-      </View>
+          {t('transaction_details_edit')}
+        </ModalButton>
+      </ModalFooter>
 
       <ExpenseFormModal
         visible={showExpenseForm}
@@ -274,32 +272,19 @@ export default function TransactionDetailsModal() {
           setShowExpenseForm(false);
         }}
       />
-    </SafeAreaView>
+    </ModalContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundDefault,
-  },
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.backgroundSurface,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.textPrimary,
+  editIconButton: {
+    padding: spacing.xs,
   },
   loadingContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: spacing.lg,
   },
   loadingText: {
     fontSize: 16,
@@ -309,17 +294,17 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: spacing.lg,
   },
   errorText: {
     fontSize: 16,
     color: colors.error,
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   retryButton: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md - spacing.xs,
     borderRadius: 8,
   },
   retryButtonText: {
@@ -331,52 +316,51 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailsContainer: {
-    padding: 24,
-    gap: 24,
+    padding: spacing.lg + spacing.sm,
+    gap: spacing.lg + spacing.sm,
   },
   heroSection: {
     alignItems: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 16,
-    marginBottom: 8,
+    borderRadius: 12,
   },
   heroAmount: {
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: '800',
     color: colors.textPrimary,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   heroTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md - spacing.xs,
   },
   verifiedBadge: {
     backgroundColor: colors.success || '#4CAF50',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: spacing.xs + 2,
   },
   verifiedBadgeText: {
     color: colors.backgroundDefault,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
   section: {
-    gap: 12,
+    gap: spacing.md - spacing.xs,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.textPrimary,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   descriptionText: {
     fontSize: 16,
@@ -385,15 +369,15 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    padding: 16,
-    gap: 16,
+    borderRadius: 8,
+    padding: spacing.md - spacing.xs,
+    gap: spacing.md,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
   },
   infoLabel: {
     fontSize: 14,
@@ -410,8 +394,8 @@ const styles = StyleSheet.create({
   },
   statusCard: {
     backgroundColor: colors.backgroundSurface,
-    padding: 16,
-    borderRadius: 12,
+    padding: spacing.md,
+    borderRadius: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -423,8 +407,8 @@ const styles = StyleSheet.create({
   },
   verifyButtonInline: {
     backgroundColor: colors.success || '#4CAF50',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: 8,
   },
   verifyButtonInlineText: {
@@ -436,56 +420,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.success || '#4CAF50',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: 8,
-    gap: 8,
+    gap: spacing.sm,
   },
   verifyingText: {
     fontSize: 14,
     fontWeight: '600',
     color: colors.backgroundDefault,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.backgroundSurface,
-  },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  editButton: {
-    backgroundColor: colors.primary,
-  },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-  deleteButton: {
-    flex: 1,
-    backgroundColor: colors.error,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.backgroundDefault,
-  },
   deletingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   deletingText: {
     fontSize: 16,

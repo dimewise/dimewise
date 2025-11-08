@@ -17,6 +17,7 @@ import {
   type ExpenseWithDetails,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 export type Filter = {
   search?: string;
@@ -101,9 +102,9 @@ export default function ExpensesScreen() {
       <Pressable
         onPress={loadMore}
         style={{
-          marginHorizontal: 16,
-          marginTop: 16,
-          padding: 12,
+          marginHorizontal: spacing.md,
+          marginTop: spacing.md,
+          padding: spacing.md - spacing.xs,
           backgroundColor: colors.backgroundSurface,
           borderRadius: 8,
           alignItems: 'center',
@@ -124,11 +125,11 @@ export default function ExpensesScreen() {
           alignItems: 'center',
           justifyContent: 'flex-start',
           width: '100%',
-          paddingHorizontal: 24,
+          paddingHorizontal: spacing.lg,
         }}
         edges={['top']}
       >
-        <View style={{ width: '100%', paddingVertical: 16 }}>
+        <View style={{ width: '100%', paddingVertical: spacing.md }}>
           <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>
             {t('page_title_transactions')}
           </Text>
@@ -143,11 +144,11 @@ export default function ExpensesScreen() {
           data={expenses}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <ExpenseRow item={item} />}
-          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
           contentContainerStyle={{ paddingBottom: 100 }}
           ListFooterComponent={ListFooter}
           ListEmptyComponent={
-            <View style={{ margin: 24, alignItems: 'center' }}>
+            <View style={{ margin: spacing.lg, alignItems: 'center' }}>
               <Text style={{ color: colors.disabled }}>{t('transactions_empty')}</Text>
             </View>
           }
