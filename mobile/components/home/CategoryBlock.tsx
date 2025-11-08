@@ -1,18 +1,17 @@
-import { useLocales } from 'expo-localization';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import type { CategoryBreakdown } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
+import { useUserLocale } from '@/hooks/useUserLocale';
 
 interface Props {
   items: CategoryBreakdown[];
 }
 
 export const CategoryBlock = ({ items }: Props) => {
-  const locales = useLocales();
-  const primaryLocale = locales[0];
   const { t } = useTranslation();
+  const { currency, locale } = useUserLocale();
 
   const spentPercent = (spent: number, budget: number) =>
     budget ? Math.min((spent / budget) * 100, 100) : 0;
@@ -21,6 +20,12 @@ export const CategoryBlock = ({ items }: Props) => {
     if (percent > 75) return colors.error; // > 75 % spent  → red
     if (percent >= 50) return colors.warning; // 50-75 % spent → amber
     return colors.primary; // < 50 % spent  → green
+  };
+
+  const badgeTextColor = (percent: number) => {
+    if (percent > 75) return colors.errorTextOn;
+    if (percent >= 50) return colors.warningTextOn;
+    return colors.primaryTextOn;
   };
 
   if (items.length === 0) {
@@ -70,28 +75,106 @@ export const CategoryBlock = ({ items }: Props) => {
         {items.map((c) => {
           const pct = spentPercent(c.spent, c.budget);
           const color = barColor(pct);
+          const badgeText = badgeTextColor(pct);
           return (
             <View
               key={c.category_id}
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
                 backgroundColor: colors.backgroundSurface,
                 borderRadius: 8,
                 padding: 16,
+                gap: 8,
               }}
             >
-              <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ fontSize: 16, fontWeight: '500', color: colors.textPrimary }}>
+              {/* Top row: Title and Percentage badge */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: colors.textPrimary,
+                    flex: 1,
+                  }}
+                >
                   {c.category_title}
                 </Text>
-                <Text style={{ fontSize: 12, color: colors.disabled }}>
-                  {formatCurrency(c.spent, c.currency, primaryLocale.languageTag)}
-                </Text>
+                <View
+                  style={{
+                    backgroundColor: color,
+                    borderRadius: 12,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: '600',
+                      color: badgeText,
+                    }}
+                  >
+                    {Math.round(pct)}%
+                  </Text>
+                </View>
               </View>
 
-              {/* tinted progress bar */}
-              <View style={{ width: 80, height: 8, backgroundColor: '#e5e7eb', borderRadius: 4 }}>
+              {/* Main section: Spent and Remaining in two columns */}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  gap: 16,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: colors.disabled, marginBottom: 4 }}>
+                    Spent
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: '600',
+                      color: colors.textPrimary,
+                    }}
+                  >
+                    {formatCurrency(c.spent, currency, locale)}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: colors.disabled, marginBottom: 4 }}>
+                    Remaining
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: '600',
+                      color: c.remaining > 0 ? colors.success : colors.error,
+                    }}
+                  >
+                    {formatCurrency(c.remaining, currency, locale)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Budget (small, secondary) */}
+              <Text style={{ fontSize: 11, color: colors.disabled }}>
+                Budget: {formatCurrency(c.budget, currency, locale)}
+              </Text>
+
+              {/* Full-width progress bar */}
+              <View
+                style={{
+                  height: 8,
+                  backgroundColor: '#2A2A2A',
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                }}
+              >
                 <View
                   style={{
                     height: '100%',
@@ -101,9 +184,6 @@ export const CategoryBlock = ({ items }: Props) => {
                   }}
                 />
               </View>
-              <Text style={{ marginLeft: 8, fontSize: 14, fontWeight: '600', color }}>
-                {Math.round(pct)}%
-              </Text>
             </View>
           );
         })}

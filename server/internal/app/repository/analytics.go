@@ -62,56 +62,23 @@ func GetTotalSpentByUserIDAndDateRange(
 	return &result, nil
 }
 
+// GetCategoriesBreakdown returns categories with their budget and spent amounts for a user within a date range
 func GetCategoriesBreakdown(
 	ctx context.Context,
 	db qrm.DB,
 	userID uuid.UUID,
-	params oapi.GetAnalyticsCategoriesBreakdownParams,
-) (*[]dto.CategoryBreakdown, error) {
-	// Set default values
-	month := time.Now().Month()
-	year := time.Now().Year()
-	if params.Month != nil {
-		month = time.Month(*params.Month)
-	}
-	if params.Year != nil {
-		year = *params.Year
-	}
-
-	// Calculate date range for the month
-	startDate := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
-	var endDate time.Time
-	if month == 12 {
-		endDate = time.Date(year+1, 1, 1, 0, 0, 0, 0, time.UTC)
-	} else {
-		endDate = time.Date(year, month+1, 1, 0, 0, 0, 0, time.UTC)
-	}
-
-	// Get user's currency from user table
-	userTbl := table.User
-	userStmt := userTbl.SELECT(userTbl.AllColumns).
-		WHERE(userTbl.ID.EQ(postgres.UUID(userID)))
-
-	userDest := []model.User{}
-	err := userStmt.QueryContext(ctx, db, &userDest)
-	if err != nil {
-		return nil, errors.Errorf("failed to get user currency: %w", err)
-	}
-	if len(userDest) == 0 {
-		return nil, errors.Errorf("user not found")
-	}
-	currency := string(userDest[0].Currency)
-
-	// Get categories with their spending breakdown
-	categoryTbl := table.Category
-	expenseTbl := table.Expense
+	startDate time.Time,
+	endDate time.Time,
+) (*[]dto.CategoryBreakdownResult, error) {
+	categoryTbl := table.Category.AS("category")
+	expenseTbl := table.Expense.AS("expense")
 
 	// Query to get categories with their budget and spent amounts
 	stmt := categoryTbl.SELECT(
-		categoryTbl.ID,
-		categoryTbl.Title,
-		categoryTbl.Amount,
-		postgres.COALESCE(postgres.SUM(expenseTbl.Amount), postgres.Int(0)).AS("spent"),
+		categoryTbl.ID.AS("category.id"),
+		categoryTbl.Title.AS("category.title"),
+		categoryTbl.Amount.AS("category.amount"),
+		postgres.COALESCE(postgres.SUM(expenseTbl.Amount), postgres.Int(0)).AS("expense.spent"),
 	).FROM(
 		categoryTbl.
 			LEFT_JOIN(expenseTbl, expenseTbl.CategoryID.EQ(categoryTbl.ID).
@@ -123,34 +90,13 @@ func GetCategoriesBreakdown(
 			AND(categoryTbl.DeletedAt.IS_NULL())).
 		GROUP_BY(categoryTbl.ID, categoryTbl.Title, categoryTbl.Amount)
 
-	type CategoryBreakdownResult struct {
-		ID     uuid.UUID `sql:"id"`
-		Title  string    `sql:"title"`
-		Budget int64     `sql:"amount"`
-		Spent  int64     `sql:"spent"`
-	}
-
-	results := []CategoryBreakdownResult{}
-	err = stmt.QueryContext(ctx, db, &results)
+	results := []dto.CategoryBreakdownResult{}
+	err := stmt.QueryContext(ctx, db, &results)
 	if err != nil {
 		return nil, errors.Errorf("failed to get categories breakdown: %w", err)
 	}
 
-	// Convert to DTO
-	breakdown := make([]dto.CategoryBreakdown, len(results))
-	for i, result := range results {
-		remaining := result.Budget - result.Spent
-		breakdown[i] = dto.CategoryBreakdown{
-			CategoryID:    result.ID,
-			CategoryTitle: result.Title,
-			Budget:        int(result.Budget),
-			Spent:         int(result.Spent),
-			Remaining:     int(remaining),
-			Currency:      currency,
-		}
-	}
-
-	return &breakdown, nil
+	return &results, nil
 }
 
 func GetPaymentMethodsBreakdown(

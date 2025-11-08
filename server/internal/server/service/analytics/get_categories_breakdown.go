@@ -2,6 +2,7 @@ package analyticsvc
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-errors/errors"
 
@@ -27,11 +28,45 @@ func GetCategoriesBreakdown(
 		)
 	}
 
-	categoriesBreakdown, err := repository.GetCategoriesBreakdown(ctx, c.DB(), user.ID, params)
+	// Extract and default month/year from params
+	month := time.Now().Month()
+	year := time.Now().Year()
+	if params.Month != nil {
+		month = time.Month(*params.Month)
+	}
+	if params.Year != nil {
+		year = *params.Year
+	}
+
+	// Calculate date range for the month
+	startDate := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
+	var endDate time.Time
+	if month == 12 {
+		endDate = time.Date(year+1, 1, 1, 0, 0, 0, 0, time.UTC)
+	} else {
+		endDate = time.Date(year, month+1, 1, 0, 0, 0, 0, time.UTC)
+	}
+
+	// Call repository function with pre-computed values
+	results, err := repository.GetCategoriesBreakdown(ctx, c.DB(), user.ID, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
 
-	oapiCategoriesBreakdown := dto.BatchTransformCategoryBreakdownToOAPI(*categoriesBreakdown)
+	// Convert raw DB results to DTOs
+	breakdown := make([]dto.CategoryBreakdown, len(*results))
+	for i, result := range *results {
+		remaining := result.Budget - result.Spent
+		breakdown[i] = dto.CategoryBreakdown{
+			CategoryID:    result.ID,
+			CategoryTitle: result.Title,
+			Budget:        int(result.Budget),
+			Spent:         int(result.Spent),
+			Remaining:     int(remaining),
+		}
+	}
+
+	// Transform to OAPI
+	oapiCategoriesBreakdown := dto.BatchTransformCategoryBreakdownToOAPI(breakdown)
 	return &oapiCategoriesBreakdown, nil
 }
