@@ -57,7 +57,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: false,
     bundleIdentifier: getUniqueIdentifier(),
     icon: getIOSAppIcon(),
-    usesAppleSignIn: true,
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },

@@ -2,7 +2,6 @@ import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { BalanceSummary } from '@/components/home/BalanceSummary';
 import { CategoryBlock } from '@/components/home/CategoryBlock';
 import { Header } from '@/components/home/Header';
@@ -33,7 +32,6 @@ type SelectedMonthYearType = {
 };
 
 export default function HomeScreen() {
-  const router = useRouter();
   const now = DateTime.local();
   const [selectedMonthYear, setSelectedMonthYear] = useState<SelectedMonthYearType>({
     month: now.month,
