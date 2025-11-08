@@ -42,7 +42,6 @@ func NewServer(config *config.Config) *Server {
 		r.Use(middleware.NewClerkAuthMiddleware(config))
 		r.Use(middleware.NewLoadAppUserMiddleware(config))
 
-		// TODO: add StrictHTTPServerOptions
 		serverOptions := oapi.StrictHTTPServerOptions{
 			RequestErrorHandlerFunc: func(w http.ResponseWriter, _ *http.Request, err error) {
 				http.Error(w, err.Error(), http.StatusBadRequest)
