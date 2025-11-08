@@ -1,6 +1,5 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { DateTime } from 'luxon';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -39,9 +38,9 @@ export default function HomeScreen() {
     month: now.month,
     year: now.year,
   });
-  const sheetRef = useRef<BottomSheetModal>(null);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
 
-  const openPicker = () => sheetRef.current?.present();
+  const openPicker = () => setShowMonthPicker(true);
   const openExpenseForm = () => router.push('/modals/expense-form');
 
   const handleRefresh = async () => {
@@ -125,7 +124,8 @@ export default function HomeScreen() {
         />
         <FloatingActionButton onPress={openExpenseForm} />
         <MonthYearPicker
-          ref={sheetRef}
+          visible={showMonthPicker}
+          onClose={() => setShowMonthPicker(false)}
           initialMonth={selectedMonthYear.month}
           initialYear={selectedMonthYear.year}
           onChange={(m, y) => setSelectedMonthYear({ month: m, year: y })}
