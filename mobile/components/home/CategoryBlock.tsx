@@ -165,7 +165,7 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
               >
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 11, color: colors.disabled, marginBottom: 4 }}>
-                    Spent
+                    {t('category_spent')}
                   </Text>
                   <Text
                     style={{
@@ -179,7 +179,7 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 11, color: colors.disabled, marginBottom: 4 }}>
-                    Remaining
+                    {t('category_remaining')}
                   </Text>
                   <Text
                     style={{
@@ -195,7 +195,7 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
 
               {/* Budget (small, secondary) */}
               <Text style={{ fontSize: 11, color: colors.disabled }}>
-                Budget: {formatCurrency(c.budget, currency, locale)}
+                {t('category_budget')}: {formatCurrency(c.budget, currency, locale)}
               </Text>
 
               {/* Full-width progress bar */}
