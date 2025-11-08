@@ -87,6 +87,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   scheme: 'dimewise',
   plugins: [
+    'expo-font',
+    'expo-web-browser',
     'expo-router',
     [
       'expo-splash-screen',
