@@ -20,6 +20,7 @@ import {
 import { colors } from '@/theme/colors';
 import { useUserLocale } from '@/hooks/useUserLocale';
 import { formatCurrency } from '@/utils/localization/currencies';
+import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 
 export default function TransactionDetailsModal() {
   const router = useRouter();
@@ -101,8 +102,10 @@ export default function TransactionDetailsModal() {
     }
   };
 
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+
   const handleEdit = () => {
-    router.push(`/modals/expense-form?expenseId=${expense.id}`);
+    setShowExpenseForm(true);
   };
 
   const handleDelete = () => {
@@ -261,6 +264,16 @@ export default function TransactionDetailsModal() {
           <Text style={styles.actionButtonText}>{t('transaction_details_edit')}</Text>
         </Pressable>
       </View>
+
+      <ExpenseFormModal
+        visible={showExpenseForm}
+        onClose={() => setShowExpenseForm(false)}
+        expenseId={expense.id}
+        onSuccess={() => {
+          // The expense query will refetch automatically
+          setShowExpenseForm(false);
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -273,13 +286,13 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.backgroundSurface,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
     color: colors.textPrimary,
   },
   loadingContainer: {
@@ -435,23 +448,18 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     gap: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.backgroundSurface,
   },
   actionButton: {
     flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.textPrimary,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   editButton: {
     backgroundColor: colors.primary,
@@ -459,23 +467,15 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.backgroundDefault,
+    color: colors.textPrimary,
   },
   deleteButton: {
     flex: 1,
     backgroundColor: colors.error,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: colors.error,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
   },
   deleteButtonText: {
     fontSize: 16,

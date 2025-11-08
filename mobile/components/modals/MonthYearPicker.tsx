@@ -1,11 +1,14 @@
 import { Picker } from '@react-native-picker/picker';
 import { DateTime, Info } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/theme/colors';
 import { useUserLocale } from '@/hooks/useUserLocale';
+import { ModalContainer } from './ModalContainer';
+import { ModalHeader } from './ModalHeader';
+import { ModalFooter } from './ModalFooter';
+import { ModalButton } from './ModalButton';
 
 type Props = {
   visible: boolean;
@@ -52,11 +55,8 @@ export const MonthYearPicker = ({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>{t('common_select_month_year') || 'Select month & year'}</Text>
-        </View>
+      <ModalContainer>
+        <ModalHeader title={t('common_select_month_year') || 'Select month & year'} />
 
         <ScrollView
           style={styles.content}
@@ -108,42 +108,20 @@ export const MonthYearPicker = ({
           </View>
         </ScrollView>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Pressable
-            onPress={onClose}
-            style={[styles.button, styles.cancelButton]}
-          >
-            <Text style={styles.cancelButtonText}>{t('form_cancel')}</Text>
-          </Pressable>
-          <Pressable
-            onPress={handleDone}
-            style={[styles.button, styles.doneButton]}
-          >
-            <Text style={styles.doneButtonText}>{t('common_done')}</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
+        <ModalFooter>
+          <ModalButton onPress={onClose} variant="cancel">
+            {t('form_cancel')}
+          </ModalButton>
+          <ModalButton onPress={handleDone} variant="primary">
+            {t('common_done')}
+          </ModalButton>
+        </ModalFooter>
+      </ModalContainer>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.backgroundDefault,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.backgroundSurface,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
   content: {
     flex: 1,
   },
@@ -167,32 +145,5 @@ const styles = StyleSheet.create({
   pickerItem: {
     color: colors.textPrimary,
   },
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.backgroundSurface,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: colors.backgroundSurface,
-  },
-  cancelButtonText: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
-  doneButton: {
-    backgroundColor: colors.primary,
-  },
-  doneButtonText: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
 });
+

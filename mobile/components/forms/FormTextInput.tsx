@@ -62,7 +62,10 @@ export const FormTextInput = <TFieldValues extends FieldValues = FieldValues>({
               {t(labelKey)}
             </Text>
             <TextInput
-              style={[sharedStyles.input, errors?.[name] && sharedStyles.inputError]}
+              style={[
+                sharedStyles.input,
+                errors?.[name] && { borderWidth: 1, borderColor: colors.error },
+              ]}
               autoCapitalize={autoCapitalize}
               keyboardType={keyboardType}
               secureTextEntry={secureTextEntry}

@@ -9,7 +9,8 @@ import { AppLayout } from '@/components/layouts/AppLayout';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ExpenseRow } from '@/components/ExpenseRow';
 import { FilterBar } from '@/components/transactions/FilterBar';
-import { FilterModal } from '@/components/transactions/FilterModal';
+import { FilterModal } from '@/components/modals/FilterModal';
+import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 import {
   useGetExpensesQuery,
   useLazyGetExpensesQuery,
@@ -46,7 +47,8 @@ export default function ExpensesScreen() {
     paymentMethodId: params.paymentMethodId,
   }));
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const openExpenseForm = () => router.push('/modals/expense-form');
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
+  const openExpenseForm = () => setShowExpenseForm(true);
 
   // Sync filter state with URL params when they change
   useEffect(() => {
@@ -164,12 +166,19 @@ export default function ExpensesScreen() {
         />
         <FloatingActionButton onPress={openExpenseForm} />
 
-        {/* Filter Modal */}
+        {/* Modals */}
         <FilterModal
           visible={showFilterModal}
           onClose={() => setShowFilterModal(false)}
           onApply={setFilter}
           currentFilters={filter}
+        />
+        <ExpenseFormModal
+          visible={showExpenseForm}
+          onClose={() => setShowExpenseForm(false)}
+          onSuccess={() => {
+            refetch();
+          }}
         />
       </SafeAreaView>
     </AppLayout>

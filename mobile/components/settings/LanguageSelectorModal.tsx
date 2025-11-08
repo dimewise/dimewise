@@ -1,0 +1,115 @@
+import { useTranslation } from 'react-i18next';
+import { Alert, Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { useGetUsersMeQuery, usePutUsersMeMutation } from '@/generated/api/api';
+import { colors } from '@/theme/colors';
+import { useState, useEffect } from 'react';
+import { ModalContainer } from '@/components/modals/ModalContainer';
+import { ModalHeader } from '@/components/modals/ModalHeader';
+import { ModalFooter } from '@/components/modals/ModalFooter';
+import { ModalButton } from '@/components/modals/ModalButton';
+
+const LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'ja', name: '日本語' },
+];
+
+type Props = {
+  visible: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+};
+
+export const LanguageSelectorModal = ({ visible, onClose, onSuccess }: Props) => {
+  const { t } = useTranslation();
+  const { data: user } = useGetUsersMeQuery();
+  const [updateUser, { isLoading }] = usePutUsersMeMutation();
+  const [selectedLanguage, setSelectedLanguage] = useState(user?.preferred_language ?? 'en');
+
+  // Reset selected language when modal opens
+  useEffect(() => {
+    if (visible && user?.preferred_language) {
+      setSelectedLanguage(user.preferred_language);
+    }
+  }, [visible, user?.preferred_language]);
+
+  const onSave = async () => {
+    if (!user) return;
+
+    try {
+      await updateUser({
+        userUpdate: {
+          currency: user.currency,
+          preferred_language: selectedLanguage as any,
+        },
+      }).unwrap();
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      console.error('Error updating language:', error);
+      Alert.alert('Error', 'Failed to update language. Please try again.');
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <ModalContainer>
+        <ModalHeader title={t('settings_select_language')} />
+
+        <ScrollView
+          style={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedLanguage}
+              onValueChange={setSelectedLanguage}
+              style={styles.picker}
+            >
+              {LANGUAGES.map((language) => (
+                <Picker.Item
+                  key={language.code}
+                  label={language.name}
+                  value={language.code}
+                  color={colors.textPrimary}
+                />
+              ))}
+            </Picker>
+          </View>
+        </ScrollView>
+
+        <ModalFooter>
+          <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
+            {t('form_cancel')}
+          </ModalButton>
+          <ModalButton onPress={onSave} variant="primary" disabled={isLoading}>
+            {isLoading ? '...' : t('form_save')}
+          </ModalButton>
+        </ModalFooter>
+      </ModalContainer>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+  },
+  pickerContainer: {
+    backgroundColor: colors.backgroundSurface,
+    borderRadius: 12,
+    borderWidth: 0,
+    overflow: 'hidden',
+    margin: 24,
+  },
+  picker: {
+    height: 200,
+    color: colors.textPrimary,
+  },
+});
+
