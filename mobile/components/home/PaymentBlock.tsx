@@ -70,7 +70,7 @@ export const PaymentBlock = ({ items }: Props) => {
               {p.payment_method_title}
             </Text>
             <Text style={{ fontSize: 16, color: colors.disabled }}>
-              {formatCurrency(p.total_spent, p.currency, locale)}
+              {formatCurrency(p.total_spent, currency, locale)}
             </Text>
           </View>
         ))}

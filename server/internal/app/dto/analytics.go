@@ -22,7 +22,6 @@ type CategoryBreakdown struct {
 	Budget        int       `json:"budget"`
 	Spent         int       `json:"spent"`
 	Remaining     int       `json:"remaining"`
-	Currency      string    `json:"currency"`
 }
 
 // PaymentMethodBreakdown represents payment method spending breakdown

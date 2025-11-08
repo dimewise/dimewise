@@ -17,15 +17,15 @@ export const BalanceSummary = ({ selectedMonth, selectedYear }: Props) => {
   const { currency, locale } = useUserLocale();
 
   const budget = useMemo(
-    () => formatCurrency(data?.totalBudget ?? 0, data?.currency ?? currency, locale),
+    () => formatCurrency(data?.totalBudget ?? 0, currency, locale),
     [data, currency, locale],
   );
   const spent = useMemo(
-    () => formatCurrency(data?.totalSpent ?? 0, data?.currency ?? currency, locale),
+    () => formatCurrency(data?.totalSpent ?? 0, currency, locale),
     [data, currency, locale],
   );
   const remainder = useMemo(
-    () => formatCurrency(data?.remainingBudget ?? 0, data?.currency ?? currency, locale),
+    () => formatCurrency(data?.remainingBudget ?? 0, currency, locale),
     [data, currency, locale],
   );
 
@@ -59,22 +59,6 @@ export const BalanceSummary = ({ selectedMonth, selectedYear }: Props) => {
           <Text style={{ color: colors.disabled }}>{t('budget_total')}</Text>
           <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: 600 }}>{budget}</Text>
         </View>
-      </View>
-      <View
-        style={{
-          height: 8,
-          width: '100%',
-          backgroundColor: remainderColor,
-        }}
-      >
-        <View
-          style={{
-            height: '100%',
-            width: `${100 - remainderPercent}%`,
-            backgroundColor: colors.secondary,
-            borderRadius: 99,
-          }}
-        />
       </View>
     </View>
   );
