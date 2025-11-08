@@ -79,7 +79,13 @@ export default function HomeScreen() {
       case 'payments':
         return <PaymentBlock items={item.data} />;
       case 'transactions':
-        return <TransactionBlock items={item.data} />;
+        return (
+          <TransactionBlock
+            items={item.data}
+            selectedMonth={selectedMonthYear.month}
+            selectedYear={selectedMonthYear.year}
+          />
+        );
       default:
         return null;
     }

@@ -168,7 +168,6 @@ export const ExpenseRow = ({ item }: Props) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.backgroundSurface,
-    marginBottom: 8,
     borderRadius: 8,
     padding: 16,
   },
@@ -184,10 +183,7 @@ const styles = StyleSheet.create({
   rightActions: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    marginBottom: 8,
     marginLeft: 8,
-    marginTop: 2,
-    marginRight: 2,
     gap: 8,
   },
   actionButton: {

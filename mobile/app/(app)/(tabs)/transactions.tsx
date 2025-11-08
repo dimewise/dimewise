@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ExpenseRow } from '@/components/transactions/ExpenseRow';
@@ -32,8 +32,12 @@ export default function ExpensesScreen() {
   const router = useRouter();
   const locales = useLocales();
   const primaryLocale = locales[0];
+  const params = useLocalSearchParams<{ dateFrom?: string; dateTo?: string }>();
 
-  const [filter, setFilter] = useState<Filter>({});
+  const [filter, setFilter] = useState<Filter>(() => ({
+    dateFrom: params.dateFrom,
+    dateTo: params.dateTo,
+  }));
   const [showFilterModal, setShowFilterModal] = useState(false);
   const openExpenseForm = () => router.push('/modals/expense-form');
 
@@ -113,6 +117,7 @@ export default function ExpensesScreen() {
           data={expenses}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <ExpenseRow item={item} />}
+          ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
           contentContainerStyle={{ paddingBottom: 100 }}
           ListFooterComponent={ListFooter}
           ListEmptyComponent={

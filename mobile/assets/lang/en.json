@@ -23,6 +23,7 @@
   "common_categories": "Categories", 
   "common_payment_methods": "Payment methods", 
   "common_done": "Done",
+  "common_see_more": "See more",
   "common_category_name": "Category Name", 
   "common_category_name_prompt": "e.g. Groceries", 
   "common_budget_amount": "Budget Amount", 
