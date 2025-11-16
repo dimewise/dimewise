@@ -1,0 +1,20 @@
+FROM golang:1.25-alpine AS base
+# latest version: https://hub.docker.com/_/golang/
+WORKDIR /src
+
+# cache go sum and mod + download
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+  --mount=type=bind,source=./server/go.sum,target=go.sum \
+  --mount=type=bind,source=./server/go.mod,target=go.mod \
+  go mod download -x;
+
+# build binaries for transport
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+  --mount=type=bind,source=./server,target=. \
+  go build -o /bin/server ./cmd/server
+
+# transport binary for final image
+FROM alpine:3.22 AS runner
+FROM runner AS server
+COPY --from=base /bin/server /bin/
+ENTRYPOINT [ "/bin/server" ]
