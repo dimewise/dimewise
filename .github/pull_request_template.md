@@ -1,44 +1,26 @@
-## Pull Request Title
+# {PR Title}
 
-<!-- A clear, concise title describing your change. -->
-<!-- Delete sections or section content as needed -->
+## 📝 Summary & Context
 
-### Summary
+* **Related Issue:** [Link to Ticket/Issue ID]
+* **Summary:** [A high-level overview of the goal, e.g., "Implement user profile caching to reduce page load time."]
 
-Briefly explain the purpose of this PR and the main changes introduced.
+## 🛠️ What was changed
 
-### Related Issues
+[Detailed bullet points on implementation: e.g., "Added Redis layer to CacheService," "Updated UserAPI call signature."]
 
-<!-- Link to any relevant issues or tickets (e.g., Closes #123, Fixes #456) -->
+## 🧪 Steps to Verify
 
-### Changes Made
+1. [Step 1: e.g., Log in as a test user.]
+2. [Step 2: e.g., Navigate to /profile/123.]
+3. [Step 3: e.g., Check network tab to ensure cache is hit.]
 
-- List key changes or features added
-- Note any refactoring or bug fixes
-- Mention removed or deprecated code
+## 🚨 Additional Information
 
-### How to Test
+* **Breaking Change?** [Yes/No]
+* **Reviewer Focus:** [Specific files or complex logic to check.]
 
-- Steps to reproduce or verify the changes
-- Any test commands or setup required
-- Include screenshots or recordings if helpful
-
-### Checklist
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my code
-- [ ] I have commented my code, especially in hard-to-understand areas
-- [ ] I have made corresponding changes to documentation
-- [ ] My changes generate no new warnings or errors
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] All new and existing tests passed
-
-### Additional Context
-
-Add any other relevant context, screenshots, or information for reviewers.
-
-### Reviewer Notes
-
-- Are there specific areas you want feedback on?
-- Any known issues or potential risks?
-- Is there a particular file or section to focus on?
+## ☑️ Self Check
+* [ ] I have self-reviewed my code.
+* [ ] I have added/updated tests for this change as necessary.
+* [ ] No new console warnings/errors.
