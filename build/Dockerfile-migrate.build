@@ -1,0 +1,15 @@
+FROM golang:1.25-alpine as build
+# Install Goose CLI
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# --- Final image layer ---
+FROM alpine:latest
+
+# Copy the goose binary from the build stage
+COPY --from=build /go/bin/goose /usr/local/bin/
+
+# Copy SQL migration files
+COPY ./server/db/migrations /app/migrations
+
+# Set a working directory
+WORKDIR /app
