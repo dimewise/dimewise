@@ -1,20 +1,24 @@
-FROM golang:1.25-alpine AS base
-# latest version: https://hub.docker.com/_/golang/
-WORKDIR /src
+FROM golang:1.25-alpine AS builder
 
-# cache go sum and mod + download
-RUN --mount=type=cache,target=/go/pkg/mod/ \
-  --mount=type=bind,source=./server/go.sum,target=go.sum \
-  --mount=type=bind,source=./server/go.mod,target=go.mod \
-  go mod download -x;
+WORKDIR /app
 
-# build binaries for transport
-RUN --mount=type=cache,target=/go/pkg/mod/ \
-  --mount=type=bind,source=./server,target=. \
-  go build -o /bin/server ./cmd/server
+# Set Go build flags for a smaller, statically linked binary
+ENV CGO_ENABLED=0 \
+    GOOS=linux
 
-# transport binary for final image
-FROM alpine:3.22 AS runner
-FROM runner AS server
-COPY --from=base /bin/server /bin/
-ENTRYPOINT [ "/bin/server" ]
+# Cache go.mod/go.sum and download dependencies
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=bind,source=./server/go.mod,target=/app/go.mod \
+    --mount=type=bind,source=./server/go.sum,target=/app/go.sum \
+    go mod download
+
+# Build the binary
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=bind,source=./server,target=/app \
+    go build -ldflags="-w -s" -o /usr/local/bin/server ./cmd/server
+
+FROM alpine:3.20 AS runner
+
+COPY --from=builder /usr/local/bin/server /usr/local/bin/server
+
+ENTRYPOINT [ "/usr/local/bin/server" ]
