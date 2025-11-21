@@ -1,4 +1,4 @@
-name: Build and Push to GHCR
+name: Build and Push Images to GHCR
 
 on:
   workflow_dispatch:
@@ -12,8 +12,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: read # Only need read permission now
+      packages: write # Needed to push images to GHCR
 
     steps:
     - name: Checkout tag
@@ -21,6 +21,7 @@ jobs:
       with:
         ref: ${{ github.event.inputs.tag }}
 
+    # --- Docker Setup ---
     - name: Setup Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -30,13 +31,31 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    # --------------------
 
-    - name: Build and push
+    # 1. Build and Push Application Image
+    - name: Build and push Application Image
       uses: docker/build-push-action@v5
       with:
         context: .
+        # Using your specified path for the application Dockerfile
         file: ./build/Dockerfile-server.build
         push: true
-        tags: ghcr.io/${{ github.repository }}:${{ github.event.inputs.tag }}
+        tags: ghcr.io/${{ github.repository_owner }}/dimewise-app:${{ github.event.inputs.tag }}
 
+    # 2. Build and Push Migration Image
+    - name: Build and push Migration Image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        # Using your specified path for the migration Dockerfile
+        file: ./build/Dockerfile-migrate.build
+        push: true
+        tags: ghcr.io/${{ github.repository_owner }}/dimewise-migrate:${{ github.event.inputs.tag }}
 
+    - name: Deployment Trigger Instructions
+      run: |
+        echo "✅ Both images pushed to GHCR with tag: ${{ github.event.inputs.tag }}"
+        echo "⏭️ Manual Step Required:"
+        echo "Please update the 'dimewise-app' and 'dimewise-migrate' image tags"
+        echo "to '${{ github.event.inputs.tag }}' in your manifests repository."
