@@ -40,9 +40,8 @@ jobs:
           file: ./build/Dockerfile-server.build
           push: true
           tags: |
-            # Tags for the Application Image: dimewise-app
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-app:main-${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-app:main
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-server:main-${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-server:main
 
       # 2. Build and Push Migration Image (dimewise-migrate)
       - name: Build and Push Migration Image
@@ -53,6 +52,5 @@ jobs:
           file: ./build/Dockerfile-migrate.build
           push: true
           tags: |
-            # Tags for the Migration Image: dimewise-migrate
             ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-migrate:main-${{ github.sha }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_BASE_NAME }}-migrate:main

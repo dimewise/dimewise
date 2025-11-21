@@ -38,17 +38,15 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        # Using your specified path for the application Dockerfile
         file: ./build/Dockerfile-server.build
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/dimewise-app:${{ github.event.inputs.tag }}
+        tags: ghcr.io/${{ github.repository_owner }}/dimewise-server:${{ github.event.inputs.tag }}
 
     # 2. Build and Push Migration Image
     - name: Build and push Migration Image
       uses: docker/build-push-action@v5
       with:
         context: .
-        # Using your specified path for the migration Dockerfile
         file: ./build/Dockerfile-migrate.build
         push: true
         tags: ghcr.io/${{ github.repository_owner }}/dimewise-migrate:${{ github.event.inputs.tag }}
@@ -57,5 +55,5 @@ jobs:
       run: |
         echo "✅ Both images pushed to GHCR with tag: ${{ github.event.inputs.tag }}"
         echo "⏭️ Manual Step Required:"
-        echo "Please update the 'dimewise-app' and 'dimewise-migrate' image tags"
+        echo "Please update the 'dimewise-server' and 'dimewise-migrate' image tags"
         echo "to '${{ github.event.inputs.tag }}' in your manifests repository."
