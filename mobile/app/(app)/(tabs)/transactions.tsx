@@ -128,9 +128,9 @@ export default function ExpensesScreen() {
 
   return (
     <AppLayout>
-      <SafeAreaView className="flex-1 items-center justify-start w-full px-5" edges={['top']}>
+      <SafeAreaView className="flex-1 items-center justify-start w-full px-5 bg-white" edges={['top']}>
         <View className="w-full py-4">
-          <Text className="text-2xl font-semibold text-white">{t('page_title_transactions')}</Text>
+          <Text className="text-2xl font-semibold text-neutral-900">{t('page_title_transactions')}</Text>
           <FilterBar
             filter={filter}
             setFilter={setFilter}
@@ -163,13 +163,13 @@ export default function ExpensesScreen() {
 
         {/* Modals */}
         <FilterModal
-          visible={filterModal.isOpen}
+          visible={filterModal.isVisible}
           onClose={filterModal.close}
           onApply={setFilter}
           currentFilters={filter}
         />
         <ExpenseFormModal
-          visible={expenseFormModal.isOpen}
+          visible={expenseFormModal.isVisible}
           onClose={expenseFormModal.close}
           onSuccess={refetch}
         />

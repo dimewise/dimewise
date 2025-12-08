@@ -18,8 +18,8 @@ interface UseCategoriesOptions {
 export function useCategories(options?: UseCategoriesOptions) {
   const { t } = useTranslation();
 
-  // Queries
-  const { data: categories = [], isLoading, error, refetch } = useGetCategoriesQuery();
+  // Queries - pass empty object to avoid undefined error
+  const { data: categories = [], isLoading, error, refetch } = useGetCategoriesQuery({});
 
   // Mutations
   const [createCategoryMutation, createState] = usePostCategoriesMutation();
@@ -35,7 +35,7 @@ export function useCategories(options?: UseCategoriesOptions) {
         }).unwrap();
         logger.info('Category created', {
           context: 'useCategories',
-          data: { name: payload.name },
+          data: { title: payload.title },
         });
         options?.onMutationSuccess?.();
         return result;
@@ -82,7 +82,7 @@ export function useCategories(options?: UseCategoriesOptions) {
         t('settings.categories.deleteTitle', 'Delete Category'),
         t('settings.categories.deleteMessage', {
           defaultValue: 'Are you sure you want to delete "{{name}}"?',
-          name: category.name,
+          name: category.title,
         }),
         [
           { text: t('common.cancel', 'Cancel'), style: 'cancel' },

@@ -41,14 +41,14 @@ export const Input = memo(
     return (
       <View className={cn('w-full', containerClassName)}>
         {label && (
-          <Text className="text-zinc-400 text-sm font-medium mb-2">
+          <Text className="text-neutral-600 text-sm font-medium mb-2">
             {label}
           </Text>
         )}
         <View
           className={cn(
-            'flex-row items-center bg-surface-elevated rounded-xl border px-4',
-            isFocused ? 'border-primary-500' : 'border-zinc-700',
+            'flex-row items-center bg-white rounded-xl border px-4',
+            isFocused ? 'border-primary-500' : 'border-neutral-200',
             error && 'border-error'
           )}
         >
@@ -62,7 +62,7 @@ export const Input = memo(
           )}
           <TextInput
             ref={ref}
-            className={cn('flex-1 py-3.5 text-base text-zinc-50', className)}
+            className={cn('flex-1 py-3.5 text-base text-neutral-900', className)}
             placeholderTextColor={colors.text.muted}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -79,7 +79,7 @@ export const Input = memo(
         </View>
         {(error || hint) && (
           <Text
-            className={cn('text-sm mt-1.5', error ? 'text-error' : 'text-zinc-500')}
+            className={cn('text-sm mt-1.5', error ? 'text-error' : 'text-neutral-500')}
           >
             {error || hint}
           </Text>

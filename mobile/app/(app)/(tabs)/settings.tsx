@@ -127,10 +127,10 @@ export default function SettingsScreen() {
 
   return (
     <AppLayout>
-      <SafeAreaView className="flex-1 w-full px-6" edges={['top']}>
+      <SafeAreaView className="flex-1 w-full px-6 bg-white" edges={['top']}>
         {/* Header */}
         <View className="w-full py-4">
-          <Text className="text-2xl font-semibold text-zinc-50">
+          <Text className="text-2xl font-semibold text-neutral-900">
             {t('page_title_settings')}
           </Text>
         </View>
@@ -149,7 +149,7 @@ export default function SettingsScreen() {
         >
           {/* Preferences Section */}
           <View className="mb-6">
-            <Text className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-3">
+            <Text className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
               {t('settings.preferences', 'Preferences')}
             </Text>
             <Card padding="none">
@@ -158,7 +158,7 @@ export default function SettingsScreen() {
                 value={user?.currency}
                 onPress={currencyModal.open}
               />
-              <View className="h-px bg-zinc-800 mx-4" />
+              <View className="h-px bg-neutral-200 mx-4" />
               <SettingsRow
                 label={t('settings_language')}
                 value={t(`lang_${user?.preferred_language}`)}
@@ -171,11 +171,11 @@ export default function SettingsScreen() {
           <View className="mb-6">
             <View className="flex-row justify-between items-center mb-3">
               <View className="flex-1">
-                <Text className="text-lg font-semibold text-zinc-50">
+                <Text className="text-lg font-semibold text-neutral-900">
                   {t('settings_cat_pay_title')}
                 </Text>
                 {totalBudget > 0 && (
-                  <Text className="text-sm text-zinc-500 mt-0.5">
+                  <Text className="text-sm text-neutral-500 mt-0.5">
                     {t('settings_total_budget')}: {formatCurrency(totalBudget, currency, locale)}
                   </Text>
                 )}
@@ -200,7 +200,7 @@ export default function SettingsScreen() {
               <Card padding="none">
                 {categories.map((category, index) => (
                   <React.Fragment key={category.id}>
-                    {index > 0 && <View className="h-px bg-zinc-800 mx-4" />}
+                    {index > 0 && <View className="h-px bg-neutral-200 mx-4" />}
                     <ItemRow
                       title={category.title}
                       subtitle={formatCurrency(category.amount || 0, currency, locale)}
@@ -217,7 +217,7 @@ export default function SettingsScreen() {
           {/* Payment Methods Section */}
           <View className="mb-6">
             <View className="flex-row justify-between items-center mb-3">
-              <Text className="text-lg font-semibold text-zinc-50">
+              <Text className="text-lg font-semibold text-neutral-900">
                 {t('settings_pay_methods_title')}
               </Text>
               <Button
@@ -240,7 +240,7 @@ export default function SettingsScreen() {
               <Card padding="none">
                 {paymentMethods.map((pm, index) => (
                   <React.Fragment key={pm.id}>
-                    {index > 0 && <View className="h-px bg-zinc-800 mx-4" />}
+                    {index > 0 && <View className="h-px bg-neutral-200 mx-4" />}
                     <ItemRow
                       title={pm.title}
                       subtitle={t(`payment_method_${pm.method_type}`)}
@@ -311,12 +311,12 @@ const SettingsRow = React.memo(function SettingsRow({
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="flex-row items-center justify-between p-4 active:opacity-70"
+      className="flex-row items-center justify-between p-4 active:bg-neutral-50"
     >
-      <Text className="text-base text-zinc-50">{label}</Text>
+      <Text className="text-base text-neutral-900">{label}</Text>
       <View className="flex-row items-center gap-2">
-        <Text className="text-base text-zinc-400">{value}</Text>
-        <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+        <Text className="text-base text-neutral-500">{value}</Text>
+        <Ionicons name="chevron-forward" size={20} color={colors.neutral[400]} />
       </View>
     </TouchableOpacity>
   );
@@ -340,8 +340,8 @@ const ItemRow = React.memo(function ItemRow({
   return (
     <View className="flex-row items-center justify-between p-4">
       <View className="flex-1">
-        <Text className="text-base font-medium text-zinc-50">{title}</Text>
-        {subtitle && <Text className="text-sm text-zinc-500 mt-0.5">{subtitle}</Text>}
+        <Text className="text-base font-medium text-neutral-900">{title}</Text>
+        {subtitle && <Text className="text-sm text-neutral-500 mt-0.5">{subtitle}</Text>}
       </View>
       <View className="flex-row gap-2">
         {isDeleting ? (
@@ -350,15 +350,15 @@ const ItemRow = React.memo(function ItemRow({
           <>
             <TouchableOpacity
               onPress={onEdit}
-              className="p-2.5 rounded-lg bg-primary-500 active:opacity-70"
+              className="p-2.5 rounded-lg bg-neutral-100 border border-neutral-200 active:bg-neutral-200"
             >
-              <Ionicons name="pencil" size={16} color={colors.text.inverse} />
+              <Ionicons name="pencil" size={16} color={colors.neutral[600]} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onDelete}
-              className="p-2.5 rounded-lg bg-error active:opacity-70"
+              className="p-2.5 rounded-lg bg-red-50 border border-red-100 active:bg-red-100"
             >
-              <Ionicons name="trash" size={16} color={colors.white} />
+              <Ionicons name="trash" size={16} color={colors.error} />
             </TouchableOpacity>
           </>
         )}

@@ -110,7 +110,7 @@ export default function HomeScreen() {
 
   return (
     <AppLayout>
-      <SafeAreaView className="flex-1 items-center justify-start w-full" edges={['top']}>
+      <SafeAreaView className="flex-1 items-center justify-start w-full bg-white" edges={['top']}>
         <Header
           selectedMonth={selectedMonthYear.month}
           selectedYear={selectedMonthYear.year}

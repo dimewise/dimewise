@@ -4,13 +4,13 @@ import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { PaymentMethodBreakdown } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
+import { Card } from '@/components/ui/Card';
 
 type Props = {
   items: PaymentMethodBreakdown[];
-  selectedMonth: number; // 1-based month (1-12)
+  selectedMonth: number;
   selectedYear: number;
 };
 
@@ -21,50 +21,33 @@ export const PaymentBlock = ({ items, selectedMonth, selectedYear }: Props) => {
 
   if (items.length === 0) {
     return (
-      <View style={{ margin: spacing.lg, marginTop: 0 }}>
-        <Text
-          style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.md }}
-        >
+      <View className="px-4 mb-6">
+        <Text className="text-xl font-semibold text-neutral-900 mb-3">
           {t('common_payment_methods')}
         </Text>
-
-        <View
-          style={{
-            backgroundColor: colors.backgroundSurface,
-            borderRadius: 8,
-            padding: spacing.lg,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ fontSize: 14, color: colors.disabled, textAlign: 'center' }}>
-            {t('payment_methods_empty')}
-          </Text>
-          <Text
-            style={{
-              fontSize: 12,
-              color: colors.disabled,
-              marginTop: 4,
-              textAlign: 'center',
-            }}
-          >
-            {t('payment_methods_empty_hint')}
-          </Text>
-        </View>
+        <Card>
+          <View className="py-6 items-center">
+            <Text className="text-sm text-neutral-500 text-center">
+              {t('payment_methods_empty')}
+            </Text>
+            <Text className="text-xs text-neutral-400 mt-1 text-center">
+              {t('payment_methods_empty_hint')}
+            </Text>
+          </View>
+        </Card>
       </View>
     );
   }
 
   return (
-    <View style={{ margin: spacing.lg, marginTop: 0 }}>
-      <Text
-        style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.md }}
-      >
+    <View className="px-4 mb-6">
+      <Text className="text-xl font-semibold text-neutral-900 mb-3">
         {t('common_payment_methods')}
       </Text>
-      <View style={{ gap: spacing.sm }}>
-        {items.map((p) => {
+      
+      <Card padding="none">
+        {items.map((p, index) => {
           const handlePress = () => {
-            // Calculate date range for the selected month/year
             const startDate = DateTime.fromObject({
               year: selectedYear,
               month: selectedMonth,
@@ -80,36 +63,29 @@ export const PaymentBlock = ({ items, selectedMonth, selectedYear }: Props) => {
               .endOf('month')
               .toISODate();
 
-            // Navigate to transactions page with payment method filter and date filters
             router.push(
               `/(tabs)/transactions?paymentMethodId=${p.payment_method_id}&dateFrom=${startDate}&dateTo=${endDate}`,
             );
           };
 
           return (
-            <Pressable
-              key={p.payment_method_id}
-              onPress={handlePress}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                backgroundColor: colors.backgroundSurface,
-                borderRadius: 8,
-                padding: spacing.md,
-                opacity: pressed ? 0.7 : 1,
-              })}
-            >
-            <Text style={{ fontSize: 16, fontWeight: '500', color: colors.textPrimary }}>
-              {p.payment_method_title}
-            </Text>
-            <Text style={{ fontSize: 16, color: colors.disabled }}>
-              {formatCurrency(p.total_spent, currency, locale)}
-            </Text>
-            </Pressable>
+            <View key={p.payment_method_id}>
+              {index > 0 && <View className="h-px bg-neutral-100 mx-4" />}
+              <Pressable
+                onPress={handlePress}
+                className="flex-row justify-between items-center px-4 py-3.5 active:bg-neutral-50"
+              >
+                <Text className="text-base font-medium text-neutral-900">
+                  {p.payment_method_title}
+                </Text>
+                <Text className="text-base text-neutral-500 tabular-nums">
+                  {formatCurrency(p.total_spent, currency, locale)}
+                </Text>
+              </Pressable>
+            </View>
           );
         })}
-      </View>
+      </Card>
     </View>
   );
 };

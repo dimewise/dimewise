@@ -6,11 +6,12 @@ import { Link, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '@/assets/icons/splash-icon-light.png';
 import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
+import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import { createSignInSchema, type signInData } from '@/components/forms/schemas/auth';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
@@ -67,7 +68,7 @@ export default function SignInScreen() {
 
   return (
     <AuthLayout>
-      <View className="absolute inset-0 bg-background" />
+      <View className="absolute inset-0 bg-white" />
       <SafeAreaView className="flex-1 px-6">
         <KeyboardAwareScrollView
           bottomOffset={60}
@@ -82,7 +83,7 @@ export default function SignInScreen() {
             >
               <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
-            <Text className="flex-1 text-center text-2xl font-semibold text-zinc-50">
+            <Text className="flex-1 text-center text-2xl font-semibold text-neutral-900">
               {t('auth_sign_in_welcome_back')}
             </Text>
           </View>
@@ -92,11 +93,15 @@ export default function SignInScreen() {
             <Image
               source={Logo}
               contentFit="contain"
-              style={{ width: 120, aspectRatio: 1, alignSelf: 'center', marginVertical: 16 }}
+              style={{ width: 100, aspectRatio: 1, alignSelf: 'center', marginVertical: 16 }}
             />
 
-            {/* Apple Sign In */}
-            <AppleSignInButton mode="sign-in" />
+            {/* Social Sign In Options */}
+            <View className="gap-3">
+              {Platform.OS === 'ios' && <AppleSignInButton mode="sign-in" />}
+              <GoogleSignInButton mode="sign-in" />
+              <LineSignInButton mode="sign-in" />
+            </View>
 
             <Divider label={t('common_or', 'or')} />
 
@@ -144,9 +149,9 @@ export default function SignInScreen() {
 
             {/* Sign up link */}
             <View className="items-center mt-4">
-              <Text className="text-zinc-400">
+              <Text className="text-neutral-500">
                 {t('auth_sign_in_no_account')}{' '}
-                <Link href="/sign-up" className="text-primary-500 font-semibold underline">
+                <Link href="/sign-up" className="text-neutral-900 font-semibold underline">
                   {t('auth_sign_up')}
                 </Link>
               </Text>

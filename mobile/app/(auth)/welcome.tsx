@@ -2,11 +2,11 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Logo from '@/assets/icons/splash-icon-light.png';
-import { CoverGradient } from '@/components/CoverGradient';
+import Logo from '@/assets/icons/splash-icon-dark.png';
 import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
+import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { Button, Divider } from '@/components/ui';
 
@@ -24,29 +24,31 @@ export default function WelcomeScreen() {
 
   return (
     <AuthLayout>
-      <CoverGradient />
+      <View className="absolute inset-0 bg-white" />
       <SafeAreaView className="flex-1 px-6">
         {/* Logo and branding */}
         <View className="flex-1 items-center justify-center">
           <Image
             source={Logo}
             contentFit="contain"
-            style={{ width: '50%', aspectRatio: 1 }}
+            style={{ width: '40%', aspectRatio: 1 }}
           />
-          <Text className="text-4xl font-bold text-zinc-50 mt-4">
+          <Text className="text-4xl font-light text-neutral-900 mt-6 tracking-tight">
             {t('app_name')}
           </Text>
-          <Text className="text-lg text-zinc-400 mt-2 text-center">
+          <Text className="text-base text-neutral-500 mt-2 text-center">
             {t('auth_catchphrase')}
           </Text>
         </View>
 
         {/* Auth buttons */}
         <View className="w-full pb-12 gap-3">
-          {/* Apple Sign In - Required for iOS App Store */}
-          <AppleSignInButton mode="sign-up" />
+          {/* Social Sign In Options */}
+          {Platform.OS === 'ios' && <AppleSignInButton mode="sign-up" />}
+          <GoogleSignInButton mode="sign-up" />
+          <LineSignInButton mode="sign-up" />
 
-          <Divider label={t('common.or', 'or')} />
+          <Divider label={t('common_or', 'or')} />
 
           <Button
             title={t('auth_get_started')}

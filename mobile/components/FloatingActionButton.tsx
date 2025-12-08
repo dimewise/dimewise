@@ -1,5 +1,5 @@
 import Octicons from '@expo/vector-icons/Octicons';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable } from 'react-native';
 import { colors } from '@/theme/colors';
 
 type Props = {
@@ -9,37 +9,22 @@ type Props = {
 export const FloatingActionButton = ({ onPress }: Props) => {
   return (
     <Pressable
-      style={styles.fab}
+      className="absolute bottom-6 right-6 w-14 h-14 rounded-full bg-primary-500 items-center justify-center shadow-lg active:bg-primary-600"
       onPress={onPress}
-      android_ripple={{ color: colors.primaryLight, radius: 30 }}
+      android_ripple={{ color: colors.primary[400], radius: 28 }}
+      style={{
+        elevation: 8,
+        shadowColor: colors.neutral[900],
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      }}
     >
       <Octicons
         name="plus"
         size={24}
-        color={colors.backgroundDefault}
+        color={colors.neutral[0]}
       />
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  fab: {
-    position: 'absolute',
-    bottom: 24, // Above tab bar
-    right: 24,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 8, // Android shadow
-    shadowColor: colors.black, // iOS shadow
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-});

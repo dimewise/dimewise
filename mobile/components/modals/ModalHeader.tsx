@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '@/theme/colors';
+import { Text, View } from 'react-native';
 
 type Props = {
   title: string;
@@ -10,42 +9,17 @@ type Props = {
 export const ModalHeader = ({ title, rightAction }: Props) => {
   if (!rightAction) {
     return (
-      <View style={styles.headerCentered}>
-        <Text style={styles.title}>{title}</Text>
+      <View className="items-center justify-center px-6 py-4 border-b border-neutral-200">
+        <Text className="text-lg font-semibold text-neutral-900">{title}</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.header}>
-      <Text style={styles.title}>{title}</Text>
+    <View className="flex-row items-center justify-between px-6 py-4 border-b border-neutral-200">
+      <Text className="text-lg font-semibold text-neutral-900">{title}</Text>
       <View>{rightAction}</View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.backgroundSurface,
-  },
-  headerCentered: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.backgroundSurface,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-});
 

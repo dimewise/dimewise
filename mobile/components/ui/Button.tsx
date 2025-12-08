@@ -14,11 +14,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-primary-500',
-        secondary: 'bg-surface-elevated border border-zinc-700',
+        primary: 'bg-neutral-900',
+        secondary: 'bg-neutral-100 border border-neutral-200',
         ghost: 'bg-transparent',
         danger: 'bg-error',
-        outline: 'bg-transparent border border-primary-500',
+        outline: 'bg-transparent border border-neutral-900',
       },
       size: {
         sm: 'px-4 py-2',
@@ -41,11 +41,11 @@ const buttonVariants = cva(
 const textVariants = cva('font-semibold text-center', {
   variants: {
     variant: {
-      primary: 'text-zinc-950',
-      secondary: 'text-zinc-50',
-      ghost: 'text-primary-500',
-      danger: 'text-zinc-50',
-      outline: 'text-primary-500',
+      primary: 'text-white',
+      secondary: 'text-neutral-900',
+      ghost: 'text-neutral-900',
+      danger: 'text-white',
+      outline: 'text-neutral-900',
     },
     size: {
       sm: 'text-sm',

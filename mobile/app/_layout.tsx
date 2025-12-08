@@ -1,9 +1,8 @@
 import '../global.css';
 
-import { initSentry, withSentryErrorBoundary } from '@/lib/sentry';
-
-// Initialize Sentry early
-initSentry();
+// TODO: Uncomment when Sentry is configured
+// import { initSentry, withSentryErrorBoundary } from '@/lib/sentry';
+// initSentry();
 
 if (__DEV__) {
   require('../ReactotronConfig');
@@ -19,15 +18,18 @@ import '../utils/localization/i18n';
 import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-function RootLayout() {
+// TODO: Uncomment when Sentry is configured
+// function RootLayout() {
+export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
       <Provider store={store}>
         <KeyboardProvider>
           <ClerkProvider tokenCache={tokenCache}>
             <StatusBar
-              barStyle={'light-content'}
+              barStyle={'dark-content'}
               translucent
+              backgroundColor="transparent"
             />
             <Slot />
           </ClerkProvider>
@@ -37,5 +39,5 @@ function RootLayout() {
   );
 }
 
-// Wrap with Sentry error boundary for crash reporting
-export default withSentryErrorBoundary(RootLayout);
+// TODO: Uncomment when Sentry is configured
+// export default withSentryErrorBoundary(RootLayout);

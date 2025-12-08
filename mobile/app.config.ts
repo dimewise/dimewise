@@ -60,6 +60,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
     },
+    usesAppleSignIn: true,
   },
   android: {
     adaptiveIcon: {
@@ -78,13 +79,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-font',
     'expo-web-browser',
     'expo-router',
-    [
-      '@sentry/react-native/expo',
-      {
-        organization: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-      },
-    ],
+    // TODO: Uncomment when Sentry is configured
+    // [
+    //   '@sentry/react-native/expo',
+    //   {
+    //     organization: process.env.SENTRY_ORG,
+    //     project: process.env.SENTRY_PROJECT,
+    //   },
+    // ],
     [
       'expo-splash-screen',
       {

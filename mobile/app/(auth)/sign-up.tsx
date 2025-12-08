@@ -7,11 +7,12 @@ import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { Modal, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '@/assets/icons/splash-icon-light.png';
 import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
+import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import {
   createSignUpSchema,
@@ -114,7 +115,7 @@ export default function SignUpScreen() {
 
   return (
     <AuthLayout>
-      <View className="absolute inset-0 bg-background" />
+      <View className="absolute inset-0 bg-white" />
       <SafeAreaView className="flex-1 px-6">
         <KeyboardAwareScrollView
           bottomOffset={60}
@@ -129,7 +130,7 @@ export default function SignUpScreen() {
             >
               <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
-            <Text className="flex-1 text-center text-2xl font-semibold text-zinc-50">
+            <Text className="flex-1 text-center text-2xl font-semibold text-neutral-900">
               {t('auth_sign_up_create_account')}
             </Text>
           </View>
@@ -139,11 +140,15 @@ export default function SignUpScreen() {
             <Image
               source={Logo}
               contentFit="contain"
-              style={{ width: 120, aspectRatio: 1, alignSelf: 'center', marginVertical: 16 }}
+              style={{ width: 100, aspectRatio: 1, alignSelf: 'center', marginVertical: 16 }}
             />
 
-            {/* Apple Sign In */}
-            <AppleSignInButton mode="sign-up" />
+            {/* Social Sign In Options */}
+            <View className="gap-3">
+              {Platform.OS === 'ios' && <AppleSignInButton mode="sign-up" />}
+              <GoogleSignInButton mode="sign-up" />
+              <LineSignInButton mode="sign-up" />
+            </View>
 
             <Divider label={t('common_or', 'or')} />
 

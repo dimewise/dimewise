@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Primary - Emerald (growth/money)
+        // Primary - Emerald (used sparingly for CTAs and success states)
         primary: {
           50: '#ECFDF5',
           100: '#D1FAE5',
@@ -22,32 +22,45 @@ module.exports = {
           900: '#064E3B',
           DEFAULT: '#10B981',
         },
-        // Accent - Amber
-        accent: {
-          400: '#FBBF24',
-          500: '#F59E0B',
-          600: '#D97706',
-          DEFAULT: '#F59E0B',
+        // Neutral - Core monochromatic palette (receipt-inspired)
+        neutral: {
+          0: '#FFFFFF',
+          50: '#FAFAFA',
+          100: '#F5F5F5',
+          200: '#E5E5E5',
+          300: '#D4D4D4',
+          400: '#A3A3A3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0A0A0A',
         },
-        // Surfaces
+        // Surfaces (light theme)
         surface: {
-          DEFAULT: '#18181B', // zinc-900
-          base: '#09090B', // zinc-950
-          elevated: '#27272A', // zinc-800
-          overlay: '#3F3F46', // zinc-700
+          DEFAULT: '#FAFAFA',
+          base: '#FFFFFF',
+          elevated: '#FFFFFF',
         },
         // Semantic
-        success: '#22C55E',
+        success: '#10B981',
         warning: '#F59E0B',
         error: '#EF4444',
         info: '#3B82F6',
         // Background
-        background: '#09090B',
+        background: '#FFFFFF',
         // Border
-        border: '#27272A',
+        border: '#E5E5E5',
+        'border-strong': '#D4D4D4',
+        // Text utilities
+        'text-primary': '#171717',
+        'text-secondary': '#525252',
+        'text-muted': '#737373',
       },
       fontFamily: {
         sans: ['System'],
+        mono: ['Courier'],
       },
       fontSize: {
         '2xs': ['10px', '14px'],

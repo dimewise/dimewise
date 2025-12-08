@@ -22,13 +22,13 @@ interface UsePaymentMethodsOptions {
 export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
   const { t } = useTranslation();
 
-  // Queries
+  // Queries - pass empty object to avoid undefined error
   const {
     data: paymentMethods = [],
     isLoading,
     error,
     refetch,
-  } = useGetPaymentMethodsQuery();
+  } = useGetPaymentMethodsQuery({});
 
   // Mutations
   const [createPaymentMethodMutation, createState] =
@@ -47,7 +47,7 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
         }).unwrap();
         logger.info('Payment method created', {
           context: 'usePaymentMethods',
-          data: { name: payload.name },
+          data: { title: payload.title },
         });
         options?.onMutationSuccess?.();
         return result;
@@ -98,7 +98,7 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
         t('settings.paymentMethods.deleteTitle', 'Delete Payment Method'),
         t('settings.paymentMethods.deleteMessage', {
           defaultValue: 'Are you sure you want to delete "{{name}}"?',
-          name: paymentMethod.name,
+          name: paymentMethod.title,
         }),
         [
           { text: t('common.cancel', 'Cancel'), style: 'cancel' },
