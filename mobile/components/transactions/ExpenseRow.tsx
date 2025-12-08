@@ -81,8 +81,9 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
       await verifyExpense({ expenseId: item.id }).unwrap();
       closeSwipeable();
       onUpdate?.();
-    } catch (error) {
-      logger.error('Error verifying expense:', error);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      logger.error(`Error verifying expense: ${errorMessage}`);
       Alert.alert(t('common_error'), t('transaction_verify_error'));
     }
   }, [isVerified, isVerifying, verifyExpense, item.id, closeSwipeable, onUpdate, t]);
@@ -109,8 +110,9 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
           try {
             await deleteExpense({ expenseId: item.id }).unwrap();
             onUpdate?.();
-          } catch (error) {
-            logger.error('Error deleting expense:', error);
+          } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+            logger.error(`Error deleting expense: ${errorMessage}`);
             Alert.alert(t('common_error'), t('transaction_delete_error'));
           }
         },
@@ -154,19 +156,19 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
       <ReanimatedSwipeable ref={swipeableRef} renderRightActions={renderRightActions}>
         <Pressable
           onPress={handleViewDetails}
-          className={`bg-surface rounded-lg p-4 ${isVerified ? 'border-l-4 border-l-emerald-500' : ''}`}
+          className={`bg-white rounded-xl p-4 border border-neutral-200 ${isVerified ? 'border-l-4 border-l-emerald-500' : ''}`}
         >
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
               <View className="flex-row items-center gap-2">
-                <Text className="text-[15px] font-semibold text-white">{item.title}</Text>
+                <Text className="text-[15px] font-semibold text-neutral-900">{item.title}</Text>
                 {isVerified && <Text className="text-xs text-emerald-500 font-bold">✓</Text>}
               </View>
-              <Text className="text-xs text-text-secondary mt-0.5">
+              <Text className="text-xs text-neutral-500 mt-0.5">
                 {item.category.title} · {item.payment_method.title} · {formattedDate}
               </Text>
             </View>
-            <Text className="text-[15px] font-semibold text-white">{formatCurrency(item.amount, currency, locale)}</Text>
+            <Text className="text-[15px] font-semibold text-neutral-900 tabular-nums">{formatCurrency(item.amount, currency, locale)}</Text>
           </View>
         </Pressable>
       </ReanimatedSwipeable>

@@ -20,12 +20,12 @@ export const LoadingState = memo(function LoadingState({
     <View
       className={cn(
         'items-center justify-center p-6',
-        fullScreen && 'flex-1 bg-background',
+        fullScreen && 'flex-1 bg-white',
         className
       )}
     >
       <ActivityIndicator size={size} color={colors.primary.DEFAULT} />
-      {message && <Text className="mt-4 text-sm text-zinc-400">{message}</Text>}
+      {message && <Text className="mt-4 text-sm text-neutral-500">{message}</Text>}
     </View>
   );
 });

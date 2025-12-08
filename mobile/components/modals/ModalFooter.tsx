@@ -1,23 +1,15 @@
 import { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { colors } from '@/theme/colors';
+import { View } from 'react-native';
 
 type Props = {
   children: ReactNode;
 };
 
 export const ModalFooter = ({ children }: Props) => {
-  return <View style={styles.footer}>{children}</View>;
+  return (
+    <View className="flex-row px-6 py-4 gap-3 border-t border-neutral-200 bg-neutral-50">
+      {children}
+    </View>
+  );
 };
-
-const styles = StyleSheet.create({
-  footer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: colors.backgroundSurface,
-  },
-});
 

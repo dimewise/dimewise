@@ -1,5 +1,5 @@
 import React, { memo, type ReactNode } from 'react';
-import { View, TouchableOpacity, type ViewProps } from 'react-native';
+import { View, Pressable, type ViewProps } from 'react-native';
 import { cn } from '@/utils/cn';
 
 interface CardProps extends ViewProps {
@@ -25,22 +25,21 @@ export const Card = memo(function Card({
   ...props
 }: CardProps) {
   const cardClasses = cn(
-    'bg-surface rounded-2xl border border-zinc-800',
+    'bg-white rounded-2xl border border-neutral-200',
     paddingClasses[padding],
-    elevated && 'shadow-lg shadow-black/50',
+    elevated && 'shadow-sm',
     className
   );
 
   if (onPress) {
     return (
-      <TouchableOpacity
+      <Pressable
         onPress={onPress}
-        activeOpacity={0.7}
-        className={cardClasses}
+        className={cn(cardClasses, 'active:opacity-80')}
         {...props}
       >
         {children}
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 

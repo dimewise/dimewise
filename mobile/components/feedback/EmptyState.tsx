@@ -28,14 +28,14 @@ export const EmptyState = memo(function EmptyState({
 }: EmptyStateProps) {
   return (
     <View className={cn('items-center justify-center p-6 py-12', className)}>
-      <View className="mb-4 opacity-50">
-        <Ionicons name={icon} size={64} color={colors.text.secondary} />
+      <View className="mb-4">
+        <Ionicons name={icon} size={64} color={colors.neutral[300]} />
       </View>
-      <Text className="text-lg font-semibold text-zinc-50 text-center mb-2">
+      <Text className="text-base font-medium text-neutral-600 text-center mb-1">
         {title}
       </Text>
       {message && (
-        <Text className="text-sm text-zinc-400 text-center mb-6 max-w-xs">
+        <Text className="text-sm text-neutral-500 text-center mb-6 max-w-xs">
           {message}
         </Text>
       )}

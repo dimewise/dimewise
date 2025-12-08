@@ -1,13 +1,15 @@
 /**
- * Dimewise Color System
+ * Dimewise Color System - Receipt-Inspired Light Theme
  *
- * Use Tailwind classes when possible. This file is for:
- * - JavaScript color references (charts, dynamic styles)
- * - Third-party component styling
+ * Design Philosophy:
+ * - Clean, paper-white backgrounds like a receipt
+ * - Monochromatic with strategic accent colors
+ * - Whitespace and typography for visual hierarchy
+ * - High contrast for accessibility
  */
 
 export const colors = {
-  // Primary - Emerald (growth/money)
+  // Primary - Emerald (growth/money) - used sparingly for CTAs
   primary: {
     50: '#ECFDF5',
     100: '#D1FAE5',
@@ -22,67 +24,81 @@ export const colors = {
     DEFAULT: '#10B981',
   },
 
-  // Accent - Amber
-  accent: {
-    400: '#FBBF24',
-    500: '#F59E0B',
-    600: '#D97706',
-    DEFAULT: '#F59E0B',
+  // Neutral - The core of our monochromatic palette
+  neutral: {
+    0: '#FFFFFF',
+    50: '#FAFAFA',
+    100: '#F5F5F5',
+    200: '#E5E5E5',
+    300: '#D4D4D4',
+    400: '#A3A3A3',
+    500: '#737373',
+    600: '#525252',
+    700: '#404040',
+    800: '#262626',
+    900: '#171717',
+    950: '#0A0A0A',
   },
 
-  // Surfaces (dark theme)
+  // Surfaces (light theme)
   surface: {
-    base: '#09090B', // zinc-950 - Main background
-    DEFAULT: '#18181B', // zinc-900 - Cards
-    elevated: '#27272A', // zinc-800 - Elevated cards
-    overlay: '#3F3F46', // zinc-700 - Overlays
+    base: '#FFFFFF', // Pure white - main background
+    DEFAULT: '#FAFAFA', // Subtle off-white - cards
+    elevated: '#FFFFFF', // White - elevated cards with shadow
+    overlay: 'rgba(0, 0, 0, 0.5)', // Modal overlays
   },
 
   // Text
   text: {
-    primary: '#FAFAFA', // zinc-50
-    secondary: '#A1A1AA', // zinc-400
-    muted: '#71717A', // zinc-500
-    inverse: '#09090B', // zinc-950
+    primary: '#171717', // Near black - main text
+    secondary: '#525252', // Dark gray - secondary text
+    muted: '#737373', // Medium gray - tertiary/disabled
+    inverse: '#FFFFFF', // White - on dark backgrounds
   },
 
   // Semantic
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  success: '#10B981', // Emerald
+  warning: '#F59E0B', // Amber
+  error: '#EF4444', // Red
+  info: '#3B82F6', // Blue
 
   // Borders
   border: {
-    DEFAULT: '#27272A', // zinc-800
-    subtle: '#3F3F46', // zinc-700
+    DEFAULT: '#E5E5E5', // Light gray
+    subtle: '#F5F5F5', // Very light
+    strong: '#D4D4D4', // Darker border
   },
 
-  // Legacy support (map to new colors for backward compatibility)
-  background: '#09090B',
-  backgroundDefault: '#09090B',
-  backgroundSurface: '#18181B',
-  white: '#FAFAFA',
-  black: '#09090B',
-  textPrimary: '#FAFAFA',
-  textSecondary: '#A1A1AA',
-  disabled: '#71717A',
+  // Accent (used very sparingly)
+  accent: {
+    DEFAULT: '#10B981',
+  },
 
-  // Legacy primary colors (mapped to new system)
+  // Legacy support (mapped to new light theme)
+  background: '#FFFFFF',
+  backgroundDefault: '#FFFFFF',
+  backgroundSurface: '#FAFAFA',
+  white: '#FFFFFF',
+  black: '#171717',
+  textPrimary: '#171717',
+  textSecondary: '#525252',
+  disabled: '#A3A3A3',
+
+  // Legacy primary
   primaryLight: '#34D399',
   primaryDark: '#047857',
-  primaryTextOn: '#09090B',
+  primaryTextOn: '#FFFFFF',
 
-  // Legacy secondary (mapped to accent)
-  secondary: '#F59E0B',
-  secondaryLight: '#FBBF24',
-  secondaryDark: '#D97706',
-  secondaryTextOn: '#09090B',
+  // Legacy secondary
+  secondary: '#737373',
+  secondaryLight: '#A3A3A3',
+  secondaryDark: '#525252',
+  secondaryTextOn: '#FFFFFF',
 
   // Legacy feedback
-  errorTextOn: '#FAFAFA',
-  successTextOn: '#FAFAFA',
-  warningTextOn: '#09090B',
+  errorTextOn: '#FFFFFF',
+  successTextOn: '#FFFFFF',
+  warningTextOn: '#171717',
 } as const;
 
 export type ColorKey = keyof typeof colors;

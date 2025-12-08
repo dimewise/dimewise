@@ -136,14 +136,14 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                     <Picker.Item
                       label={t('transactions_filter_all')}
                       value=""
-                      color={colors.disabled}
+                      color={colors.neutral[400]}
                     />
                     {categories?.map((category) => (
                       <Picker.Item
                         key={category.id}
                         label={category.title}
                         value={category.id}
-                        color={colors.textPrimary}
+                        color={colors.neutral[900]}
                       />
                     ))}
                   </Picker>
@@ -175,14 +175,14 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                     <Picker.Item
                       label={t('transactions_filter_all')}
                       value=""
-                      color={colors.disabled}
+                      color={colors.neutral[400]}
                     />
                     {paymentMethods?.map((method) => (
                       <Picker.Item
                         key={method.id}
                         label={method.title}
                         value={method.id}
-                        color={colors.textPrimary}
+                        color={colors.neutral[900]}
                       />
                     ))}
                   </Picker>
@@ -281,12 +281,12 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                     <Picker.Item
                       label={t('transactions_filter_verified')}
                       value="verified"
-                      color={colors.textPrimary}
+                      color={colors.neutral[900]}
                     />
                     <Picker.Item
                       label={t('transactions_filter_unverified')}
                       value="unverified"
-                      color={colors.textPrimary}
+                      color={colors.neutral[900]}
                     />
                   </Picker>
                 </View>
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     fontSize: 13,
-    color: colors.disabled,
+    color: colors.neutral[500],
     fontWeight: '500' as const,
   },
   content: {
@@ -334,39 +334,41 @@ const styles = StyleSheet.create({
     alignItems: 'center' as const,
     paddingVertical: 16,
     paddingHorizontal: 16,
-    backgroundColor: colors.backgroundSurface,
+    backgroundColor: colors.neutral[50],
     borderRadius: 12,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: colors.neutral[200],
   },
   collapsibleLabel: {
     fontSize: 16,
     fontWeight: '600' as const,
-    color: colors.textPrimary,
+    color: colors.neutral[900],
   },
   collapsibleValue: {
     fontSize: 16,
-    color: colors.textPrimary,
+    color: colors.neutral[500],
     flex: 1,
     textAlign: 'right' as const,
   },
   pickerWrapper: {
-    backgroundColor: colors.backgroundSurface,
+    backgroundColor: colors.neutral[50],
     borderRadius: 12,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: colors.neutral[200],
     overflow: 'hidden',
     minHeight: 200,
   },
   picker: {
     height: 50,
-    color: colors.textPrimary,
+    color: colors.neutral[900],
   },
   pickerItem: {
-    color: colors.textPrimary,
+    color: colors.neutral[900],
     fontSize: 16,
   },
   datePicker: {
     height: 200,
-    backgroundColor: colors.backgroundSurface,
+    backgroundColor: colors.neutral[50],
   },
 });
 

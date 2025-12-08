@@ -3,7 +3,6 @@ import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useGetAnalyticsBudgetOverviewQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { useUserLocale } from '@/hooks/useUserLocale';
 
@@ -32,34 +31,44 @@ export const BalanceSummary = ({ selectedMonth, selectedYear }: Props) => {
 
   const remainderPercent = ((data?.remainingBudget ?? 0) / (data?.totalBudget ?? 1)) * 100;
   const remainderColor = useMemo(() => {
-    if (remainderPercent > 75) return colors.primary;
+    if (remainderPercent > 75) return colors.primary.DEFAULT;
     if (remainderPercent >= 50) return colors.warning;
     return colors.error;
   }, [remainderPercent]);
 
   return (
-    <View
-      style={{
-        width: '100%',
-        gap: spacing.xxl,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: spacing.md,
-        marginBottom: spacing.xl,
-      }}
-    >
-      <View style={{ alignItems: 'center' }}>
-        <Text style={{ color: colors.disabled }}>{t('budget_remainder')}</Text>
-        <Text style={{ color: remainderColor, fontSize: 48, fontWeight: 700 }}>{remainder}</Text>
+    <View className="w-full items-center justify-center mt-2 mb-6 gap-8">
+      {/* Main remainder display */}
+      <View className="items-center">
+        <Text className="text-sm text-neutral-500 uppercase tracking-wide mb-1">
+          {t('budget_remainder')}
+        </Text>
+        <Text
+          style={{ color: remainderColor }}
+          className="text-5xl font-bold tracking-tight"
+        >
+          {remainder}
+        </Text>
       </View>
-      <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-evenly' }}>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: colors.disabled }}>{t('budget_used')}</Text>
-          <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: 600 }}>{spent}</Text>
+
+      {/* Budget breakdown */}
+      <View className="flex-row w-full justify-evenly">
+        <View className="items-center px-4">
+          <Text className="text-xs text-neutral-400 uppercase tracking-wide mb-1">
+            {t('budget_used')}
+          </Text>
+          <Text className="text-2xl font-semibold text-neutral-900">
+            {spent}
+          </Text>
         </View>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ color: colors.disabled }}>{t('budget_total')}</Text>
-          <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: 600 }}>{budget}</Text>
+        <View className="w-px h-12 bg-neutral-200" />
+        <View className="items-center px-4">
+          <Text className="text-xs text-neutral-400 uppercase tracking-wide mb-1">
+            {t('budget_total')}
+          </Text>
+          <Text className="text-2xl font-semibold text-neutral-900">
+            {budget}
+          </Text>
         </View>
       </View>
     </View>

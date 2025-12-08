@@ -29,17 +29,17 @@ export const ErrorState = memo(function ErrorState({
     <View
       className={cn(
         'items-center justify-center p-6',
-        fullScreen && 'flex-1 bg-background',
+        fullScreen && 'flex-1 bg-white',
         className
       )}
     >
-      <View className="mb-4 p-4 rounded-full bg-error/10">
+      <View className="mb-4 p-4 rounded-full bg-red-50">
         <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
       </View>
-      <Text className="text-xl font-semibold text-zinc-50 text-center mb-2">
+      <Text className="text-xl font-semibold text-neutral-900 text-center mb-2">
         {title || t('error.generic.title', 'Something went wrong')}
       </Text>
-      <Text className="text-base text-zinc-400 text-center mb-6 max-w-xs">
+      <Text className="text-base text-neutral-500 text-center mb-6 max-w-xs">
         {message || t('error.generic.message', 'Please try again later')}
       </Text>
       {onRetry && (

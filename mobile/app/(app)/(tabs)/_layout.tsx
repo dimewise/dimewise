@@ -10,11 +10,16 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textPrimary,
+        tabBarActiveTintColor: colors.primary.DEFAULT,
+        tabBarInactiveTintColor: colors.neutral[400],
         tabBarStyle: {
-          backgroundColor: colors.backgroundSurface,
-          borderTopColor: colors.backgroundSurface,
+          backgroundColor: colors.neutral[0],
+          borderTopColor: colors.neutral[200],
+          borderTopWidth: 1,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
         },
       }}
     >

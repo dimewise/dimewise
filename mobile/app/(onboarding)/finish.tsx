@@ -15,7 +15,6 @@ import {
   usePostUsersMeMutation,
 } from '@/generated/api/api';
 import { postMeUserBody } from '@/generated/types/users/users.zod';
-import { sharedStyles } from '@/theme/stylesheets';
 
 type Form = { currency: CurrencyType; preferred_language: SupportedLanguage };
 
@@ -54,73 +53,53 @@ export default function FinishScreen() {
   return (
     <AppLayout>
       <SafeAreaView
-        style={{
-          flex: 1,
-          width: '100%',
-          paddingHorizontal: 24,
-          justifyContent: 'center',
-          gap: 16,
-        }}
+        className="flex-1 w-full px-6 justify-center gap-4"
         edges={['top']}
       >
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: '700',
-            marginBottom: 48,
-            color: colors.textPrimary,
-            textAlign: 'center',
-          }}
-        >
+        <Text className="text-2xl font-bold mb-12 text-neutral-900 text-center">
           {t('finish_title')}
         </Text>
 
         {/* Currency Field */}
-        <View style={{ gap: 8 }}>
-          <Text
-            style={{ fontSize: 16, fontWeight: '600', marginBottom: 4, color: colors.textPrimary }}
-          >
+        <View className="gap-2">
+          <Text className="text-base font-semibold mb-1 text-neutral-900">
             {t('finish_currency_label')}
           </Text>
-          <Text
-            style={{ fontSize: 14, fontWeight: '500', marginBottom: 4, color: colors.disabled }}
-          >
+          <Text className="text-sm font-medium mb-1 text-neutral-500">
             {t('finish_currency_helper')}
           </Text>
           <Pressable
             onPress={openCurrency}
-            style={{ backgroundColor: colors.backgroundSurface, padding: 16, borderRadius: 8 }}
+            className="bg-neutral-50 p-4 rounded-xl border border-neutral-200 active:bg-neutral-100"
           >
-            <Text style={{ color: colors.textPrimary }}>{currency}</Text>
+            <Text className="text-neutral-900">{currency}</Text>
           </Pressable>
           {errors.currency && (
-            <Text style={{ color: colors.error, fontSize: 12 }}>{errors.currency.message}</Text>
+            <Text className="text-red-500 text-xs">{errors.currency.message}</Text>
           )}
         </View>
 
         {/* Language Field */}
-        <View style={{ gap: 8 }}>
-          <Text
-            style={{ fontSize: 16, fontWeight: '600', marginBottom: 4, color: colors.textPrimary }}
-          >
+        <View className="gap-2">
+          <Text className="text-base font-semibold mb-1 text-neutral-900">
             {t('finish_language_label')}
           </Text>
-          <Text style={{ fontSize: 14, color: colors.disabled, marginBottom: 4 }}>
+          <Text className="text-sm text-neutral-500 mb-1">
             {t('finish_language_helper')}
           </Text>
-          <Text style={{ fontSize: 12, color: colors.warning, marginBottom: 8 }}>
+          <Text className="text-xs text-amber-600 mb-2">
             {t('finish_language_warning')}
           </Text>
           <Pressable
             onPress={openLanguage}
-            style={{ backgroundColor: colors.backgroundSurface, padding: 16, borderRadius: 8 }}
+            className="bg-neutral-50 p-4 rounded-xl border border-neutral-200 active:bg-neutral-100"
           >
-            <Text style={{ color: colors.textPrimary }}>
+            <Text className="text-neutral-900">
               {language === 'en' ? 'English' : '日本語'}
             </Text>
           </Pressable>
           {errors.preferred_language && (
-            <Text style={{ color: colors.error, fontSize: 12 }}>
+            <Text className="text-red-500 text-xs">
               {errors.preferred_language.message}
             </Text>
           )}
@@ -129,23 +108,15 @@ export default function FinishScreen() {
         <Pressable
           onPress={onFinish}
           disabled={isLoading}
-          style={{
-            marginTop: 8,
-            padding: 16,
-            backgroundColor: isLoading ? colors.disabled : colors.primary,
-            borderRadius: 8,
-            alignItems: 'center',
-            flexDirection: 'row', // keeps spinner + text centred
-            justifyContent: 'center',
-          }}
+          className={`mt-2 p-4 rounded-xl items-center flex-row justify-center ${isLoading ? 'bg-neutral-300' : 'bg-primary-500 active:bg-primary-600'}`}
         >
           {isLoading ? (
             <ActivityIndicator
               size="small"
-              color={colors.white}
+              color={colors.neutral[0]}
             />
           ) : (
-            <Text style={sharedStyles.buttonContainedText}>{t('finish_cta')}</Text>
+            <Text className="text-base font-semibold text-white">{t('finish_cta')}</Text>
           )}
         </Pressable>
       </SafeAreaView>
