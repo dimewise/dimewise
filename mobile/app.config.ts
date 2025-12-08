@@ -79,6 +79,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-web-browser',
     'expo-router',
     [
+      '@sentry/react-native/expo',
+      {
+        organization: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+      },
+    ],
+    [
       'expo-splash-screen',
       {
         image: './assets/icons/splash-icon-dark.png',

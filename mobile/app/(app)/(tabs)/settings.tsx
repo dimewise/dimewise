@@ -1,532 +1,368 @@
 import { useClerk } from '@clerk/clerk-expo';
-import Octicons from '@expo/vector-icons/Octicons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
-  Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
-  ActivityIndicator,
   RefreshControl,
+  TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
-import {
-  type CurrencyType,
-  type SupportedLanguage,
-  useGetCategoriesQuery,
-  useGetPaymentMethodsQuery,
-  useGetUsersMeQuery,
-  usePutUsersMeMutation,
-  useDeleteCategoriesByCategoryIdMutation,
-  useDeletePaymentMethodsByPaymentMethodIdMutation,
-  type PaymentMethodType,
-} from '@/generated/api/api';
-import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
-import { CURRENCIES } from '@/utils/constants';
-import { formatCurrency } from '@/utils/localization/currencies';
-import { useUserLocale } from '@/hooks/useUserLocale';
 import { CategoryFormModal } from '@/components/settings/CategoryFormModal';
 import { PaymentMethodFormModal } from '@/components/settings/PaymentMethodFormModal';
 import { CurrencySelectorModal } from '@/components/settings/CurrencySelectorModal';
 import { LanguageSelectorModal } from '@/components/settings/LanguageSelectorModal';
+import { Button, Card } from '@/components/ui';
+import { EmptyState } from '@/components/feedback';
+import { useCategories, usePaymentMethods } from '@/hooks/api';
+import { useModal } from '@/hooks/ui';
+import { useUserLocale } from '@/hooks/useUserLocale';
+import {
+  type Category,
+  type PaymentMethod,
+  type PaymentMethodType,
+  useGetUsersMeQuery,
+} from '@/generated/api/api';
+import { colors } from '@/theme/colors';
+import { formatCurrency } from '@/utils/localization/currencies';
+import { logger } from '@/lib/logger';
 
-type RootStackParamList = { Login: undefined };
+// Types for modal props
+interface CategoryModalData {
+  categoryId?: string;
+  initialTitle?: string;
+  initialAmount?: string;
+}
+
+interface PaymentMethodModalData {
+  paymentMethodId?: string;
+  initialTitle?: string;
+  initialMethodType?: PaymentMethodType;
+}
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { signOut } = useClerk();
-  const { data: cats, refetch: refetchCategories } = useGetCategoriesQuery({
-    includeDeleted: false,
-  });
-  const { data: pms, refetch: refetchPaymentMethods } = useGetPaymentMethodsQuery({
-    includeDeleted: false,
-  });
-  const { data: user, refetch: refetchUser } = useGetUsersMeQuery();
   const { currency, locale } = useUserLocale();
 
-  // Calculate total monthly budget
+  // API hooks
+  const { data: user, refetch: refetchUser } = useGetUsersMeQuery();
+  const {
+    categories,
+    isLoading: categoriesLoading,
+    deleteCategory,
+    refetch: refetchCategories,
+    isDeleting: isDeletingCategory,
+  } = useCategories();
+  const {
+    paymentMethods,
+    isLoading: paymentMethodsLoading,
+    deletePaymentMethod,
+    refetch: refetchPaymentMethods,
+    isDeleting: isDeletingPaymentMethod,
+  } = usePaymentMethods();
+
+  // Modal states using the new hook
+  const currencyModal = useModal();
+  const languageModal = useModal();
+  const categoryModal = useModal<CategoryModalData>();
+  const paymentMethodModal = useModal<PaymentMethodModalData>();
+
+  // Calculate total budget
   const totalBudget = useMemo(() => {
-    if (!cats) return 0;
-    return cats.reduce((sum, cat) => sum + (cat.amount || 0), 0);
-  }, [cats]);
+    return categories.reduce((sum, cat) => sum + (cat.amount || 0), 0);
+  }, [categories]);
 
-  const [updateUser] = usePutUsersMeMutation();
-  const [deleteCategory] = useDeleteCategoriesByCategoryIdMutation();
-  const [deletePaymentMethod] = useDeletePaymentMethodsByPaymentMethodIdMutation();
-  const [isLoading, setIsLoading] = useState(false);
-  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
-  const [deletingPaymentMethodId, setDeletingPaymentMethodId] = useState<string | null>(null);
-  const [deletedCategoryId, setDeletedCategoryId] = useState<string | null>(null);
-  const [deletedPaymentMethodId, setDeletedPaymentMethodId] = useState<string | null>(null);
-
-  // Modal visibility states
-  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
-  const [categoryModalProps, setCategoryModalProps] = useState<{
-    categoryId?: string;
-    initialTitle?: string;
-    initialAmount?: string;
-  }>({});
-  const [paymentMethodModalProps, setPaymentMethodModalProps] = useState<{
-    paymentMethodId?: string;
-    initialTitle?: string;
-    initialMethodType?: PaymentMethodType;
-  }>({});
-
-  // Clear deleted states when items are no longer in the data
-  useEffect(() => {
-    if (deletedCategoryId && cats && !cats.find((cat) => cat.id === deletedCategoryId)) {
-      setDeletedCategoryId(null);
-      setDeletingCategoryId(null);
-    }
-  }, [deletedCategoryId, cats]);
-
-  useEffect(() => {
-    if (deletedPaymentMethodId && pms && !pms.find((pm) => pm.id === deletedPaymentMethodId)) {
-      setDeletedPaymentMethodId(null);
-      setDeletingPaymentMethodId(null);
-    }
-  }, [deletedPaymentMethodId, pms]);
-
-  const onSelectCurrency = () => {
-    setShowCurrencyModal(true);
-  };
-
-  const onSelectLanguage = () => {
-    setShowLanguageModal(true);
-  };
-
-  const handleRefresh = async () => {
+  // Handlers
+  const handleRefresh = useCallback(async () => {
     await Promise.all([refetchCategories(), refetchPaymentMethods(), refetchUser()]);
-  };
+  }, [refetchCategories, refetchPaymentMethods, refetchUser]);
 
-  const onEditCategory = (categoryId: string, title: string, amount: number) => {
-    setCategoryModalProps({
-      categoryId,
-      initialTitle: title,
-      initialAmount: amount.toString(),
-    });
-    setShowCategoryModal(true);
-  };
-
-  const onEditPaymentMethod = (paymentMethodId: string, title: string, method_type: string) => {
-    setPaymentMethodModalProps({
-      paymentMethodId,
-      initialTitle: title,
-      initialMethodType: method_type as PaymentMethodType,
-    });
-    setShowPaymentMethodModal(true);
-  };
-
-  const onAddCategory = () => {
-    setCategoryModalProps({});
-    setShowCategoryModal(true);
-  };
-
-  const onAddPaymentMethod = () => {
-    setPaymentMethodModalProps({});
-    setShowPaymentMethodModal(true);
-  };
-
-  const onDeleteCategory = (categoryId: string, title: string) => {
-    Alert.alert(t('settings_delete_confirm_title'), t('settings_delete_category_confirm'), [
-      { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
-      {
-        text: t('settings_delete_confirm_delete'),
-        style: 'destructive',
-        onPress: async () => {
-          setDeletingCategoryId(categoryId);
-          try {
-            await deleteCategory({ categoryId }).unwrap();
-            setDeletedCategoryId(categoryId);
-          } catch (error) {
-            console.error('Error deleting category:', error);
-            Alert.alert('Error', 'Failed to delete category. Please try again.');
-            setDeletingCategoryId(null);
-          }
-        },
-      },
-    ]);
-  };
-
-  const onDeletePaymentMethod = (paymentMethodId: string, title: string) => {
-    Alert.alert(t('settings_delete_confirm_title'), t('settings_delete_payment_method_confirm'), [
-      { text: t('settings_delete_confirm_cancel'), style: 'cancel' },
-      {
-        text: t('settings_delete_confirm_delete'),
-        style: 'destructive',
-        onPress: async () => {
-          setDeletingPaymentMethodId(paymentMethodId);
-          try {
-            await deletePaymentMethod({ paymentMethodId }).unwrap();
-            setDeletedPaymentMethodId(paymentMethodId);
-          } catch (error) {
-            console.error('Error deleting payment method:', error);
-            Alert.alert('Error', 'Failed to delete payment method. Please try again.');
-            setDeletingPaymentMethodId(null);
-          }
-        },
-      },
-    ]);
-  };
-  const onLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await signOut();
       router.replace('/welcome');
     } catch (err) {
-      throw new Error(JSON.stringify(err, null, 2));
+      logger.error(err as Error, { context: 'Settings' });
     }
-  };
+  }, [signOut, router]);
 
-  const sections = useMemo(
-    () => [
-      {
-        title: t('settings_cat_pay_title'),
-        data: cats ?? [],
-        action: onAddCategory,
-        type: 'categories' as const,
-      },
-      {
-        title: t('settings_pay_methods_title'),
-        data: pms ?? [],
-        action: onAddPaymentMethod,
-        type: 'payment_methods' as const,
-      },
-    ],
-    [cats, pms, t],
+  const handleEditCategory = useCallback(
+    (category: Category) => {
+      categoryModal.open({
+        categoryId: category.id,
+        initialTitle: category.title,
+        initialAmount: category.amount?.toString(),
+      });
+    },
+    [categoryModal]
   );
 
-  const currencyRow = (
-    <Pressable
-      onPress={onSelectCurrency}
-      style={styles.row}
-    >
-      <Text style={styles.rowLabel}>{t('settings_currency')}</Text>
-      <Text style={styles.rowValue}>{user?.currency}</Text>
-    </Pressable>
+  const handleEditPaymentMethod = useCallback(
+    (pm: PaymentMethod) => {
+      paymentMethodModal.open({
+        paymentMethodId: pm.id,
+        initialTitle: pm.title,
+        initialMethodType: pm.method_type,
+      });
+    },
+    [paymentMethodModal]
   );
 
-  const languageRow = (
-    <Pressable
-      onPress={onSelectLanguage}
-      style={styles.row}
-    >
-      <Text style={styles.rowLabel}>{t('settings_language')}</Text>
-      <Text style={styles.rowValue}>{t(`lang_${user?.preferred_language}`)}</Text>
-    </Pressable>
-  );
+  const handleAddCategory = useCallback(() => {
+    categoryModal.open({});
+  }, [categoryModal]);
 
-  if (!user) return null; // or a spinner
+  const handleAddPaymentMethod = useCallback(() => {
+    paymentMethodModal.open({});
+  }, [paymentMethodModal]);
+
+  if (!user) return null;
 
   return (
     <AppLayout>
-      <SafeAreaView
-        style={{ flex: 1, width: '100%', paddingHorizontal: spacing.lg }}
-        edges={['top']}
-      >
-        <View style={{ width: '100%', paddingVertical: spacing.md }}>
-          <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>
+      <SafeAreaView className="flex-1 w-full px-6" edges={['top']}>
+        {/* Header */}
+        <View className="w-full py-4">
+          <Text className="text-2xl font-semibold text-zinc-50">
             {t('page_title_settings')}
           </Text>
         </View>
+
         <ScrollView
-          contentContainerStyle={{ paddingTop: spacing.md, paddingBottom: spacing.xl }}
+          contentContainerStyle={{ paddingBottom: 32 }}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={false}
               onRefresh={handleRefresh}
-              tintColor={colors.textPrimary}
-              colors={[colors.textPrimary]}
+              tintColor={colors.primary.DEFAULT}
+              colors={[colors.primary.DEFAULT]}
             />
           }
         >
-          <View style={styles.section}>
-            {currencyRow}
-            {languageRow}
+          {/* Preferences Section */}
+          <View className="mb-6">
+            <Text className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-3">
+              {t('settings.preferences', 'Preferences')}
+            </Text>
+            <Card padding="none">
+              <SettingsRow
+                label={t('settings_currency')}
+                value={user?.currency}
+                onPress={currencyModal.open}
+              />
+              <View className="h-px bg-zinc-800 mx-4" />
+              <SettingsRow
+                label={t('settings_language')}
+                value={t(`lang_${user?.preferred_language}`)}
+                onPress={languageModal.open}
+              />
+            </Card>
           </View>
 
-          {sections.map((sec) => (
-            <View
-              key={sec.title}
-              style={{ marginBottom: 24 }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: 8,
-                }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 18, fontWeight: '600', color: colors.textPrimary }}>
-                    {sec.title}
+          {/* Categories Section */}
+          <View className="mb-6">
+            <View className="flex-row justify-between items-center mb-3">
+              <View className="flex-1">
+                <Text className="text-lg font-semibold text-zinc-50">
+                  {t('settings_cat_pay_title')}
+                </Text>
+                {totalBudget > 0 && (
+                  <Text className="text-sm text-zinc-500 mt-0.5">
+                    {t('settings_total_budget')}: {formatCurrency(totalBudget, currency, locale)}
                   </Text>
-                  {sec.type === 'categories' && totalBudget > 0 && (
-                    <Text style={{ fontSize: 14, color: colors.textSecondary, marginTop: 2 }}>
-                      {t('settings_total_budget')}: {formatCurrency(totalBudget, currency, locale)}
-                    </Text>
-                  )}
-                </View>
-                <Pressable
-                  onPress={sec.action}
-                  style={({ pressed }) => ({
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: pressed ? `${colors.primary}20` : colors.primary,
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 8,
-                  })}
-                >
-                  <Octicons
-                    name="plus"
-                    size={16}
-                    color={colors.backgroundDefault}
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text
-                    style={{ fontSize: 14, fontWeight: '600', color: colors.backgroundDefault }}
-                  >
-                    {sec.type === 'categories'
-                      ? t('settings_add_category')
-                      : t('settings_add_payment')}
-                  </Text>
-                </Pressable>
+                )}
               </View>
-
-              {/*  empty or list  */}
-              {sec.data.length === 0 ? (
-                <View
-                  style={{
-                    backgroundColor: colors.backgroundSurface,
-                    borderRadius: 8,
-                    padding: 16,
-                    alignItems: 'center',
-                  }}
-                >
-                  <Text style={{ fontSize: 14, color: colors.disabled }}>
-                    {sec.type === 'categories' ? t('categories_empty') : t('payment_methods_empty')}
-                  </Text>
-                </View>
-              ) : (
-                <View style={{ gap: 8 }}>
-                  {sec.data.map((item) => (
-                    <View
-                      key={item.id}
-                      style={{
-                        backgroundColor: colors.backgroundSurface,
-                        borderRadius: 8,
-                        padding: 12,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <View style={{ flex: 1 }}>
-                        <Text
-                          style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '500' }}
-                        >
-                          {item.title}
-                        </Text>
-                        {sec.type === 'categories' && 'amount' in item && (
-                          <Text style={{ color: colors.disabled, fontSize: 12, marginTop: 2 }}>
-                            {formatCurrency(item.amount, currency, locale)}
-                          </Text>
-                        )}
-                        {sec.type === 'payment_methods' && 'method_type' in item && (
-                          <Text style={{ color: colors.disabled, fontSize: 12, marginTop: 2 }}>
-                            {t(`payment_method_${item.method_type}`)}
-                          </Text>
-                        )}
-                      </View>
-                      <View style={{ flexDirection: 'row', gap: 8 }}>
-                        {(sec.type === 'categories' &&
-                          (deletingCategoryId === item.id || deletedCategoryId === item.id)) ||
-                        (sec.type === 'payment_methods' &&
-                          (deletingPaymentMethodId === item.id ||
-                            deletedPaymentMethodId === item.id)) ? (
-                          <View style={styles.loadingContainer}>
-                            <ActivityIndicator
-                              size="small"
-                              color={colors.primary}
-                            />
-                            <Text style={styles.loadingText}>{t('settings_deleting')}</Text>
-                          </View>
-                        ) : (
-                          <>
-                            <Pressable
-                              onPress={() => {
-                                if (sec.type === 'categories' && 'amount' in item) {
-                                  onEditCategory(item.id, item.title, item.amount);
-                                } else if (
-                                  sec.type === 'payment_methods' &&
-                                  'method_type' in item
-                                ) {
-                                  onEditPaymentMethod(item.id, item.title, item.method_type);
-                                }
-                              }}
-                              style={styles.iconButton}
-                            >
-                              <Octicons
-                                name="pencil"
-                                size={18}
-                                color={colors.backgroundDefault}
-                              />
-                            </Pressable>
-                            <Pressable
-                              onPress={() => {
-                                if (sec.type === 'categories') {
-                                  onDeleteCategory(item.id, item.title);
-                                } else {
-                                  onDeletePaymentMethod(item.id, item.title);
-                                }
-                              }}
-                              style={[styles.iconButton, styles.deleteIconButton]}
-                            >
-                              <Octicons
-                                name="trash"
-                                size={18}
-                                color={colors.backgroundDefault}
-                              />
-                            </Pressable>
-                          </>
-                        )}
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              )}
+              <Button
+                title={t('settings_add_category')}
+                onPress={handleAddCategory}
+                size="sm"
+                leftIcon={<Ionicons name="add" size={16} color={colors.text.inverse} />}
+              />
             </View>
-          ))}
 
-          {/* 4.  Log Out */}
-          <Pressable
-            onPress={onLogout}
-            style={{
-              backgroundColor: `${colors.error}20`,
-              borderRadius: 8,
-              padding: 12,
-              alignItems: 'center',
-              marginTop: 8,
-            }}
-          >
-            <Text style={{ color: colors.error, fontWeight: '600' }}>{t('settings_logout')}</Text>
-          </Pressable>
+            {categories.length === 0 ? (
+              <Card>
+                <EmptyState
+                  icon="folder-outline"
+                  title={t('categories_empty')}
+                  className="py-6"
+                />
+              </Card>
+            ) : (
+              <Card padding="none">
+                {categories.map((category, index) => (
+                  <React.Fragment key={category.id}>
+                    {index > 0 && <View className="h-px bg-zinc-800 mx-4" />}
+                    <ItemRow
+                      title={category.title}
+                      subtitle={formatCurrency(category.amount || 0, currency, locale)}
+                      onEdit={() => handleEditCategory(category)}
+                      onDelete={() => deleteCategory(category)}
+                      isDeleting={isDeletingCategory}
+                    />
+                  </React.Fragment>
+                ))}
+              </Card>
+            )}
+          </View>
+
+          {/* Payment Methods Section */}
+          <View className="mb-6">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-lg font-semibold text-zinc-50">
+                {t('settings_pay_methods_title')}
+              </Text>
+              <Button
+                title={t('settings_add_payment')}
+                onPress={handleAddPaymentMethod}
+                size="sm"
+                leftIcon={<Ionicons name="add" size={16} color={colors.text.inverse} />}
+              />
+            </View>
+
+            {paymentMethods.length === 0 ? (
+              <Card>
+                <EmptyState
+                  icon="card-outline"
+                  title={t('payment_methods_empty')}
+                  className="py-6"
+                />
+              </Card>
+            ) : (
+              <Card padding="none">
+                {paymentMethods.map((pm, index) => (
+                  <React.Fragment key={pm.id}>
+                    {index > 0 && <View className="h-px bg-zinc-800 mx-4" />}
+                    <ItemRow
+                      title={pm.title}
+                      subtitle={t(`payment_method_${pm.method_type}`)}
+                      onEdit={() => handleEditPaymentMethod(pm)}
+                      onDelete={() => deletePaymentMethod(pm)}
+                      isDeleting={isDeletingPaymentMethod}
+                    />
+                  </React.Fragment>
+                ))}
+              </Card>
+            )}
+          </View>
+
+          {/* Logout Button */}
+          <Button
+            title={t('settings_logout')}
+            onPress={handleLogout}
+            variant="danger"
+            fullWidth
+            className="mt-4"
+          />
         </ScrollView>
       </SafeAreaView>
 
       {/* Modals */}
       <CurrencySelectorModal
-        visible={showCurrencyModal}
-        onClose={() => setShowCurrencyModal(false)}
-        onSuccess={() => {
-          refetchUser();
-        }}
+        visible={currencyModal.isVisible}
+        onClose={currencyModal.close}
+        onSuccess={refetchUser}
       />
       <LanguageSelectorModal
-        visible={showLanguageModal}
-        onClose={() => setShowLanguageModal(false)}
-        onSuccess={() => {
-          refetchUser();
-        }}
+        visible={languageModal.isVisible}
+        onClose={languageModal.close}
+        onSuccess={refetchUser}
       />
       <CategoryFormModal
-        visible={showCategoryModal}
-        onClose={() => setShowCategoryModal(false)}
-        categoryId={categoryModalProps.categoryId}
-        initialTitle={categoryModalProps.initialTitle}
-        initialAmount={categoryModalProps.initialAmount}
-        onSuccess={() => {
-          refetchCategories();
-        }}
+        visible={categoryModal.isVisible}
+        onClose={categoryModal.close}
+        categoryId={categoryModal.data?.categoryId}
+        initialTitle={categoryModal.data?.initialTitle}
+        initialAmount={categoryModal.data?.initialAmount}
+        onSuccess={refetchCategories}
       />
       <PaymentMethodFormModal
-        visible={showPaymentMethodModal}
-        onClose={() => setShowPaymentMethodModal(false)}
-        paymentMethodId={paymentMethodModalProps.paymentMethodId}
-        initialTitle={paymentMethodModalProps.initialTitle}
-        initialMethodType={paymentMethodModalProps.initialMethodType}
-        onSuccess={() => {
-          refetchPaymentMethods();
-        }}
+        visible={paymentMethodModal.isVisible}
+        onClose={paymentMethodModal.close}
+        paymentMethodId={paymentMethodModal.data?.paymentMethodId}
+        initialTitle={paymentMethodModal.data?.initialTitle}
+        initialMethodType={paymentMethodModal.data?.initialMethodType}
+        onSuccess={refetchPaymentMethods}
       />
     </AppLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: spacing.lg },
-  header: { fontSize: 24, fontWeight: '600', color: colors.textPrimary, marginVertical: spacing.md },
-  scroll: { paddingBottom: spacing.xl },
-  section: { marginBottom: spacing.lg },
-  sectionTitle: { fontSize: 18, fontWeight: '600', color: colors.textPrimary, marginBottom: spacing.sm },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  rowLabel: { fontSize: 16, color: colors.textPrimary },
-  rowValue: { fontSize: 16, color: colors.textSecondary },
-  logout: { backgroundColor: `${colors.error}20`, marginTop: 16 },
-  actionButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  actionButtonText: {
-    color: colors.backgroundDefault,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  iconButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 40,
-    minHeight: 40,
-  },
-  deleteIconButton: {
-    backgroundColor: colors.error,
-  },
-  deleteButton: {
-    backgroundColor: `${colors.error}20`,
-  },
-  deleteButtonText: {
-    color: colors.error,
-  },
-  loadingButton: {
-    opacity: 0.6,
-  },
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  loadingText: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    fontWeight: '500',
-  },
+// Sub-components
+interface SettingsRowProps {
+  label: string;
+  value?: string;
+  onPress: () => void;
+}
+
+const SettingsRow = React.memo(function SettingsRow({
+  label,
+  value,
+  onPress,
+}: SettingsRowProps) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      className="flex-row items-center justify-between p-4 active:opacity-70"
+    >
+      <Text className="text-base text-zinc-50">{label}</Text>
+      <View className="flex-row items-center gap-2">
+        <Text className="text-base text-zinc-400">{value}</Text>
+        <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
+      </View>
+    </TouchableOpacity>
+  );
+});
+
+interface ItemRowProps {
+  title: string;
+  subtitle?: string;
+  onEdit: () => void;
+  onDelete: () => void;
+  isDeleting?: boolean;
+}
+
+const ItemRow = React.memo(function ItemRow({
+  title,
+  subtitle,
+  onEdit,
+  onDelete,
+  isDeleting,
+}: ItemRowProps) {
+  return (
+    <View className="flex-row items-center justify-between p-4">
+      <View className="flex-1">
+        <Text className="text-base font-medium text-zinc-50">{title}</Text>
+        {subtitle && <Text className="text-sm text-zinc-500 mt-0.5">{subtitle}</Text>}
+      </View>
+      <View className="flex-row gap-2">
+        {isDeleting ? (
+          <ActivityIndicator size="small" color={colors.primary.DEFAULT} />
+        ) : (
+          <>
+            <TouchableOpacity
+              onPress={onEdit}
+              className="p-2.5 rounded-lg bg-primary-500 active:opacity-70"
+            >
+              <Ionicons name="pencil" size={16} color={colors.text.inverse} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onDelete}
+              className="p-2.5 rounded-lg bg-error active:opacity-70"
+            >
+              <Ionicons name="trash" size={16} color={colors.white} />
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+    </View>
+  );
 });

@@ -1,5 +1,5 @@
 import { useSignIn } from '@clerk/clerk-expo';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
@@ -10,14 +10,13 @@ import { Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '@/assets/icons/splash-icon-light.png';
-import { FormSSOButton } from '@/components/forms/FormSSOButton';
-import { FormSubmitButton } from '@/components/forms/FormSubmitButton';
+import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import { createSignInSchema, type signInData } from '@/components/forms/schemas/auth';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
+import { Button, Divider } from '@/components/ui';
 import { colors } from '@/theme/colors';
-import { sharedStyles } from '@/theme/stylesheets';
-import { SOCIAL_AUTHS } from '@/utils/constants';
+import { logger } from '@/lib/logger';
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -50,91 +49,59 @@ export default function SignInScreen() {
           await setActive({ session: signInAttempt.createdSessionId });
           router.replace('/');
         } else {
-          setApiError('Additional steps are required for sign-in.');
-          console.error(JSON.stringify(signInAttempt, null, 2));
+          setApiError(t('auth.error.additional_steps', 'Additional steps are required for sign-in.'));
+          logger.warn('Sign-in requires additional steps', {
+            context: 'SignIn',
+            data: { status: signInAttempt.status },
+          });
         }
       } catch (err) {
-        setApiError('Sign-in failed: Invalid credentials or network error');
-        console.error(JSON.stringify(err, null, 2));
+        setApiError(t('auth.error.invalid_credentials', 'Sign-in failed: Invalid credentials or network error'));
+        logger.error(err as Error, { context: 'SignIn' });
       } finally {
         setLoading(false);
       }
     },
-    [isLoaded, loading, signIn, setActive, router],
+    [isLoaded, loading, signIn, setActive, router, t],
   );
 
   return (
     <AuthLayout>
-      <View
-        style={[sharedStyles.authLinearGradient, { backgroundColor: colors.backgroundDefault }]}
-      />
-      <SafeAreaView style={sharedStyles.safeArea}>
+      <View className="absolute inset-0 bg-background" />
+      <SafeAreaView className="flex-1 px-6">
         <KeyboardAwareScrollView
           bottomOffset={60}
           disableScrollOnKeyboardHide={true}
           style={{ flex: 1, width: '100%' }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              position: 'relative',
-            }}
-          >
+          {/* Header */}
+          <View className="flex-row items-center relative py-2">
             <TouchableOpacity
               onPress={() => router.back()}
-              style={{ position: 'absolute', left: 0, zIndex: 10 }}
+              className="absolute left-0 z-10 p-2 -ml-2"
             >
-              <FontAwesome5
-                name="arrow-left"
-                size={24}
-                color={colors.textPrimary}
-              />
+              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
-
-            <Text
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                fontSize: 24,
-                fontWeight: '600',
-                color: colors.textPrimary,
-              }}
-            >
+            <Text className="flex-1 text-center text-2xl font-semibold text-zinc-50">
               {t('auth_sign_in_welcome_back')}
             </Text>
           </View>
 
-          <View style={{ flex: 1, width: '100%', gap: 24 }}>
+          {/* Content */}
+          <View className="flex-1 w-full gap-6 mt-4">
             <Image
               source={Logo}
               contentFit="contain"
-              style={{ width: 150, aspectRatio: 1, alignSelf: 'center', marginVertical: 24 }}
+              style={{ width: 120, aspectRatio: 1, alignSelf: 'center', marginVertical: 16 }}
             />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 16,
-              }}
-            >
-              {SOCIAL_AUTHS.map((name) => (
-                <FormSSOButton
-                  key={name}
-                  social={name}
-                />
-              ))}
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
-              <Text style={{ marginHorizontal: 8, color: colors.textPrimary }}>
-                {t('common_or')}
-              </Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
-            </View>
 
-            <View style={{ flex: 1, gap: 8 }}>
+            {/* Apple Sign In */}
+            <AppleSignInButton mode="sign-in" />
+
+            <Divider label={t('common_or', 'or')} />
+
+            {/* Email/Password Form */}
+            <View className="gap-4">
               <FormTextInput
                 control={control}
                 name="emailAddress"
@@ -156,30 +123,30 @@ export default function SignInScreen() {
                 loading={loading}
                 errors={errors}
                 colors={colors}
-                animateView
                 t={t}
               />
 
               {/* API error */}
-              {!!apiError && <Text style={{ color: colors.error }}>{apiError}</Text>}
+              {!!apiError && (
+                <Text className="text-error text-sm">{apiError}</Text>
+              )}
 
-              <FormSubmitButton
-                loading={loading}
-                onPress={handleSubmit(onSignInPress)}
+              <Button
                 title={t('common_continue')}
+                onPress={handleSubmit(onSignInPress)}
+                loading={loading}
+                variant="primary"
+                size="lg"
+                fullWidth
+                className="mt-2"
               />
             </View>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: colors.textPrimary }}>
-                {t('auth_sign_in_no_account')}&nbsp;
-                <Link
-                  href="/sign-up"
-                  style={{
-                    color: colors.secondary,
-                    fontWeight: '600',
-                    textDecorationLine: 'underline',
-                  }}
-                >
+
+            {/* Sign up link */}
+            <View className="items-center mt-4">
+              <Text className="text-zinc-400">
+                {t('auth_sign_in_no_account')}{' '}
+                <Link href="/sign-up" className="text-primary-500 font-semibold underline">
                   {t('auth_sign_up')}
                 </Link>
               </Text>

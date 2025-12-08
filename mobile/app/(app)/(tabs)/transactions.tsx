@@ -1,23 +1,19 @@
-import { useLocales } from 'expo-localization';
 import { DateTime } from 'luxon';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, memo } from 'react';
 import { FlatList, Pressable, Text, View, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { ExpenseRow } from '@/components/ExpenseRow';
+import { ExpenseRow } from '@/components/transactions';
 import { FilterBar } from '@/components/transactions/FilterBar';
 import { FilterModal } from '@/components/modals/FilterModal';
 import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
-import {
-  useGetExpensesQuery,
-  useLazyGetExpensesQuery,
-  type ExpenseWithDetails,
-} from '@/generated/api/api';
+import { EmptyState } from '@/components/feedback';
+import { useGetExpensesQuery, useLazyGetExpensesQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
+import { useModal } from '@/hooks/ui';
 
 export type Filter = {
   search?: string;
@@ -29,11 +25,24 @@ export type Filter = {
 };
 const LIMIT = 20;
 
+// Memoized load more button
+const LoadMoreButton = memo<{ onPress: () => void; isFetching: boolean }>(({ onPress, isFetching }) => {
+  const { t } = useTranslation();
+  return (
+    <Pressable onPress={onPress} className="mx-4 mt-4 p-2.5 bg-surface rounded-lg items-center">
+      <Text className="text-primary-500 font-semibold">
+        {isFetching ? t('transactions_loading') : t('transactions_load_more')}
+      </Text>
+    </Pressable>
+  );
+});
+
+LoadMoreButton.displayName = 'LoadMoreButton';
+
 export default function ExpensesScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
-  const locales = useLocales();
-  const primaryLocale = locales[0];
+  const filterModal = useModal();
+  const expenseFormModal = useModal();
   const params = useLocalSearchParams<{
     dateFrom?: string;
     dateTo?: string;
@@ -47,9 +56,6 @@ export default function ExpensesScreen() {
     categoryId: params.categoryId,
     paymentMethodId: params.paymentMethodId,
   }));
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [showExpenseForm, setShowExpenseForm] = useState(false);
-  const openExpenseForm = () => setShowExpenseForm(true);
 
   // Sync filter state with URL params when they change
   useEffect(() => {
@@ -96,90 +102,76 @@ export default function ExpensesScreen() {
   /* ---------- data ---------- */
   const expenses = useMemo(() => data?.data ?? [], [data]);
 
-  const ListFooter = useMemo(() => {
+  // Memoized render item
+  const renderItem = useCallback(
+    ({ item }: { item: (typeof expenses)[0] }) => <ExpenseRow item={item} onUpdate={refetch} />,
+    [refetch],
+  );
+
+  // Memoized key extractor
+  const keyExtractor = useCallback((item: (typeof expenses)[0]) => item.id, []);
+
+  // List footer component
+  const ListFooterComponent = useMemo(() => {
     if (!data?.pagination.has_next) return null;
-    return (
-      <Pressable
-        onPress={loadMore}
-        style={{
-          marginHorizontal: spacing.md,
-          marginTop: spacing.md,
-          padding: spacing.md - spacing.xs,
-          backgroundColor: colors.backgroundSurface,
-          borderRadius: 8,
-          alignItems: 'center',
-        }}
-      >
-        <Text style={{ color: colors.primary, fontWeight: '600' }}>
-          {isFetching ? t('transactions_loading') : t('transactions_load_more')}
-        </Text>
-      </Pressable>
-    );
-  }, [data?.pagination.has_next, isFetching, loadMore]);
+    return <LoadMoreButton onPress={loadMore} isFetching={isFetching} />;
+  }, [data?.pagination.has_next, loadMore, isFetching]);
+
+  // Empty state component
+  const ListEmptyComponent = useMemo(
+    () => <EmptyState title={t('transactions_empty')} className="mt-8" />,
+    [t],
+  );
+
+  // Item separator
+  const ItemSeparator = useCallback(() => <View className="h-2" />, []);
 
   return (
     <AppLayout>
-      <SafeAreaView
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          width: '100%',
-          paddingHorizontal: spacing.lg,
-        }}
-        edges={['top']}
-      >
-        <View style={{ width: '100%', paddingVertical: spacing.md }}>
-          <Text style={{ fontSize: 24, fontWeight: '600', color: colors.textPrimary }}>
-            {t('page_title_transactions')}
-          </Text>
+      <SafeAreaView className="flex-1 items-center justify-start w-full px-5" edges={['top']}>
+        <View className="w-full py-4">
+          <Text className="text-2xl font-semibold text-white">{t('page_title_transactions')}</Text>
           <FilterBar
             filter={filter}
             setFilter={setFilter}
-            onOpenFilterModal={() => setShowFilterModal(true)}
+            onOpenFilterModal={filterModal.open}
             onFilterChange={setFilter}
           />
         </View>
         <FlatList
           data={expenses}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <ExpenseRow item={item} />}
-          ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={{ paddingBottom: 100 }}
-          ListFooterComponent={ListFooter}
-          ListEmptyComponent={
-            <View style={{ margin: spacing.lg, alignItems: 'center' }}>
-              <Text style={{ color: colors.disabled }}>{t('transactions_empty')}</Text>
-            </View>
-          }
+          ListFooterComponent={ListFooterComponent}
+          ListEmptyComponent={ListEmptyComponent}
           showsVerticalScrollIndicator={false}
-          style={{ width: '100%' }}
+          className="w-full"
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           refreshControl={
             <RefreshControl
               refreshing={isFetching}
               onRefresh={refetch}
-              tintColor={colors.textPrimary}
-              colors={[colors.textPrimary]}
+              tintColor={colors.text.primary}
+              colors={[colors.text.primary]}
             />
           }
         />
-        <FloatingActionButton onPress={openExpenseForm} />
+        <FloatingActionButton onPress={expenseFormModal.open} />
 
         {/* Modals */}
         <FilterModal
-          visible={showFilterModal}
-          onClose={() => setShowFilterModal(false)}
+          visible={filterModal.isOpen}
+          onClose={filterModal.close}
           onApply={setFilter}
           currentFilters={filter}
         />
         <ExpenseFormModal
-          visible={showExpenseForm}
-          onClose={() => setShowExpenseForm(false)}
-          onSuccess={() => {
-            refetch();
-          }}
+          visible={expenseFormModal.isOpen}
+          onClose={expenseFormModal.close}
+          onSuccess={refetch}
         />
       </SafeAreaView>
     </AppLayout>

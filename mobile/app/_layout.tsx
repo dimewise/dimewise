@@ -1,3 +1,10 @@
+import '../global.css';
+
+import { initSentry, withSentryErrorBoundary } from '@/lib/sentry';
+
+// Initialize Sentry early
+initSentry();
+
 if (__DEV__) {
   require('../ReactotronConfig');
 }
@@ -12,7 +19,7 @@ import '../utils/localization/i18n';
 import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
@@ -29,3 +36,6 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+// Wrap with Sentry error boundary for crash reporting
+export default withSentryErrorBoundary(RootLayout);
