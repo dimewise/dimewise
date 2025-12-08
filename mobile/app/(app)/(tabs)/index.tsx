@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { FlatList, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BalanceSummary } from '@/components/home/BalanceSummary';
@@ -19,6 +19,7 @@ import {
   useGetAnalyticsPaymentMethodsBreakdownQuery,
   useGetAnalyticsRecentTransactionsQuery,
 } from '@/generated/api/api';
+import { useModal } from '@/hooks/ui';
 import { colors } from '@/theme/colors';
 
 type HeaderItem = { type: 'header' };
@@ -37,15 +38,10 @@ export default function HomeScreen() {
     month: now.month,
     year: now.year,
   });
-  const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [showExpenseForm, setShowExpenseForm] = useState(false);
-
-  const openPicker = () => setShowMonthPicker(true);
-  const openExpenseForm = () => setShowExpenseForm(true);
-
-  const handleRefresh = async () => {
-    await Promise.all([refetchCategories(), refetchPayments(), refetchTransactions()]);
-  };
+  
+  // Use the new useModal hook for cleaner state management
+  const monthPickerModal = useModal();
+  const expenseFormModal = useModal();
 
   const { data: categories, refetch: refetchCategories } =
     useGetAnalyticsCategoriesBreakdownQuery(selectedMonthYear);
@@ -54,17 +50,27 @@ export default function HomeScreen() {
   const { data: transactions, refetch: refetchTransactions } =
     useGetAnalyticsRecentTransactionsQuery(selectedMonthYear);
 
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetchCategories(), refetchPayments(), refetchTransactions()]);
+  }, [refetchCategories, refetchPayments, refetchTransactions]);
+
+  const handleExpenseSuccess = useCallback(() => {
+    refetchCategories();
+    refetchPayments();
+    refetchTransactions();
+  }, [refetchCategories, refetchPayments, refetchTransactions]);
+
   const data: Section[] = useMemo(
     () => [
-      { type: 'header' }, // 0
-      { type: 'categories', data: categories ?? [] }, // 1
-      { type: 'payments', data: payments ?? [] }, // 2
-      { type: 'transactions', data: transactions ?? [] }, // 3
+      { type: 'header' },
+      { type: 'categories', data: categories ?? [] },
+      { type: 'payments', data: payments ?? [] },
+      { type: 'transactions', data: transactions ?? [] },
     ],
     [categories, payments, transactions],
   );
 
-  const renderItem = ({ item }: { item: Section }) => {
+  const renderItem = useCallback(({ item }: { item: Section }) => {
     switch (item.type) {
       case 'header':
         return (
@@ -100,23 +106,15 @@ export default function HomeScreen() {
       default:
         return null;
     }
-  };
+  }, [selectedMonthYear]);
 
   return (
     <AppLayout>
-      <SafeAreaView
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          width: '100%',
-        }}
-        edges={['top']}
-      >
+      <SafeAreaView className="flex-1 items-center justify-start w-full" edges={['top']}>
         <Header
           selectedMonth={selectedMonthYear.month}
           selectedYear={selectedMonthYear.year}
-          setOpen={openPicker}
+          setOpen={monthPickerModal.open}
         />
         <FlatList
           data={data}
@@ -129,27 +127,23 @@ export default function HomeScreen() {
             <RefreshControl
               refreshing={false}
               onRefresh={handleRefresh}
-              tintColor={colors.textPrimary}
-              colors={[colors.textPrimary]}
+              tintColor={colors.primary.DEFAULT}
+              colors={[colors.primary.DEFAULT]}
             />
           }
         />
-        <FloatingActionButton onPress={openExpenseForm} />
+        <FloatingActionButton onPress={expenseFormModal.open} />
         <MonthYearPicker
-          visible={showMonthPicker}
-          onClose={() => setShowMonthPicker(false)}
+          visible={monthPickerModal.isVisible}
+          onClose={monthPickerModal.close}
           initialMonth={selectedMonthYear.month}
           initialYear={selectedMonthYear.year}
           onChange={(m, y) => setSelectedMonthYear({ month: m, year: y })}
         />
         <ExpenseFormModal
-          visible={showExpenseForm}
-          onClose={() => setShowExpenseForm(false)}
-          onSuccess={() => {
-            refetchCategories();
-            refetchPayments();
-            refetchTransactions();
-          }}
+          visible={expenseFormModal.isVisible}
+          onClose={expenseFormModal.close}
+          onSuccess={handleExpenseSuccess}
         />
       </SafeAreaView>
     </AppLayout>

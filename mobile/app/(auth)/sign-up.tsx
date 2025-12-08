@@ -1,5 +1,5 @@
 import { useSignUp } from '@clerk/clerk-expo';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
@@ -11,8 +11,7 @@ import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Logo from '@/assets/icons/splash-icon-light.png';
-import { FormSSOButton } from '@/components/forms/FormSSOButton';
-import { FormSubmitButton } from '@/components/forms/FormSubmitButton';
+import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import {
   createSignUpSchema,
@@ -21,10 +20,10 @@ import {
   type verificationData,
 } from '@/components/forms/schemas/auth';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
+import { Button, Card, Divider } from '@/components/ui';
 import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
 import { colors } from '@/theme/colors';
-import { sharedStyles } from '@/theme/stylesheets';
-import { SOCIAL_AUTHS } from '@/utils/constants';
+import { logger } from '@/lib/logger';
 
 // handle any pending authentication session
 WebBrowser.maybeCompleteAuthSession();
@@ -73,13 +72,13 @@ export default function SignUpScreen() {
         await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
         setPendingVerification(true);
       } catch (err) {
-        setApiError('Failed to create account or send verification email');
-        console.error(JSON.stringify(err, null, 2));
+        setApiError(t('auth.error.create_account', 'Failed to create account or send verification email'));
+        logger.error(err as Error, { context: 'SignUp' });
       } finally {
         setLoading(false);
       }
     },
-    [isLoaded, loading, signUp],
+    [isLoaded, loading, signUp, t],
   );
 
   // Verification code submission handler
@@ -97,89 +96,59 @@ export default function SignUpScreen() {
           await setActive({ session: signUpAttempt.createdSessionId });
           router.replace('/');
         } else {
-          setApiError('Additional verification steps required');
-          console.error(JSON.stringify(signUpAttempt, null, 2));
+          setApiError(t('auth.error.additional_verification', 'Additional verification steps required'));
+          logger.warn('Sign-up requires additional verification', {
+            context: 'SignUp',
+            data: { status: signUpAttempt.status },
+          });
         }
       } catch (err) {
-        setApiError('Verification failed: Invalid code or network error');
-        console.error(JSON.stringify(err, null, 2));
+        setApiError(t('auth.error.verification_failed', 'Verification failed: Invalid code or network error'));
+        logger.error(err as Error, { context: 'SignUp' });
       } finally {
         setLoading(false);
       }
     },
-    [isLoaded, loading, signUp, setActive, router],
+    [isLoaded, loading, signUp, setActive, router, t],
   );
 
   return (
     <AuthLayout>
-      <View
-        style={[sharedStyles.authLinearGradient, { backgroundColor: colors.backgroundDefault }]}
-      />
-      <SafeAreaView style={sharedStyles.safeArea}>
+      <View className="absolute inset-0 bg-background" />
+      <SafeAreaView className="flex-1 px-6">
         <KeyboardAwareScrollView
           bottomOffset={60}
           disableScrollOnKeyboardHide={true}
           style={{ flex: 1, width: '100%' }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              position: 'relative',
-            }}
-          >
+          {/* Header */}
+          <View className="flex-row items-center relative py-2">
             <TouchableOpacity
               onPress={() => router.back()}
-              style={{ position: 'absolute', left: 0, zIndex: 10 }}
+              className="absolute left-0 z-10 p-2 -ml-2"
             >
-              <FontAwesome5
-                name="arrow-left"
-                size={24}
-                color={colors.textPrimary}
-              />
+              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
             </TouchableOpacity>
-
-            <Text
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                fontSize: 24,
-                fontWeight: '600',
-                color: colors.textPrimary,
-              }}
-            >
+            <Text className="flex-1 text-center text-2xl font-semibold text-zinc-50">
               {t('auth_sign_up_create_account')}
             </Text>
           </View>
 
-          <View style={{ flex: 1, width: '100%', gap: 24 }}>
+          {/* Content */}
+          <View className="flex-1 w-full gap-6 mt-4">
             <Image
               source={Logo}
               contentFit="contain"
-              style={{ width: 150, aspectRatio: 1, alignSelf: 'center', marginVertical: 24 }}
+              style={{ width: 120, aspectRatio: 1, alignSelf: 'center', marginVertical: 16 }}
             />
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 16,
-              }}
-            >
-              {SOCIAL_AUTHS.map((name) => (
-                <FormSSOButton
-                  key={name}
-                  social={name}
-                />
-              ))}
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 16 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
-              <Text style={{ marginHorizontal: 8, color: colors.textPrimary }}>or</Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.textPrimary }} />
-            </View>
+
+            {/* Apple Sign In */}
+            <AppleSignInButton mode="sign-up" />
+
+            <Divider label={t('common_or', 'or')} />
+
             {/* Email & Password Form */}
-            <View style={{ flex: 1, gap: 8 }}>
+            <View className="gap-4">
               <FormTextInput
                 control={control}
                 name="emailAddress"
@@ -202,53 +171,49 @@ export default function SignUpScreen() {
                 errors={errors}
                 colors={colors}
                 t={t}
-                animateView
               />
-              {!!apiError && <Text style={{ color: colors.error }}>{apiError}</Text>}
-              <FormSubmitButton
-                loading={loading}
-                onPress={handleSubmit(onSignUpPress)}
+
+              {!!apiError && (
+                <Text className="text-error text-sm">{apiError}</Text>
+              )}
+
+              <Button
                 title={t('auth_sign_up_create_account')}
+                onPress={handleSubmit(onSignUpPress)}
+                loading={loading}
+                variant="primary"
+                size="lg"
+                fullWidth
+                className="mt-2"
               />
             </View>
-            <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: colors.textPrimary }}>
-                {t('auth_sign_up_already_have_an_account')}&nbsp;
-                <Link
-                  href="/sign-in"
-                  style={{
-                    color: colors.secondary,
-                    fontWeight: '600',
-                    textDecorationLine: 'underline',
-                  }}
-                >
+
+            {/* Sign in link */}
+            <View className="items-center mt-2">
+              <Text className="text-zinc-400">
+                {t('auth_sign_up_already_have_an_account')}{' '}
+                <Link href="/sign-in" className="text-primary-500 font-semibold underline">
                   {t('auth_sign_in')}
                 </Link>
               </Text>
             </View>
-            <View style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ color: colors.textPrimary, textAlign: 'center', fontSize: 12 }}>
+
+            {/* Terms and privacy */}
+            <View className="items-center mt-4">
+              <Text className="text-zinc-500 text-center text-xs leading-5">
                 <Trans
                   i18nKey="auth_sign_up_agreement"
                   components={{
                     terms: (
                       <Link
                         href="/terms-of-service"
-                        style={{
-                          color: colors.secondary,
-                          fontWeight: '600',
-                          textDecorationLine: 'underline',
-                        }}
+                        className="text-primary-500 font-semibold underline"
                       />
                     ),
                     privacy: (
                       <Link
                         href="/privacy-policy"
-                        style={{
-                          color: colors.secondary,
-                          fontWeight: '600',
-                          textDecorationLine: 'underline',
-                        }}
+                        className="text-primary-500 font-semibold underline"
                       />
                     ),
                   }}
@@ -257,39 +222,16 @@ export default function SignUpScreen() {
             </View>
           </View>
         </KeyboardAwareScrollView>
+
+        {/* Verification Modal */}
         <Modal
           animationType="slide"
           transparent={true}
           visible={pendingVerification}
         >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)', // semi-transparent black overlay
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <View
-              style={{
-                width: '80%', // 80% of the screen width
-                backgroundColor: colors.backgroundDefault, // your modal background color
-                padding: 20,
-                borderRadius: 10, // rounded corners
-                elevation: 5, // shadow for Android
-                shadowColor: '#000', // shadow for iOS
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 4,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 24,
-                  marginBottom: 24,
-                  color: colors.textPrimary,
-                }}
-              >
+          <View className="flex-1 bg-black/50 justify-center items-center px-6">
+            <Card className="w-full" padding="lg">
+              <Text className="text-2xl font-semibold text-zinc-50 mb-6">
                 {t('auth_sign_up_verify_your_email')}
               </Text>
               <FormTextInput
@@ -302,14 +244,19 @@ export default function SignUpScreen() {
                 colors={colors}
                 t={t}
               />
-              {!!apiError && <Text style={{ color: colors.error }}>{apiError}</Text>}
-              <FormSubmitButton
-                loading={loading}
-                onPress={handleVerifySubmit(onVerifyPress)}
+              {!!apiError && (
+                <Text className="text-error text-sm mt-2">{apiError}</Text>
+              )}
+              <Button
                 title={t('common_verify')}
-                style={{ marginTop: 24 }}
+                onPress={handleVerifySubmit(onVerifyPress)}
+                loading={loading}
+                variant="primary"
+                size="lg"
+                fullWidth
+                className="mt-6"
               />
-            </View>
+            </Card>
           </View>
         </Modal>
       </SafeAreaView>

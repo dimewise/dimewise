@@ -1,34 +1,88 @@
+/**
+ * Dimewise Color System
+ *
+ * Use Tailwind classes when possible. This file is for:
+ * - JavaScript color references (charts, dynamic styles)
+ * - Third-party component styling
+ */
+
 export const colors = {
-  // Primary colors (teal family)
-  primary: '#1ABC9C',
-  primaryLight: '#66D9CC',
-  primaryDark: '#12876E',
-  primaryTextOn: '#121212', // Text color to use on primary backgrounds
+  // Primary - Emerald (growth/money)
+  primary: {
+    50: '#ECFDF5',
+    100: '#D1FAE5',
+    200: '#A7F3D0',
+    300: '#6EE7B7',
+    400: '#34D399',
+    500: '#10B981',
+    600: '#059669',
+    700: '#047857',
+    800: '#065F46',
+    900: '#064E3B',
+    DEFAULT: '#10B981',
+  },
 
-  // Secondary colors (warm coral family)
-  secondary: '#FF6F61',
-  secondaryLight: '#FF9486',
-  secondaryDark: '#B95148',
-  secondaryTextOn: '#121212', // Text color to use on secondary backgrounds
+  // Accent - Amber
+  accent: {
+    400: '#FBBF24',
+    500: '#F59E0B',
+    600: '#D97706',
+    DEFAULT: '#F59E0B',
+  },
 
-  // Backgrounds and surfaces
-  backgroundDefault: '#121212', // App main background (dark)
-  backgroundSurface: '#1E1E1E', // Cards, panels, modals background (dark)
+  // Surfaces (dark theme)
+  surface: {
+    base: '#09090B', // zinc-950 - Main background
+    DEFAULT: '#18181B', // zinc-900 - Cards
+    elevated: '#27272A', // zinc-800 - Elevated cards
+    overlay: '#3F3F46', // zinc-700 - Overlays
+  },
 
-  // Feedback colors
-  error: '#EF5350',
-  errorTextOn: '#121212',
-  success: '#27AE60',
-  successTextOn: '#121212',
-  disabled: '#A0A0A0',
-  warning: '#F1C40F', // Vibrant yellow for alert/warning
-  warningTextOn: '#121212', // Dark text on yellow backgrounds
+  // Text
+  text: {
+    primary: '#FAFAFA', // zinc-50
+    secondary: '#A1A1AA', // zinc-400
+    muted: '#71717A', // zinc-500
+    inverse: '#09090B', // zinc-950
+  },
 
-  // Text colors
-  textPrimary: '#E0E0E0', // Primary text on dark backgrounds
-  textSecondary: '#A497BD', // Secondary text, muted/lavender tone
+  // Semantic
+  success: '#22C55E',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  info: '#3B82F6',
 
-  // Additional neutrals if useful
-  white: '#FFFFFF',
-  black: '#000000',
-};
+  // Borders
+  border: {
+    DEFAULT: '#27272A', // zinc-800
+    subtle: '#3F3F46', // zinc-700
+  },
+
+  // Legacy support (map to new colors for backward compatibility)
+  background: '#09090B',
+  backgroundDefault: '#09090B',
+  backgroundSurface: '#18181B',
+  white: '#FAFAFA',
+  black: '#09090B',
+  textPrimary: '#FAFAFA',
+  textSecondary: '#A1A1AA',
+  disabled: '#71717A',
+
+  // Legacy primary colors (mapped to new system)
+  primaryLight: '#34D399',
+  primaryDark: '#047857',
+  primaryTextOn: '#09090B',
+
+  // Legacy secondary (mapped to accent)
+  secondary: '#F59E0B',
+  secondaryLight: '#FBBF24',
+  secondaryDark: '#D97706',
+  secondaryTextOn: '#09090B',
+
+  // Legacy feedback
+  errorTextOn: '#FAFAFA',
+  successTextOn: '#FAFAFA',
+  warningTextOn: '#09090B',
+} as const;
+
+export type ColorKey = keyof typeof colors;
