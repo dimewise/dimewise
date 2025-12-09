@@ -163,7 +163,6 @@ export default function SignUpScreen() {
                 autoCapitalize="none"
                 loading={loading}
                 errors={errors}
-                colors={colors}
                 t={t}
               />
               <FormTextInput
@@ -174,7 +173,6 @@ export default function SignUpScreen() {
                 secureTextEntry={true}
                 loading={loading}
                 errors={errors}
-                colors={colors}
                 t={t}
               />
 
@@ -246,7 +244,6 @@ export default function SignUpScreen() {
                 placeholderKey="common_verification_code_prompt"
                 loading={loading}
                 errors={codeErrors}
-                colors={colors}
                 t={t}
               />
               {!!apiError && (

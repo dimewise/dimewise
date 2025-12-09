@@ -150,10 +150,8 @@ export const CategoryFormModal = ({
               name="title"
               labelKey="form_category_title"
               placeholderKey="form_category_title_prompt"
-              colors={colors}
               t={t}
               errors={errors}
-              animateView
             />
 
             <Controller
