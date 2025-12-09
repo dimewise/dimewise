@@ -1,7 +1,6 @@
 import { useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Image } from 'expo-image';
 import { Link, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Logo from '@/assets/icons/splash-icon-light.png';
 import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
 import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
@@ -76,7 +74,7 @@ export default function SignInScreen() {
           style={{ flex: 1, width: '100%' }}
         >
           {/* Header */}
-          <View className="flex-row items-center relative py-2">
+          <View className="flex-row items-center relative py-2 mb-6">
             <TouchableOpacity
               onPress={() => router.back()}
               className="absolute left-0 z-10 p-2 -ml-2"
@@ -89,13 +87,7 @@ export default function SignInScreen() {
           </View>
 
           {/* Content */}
-          <View className="flex-1 w-full gap-6 mt-4">
-            <Image
-              source={Logo}
-              contentFit="contain"
-              style={{ width: 100, aspectRatio: 1, alignSelf: 'center', marginVertical: 16 }}
-            />
-
+          <View className="flex-1 w-full gap-6">
             {/* Social Sign In Options */}
             <View className="gap-3">
               {Platform.OS === 'ios' && <AppleSignInButton mode="sign-in" />}

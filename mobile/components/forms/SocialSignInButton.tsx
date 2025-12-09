@@ -32,7 +32,7 @@ const PROVIDER_CONFIG: Record<SocialProvider, ProviderConfig> = {
   oauth_google: {
     name: 'Google',
     icon: 'logo-google',
-    bgColor: 'bg-white',
+    bgColor: 'bg-white border border-neutral-300',
     textColor: 'text-gray-800',
     iconColor: '#4285F4',
   },
@@ -60,7 +60,7 @@ const PROVIDER_CONFIG: Record<SocialProvider, ProviderConfig> = {
   oauth_apple: {
     name: 'Apple',
     icon: 'logo-apple',
-    bgColor: 'bg-white',
+    bgColor: 'bg-white border border-neutral-300',
     textColor: 'text-black',
     iconColor: '#000000',
   },
