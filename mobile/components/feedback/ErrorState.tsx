@@ -37,14 +37,14 @@ export const ErrorState = memo(function ErrorState({
         <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
       </View>
       <Text className="text-xl font-semibold text-neutral-900 text-center mb-2">
-        {title || t('error.generic.title', 'Something went wrong')}
+        {title || t('error_generic_title')}
       </Text>
       <Text className="text-base text-neutral-500 text-center mb-6 max-w-xs">
-        {message || t('error.generic.message', 'Please try again later')}
+        {message || t('error_generic_message')}
       </Text>
       {onRetry && (
         <Button
-          title={retryLabel || t('common.retry', 'Try Again')}
+          title={retryLabel || t('common_retry')}
           onPress={onRetry}
           variant="secondary"
         />

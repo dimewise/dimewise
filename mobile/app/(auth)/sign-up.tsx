@@ -73,7 +73,7 @@ export default function SignUpScreen() {
         await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
         setPendingVerification(true);
       } catch (err) {
-        setApiError(t('auth.error.create_account', 'Failed to create account or send verification email'));
+        setApiError(t('auth_error_create_account'));
         logger.error(err as Error, { context: 'SignUp' });
       } finally {
         setLoading(false);
@@ -97,14 +97,14 @@ export default function SignUpScreen() {
           await setActive({ session: signUpAttempt.createdSessionId });
           router.replace('/');
         } else {
-          setApiError(t('auth.error.additional_verification', 'Additional verification steps required'));
+          setApiError(t('auth_error_additional_verification'));
           logger.warn('Sign-up requires additional verification', {
             context: 'SignUp',
             data: { status: signUpAttempt.status },
           });
         }
       } catch (err) {
-        setApiError(t('auth.error.verification_failed', 'Verification failed: Invalid code or network error'));
+        setApiError(t('auth_error_verification_failed'));
         logger.error(err as Error, { context: 'SignUp' });
       } finally {
         setLoading(false);

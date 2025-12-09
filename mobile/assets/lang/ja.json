@@ -63,6 +63,7 @@
   "lang_ja": "日本語",
   "settings_currency": "通貨",
   "settings_language": "言語",
+  "settings_preferences": "設定項目",
   "settings_select_currency": "通貨を選択",
   "settings_select_language": "言語を選択",
   "settings_cat_pay_title": "カテゴリ・予算",
@@ -155,5 +156,16 @@
   "settings_deleting": "削除中...",
   "transaction_swipe_verify": "確認",
   "transaction_swipe_edit": "編集",
-  "transaction_swipe_delete": "削除"
+  "transaction_swipe_delete": "削除",
+  "common_error": "エラー",
+  "common_retry": "もう一度試す",
+  "error_generic_title": "エラーが発生しました",
+  "error_generic_message": "後でもう一度お試しください",
+  "auth_error_create_account": "アカウント作成または確認メール送信に失敗しました",
+  "auth_error_additional_verification": "追加の確認手順が必要です",
+  "auth_error_verification_failed": "確認に失敗しました：無効なコードまたはネットワークエラー",
+  "auth_error_additional_steps": "サインインには追加の手順が必要です。",
+  "auth_error_invalid_credentials": "サインインに失敗しました：無効な認証情報またはネットワークエラー",
+  "transaction_verify_error": "取引の確認に失敗しました",
+  "transaction_delete_error": "取引の削除に失敗しました"
 }

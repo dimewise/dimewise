@@ -10,7 +10,7 @@ import { ExpenseRow } from '@/components/transactions';
 import { FilterBar } from '@/components/transactions/FilterBar';
 import { FilterModal } from '@/components/modals/FilterModal';
 import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
-import { EmptyState } from '@/components/feedback';
+import { EmptyState, LoadingState } from '@/components/feedback';
 import { useGetExpensesQuery, useLazyGetExpensesQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { useModal } from '@/hooks/ui';
@@ -101,6 +101,9 @@ export default function ExpensesScreen() {
 
   /* ---------- data ---------- */
   const expenses = useMemo(() => data?.data ?? [], [data]);
+  
+  // Show loading state only on initial load
+  const isInitialLoading = isLoading && !data;
 
   // Memoized render item
   const renderItem = useCallback(
@@ -117,14 +120,34 @@ export default function ExpensesScreen() {
     return <LoadMoreButton onPress={loadMore} isFetching={isFetching} />;
   }, [data?.pagination.has_next, loadMore, isFetching]);
 
-  // Empty state component
+  // Empty state component - only show when not loading and no data
   const ListEmptyComponent = useMemo(
-    () => <EmptyState title={t('transactions_empty')} className="mt-8" />,
-    [t],
+    () => isInitialLoading ? null : <EmptyState title={t('transactions_empty')} className="mt-8" />,
+    [t, isInitialLoading],
   );
 
   // Item separator
   const ItemSeparator = useCallback(() => <View className="h-2" />, []);
+
+  // Show loading state for initial load
+  if (isInitialLoading) {
+    return (
+      <AppLayout>
+        <SafeAreaView className="flex-1 items-center justify-start w-full px-5 bg-white" edges={['top']}>
+          <View className="w-full py-4">
+            <Text className="text-2xl font-semibold text-neutral-900">{t('page_title_transactions')}</Text>
+            <FilterBar
+              filter={filter}
+              setFilter={setFilter}
+              onOpenFilterModal={filterModal.open}
+              onFilterChange={setFilter}
+            />
+          </View>
+          <LoadingState fullScreen={false} className="flex-1" />
+        </SafeAreaView>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
   Alert,
@@ -18,14 +17,13 @@ import {
   useDeleteExpensesByExpenseIdMutation,
 } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
-import { spacing } from '@/theme/spacing';
 import { useUserLocale } from '@/hooks/useUserLocale';
 import { formatCurrency } from '@/utils/localization/currencies';
 import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 import { ModalContainer } from '@/components/modals/ModalContainer';
 import { ModalHeader } from '@/components/modals/ModalHeader';
 import { ModalFooter } from '@/components/modals/ModalFooter';
-import { ModalButton } from '@/components/modals/ModalButton';
+import { LoadingState } from '@/components/feedback';
 
 export default function TransactionDetailsModal() {
   const router = useRouter();
@@ -34,8 +32,8 @@ export default function TransactionDetailsModal() {
   const { currency, locale } = useUserLocale();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showExpenseForm, setShowExpenseForm] = useState(false);
 
-  // Fetch expense data
   const {
     data: expense,
     isLoading,
@@ -56,10 +54,8 @@ export default function TransactionDetailsModal() {
   if (isLoading) {
     return (
       <ModalContainer>
-        <ModalHeader title={t('transaction_details_title')} />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>{t('form_loading')}</Text>
-        </View>
+        <ModalHeader title={t('transaction_details_title')} onClose={onClose} />
+        <LoadingState fullScreen={false} className="flex-1" />
       </ModalContainer>
     );
   }
@@ -67,14 +63,18 @@ export default function TransactionDetailsModal() {
   if (error || !expense) {
     return (
       <ModalContainer>
-        <ModalHeader title={t('transaction_details_title')} />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Failed to load transaction details</Text>
+        <ModalHeader title={t('transaction_details_title')} onClose={onClose} />
+        <View className="flex-1 items-center justify-center p-6">
+          <Text className="text-base text-red-500 mb-4">
+            {t('error_generic_message')}
+          </Text>
           <Pressable
             onPress={onClose}
-            style={styles.retryButton}
+            className="bg-primary-500 px-6 py-3 rounded-xl"
           >
-            <Text style={styles.retryButtonText}>Close</Text>
+            <Text className="text-base font-semibold text-white">
+              {t('form_cancel')}
+            </Text>
           </Pressable>
         </View>
       </ModalContainer>
@@ -89,15 +89,12 @@ export default function TransactionDetailsModal() {
     try {
       setIsVerifying(true);
       await verifyExpense({ expenseId: expense.id }).unwrap();
-    } catch (error) {
-      console.error('Error verifying expense:', error);
-      Alert.alert('Error', 'Failed to verify expense. Please try again.');
+    } catch (err) {
+      Alert.alert(t('common_error'), t('transaction_verify_error'));
     } finally {
       setIsVerifying(false);
     }
   };
-
-  const [showExpenseForm, setShowExpenseForm] = useState(false);
 
   const handleEdit = () => {
     setShowExpenseForm(true);
@@ -108,10 +105,7 @@ export default function TransactionDetailsModal() {
       t('transaction_details_delete_confirm_title'),
       t('transaction_details_delete_confirm'),
       [
-        {
-          text: t('form_cancel'),
-          style: 'cancel',
-        },
+        { text: t('form_cancel'), style: 'cancel' },
         {
           text: t('transaction_details_delete'),
           style: 'destructive',
@@ -120,9 +114,8 @@ export default function TransactionDetailsModal() {
               setIsDeleting(true);
               await deleteExpense({ expenseId: expense.id }).unwrap();
               onClose();
-            } catch (error) {
-              console.error('Error deleting expense:', error);
-              Alert.alert('Error', 'Failed to delete expense. Please try again.');
+            } catch (err) {
+              Alert.alert(t('common_error'), t('transaction_delete_error'));
             } finally {
               setIsDeleting(false);
             }
@@ -142,302 +135,199 @@ export default function TransactionDetailsModal() {
 
   return (
     <ModalContainer>
-      <ModalHeader
-        title={t('transaction_details_title')}
-        rightAction={
-          <Pressable onPress={handleEdit} style={styles.editIconButton}>
-            <Octicons
-              name="pencil"
-              size={20}
-              color={colors.textPrimary}
-            />
-          </Pressable>
-        }
-      />
+      <ModalHeader title={t('transaction_details_title')} onClose={onClose} />
 
       <ScrollView
-        style={styles.content}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.detailsContainer}>
-          {/* Amount - Hero Section */}
-          <View style={styles.heroSection}>
-            <Text style={styles.heroAmount}>
-              {formatCurrency(expense.amount, currency, locale)}
-            </Text>
-            <Text style={styles.heroTitle}>{expense.title}</Text>
-            {isVerified && (
-              <View style={styles.verifiedBadge}>
-                <Text style={styles.verifiedBadgeText}>✓ {t('transaction_details_verified')}</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Description */}
-          {expense.description && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('form_expense_description')}</Text>
-              <View style={styles.infoCard}>
-                <Text style={styles.descriptionText}>{expense.description}</Text>
-              </View>
-            </View>
-          )}
-
-          {/* Transaction Info */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('transaction_details_transaction_details')}</Text>
-            <View style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{t('form_expense_date')}</Text>
-                <Text style={styles.infoValue}>{formatDate(expense.incurred_at)}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{t('transaction_details_time')}</Text>
-                <Text style={styles.infoValue}>{formatTime(expense.incurred_at)}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{t('form_expense_category')}</Text>
-                <Text style={styles.infoValue}>{expense.category.title}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{t('form_expense_payment_method')}</Text>
-                <Text style={styles.infoValue}>{expense.payment_method.title}</Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Verification Status */}
-          {!isVerified && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('transaction_details_status')}</Text>
-              <View style={styles.statusCard}>
-                <Text style={styles.statusText}>{t('transaction_details_unverified')}</Text>
-                {isVerifying ? (
-                  <View style={styles.verifyingContainer}>
-                    <ActivityIndicator
-                      size="small"
-                      color={colors.backgroundDefault}
-                    />
-                    <Text style={styles.verifyingText}>{t('transaction_details_verifying')}</Text>
-                  </View>
-                ) : (
-                  <Pressable
-                    onPress={handleVerify}
-                    style={styles.verifyButtonInline}
-                  >
-                    <Text style={styles.verifyButtonInlineText}>
-                      {t('transaction_details_mark_verified')}
-                    </Text>
-                  </Pressable>
-                )}
-              </View>
+        {/* Hero Section - Amount & Title */}
+        <View className="items-center py-20 px-6">
+          <Text className="text-5xl font-bold text-neutral-900 mb-1">
+            {formatCurrency(expense.amount, currency, locale)}
+          </Text>
+          <Text className="text-lg text-neutral-600 text-center mb-2">
+            {expense.title}
+          </Text>
+          {isVerified && (
+            <View className="bg-emerald-50 px-3 py-1 rounded-full flex-row items-center gap-1.5">
+              <Octicons name="check-circle-fill" size={14} color={colors.success} />
+              <Text className="text-sm font-medium text-emerald-700">
+                {t('transaction_details_verified')}
+              </Text>
             </View>
           )}
         </View>
+
+        {/* Description */}
+        {expense.description && (
+          <View className="px-6 mb-4">
+            <Text className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-1.5">
+              {t('form_expense_description')}
+            </Text>
+            <View className="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
+              <Text className="text-base text-neutral-700 leading-6">
+                {expense.description}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Transaction Details Card */}
+        <View className="px-6 mb-4">
+          <Text className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-1.5">
+            {t('transaction_details_transaction_details')}
+          </Text>
+          <View className="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden">
+            <DetailRow
+              label={t('form_expense_date')}
+              value={formatDate(expense.incurred_at)}
+            />
+            <View className="h-px bg-neutral-200 mx-4" />
+            <DetailRow
+              label={t('transaction_details_time')}
+              value={formatTime(expense.incurred_at)}
+            />
+            <View className="h-px bg-neutral-200 mx-4" />
+            <DetailRow
+              label={t('form_expense_category')}
+              value={expense.category.title}
+            />
+            <View className="h-px bg-neutral-200 mx-4" />
+            <DetailRow
+              label={t('form_expense_payment_method')}
+              value={expense.payment_method.title}
+            />
+          </View>
+        </View>
+
+        {/* Status Section (if not verified) */}
+        {!isVerified && (
+          <View className="px-6 mb-4">
+            <Text className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-1.5">
+              {t('transaction_details_status')}
+            </Text>
+            <View className="bg-amber-50 rounded-xl p-4 border border-amber-200 flex-row items-center gap-2">
+              <Octicons name="alert" size={16} color={colors.warning} />
+              <Text className="text-base font-medium text-amber-700">
+                {t('transaction_details_unverified')}
+              </Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
 
+      {/* Action Buttons Footer */}
       <ModalFooter>
-        <ModalButton
-          onPress={handleDelete}
-          variant="error"
-          disabled={isVerifying || isDeleting}
-        >
-          {isDeleting ? (
-            <View style={styles.deletingContainer}>
-              <ActivityIndicator
-                size="small"
-                color={colors.backgroundDefault}
-              />
-              <Text style={styles.deletingText}>{t('transaction_details_deleting')}</Text>
-            </View>
-          ) : (
-            t('transaction_details_delete')
-          )}
-        </ModalButton>
-        <ModalButton
+        {/* Verify Button (only if not verified) */}
+        {!isVerified && (
+          <ActionButton
+            onPress={handleVerify}
+            icon="check"
+            label={isVerifying ? t('transaction_details_verifying') : t('transaction_swipe_verify')}
+            variant="success"
+            disabled={isVerifying}
+            isLoading={isVerifying}
+          />
+        )}
+
+        {/* Edit Button */}
+        <ActionButton
           onPress={handleEdit}
-          variant="primary"
-          disabled={isDeleting}
-        >
-          {t('transaction_details_edit')}
-        </ModalButton>
+          icon="pencil"
+          label={t('transaction_details_edit')}
+          variant="default"
+          disabled={isDeleting || isVerifying}
+        />
+
+        {/* Delete Button */}
+        <ActionButton
+          onPress={handleDelete}
+          icon="trash"
+          label={isDeleting ? t('transaction_details_deleting') : t('transaction_details_delete')}
+          variant="danger"
+          disabled={isDeleting || isVerifying}
+          isLoading={isDeleting}
+        />
       </ModalFooter>
 
+      {/* Edit Modal */}
       <ExpenseFormModal
         visible={showExpenseForm}
         onClose={() => setShowExpenseForm(false)}
         expenseId={expense.id}
-        onSuccess={() => {
-          // The expense query will refetch automatically
-          setShowExpenseForm(false);
-        }}
+        onSuccess={() => setShowExpenseForm(false)}
       />
     </ModalContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  editIconButton: {
-    padding: spacing.xs,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: colors.disabled,
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.lg,
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.error,
-    marginBottom: spacing.md,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md - spacing.xs,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.backgroundDefault,
-  },
-  content: {
-    flex: 1,
-  },
-  detailsContainer: {
-    padding: spacing.lg + spacing.sm,
-    gap: spacing.lg + spacing.sm,
-  },
-  heroSection: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-  },
-  heroAmount: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  heroTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    textAlign: 'center',
-    marginBottom: spacing.md - spacing.xs,
-  },
-  verifiedBadge: {
-    backgroundColor: colors.success || '#4CAF50',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs + 2,
-  },
-  verifiedBadgeText: {
-    color: colors.backgroundDefault,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  section: {
-    gap: spacing.md - spacing.xs,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  descriptionText: {
-    fontSize: 16,
-    color: colors.textPrimary,
-    lineHeight: 22,
-  },
-  infoCard: {
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 8,
-    padding: spacing.md - spacing.xs,
-    gap: spacing.md,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-  },
-  infoLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.disabled,
-    flex: 1,
-  },
-  infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    textAlign: 'right',
-    flex: 1,
-  },
-  statusCard: {
-    backgroundColor: colors.backgroundSurface,
-    padding: spacing.md,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  statusText: {
-    fontSize: 16,
-    color: colors.disabled,
-    fontWeight: '500',
-  },
-  verifyButtonInline: {
-    backgroundColor: colors.success || '#4CAF50',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 8,
-  },
-  verifyButtonInlineText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.backgroundDefault,
-  },
-  verifyingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.success || '#4CAF50',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 8,
-    gap: spacing.sm,
-  },
-  verifyingText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.backgroundDefault,
-  },
-  deletingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  deletingText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.backgroundDefault,
-  },
-});
+// Detail Row Component
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <View className="flex-row justify-between items-center px-4 py-3.5">
+      <Text className="text-sm text-neutral-500">{label}</Text>
+      <Text className="text-base font-medium text-neutral-900">{value}</Text>
+    </View>
+  );
+}
+
+// Action Button Component
+function ActionButton({
+  onPress,
+  icon,
+  label,
+  variant,
+  disabled,
+  isLoading,
+}: {
+  onPress: () => void;
+  icon: 'check' | 'pencil' | 'trash';
+  label: string;
+  variant: 'success' | 'default' | 'danger';
+  disabled?: boolean;
+  isLoading?: boolean;
+}) {
+  const variantStyles = {
+    success: {
+      bg: 'bg-emerald-500',
+      activeBg: 'active:bg-emerald-600',
+      iconColor: '#FFFFFF',
+      textColor: 'text-white',
+    },
+    default: {
+      bg: 'bg-neutral-100',
+      activeBg: 'active:bg-neutral-200',
+      iconColor: colors.neutral[700],
+      textColor: 'text-neutral-700',
+    },
+    danger: {
+      bg: 'bg-red-50',
+      activeBg: 'active:bg-red-100',
+      iconColor: colors.error,
+      textColor: 'text-red-600',
+    },
+  };
+
+  const style = variantStyles[variant];
+
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      className={`flex-1 items-center justify-center py-3 rounded-xl ${style.bg} ${!disabled && style.activeBg} ${disabled ? 'opacity-50' : ''}`}
+    >
+      {isLoading ? (
+        <ActivityIndicator size="small" color={style.iconColor} />
+      ) : (
+        <>
+          <Octicons name={icon} size={20} color={style.iconColor} />
+          <Text className={`text-xs font-medium mt-1 ${style.textColor}`}>
+            {label}
+          </Text>
+        </>
+      )}
+    </Pressable>
+  );
+}

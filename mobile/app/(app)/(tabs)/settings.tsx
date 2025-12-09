@@ -18,7 +18,7 @@ import { PaymentMethodFormModal } from '@/components/settings/PaymentMethodFormM
 import { CurrencySelectorModal } from '@/components/settings/CurrencySelectorModal';
 import { LanguageSelectorModal } from '@/components/settings/LanguageSelectorModal';
 import { Button, Card } from '@/components/ui';
-import { EmptyState } from '@/components/feedback';
+import { EmptyState, LoadingState } from '@/components/feedback';
 import { useCategories, usePaymentMethods } from '@/hooks/api';
 import { useModal } from '@/hooks/ui';
 import { useUserLocale } from '@/hooks/useUserLocale';
@@ -123,7 +123,26 @@ export default function SettingsScreen() {
     paymentMethodModal.open({});
   }, [paymentMethodModal]);
 
+  // Show loading state on initial load
+  const isInitialLoading = (categoriesLoading || paymentMethodsLoading) 
+    && categories.length === 0 && paymentMethods.length === 0;
+
   if (!user) return null;
+
+  if (isInitialLoading) {
+    return (
+      <AppLayout>
+        <SafeAreaView className="flex-1 w-full px-6 bg-white" edges={['top']}>
+          <View className="w-full py-4">
+            <Text className="text-2xl font-semibold text-neutral-900">
+              {t('page_title_settings')}
+            </Text>
+          </View>
+          <LoadingState fullScreen={false} className="flex-1" />
+        </SafeAreaView>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -150,7 +169,7 @@ export default function SettingsScreen() {
           {/* Preferences Section */}
           <View className="mb-6">
             <Text className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
-              {t('settings.preferences', 'Preferences')}
+              {t('settings_preferences')}
             </Text>
             <Card padding="none">
               <SettingsRow
