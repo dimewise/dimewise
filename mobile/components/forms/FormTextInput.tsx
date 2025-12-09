@@ -6,10 +6,6 @@ import {
   type Path,
 } from 'react-hook-form';
 import { type KeyboardTypeOptions, Text, TextInput, View } from 'react-native';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
-import { useGradualAnimation } from '@/hooks/useGradualAnimation';
-import { sharedStyles } from '@/theme/stylesheets';
-import { colors as themeColors } from '@/theme/colors';
 
 interface Props<TFieldValues extends FieldValues> {
   control: Control<TFieldValues>;
@@ -20,13 +16,10 @@ interface Props<TFieldValues extends FieldValues> {
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   loading?: boolean;
   errors?: FieldErrors<TFieldValues>;
-  colors: {
-    textPrimary: string;
-    error: string;
-  };
   t: (key: string) => string;
   secureTextEntry?: boolean;
-  animateView?: boolean;
+  multiline?: boolean;
+  numberOfLines?: number;
 }
 
 export const FormTextInput = <TFieldValues extends FieldValues = FieldValues>({
@@ -38,50 +31,43 @@ export const FormTextInput = <TFieldValues extends FieldValues = FieldValues>({
   autoCapitalize = 'none',
   loading = false,
   errors,
-  colors,
   t,
   secureTextEntry,
-  animateView,
+  multiline,
+  numberOfLines,
 }: Props<TFieldValues>) => {
-  const { height } = useGradualAnimation();
-
-  const keyboardPadding = useAnimatedStyle(() => {
-    return {
-      height: height.value,
-    };
-  }, []);
-
   return (
     <Controller
       control={control}
       name={name}
       render={({ field: { onChange, onBlur, value } }) => (
-        <>
-          <View style={{ gap: 8 }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.textPrimary }}>
-              {t(labelKey)}
+        <View className="gap-2">
+          <Text className="text-sm font-medium text-neutral-500">
+            {t(labelKey)}
+          </Text>
+          <TextInput
+            className={`bg-neutral-100 rounded-xl px-4 text-base text-neutral-900 ${
+              multiline ? 'min-h-[100px] py-3' : 'h-12'
+            } ${errors?.[name] ? 'border border-red-500' : ''}`}
+            style={multiline ? { textAlignVertical: 'top' } : undefined}
+            autoCapitalize={autoCapitalize}
+            keyboardType={keyboardType}
+            secureTextEntry={secureTextEntry}
+            placeholder={t(placeholderKey)}
+            placeholderTextColor="#A3A3A3"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            value={value}
+            editable={!loading}
+            multiline={multiline}
+            numberOfLines={numberOfLines}
+          />
+          {errors?.[name] && (
+            <Text className="text-sm text-red-500">
+              {String(errors[name]?.message ?? '')}
             </Text>
-            <TextInput
-              style={[
-                sharedStyles.input,
-                errors?.[name] && { borderWidth: 1, borderColor: colors.error },
-              ]}
-              autoCapitalize={autoCapitalize}
-              keyboardType={keyboardType}
-              secureTextEntry={secureTextEntry}
-              placeholder={t(placeholderKey)}
-              placeholderTextColor={themeColors.disabled}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              editable={!loading}
-            />
-            {errors?.[name] && (
-              <Text style={{ color: colors.error }}>{String(errors[name]?.message ?? '')}</Text>
-            )}
-          </View>
-          {animateView && <Animated.View style={keyboardPadding} />}
-        </>
+          )}
+        </View>
       )}
     />
   );

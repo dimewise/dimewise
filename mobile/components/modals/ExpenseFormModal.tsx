@@ -6,13 +6,11 @@ import {
   Alert,
   Modal,
   Pressable,
-  ScrollView,
-  StyleSheet,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { DateTime } from 'luxon';
@@ -40,7 +38,6 @@ import { ModalContainer } from './ModalContainer';
 import { ModalHeader } from './ModalHeader';
 import { ModalFooter } from './ModalFooter';
 import { ModalButton } from './ModalButton';
-import { spacing } from '@/theme/spacing';
 
 // Use the generated zod schema directly
 type FormData = z.infer<typeof postExpenseBody>;
@@ -204,252 +201,237 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
       <ModalContainer>
         <ModalHeader
           title={isEditMode ? t('settings_edit_expense') : t('settings_add_new_expense')}
+          onClose={onClose}
         />
 
-        <TouchableWithoutFeedback onPress={() => setExpandedField(null)}>
-          <ScrollView
-            style={styles.content}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-          >
-            <View style={styles.form}>
-              <FormTextInput
-                control={control}
-                name="title"
-                labelKey="form_expense_title"
-                placeholderKey="form_expense_title_prompt"
-                colors={colors}
-                t={t}
-                errors={errors}
-                animateView
-              />
+        <KeyboardAwareScrollView
+          className="flex-1"
+          contentContainerClassName="p-6"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          bottomOffset={20}
+        >
+          <Pressable className="gap-5" onPress={() => setExpandedField(null)}>
+            {/* Title */}
+            <FormTextInput
+              control={control}
+              name="title"
+              labelKey="form_expense_title"
+              placeholderKey="form_expense_title_prompt"
+              t={t}
+              errors={errors}
+            />
 
-              <Controller
-                control={control}
-                name="incurred_at"
-                render={({ field: { value } }) => (
-                  <View style={styles.collapsibleContainer}>
-                    <Pressable
-                      style={styles.collapsibleHeader}
-                      onPress={() => toggleField('date')}
-                    >
-                      <Text style={styles.collapsibleLabel}>{t('form_expense_date')}</Text>
-                      <Text style={styles.collapsibleValue}>{formatDate(value)}</Text>
-                    </Pressable>
-                    {expandedField === 'date' && (
-                      <View style={styles.pickerWrapper}>
-                        <DateTimePicker
-                          value={selectedDate}
-                          mode="date"
-                          display="spinner"
-                          onChange={onDateChange}
-                          style={styles.datePicker}
-                          textColor={colors.textPrimary}
-                          themeVariant="dark"
-                          locale={locale}
-                        />
-                      </View>
-                    )}
-                    {errors?.incurred_at && (
-                      <Text style={styles.errorText}>
-                        {String(errors.incurred_at?.message ?? '')}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
+            {/* Amount */}
+            <Controller
+              control={control}
+              name="amount"
+              render={({ field: { onChange, onBlur } }) => {
+                const handleTextChange = (text: string) => {
+                  if (!currencyUsesDecimals(currency)) {
+                    setDisplayValue(text);
+                    const numValue = text ? parseFloat(text) : 0;
+                    onChange(numValue);
+                    return;
+                  }
 
-              {/* Category - Collapsible */}
-              <Controller
-                control={control}
-                name="category_id"
-                render={({ field: { onChange, value } }) => (
-                  <View style={styles.collapsibleContainer}>
-                    <Pressable
-                      style={styles.collapsibleHeader}
-                      onPress={() => toggleField('category')}
-                    >
-                      <Text style={styles.collapsibleLabel}>{t('form_expense_category')}</Text>
-                      <Text style={[styles.collapsibleValue, !value && styles.placeholderText]}>
-                        {getSelectedCategoryTitle()}
-                      </Text>
-                    </Pressable>
-                    {expandedField === 'category' && (
-                      <View style={styles.pickerWrapper}>
-                        <Picker
-                          selectedValue={value}
-                          onValueChange={onChange}
-                          style={styles.picker}
-                          itemStyle={styles.pickerItem}
-                        >
-                          <Picker.Item
-                            label={categoriesLoading ? t('form_loading') : t('form_select_category')}
-                            value=""
-                            color={colors.disabled}
-                          />
-                          {categories?.map((category) => (
-                            <Picker.Item
-                              key={category.id}
-                              label={category.title}
-                              value={category.id}
-                              color={colors.textPrimary}
-                            />
-                          ))}
-                        </Picker>
-                      </View>
-                    )}
-                    {errors?.category_id && (
-                      <Text style={styles.errorText}>
-                        {String(errors.category_id?.message ?? '')}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
+                  const cleanText = text.replace(/[^0-9.]/g, '');
 
-              {/* Payment Method - Collapsible */}
-              <Controller
-                control={control}
-                name="payment_method_id"
-                render={({ field: { onChange, value } }) => (
-                  <View style={styles.collapsibleContainer}>
-                    <Pressable
-                      style={styles.collapsibleHeader}
-                      onPress={() => toggleField('payment_method')}
-                    >
-                      <Text style={styles.collapsibleLabel}>
-                        {t('form_expense_payment_method')}
-                      </Text>
-                      <Text style={[styles.collapsibleValue, !value && styles.placeholderText]}>
-                        {getSelectedPaymentMethodTitle()}
-                      </Text>
-                    </Pressable>
-                    {expandedField === 'payment_method' && (
-                      <View style={styles.pickerWrapper}>
-                        <Picker
-                          selectedValue={value}
-                          onValueChange={onChange}
-                          style={styles.picker}
-                          itemStyle={styles.pickerItem}
-                        >
-                          <Picker.Item
-                            label={
-                              paymentMethodsLoading
-                                ? t('form_loading')
-                                : t('form_select_payment_method')
-                            }
-                            value=""
-                            color={colors.disabled}
-                          />
-                          {paymentMethods?.map((method) => (
-                            <Picker.Item
-                              key={method.id}
-                              label={method.title}
-                              value={method.id}
-                              color={colors.textPrimary}
-                            />
-                          ))}
-                        </Picker>
-                      </View>
-                    )}
-                    {errors?.payment_method_id && (
-                      <Text style={styles.errorText}>
-                        {String(errors.payment_method_id?.message ?? '')}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* Amount */}
-              <Controller
-                control={control}
-                name="amount"
-                render={({ field: { onChange, onBlur } }) => {
-                  const handleTextChange = (text: string) => {
-                    if (!currencyUsesDecimals(currency)) {
-                      setDisplayValue(text);
-                      const numValue = text ? parseFloat(text) : 0;
-                      onChange(numValue);
-                      return;
-                    }
-
-                    const cleanText = text.replace(/[^0-9.]/g, '');
-
-                    if (cleanText.includes('.')) {
-                      const parts = cleanText.split('.');
-                      if (parts.length <= 2) {
-                        const decimalPart = parts[1] ? parts[1].substring(0, 2) : '';
-                        const formattedText = parts[0] + '.' + decimalPart;
-                        setDisplayValue(formattedText);
-                        const numValue = formattedText ? parseFloat(formattedText) : 0;
-                        onChange(numValue);
-                      }
-                    } else {
-                      setDisplayValue(cleanText);
-                      const numValue = cleanText ? parseFloat(cleanText) : 0;
+                  if (cleanText.includes('.')) {
+                    const parts = cleanText.split('.');
+                    if (parts.length <= 2) {
+                      const decimalPart = parts[1] ? parts[1].substring(0, 2) : '';
+                      const formattedText = parts[0] + '.' + decimalPart;
+                      setDisplayValue(formattedText);
+                      const numValue = formattedText ? parseFloat(formattedText) : 0;
                       onChange(numValue);
                     }
-                  };
+                  } else {
+                    setDisplayValue(cleanText);
+                    const numValue = cleanText ? parseFloat(cleanText) : 0;
+                    onChange(numValue);
+                  }
+                };
 
-                  return (
-                    <View style={styles.inputContainer}>
-                      <Text style={styles.inputLabel}>
-                        {t('form_expense_amount')} ({currency})
-                      </Text>
-                      <TextInput
-                        style={[
-                          styles.input,
-                          errors?.amount && { borderWidth: 1, borderColor: colors.error },
-                        ]}
-                        keyboardType="numeric"
-                        placeholder={getCurrencyPlaceholder(currency)}
-                        value={displayValue}
-                        onChangeText={handleTextChange}
-                        onBlur={onBlur}
-                        placeholderTextColor={colors.disabled}
-                      />
-                      {errors?.amount && (
-                        <Text style={styles.errorText}>
-                          {String(errors.amount?.message ?? '')}
-                        </Text>
-                      )}
-                    </View>
-                  );
-                }}
-              />
-
-              <Controller
-                control={control}
-                name="description"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>{t('form_expense_description')}</Text>
+                return (
+                  <View className="gap-2">
+                    <Text className="text-sm font-medium text-neutral-500">
+                      {t('form_expense_amount')} ({currency})
+                    </Text>
                     <TextInput
-                      style={[
-                        styles.input,
-                        errors?.description && { borderWidth: 1, borderColor: colors.error },
-                        { minHeight: 80, textAlignVertical: 'top' },
-                      ]}
-                      placeholder={t('form_expense_description_prompt')}
-                      placeholderTextColor={colors.disabled}
+                      className={`bg-neutral-100 rounded-xl px-4 h-12 text-base text-neutral-900 ${
+                        errors?.amount ? 'border border-red-500' : ''
+                      }`}
+                      keyboardType="numeric"
+                      placeholder={getCurrencyPlaceholder(currency)}
+                      value={displayValue}
+                      onChangeText={handleTextChange}
                       onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value || ''}
-                      multiline
-                      numberOfLines={3}
+                      placeholderTextColor="#A3A3A3"
                     />
-                    {errors?.description && (
-                      <Text style={styles.errorText}>
-                        {String(errors.description?.message ?? '')}
+                    {errors?.amount && (
+                      <Text className="text-sm text-red-500">
+                        {String(errors.amount?.message ?? '')}
                       </Text>
                     )}
                   </View>
-                )}
-              />
-            </View>
-          </ScrollView>
-        </TouchableWithoutFeedback>
+                );
+              }}
+            />
+
+            {/* Date */}
+            <Controller
+              control={control}
+              name="incurred_at"
+              render={({ field: { value } }) => (
+                <View className="gap-2">
+                  <Text className="text-sm font-medium text-neutral-500">
+                    {t('form_expense_date')}
+                  </Text>
+                  <Pressable
+                    className="flex-row justify-between items-center bg-neutral-100 rounded-xl px-4 h-12"
+                    onPress={() => toggleField('date')}
+                  >
+                    <Text className="text-base text-neutral-900">
+                      {formatDate(value)}
+                    </Text>
+                  </Pressable>
+                  {expandedField === 'date' && (
+                    <View className="bg-neutral-100 rounded-xl overflow-hidden">
+                      <DateTimePicker
+                        value={selectedDate}
+                        mode="date"
+                        display="spinner"
+                        onChange={onDateChange}
+                        style={{ height: 200 }}
+                        textColor={colors.neutral[900]}
+                        themeVariant="light"
+                        locale={locale}
+                      />
+                    </View>
+                  )}
+                  {errors?.incurred_at && (
+                    <Text className="text-sm text-red-500">
+                      {String(errors.incurred_at?.message ?? '')}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+
+            {/* Category */}
+            <Controller
+              control={control}
+              name="category_id"
+              render={({ field: { onChange, value } }) => (
+                <View className="gap-2">
+                  <Text className="text-sm font-medium text-neutral-500">
+                    {t('form_expense_category')}
+                  </Text>
+                  <Pressable
+                    className="flex-row justify-between items-center bg-neutral-100 rounded-xl px-4 h-12"
+                    onPress={() => toggleField('category')}
+                  >
+                    <Text className={`text-base ${value ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                      {getSelectedCategoryTitle()}
+                    </Text>
+                  </Pressable>
+                  {expandedField === 'category' && (
+                    <View className="bg-neutral-100 rounded-xl overflow-hidden min-h-[200px]">
+                      <Picker
+                        selectedValue={value}
+                        onValueChange={onChange}
+                        style={{ height: 200 }}
+                        itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
+                      >
+                        <Picker.Item
+                          label={categoriesLoading ? t('form_loading') : t('form_select_category')}
+                          value=""
+                          color="#A3A3A3"
+                        />
+                        {categories?.map((category) => (
+                          <Picker.Item
+                            key={category.id}
+                            label={category.title}
+                            value={category.id}
+                            color={colors.neutral[900]}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  )}
+                  {errors?.category_id && (
+                    <Text className="text-sm text-red-500">
+                      {String(errors.category_id?.message ?? '')}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+
+            {/* Payment Method */}
+            <Controller
+              control={control}
+              name="payment_method_id"
+              render={({ field: { onChange, value } }) => (
+                <View className="gap-2">
+                  <Text className="text-sm font-medium text-neutral-500">
+                    {t('form_expense_payment_method')}
+                  </Text>
+                  <Pressable
+                    className="flex-row justify-between items-center bg-neutral-100 rounded-xl px-4 h-12"
+                    onPress={() => toggleField('payment_method')}
+                  >
+                    <Text className={`text-base ${value ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                      {getSelectedPaymentMethodTitle()}
+                    </Text>
+                  </Pressable>
+                  {expandedField === 'payment_method' && (
+                    <View className="bg-neutral-100 rounded-xl overflow-hidden min-h-[200px]">
+                      <Picker
+                        selectedValue={value}
+                        onValueChange={onChange}
+                        style={{ height: 200 }}
+                        itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
+                      >
+                        <Picker.Item
+                          label={paymentMethodsLoading ? t('form_loading') : t('form_select_payment_method')}
+                          value=""
+                          color="#A3A3A3"
+                        />
+                        {paymentMethods?.map((method) => (
+                          <Picker.Item
+                            key={method.id}
+                            label={method.title}
+                            value={method.id}
+                            color={colors.neutral[900]}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  )}
+                  {errors?.payment_method_id && (
+                    <Text className="text-sm text-red-500">
+                      {String(errors.payment_method_id?.message ?? '')}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
+
+            {/* Description (Optional) */}
+            <FormTextInput
+              control={control}
+              name="description"
+              labelKey="form_expense_description"
+              placeholderKey="form_expense_description_prompt"
+              t={t}
+              errors={errors}
+              multiline
+              numberOfLines={3}
+            />
+          </Pressable>
+        </KeyboardAwareScrollView>
 
         <ModalFooter>
           <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
@@ -467,82 +449,4 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-  },
-  form: {
-    padding: spacing.lg,
-    gap: spacing.md + spacing.xs, // 16 + 4 = 20 (matches original)
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.textPrimary,
-  },
-  input: {
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    borderWidth: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.textPrimary,
-  },
-  errorText: {
-    fontSize: 14,
-    color: colors.error,
-    marginTop: 4,
-  },
-  collapsibleContainer: {
-    gap: 8,
-  },
-  collapsibleHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    borderWidth: 0,
-  },
-  collapsibleLabel: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.textPrimary,
-  },
-  collapsibleValue: {
-    fontSize: 16,
-    color: colors.textPrimary,
-    flex: 1,
-    textAlign: 'right' as const,
-  },
-  placeholderText: {
-    color: colors.disabled,
-  },
-  pickerWrapper: {
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    borderWidth: 0,
-    overflow: 'hidden',
-    minHeight: 200,
-  },
-  picker: {
-    height: 50,
-    color: colors.textPrimary,
-  },
-  pickerItem: {
-    color: colors.textPrimary,
-    fontSize: 16,
-  },
-  datePicker: {
-    height: 200,
-    backgroundColor: colors.backgroundSurface,
-  },
-});
 

@@ -116,7 +116,6 @@ export default function SignInScreen() {
                 autoCapitalize="none"
                 loading={loading}
                 errors={errors}
-                colors={colors}
                 t={t}
               />
               <FormTextInput
@@ -127,7 +126,6 @@ export default function SignInScreen() {
                 secureTextEntry={true}
                 loading={loading}
                 errors={errors}
-                colors={colors}
                 t={t}
               />
 

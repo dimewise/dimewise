@@ -141,10 +141,8 @@ export const PaymentMethodFormModal = ({
               name="title"
               labelKey="form_payment_method_title"
               placeholderKey="form_payment_method_title_prompt"
-              colors={colors}
               t={t}
               errors={errors}
-              animateView
             />
 
             <Controller
