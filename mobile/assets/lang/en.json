@@ -63,6 +63,7 @@
   "lang_ja": "Japanese", 
   "settings_currency": "Default Currency",
   "settings_language": "Default Language",
+  "settings_preferences": "Preferences",
   "settings_select_currency": "Select Currency",
   "settings_select_language": "Select Language",
   "settings_cat_pay_title": "Categories & Budgets",
@@ -155,5 +156,16 @@
   "settings_deleting": "Deleting...",
   "transaction_swipe_verify": "Verify",
   "transaction_swipe_edit": "Edit",
-  "transaction_swipe_delete": "Delete"
+  "transaction_swipe_delete": "Delete",
+  "common_error": "Error",
+  "common_retry": "Try Again",
+  "error_generic_title": "Something went wrong",
+  "error_generic_message": "Please try again later",
+  "auth_error_create_account": "Failed to create account or send verification email",
+  "auth_error_additional_verification": "Additional verification steps required",
+  "auth_error_verification_failed": "Verification failed: Invalid code or network error",
+  "auth_error_additional_steps": "Additional steps are required for sign-in.",
+  "auth_error_invalid_credentials": "Sign-in failed: Invalid credentials or network error",
+  "transaction_verify_error": "Failed to verify transaction",
+  "transaction_delete_error": "Failed to delete transaction"
 }

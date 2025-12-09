@@ -50,14 +50,14 @@ export default function SignInScreen() {
           await setActive({ session: signInAttempt.createdSessionId });
           router.replace('/');
         } else {
-          setApiError(t('auth.error.additional_steps', 'Additional steps are required for sign-in.'));
+          setApiError(t('auth_error_additional_steps'));
           logger.warn('Sign-in requires additional steps', {
             context: 'SignIn',
             data: { status: signInAttempt.status },
           });
         }
       } catch (err) {
-        setApiError(t('auth.error.invalid_credentials', 'Sign-in failed: Invalid credentials or network error'));
+        setApiError(t('auth_error_invalid_credentials'));
         logger.error(err as Error, { context: 'SignIn' });
       } finally {
         setLoading(false);
