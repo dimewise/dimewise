@@ -8,8 +8,8 @@ type Props = {
   filters: Filter;
   onRemoveFilter: (filterKey: keyof Filter) => void;
   onClearAll: () => void;
-  categories?: Array<{ id: string; title: string }>;
-  paymentMethods?: Array<{ id: string; title: string }>;
+  categories?: Array<{ id: string; title: string; deleted_at?: string | null }>;
+  paymentMethods?: Array<{ id: string; title: string; deleted_at?: string | null }>;
 };
 
 type FilterChip = {
@@ -32,19 +32,25 @@ export const FilterChips = ({
 
     if (filters.categoryId) {
       const category = categories?.find((cat) => cat.id === filters.categoryId);
+      const isDeleted = !!category?.deleted_at;
       chips.push({
         key: 'categoryId',
         label: t('transactions_filter_category'),
-        value: category?.title || 'Unknown Category',
+        value: category?.title 
+          ? (isDeleted ? `${category.title} (${t('common_deleted')})` : category.title)
+          : t('common_unknown', 'Unknown'),
       });
     }
 
     if (filters.paymentMethodId) {
       const method = paymentMethods?.find((method) => method.id === filters.paymentMethodId);
+      const isDeleted = !!method?.deleted_at;
       chips.push({
         key: 'paymentMethodId',
         label: t('transactions_filter_payment_method'),
-        value: method?.title || 'Unknown Method',
+        value: method?.title 
+          ? (isDeleted ? `${method.title} (${t('common_deleted')})` : method.title)
+          : t('common_unknown', 'Unknown'),
       });
     }
 

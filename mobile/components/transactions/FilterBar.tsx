@@ -21,8 +21,9 @@ export const FilterBar = ({ filter, setFilter, onOpenFilterModal, onFilterChange
   const debouncedSearch = useDebounce(search, 400);
 
   // Fetch categories and payment methods for filter chips
-  const { data: categories } = useGetCategoriesQuery({ includeDeleted: false });
-  const { data: paymentMethods } = useGetPaymentMethodsQuery({ includeDeleted: false });
+  // Include deleted ones so we can show the names of deleted items that are still in the filter
+  const { data: categories } = useGetCategoriesQuery({ includeDeleted: true });
+  const { data: paymentMethods } = useGetPaymentMethodsQuery({ includeDeleted: true });
 
   /* only sync to parent when debounced value changes */
   useEffect(() => {

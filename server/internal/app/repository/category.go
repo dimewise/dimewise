@@ -22,7 +22,8 @@ func GetCategoriesByUserID(
 	tbl := table.Category
 
 	cond := tbl.UserID.EQ(postgres.UUID(userID))
-	if params.IncludeDeleted != nil && !*params.IncludeDeleted {
+	// Exclude deleted items by default (only include if IncludeDeleted is explicitly true)
+	if params.IncludeDeleted == nil || !*params.IncludeDeleted {
 		cond = cond.AND(tbl.DeletedAt.IS_NULL())
 	}
 

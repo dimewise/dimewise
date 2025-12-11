@@ -61,6 +61,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       ITSAppUsesNonExemptEncryption: false,
     },
     usesAppleSignIn: true,
+    entitlements: {
+      'com.apple.developer.applesignin': ['Default'],
+    },
   },
   android: {
     adaptiveIcon: {

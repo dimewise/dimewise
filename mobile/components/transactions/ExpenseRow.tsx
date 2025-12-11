@@ -130,6 +130,10 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
 
   // Format date for display
   const formattedDate = DateTime.fromISO(item.incurred_at).setLocale(locale).toLocaleString(DateTime.DATE_MED);
+  
+  // Check if payment method or category is deleted
+  const isPaymentMethodDeleted = !!item.payment_method.deleted_at;
+  const isCategoryDeleted = !!item.category.deleted_at;
 
   const renderRightActions = useCallback(
     () => (
@@ -165,7 +169,11 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
                 {isVerified && <Text className="text-xs text-emerald-500 font-bold">✓</Text>}
               </View>
               <Text className="text-xs text-neutral-500 mt-0.5">
-                {item.category.title} · {item.payment_method.title} · {formattedDate}
+                <Text className={isCategoryDeleted ? 'line-through text-neutral-400' : ''}>{item.category.title}</Text>
+                {' · '}
+                <Text className={isPaymentMethodDeleted ? 'line-through text-neutral-400' : ''}>{item.payment_method.title}</Text>
+                {' · '}
+                {formattedDate}
               </Text>
             </View>
             <Text className="text-[15px] font-semibold text-neutral-900 tabular-nums">{formatCurrency(item.amount, currency, locale)}</Text>

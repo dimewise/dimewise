@@ -114,12 +114,8 @@ export const SocialSignInButton = memo(function SocialSignInButton({
         logger.info(`${config.name} Sign-In successful`, { context: 'SocialSignInButton' });
         onSuccess?.();
         
-        // Navigate based on whether it's a new user or existing
-        if (signUp?.createdSessionId) {
-          router.replace('/(onboarding)/finish');
-        } else {
-          router.replace('/(app)/(tabs)');
-        }
+        // Navigate to app - layout will handle onboarding redirect if needed
+        router.replace('/(app)');
         return;
       }
 
