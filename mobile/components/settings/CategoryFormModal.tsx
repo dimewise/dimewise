@@ -55,8 +55,8 @@ export const CategoryFormModal = ({
 
   // API hooks
   const { data: existingCategory } = useGetCategoriesByCategoryIdQuery(
-    { categoryId: categoryId! },
-    { skip: !isEdit },
+    { categoryId: categoryId || '' },
+    { skip: !categoryId || !isEdit },
   );
   const [createCategory, { isLoading: isCreating }] = usePostCategoriesMutation();
   const [updateCategory, { isLoading: isUpdating }] = usePutCategoriesByCategoryIdMutation();
@@ -70,7 +70,7 @@ export const CategoryFormModal = ({
     resolver: zodResolver(postCategoryBody),
     defaultValues: {
       title: initialTitle || '',
-      amount: initialAmount ? parseInt(initialAmount) : 0,
+      amount: initialAmount ? parseInt(initialAmount, 10) : 0,
     },
   });
 
@@ -87,7 +87,7 @@ export const CategoryFormModal = ({
       } else if (initialTitle || initialAmount) {
         reset({
           title: initialTitle || '',
-          amount: initialAmount ? parseInt(initialAmount) : 0,
+          amount: initialAmount ? parseInt(initialAmount, 10) : 0,
         });
         setDisplayValue(initialAmount || '');
       } else {
@@ -172,7 +172,7 @@ export const CategoryFormModal = ({
                     const parts = cleanText.split('.');
                     if (parts.length <= 2) {
                       const decimalPart = parts[1] ? parts[1].substring(0, 2) : '';
-                      const formattedText = parts[0] + '.' + decimalPart;
+                      const formattedText = `${parts[0]}.${decimalPart}`;
                       setDisplayValue(formattedText);
                       const numValue = formattedText ? parseFloat(formattedText) : 0;
                       onChange(numValue);

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { TouchableOpacity, type TouchableOpacityProps } from 'react-native';
 import { colors } from '@/theme/colors';
 import type { IconName } from '@/types';

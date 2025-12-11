@@ -4,7 +4,9 @@ import { DateTime } from 'luxon';
 import { memo, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
-import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import ReanimatedSwipeable, {
+  type SwipeableMethods,
+} from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 import type { ExpenseWithDetails } from '@/generated/api/api';
 import {
@@ -72,7 +74,7 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
   const { currency, locale } = useUserLocale();
   const [verifyExpense, { isLoading: isVerifying }] = usePostExpensesByExpenseIdVerifyMutation();
   const [deleteExpense] = useDeleteExpensesByExpenseIdMutation();
-  const swipeableRef = useRef<any>(null);
+  const swipeableRef = useRef<SwipeableMethods>(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
 
   const isVerified = !!item.verified_at;

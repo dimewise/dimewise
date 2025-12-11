@@ -58,15 +58,16 @@ export const signInWithApple = async (): Promise<AppleAuthResult | null> => {
           }
         : null,
     };
-  } catch (error: any) {
-    if (error.code === 'ERR_REQUEST_CANCELED') {
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+    if (err.code === 'ERR_REQUEST_CANCELED') {
       logger.info('Apple Sign-In cancelled by user', { context: 'AppleAuth' });
       return null;
     }
 
-    logger.error(error, {
+    logger.error(error instanceof Error ? error : String(error), {
       context: 'AppleAuth',
-      data: { code: error.code },
+      data: { code: err.code },
     });
     throw error;
   }

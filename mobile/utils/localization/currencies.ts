@@ -44,7 +44,7 @@ export const formatCurrency = (
 export const parseCurrencyInput = (input: string | number, currency: string): number => {
   const numValue = typeof input === 'string' ? parseFloat(input) : input;
 
-  if (isNaN(numValue)) {
+  if (Number.isNaN(numValue)) {
     return 0;
   }
 

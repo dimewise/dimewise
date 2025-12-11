@@ -6,7 +6,7 @@ import { ModalButton } from '@/components/modals/ModalButton';
 import { ModalContainer } from '@/components/modals/ModalContainer';
 import { ModalFooter } from '@/components/modals/ModalFooter';
 import { ModalHeader } from '@/components/modals/ModalHeader';
-import { useGetUsersMeQuery, usePutUsersMeMutation } from '@/generated/api/api';
+import { type CurrencyType, useGetUsersMeQuery, usePutUsersMeMutation } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { CURRENCIES } from '@/utils/constants';
 
@@ -18,9 +18,9 @@ type Props = {
 
 export const CurrencySelectorModal = ({ visible, onClose, onSuccess }: Props) => {
   const { t } = useTranslation();
-  const { data: user } = useGetUsersMeQuery();
+  const { data: user } = useGetUsersMeQuery(undefined);
   const [updateUser, { isLoading }] = usePutUsersMeMutation();
-  const [selectedCurrency, setSelectedCurrency] = useState(user?.currency ?? 'USD');
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyType>(user?.currency ?? 'USD');
 
   // Reset selected currency when modal opens
   useEffect(() => {
@@ -56,7 +56,7 @@ export const CurrencySelectorModal = ({ visible, onClose, onSuccess }: Props) =>
     try {
       await updateUser({
         userUpdate: {
-          currency: selectedCurrency as any,
+          currency: selectedCurrency,
           preferred_language: user.preferred_language,
         },
       }).unwrap();

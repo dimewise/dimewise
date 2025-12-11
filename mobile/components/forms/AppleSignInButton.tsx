@@ -2,7 +2,7 @@ import { useSignInWithApple } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Platform, Text, TouchableOpacity } from 'react-native';
 import { logger } from '@/lib/logger';
@@ -49,20 +49,23 @@ export const AppleSignInButton = memo(function AppleSignInButton({
         // Navigate to app - layout will handle onboarding redirect if needed
         router.replace('/(app)');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
       // Handle user cancellation gracefully
       if (
-        error.code === 'ERR_REQUEST_CANCELED' ||
-        error.code === 'ERR_CANCELED' ||
-        error.message?.includes('cancelled') ||
-        error.message?.includes('canceled')
+        err.code === 'ERR_REQUEST_CANCELED' ||
+        err.code === 'ERR_CANCELED' ||
+        err.message?.includes('cancelled') ||
+        err.message?.includes('canceled')
       ) {
         logger.debug('Apple Sign-In cancelled by user', { context: 'AppleSignInButton' });
         return;
       }
 
-      logger.error(error, { context: 'AppleSignInButton' });
-      onError?.(error);
+      logger.error(error instanceof Error ? error : String(error), {
+        context: 'AppleSignInButton',
+      });
+      onError?.(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsLoading(false);
     }

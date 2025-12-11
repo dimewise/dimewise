@@ -90,7 +90,7 @@ export default function ExpensesScreen() {
   }, [filter]);
 
   /* ---------- query ---------- */
-  const { data, error, isLoading, isFetching, refetch } = useGetExpensesQuery(queryArgs, {
+  const { data, isLoading, isFetching, refetch } = useGetExpensesQuery(queryArgs, {
     refetchOnMountOrArgChange: true,
   });
   const [fetchNext] = useLazyGetExpensesQuery();

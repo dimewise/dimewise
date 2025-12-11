@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert } from 'react-native';
 import type { Category, CategoryCreate, CategoryUpdate } from '@/generated/api/api';

@@ -1,4 +1,4 @@
-import React, { memo, type ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Pressable, View, type ViewProps } from 'react-native';
 import { cn } from '@/utils/cn';
 

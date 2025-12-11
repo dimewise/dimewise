@@ -99,7 +99,7 @@ export const getCurrencyPlaceholder = (currency: CurrencyType): string => {
  */
 export const validateCurrencyInput = (input: string, currency: CurrencyType): boolean => {
   const numValue = parseFloat(input);
-  if (isNaN(numValue) || numValue < 0) return false;
+  if (Number.isNaN(numValue) || numValue < 0) return false;
 
   if (currencyUsesDecimals(currency)) {
     // For decimal currencies, allow up to 2 decimal places

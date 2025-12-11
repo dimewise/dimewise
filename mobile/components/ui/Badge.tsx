@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Text, View } from 'react-native';
 import { cn } from '@/utils/cn';
 

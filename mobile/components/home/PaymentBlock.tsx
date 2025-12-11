@@ -5,7 +5,6 @@ import { Pressable, Text, View } from 'react-native';
 import { Card } from '@/components/ui/Card';
 import type { PaymentMethodBreakdown } from '@/generated/api/api';
 import { useUserLocale } from '@/hooks/useUserLocale';
-import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
 
 type Props = {

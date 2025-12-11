@@ -6,7 +6,7 @@ import { getLocaleFromLanguage } from '@/utils/localization/currencies';
  * Provides currency, language, and locale string based on user's settings (not device)
  */
 export const useUserLocale = () => {
-  const { data: user } = useGetUsersMeQuery();
+  const { data: user } = useGetUsersMeQuery(undefined);
 
   return {
     currency: user?.currency || 'USD',
