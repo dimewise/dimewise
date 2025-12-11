@@ -1,13 +1,13 @@
 import { useCallback, useMemo } from 'react';
-import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Alert } from 'react-native';
+import type { Category, CategoryCreate, CategoryUpdate } from '@/generated/api/api';
 import {
+  useDeleteCategoriesByCategoryIdMutation,
   useGetCategoriesQuery,
   usePostCategoriesMutation,
   usePutCategoriesByCategoryIdMutation,
-  useDeleteCategoriesByCategoryIdMutation,
 } from '@/generated/api/api';
-import type { Category, CategoryCreate, CategoryUpdate } from '@/generated/api/api';
 import { logger } from '@/lib/logger';
 
 interface UseCategoriesOptions {
@@ -40,14 +40,13 @@ export function useCategories(options?: UseCategoriesOptions) {
         options?.onMutationSuccess?.();
         return result;
       } catch (err) {
-        const error =
-          err instanceof Error ? err : new Error('Failed to create category');
+        const error = err instanceof Error ? err : new Error('Failed to create category');
         logger.error(error, { context: 'useCategories' });
         options?.onMutationError?.(error);
         throw error;
       }
     },
-    [createCategoryMutation, options]
+    [createCategoryMutation, options],
   );
 
   // Update
@@ -65,14 +64,13 @@ export function useCategories(options?: UseCategoriesOptions) {
         options?.onMutationSuccess?.();
         return result;
       } catch (err) {
-        const error =
-          err instanceof Error ? err : new Error('Failed to update category');
+        const error = err instanceof Error ? err : new Error('Failed to update category');
         logger.error(error, { context: 'useCategories' });
         options?.onMutationError?.(error);
         throw error;
       }
     },
-    [updateCategoryMutation, options]
+    [updateCategoryMutation, options],
   );
 
   // Delete with confirmation
@@ -100,19 +98,16 @@ export function useCategories(options?: UseCategoriesOptions) {
                 });
                 options?.onMutationSuccess?.();
               } catch (err) {
-                const error =
-                  err instanceof Error
-                    ? err
-                    : new Error('Failed to delete category');
+                const error = err instanceof Error ? err : new Error('Failed to delete category');
                 logger.error(error, { context: 'useCategories' });
                 options?.onMutationError?.(error);
               }
             },
           },
-        ]
+        ],
       );
     },
-    [deleteCategoryMutation, options, t]
+    [deleteCategoryMutation, options, t],
   );
 
   return {
@@ -131,7 +126,6 @@ export function useCategories(options?: UseCategoriesOptions) {
     isCreating: createState.isLoading,
     isUpdating: updateState.isLoading,
     isDeleting: deleteState.isLoading,
-    isMutating:
-      createState.isLoading || updateState.isLoading || deleteState.isLoading,
+    isMutating: createState.isLoading || updateState.isLoading || deleteState.isLoading,
   };
 }

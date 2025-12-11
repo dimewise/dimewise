@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { View, Text } from 'react-native';
+import { Text, View } from 'react-native';
 import { cn } from '@/utils/cn';
 
 type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'info';
@@ -33,12 +33,10 @@ export const Badge = memo(function Badge({
         'rounded-full self-start',
         size === 'sm' ? 'px-2 py-0.5' : 'px-3 py-1',
         container,
-        className
+        className,
       )}
     >
-      <Text
-        className={cn('font-medium', size === 'sm' ? 'text-xs' : 'text-sm', text)}
-      >
+      <Text className={cn('font-medium', size === 'sm' ? 'text-xs' : 'text-sm', text)}>
         {label}
       </Text>
     </View>

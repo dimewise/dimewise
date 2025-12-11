@@ -3,14 +3,19 @@ import { Redirect } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useEffect } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useGetUsersMeQuery } from '@/generated/api/api';
 import { LoadingScreen } from '@/components/LoadingScreen';
+import { useGetUsersMeQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { syncLanguageWithUser } from '@/utils/localization/i18n';
 
 export default function RootLayout() {
   const { isSignedIn, isLoaded } = useAuth();
-  const { data: user, isLoading, error, refetch } = useGetUsersMeQuery(undefined, {
+  const {
+    data: user,
+    isLoading,
+    error,
+    refetch,
+  } = useGetUsersMeQuery(undefined, {
     skip: !isSignedIn,
   });
 
@@ -52,10 +57,10 @@ export default function RootLayout() {
       console.log('[AppLayout] User not found in backend, redirecting to onboarding');
       return <Redirect href="/(onboarding)/finish" />;
     }
-    
+
     // Log actual errors
     console.error('[AppLayout] Error loading user data:', error);
-    
+
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorTitle}>Failed to load user data</Text>

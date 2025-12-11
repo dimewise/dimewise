@@ -1,19 +1,19 @@
-import { DateTime } from 'luxon';
-import { useCallback, useEffect, useMemo, useState, memo } from 'react';
-import { FlatList, Pressable, Text, View, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
 import { useLocalSearchParams } from 'expo-router';
-import { AppLayout } from '@/components/layouts/AppLayout';
+import { DateTime } from 'luxon';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { EmptyState, LoadingState } from '@/components/feedback';
+import { AppLayout } from '@/components/layouts/AppLayout';
+import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
+import { FilterModal } from '@/components/modals/FilterModal';
 import { ExpenseRow } from '@/components/transactions';
 import { FilterBar } from '@/components/transactions/FilterBar';
-import { FilterModal } from '@/components/modals/FilterModal';
-import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
-import { EmptyState, LoadingState } from '@/components/feedback';
 import { useGetExpensesQuery, useLazyGetExpensesQuery } from '@/generated/api/api';
-import { colors } from '@/theme/colors';
 import { useModal } from '@/hooks/ui';
+import { colors } from '@/theme/colors';
 
 export type Filter = {
   search?: string;
@@ -26,16 +26,21 @@ export type Filter = {
 const LIMIT = 20;
 
 // Memoized load more button
-const LoadMoreButton = memo<{ onPress: () => void; isFetching: boolean }>(({ onPress, isFetching }) => {
-  const { t } = useTranslation();
-  return (
-    <Pressable onPress={onPress} className="mx-4 mt-4 p-2.5 bg-surface rounded-lg items-center">
-      <Text className="text-primary-500 font-semibold">
-        {isFetching ? t('transactions_loading') : t('transactions_load_more')}
-      </Text>
-    </Pressable>
-  );
-});
+const LoadMoreButton = memo<{ onPress: () => void; isFetching: boolean }>(
+  ({ onPress, isFetching }) => {
+    const { t } = useTranslation();
+    return (
+      <Pressable
+        onPress={onPress}
+        className="mx-4 mt-4 p-2.5 bg-surface rounded-lg items-center"
+      >
+        <Text className="text-primary-500 font-semibold">
+          {isFetching ? t('transactions_loading') : t('transactions_load_more')}
+        </Text>
+      </Pressable>
+    );
+  },
+);
 
 LoadMoreButton.displayName = 'LoadMoreButton';
 
@@ -101,13 +106,18 @@ export default function ExpensesScreen() {
 
   /* ---------- data ---------- */
   const expenses = useMemo(() => data?.data ?? [], [data]);
-  
+
   // Show loading state only on initial load
   const isInitialLoading = isLoading && !data;
 
   // Memoized render item
   const renderItem = useCallback(
-    ({ item }: { item: (typeof expenses)[0] }) => <ExpenseRow item={item} onUpdate={refetch} />,
+    ({ item }: { item: (typeof expenses)[0] }) => (
+      <ExpenseRow
+        item={item}
+        onUpdate={refetch}
+      />
+    ),
     [refetch],
   );
 
@@ -117,12 +127,23 @@ export default function ExpensesScreen() {
   // List footer component
   const ListFooterComponent = useMemo(() => {
     if (!data?.pagination.has_next) return null;
-    return <LoadMoreButton onPress={loadMore} isFetching={isFetching} />;
+    return (
+      <LoadMoreButton
+        onPress={loadMore}
+        isFetching={isFetching}
+      />
+    );
   }, [data?.pagination.has_next, loadMore, isFetching]);
 
   // Empty state component - only show when not loading and no data
   const ListEmptyComponent = useMemo(
-    () => isInitialLoading ? null : <EmptyState title={t('transactions_empty')} className="mt-8" />,
+    () =>
+      isInitialLoading ? null : (
+        <EmptyState
+          title={t('transactions_empty')}
+          className="mt-8"
+        />
+      ),
     [t, isInitialLoading],
   );
 
@@ -133,9 +154,14 @@ export default function ExpensesScreen() {
   if (isInitialLoading) {
     return (
       <AppLayout>
-        <SafeAreaView className="flex-1 items-center justify-start w-full px-5 bg-white" edges={['top']}>
+        <SafeAreaView
+          className="flex-1 items-center justify-start w-full px-5 bg-white"
+          edges={['top']}
+        >
           <View className="w-full py-4">
-            <Text className="text-2xl font-semibold text-neutral-900">{t('page_title_transactions')}</Text>
+            <Text className="text-2xl font-semibold text-neutral-900">
+              {t('page_title_transactions')}
+            </Text>
             <FilterBar
               filter={filter}
               setFilter={setFilter}
@@ -143,7 +169,10 @@ export default function ExpensesScreen() {
               onFilterChange={setFilter}
             />
           </View>
-          <LoadingState fullScreen={false} className="flex-1" />
+          <LoadingState
+            fullScreen={false}
+            className="flex-1"
+          />
         </SafeAreaView>
       </AppLayout>
     );
@@ -151,9 +180,14 @@ export default function ExpensesScreen() {
 
   return (
     <AppLayout>
-      <SafeAreaView className="flex-1 items-center justify-start w-full px-5 bg-white" edges={['top']}>
+      <SafeAreaView
+        className="flex-1 items-center justify-start w-full px-5 bg-white"
+        edges={['top']}
+      >
         <View className="w-full py-4">
-          <Text className="text-2xl font-semibold text-neutral-900">{t('page_title_transactions')}</Text>
+          <Text className="text-2xl font-semibold text-neutral-900">
+            {t('page_title_transactions')}
+          </Text>
           <FilterBar
             filter={filter}
             setFilter={setFilter}

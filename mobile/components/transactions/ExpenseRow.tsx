@@ -1,20 +1,20 @@
-import { DateTime } from 'luxon';
-import { Text, View, Pressable, Alert, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
-import { useRef, useState, useCallback, memo } from 'react';
-import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Octicons from '@expo/vector-icons/Octicons';
+import { useRouter } from 'expo-router';
+import { DateTime } from 'luxon';
+import { memo, useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 import type { ExpenseWithDetails } from '@/generated/api/api';
 import {
-  usePostExpensesByExpenseIdVerifyMutation,
   useDeleteExpensesByExpenseIdMutation,
+  usePostExpensesByExpenseIdVerifyMutation,
 } from '@/generated/api/api';
+import { useUserLocale } from '@/hooks/useUserLocale';
+import { logger } from '@/lib/logger';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
-import { useUserLocale } from '@/hooks/useUserLocale';
-import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
-import { logger } from '@/lib/logger';
 
 interface ExpenseRowProps {
   item: ExpenseWithDetails;
@@ -46,9 +46,16 @@ const SwipeActionButton = memo<SwipeActionButtonProps>(
         disabled={disabled}
       >
         {isLoading ? (
-          <ActivityIndicator size="small" color={colors.background} />
+          <ActivityIndicator
+            size="small"
+            color={colors.background}
+          />
         ) : (
-          <Octicons name={icon} size={20} color={colors.background} />
+          <Octicons
+            name={icon}
+            size={20}
+            color={colors.background}
+          />
         )}
         <Text className="text-white text-[11px] font-semibold text-center">{label}</Text>
       </Pressable>
@@ -98,26 +105,30 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
   }, [router, item.id]);
 
   const handleDelete = useCallback(() => {
-    Alert.alert(t('transaction_details_delete_confirm_title'), t('transaction_details_delete_confirm'), [
-      {
-        text: t('form_cancel'),
-        style: 'cancel',
-      },
-      {
-        text: t('transaction_details_delete'),
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteExpense({ expenseId: item.id }).unwrap();
-            onUpdate?.();
-          } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-            logger.error(`Error deleting expense: ${errorMessage}`);
-            Alert.alert(t('common_error'), t('transaction_delete_error'));
-          }
+    Alert.alert(
+      t('transaction_details_delete_confirm_title'),
+      t('transaction_details_delete_confirm'),
+      [
+        {
+          text: t('form_cancel'),
+          style: 'cancel',
         },
-      },
-    ]);
+        {
+          text: t('transaction_details_delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteExpense({ expenseId: item.id }).unwrap();
+              onUpdate?.();
+            } catch (err) {
+              const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+              logger.error(`Error deleting expense: ${errorMessage}`);
+              Alert.alert(t('common_error'), t('transaction_delete_error'));
+            }
+          },
+        },
+      ],
+    );
   }, [deleteExpense, item.id, onUpdate, t]);
 
   const handleFormClose = useCallback(() => {
@@ -129,8 +140,10 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
   }, [onUpdate]);
 
   // Format date for display
-  const formattedDate = DateTime.fromISO(item.incurred_at).setLocale(locale).toLocaleString(DateTime.DATE_MED);
-  
+  const formattedDate = DateTime.fromISO(item.incurred_at)
+    .setLocale(locale)
+    .toLocaleString(DateTime.DATE_MED);
+
   // Check if payment method or category is deleted
   const isPaymentMethodDeleted = !!item.payment_method.deleted_at;
   const isCategoryDeleted = !!item.category.deleted_at;
@@ -148,8 +161,18 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
             isLoading={isVerifying}
           />
         )}
-        <SwipeActionButton onPress={handleEdit} icon="pencil" label={t('transaction_swipe_edit')} variant="edit" />
-        <SwipeActionButton onPress={handleDelete} icon="trash" label={t('transaction_swipe_delete')} variant="delete" />
+        <SwipeActionButton
+          onPress={handleEdit}
+          icon="pencil"
+          label={t('transaction_swipe_edit')}
+          variant="edit"
+        />
+        <SwipeActionButton
+          onPress={handleDelete}
+          icon="trash"
+          label={t('transaction_swipe_delete')}
+          variant="delete"
+        />
       </View>
     ),
     [isVerified, isVerifying, handleVerify, handleEdit, handleDelete, t],
@@ -157,7 +180,10 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
 
   return (
     <>
-      <ReanimatedSwipeable ref={swipeableRef} renderRightActions={renderRightActions}>
+      <ReanimatedSwipeable
+        ref={swipeableRef}
+        renderRightActions={renderRightActions}
+      >
         <Pressable
           onPress={handleViewDetails}
           className={`bg-white rounded-xl p-4 border border-neutral-200 ${isVerified ? 'border-l-4 border-l-emerald-500' : ''}`}
@@ -169,14 +195,20 @@ export const ExpenseRow = memo<ExpenseRowProps>(({ item, onUpdate }) => {
                 {isVerified && <Text className="text-xs text-emerald-500 font-bold">✓</Text>}
               </View>
               <Text className="text-xs text-neutral-500 mt-0.5">
-                <Text className={isCategoryDeleted ? 'line-through text-neutral-400' : ''}>{item.category.title}</Text>
+                <Text className={isCategoryDeleted ? 'line-through text-neutral-400' : ''}>
+                  {item.category.title}
+                </Text>
                 {' · '}
-                <Text className={isPaymentMethodDeleted ? 'line-through text-neutral-400' : ''}>{item.payment_method.title}</Text>
+                <Text className={isPaymentMethodDeleted ? 'line-through text-neutral-400' : ''}>
+                  {item.payment_method.title}
+                </Text>
                 {' · '}
                 {formattedDate}
               </Text>
             </View>
-            <Text className="text-[15px] font-semibold text-neutral-900 tabular-nums">{formatCurrency(item.amount, currency, locale)}</Text>
+            <Text className="text-[15px] font-semibold text-neutral-900 tabular-nums">
+              {formatCurrency(item.amount, currency, locale)}
+            </Text>
           </View>
         </Pressable>
       </ReanimatedSwipeable>

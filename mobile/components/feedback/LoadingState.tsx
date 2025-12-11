@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import { cn } from '@/utils/cn';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
+import { cn } from '@/utils/cn';
 
 interface LoadingStateProps {
   message?: string;
@@ -18,13 +18,12 @@ export const LoadingState = memo(function LoadingState({
 }: LoadingStateProps) {
   return (
     <View
-      className={cn(
-        'items-center justify-center p-6',
-        fullScreen && 'flex-1 bg-white',
-        className
-      )}
+      className={cn('items-center justify-center p-6', fullScreen && 'flex-1 bg-white', className)}
     >
-      <ActivityIndicator size={size} color={colors.primary.DEFAULT} />
+      <ActivityIndicator
+        size={size}
+        color={colors.primary.DEFAULT}
+      />
       {message && <Text className="mt-4 text-sm text-neutral-500">{message}</Text>}
     </View>
   );

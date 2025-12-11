@@ -1,15 +1,10 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
-import {
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  Platform,
-} from 'react-native';
-import * as AppleAuthentication from 'expo-apple-authentication';
-import { Ionicons } from '@expo/vector-icons';
 import { useSignInWithApple } from '@clerk/clerk-expo';
+import { Ionicons } from '@expo/vector-icons';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useRouter } from 'expo-router';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Platform, Text, TouchableOpacity } from 'react-native';
 import { logger } from '@/lib/logger';
 import { cn } from '@/utils/cn';
 
@@ -41,7 +36,7 @@ export const AppleSignInButton = memo(function AppleSignInButton({
 
   const handlePress = useCallback(async () => {
     setIsLoading(true);
-    
+
     try {
       // Use Clerk's native Apple Sign-In hook
       // This handles both sign-in and sign-up automatically
@@ -86,19 +81,25 @@ export const AppleSignInButton = memo(function AppleSignInButton({
       className={cn(
         'flex-row items-center justify-center w-full py-3.5 px-6 rounded-xl bg-white border border-neutral-300',
         isLoading && 'opacity-70',
-        className
+        className,
       )}
     >
       {isLoading ? (
-        <ActivityIndicator color="#000" size="small" />
+        <ActivityIndicator
+          color="#000"
+          size="small"
+        />
       ) : (
         <>
-          <Ionicons name="logo-apple" size={20} color="#000" />
+          <Ionicons
+            name="logo-apple"
+            size={20}
+            color="#000"
+          />
           <Text className="ml-3 text-base font-semibold text-black">
             {mode === 'sign-in'
               ? t('auth_apple_sign_in', 'Sign in with Apple')
-              : t('auth_apple_sign_up', 'Sign up with Apple')
-            }
+              : t('auth_apple_sign_up', 'Sign up with Apple')}
           </Text>
         </>
       )}

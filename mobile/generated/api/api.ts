@@ -1,10 +1,10 @@
-import { api } from "./client";
+import { api } from './client';
 export const addTagTypes = [
-  "Users",
-  "Categories",
-  "Payment Methods",
-  "Expenses",
-  "Analytics",
+  'Users',
+  'Categories',
+  'Payment Methods',
+  'Expenses',
+  'Analytics',
 ] as const;
 const injectedRtkApi = api
   .enhanceEndpoints({
@@ -14,52 +14,47 @@ const injectedRtkApi = api
     endpoints: (build) => ({
       getUsersMe: build.query<GetUsersMeApiResponse, GetUsersMeApiArg>({
         query: () => ({ url: `/users/me` }),
-        providesTags: ["Users"],
+        providesTags: ['Users'],
       }),
       postUsersMe: build.mutation<PostUsersMeApiResponse, PostUsersMeApiArg>({
         query: (queryArg) => ({
           url: `/users/me`,
-          method: "POST",
+          method: 'POST',
           body: queryArg.userCreate,
         }),
-        invalidatesTags: ["Users"],
+        invalidatesTags: ['Users'],
       }),
       putUsersMe: build.mutation<PutUsersMeApiResponse, PutUsersMeApiArg>({
         query: (queryArg) => ({
           url: `/users/me`,
-          method: "PUT",
+          method: 'PUT',
           body: queryArg.userUpdate,
         }),
-        invalidatesTags: ["Users"],
+        invalidatesTags: ['Users'],
       }),
-      getCategories: build.query<GetCategoriesApiResponse, GetCategoriesApiArg>(
-        {
-          query: (queryArg) => ({
-            url: `/categories`,
-            params: {
-              include_deleted: queryArg.includeDeleted,
-            },
-          }),
-          providesTags: ["Categories"],
-        },
-      ),
-      postCategories: build.mutation<
-        PostCategoriesApiResponse,
-        PostCategoriesApiArg
-      >({
+      getCategories: build.query<GetCategoriesApiResponse, GetCategoriesApiArg>({
         query: (queryArg) => ({
           url: `/categories`,
-          method: "POST",
+          params: {
+            include_deleted: queryArg.includeDeleted,
+          },
+        }),
+        providesTags: ['Categories'],
+      }),
+      postCategories: build.mutation<PostCategoriesApiResponse, PostCategoriesApiArg>({
+        query: (queryArg) => ({
+          url: `/categories`,
+          method: 'POST',
           body: queryArg.categoryCreate,
         }),
-        invalidatesTags: ["Categories"],
+        invalidatesTags: ['Categories'],
       }),
       getCategoriesByCategoryId: build.query<
         GetCategoriesByCategoryIdApiResponse,
         GetCategoriesByCategoryIdApiArg
       >({
         query: (queryArg) => ({ url: `/categories/${queryArg.categoryId}` }),
-        providesTags: ["Categories"],
+        providesTags: ['Categories'],
       }),
       putCategoriesByCategoryId: build.mutation<
         PutCategoriesByCategoryIdApiResponse,
@@ -67,10 +62,10 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/categories/${queryArg.categoryId}`,
-          method: "PUT",
+          method: 'PUT',
           body: queryArg.categoryUpdate,
         }),
-        invalidatesTags: ["Categories"],
+        invalidatesTags: ['Categories'],
       }),
       deleteCategoriesByCategoryId: build.mutation<
         DeleteCategoriesByCategoryIdApiResponse,
@@ -78,32 +73,26 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/categories/${queryArg.categoryId}`,
-          method: "DELETE",
+          method: 'DELETE',
         }),
-        invalidatesTags: ["Categories"],
+        invalidatesTags: ['Categories'],
       }),
-      getPaymentMethods: build.query<
-        GetPaymentMethodsApiResponse,
-        GetPaymentMethodsApiArg
-      >({
+      getPaymentMethods: build.query<GetPaymentMethodsApiResponse, GetPaymentMethodsApiArg>({
         query: (queryArg) => ({
           url: `/payment-methods`,
           params: {
             include_deleted: queryArg.includeDeleted,
           },
         }),
-        providesTags: ["Payment Methods"],
+        providesTags: ['Payment Methods'],
       }),
-      postPaymentMethods: build.mutation<
-        PostPaymentMethodsApiResponse,
-        PostPaymentMethodsApiArg
-      >({
+      postPaymentMethods: build.mutation<PostPaymentMethodsApiResponse, PostPaymentMethodsApiArg>({
         query: (queryArg) => ({
           url: `/payment-methods`,
-          method: "POST",
+          method: 'POST',
           body: queryArg.paymentMethodCreate,
         }),
-        invalidatesTags: ["Payment Methods"],
+        invalidatesTags: ['Payment Methods'],
       }),
       getPaymentMethodsByPaymentMethodId: build.query<
         GetPaymentMethodsByPaymentMethodIdApiResponse,
@@ -112,7 +101,7 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/payment-methods/${queryArg.paymentMethodId}`,
         }),
-        providesTags: ["Payment Methods"],
+        providesTags: ['Payment Methods'],
       }),
       putPaymentMethodsByPaymentMethodId: build.mutation<
         PutPaymentMethodsByPaymentMethodIdApiResponse,
@@ -120,10 +109,10 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/payment-methods/${queryArg.paymentMethodId}`,
-          method: "PUT",
+          method: 'PUT',
           body: queryArg.paymentMethodUpdate,
         }),
-        invalidatesTags: ["Payment Methods"],
+        invalidatesTags: ['Payment Methods'],
       }),
       deletePaymentMethodsByPaymentMethodId: build.mutation<
         DeletePaymentMethodsByPaymentMethodIdApiResponse,
@@ -131,9 +120,9 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/payment-methods/${queryArg.paymentMethodId}`,
-          method: "DELETE",
+          method: 'DELETE',
         }),
-        invalidatesTags: ["Payment Methods"],
+        invalidatesTags: ['Payment Methods'],
       }),
       getExpenses: build.query<GetExpensesApiResponse, GetExpensesApiArg>({
         query: (queryArg) => ({
@@ -149,24 +138,22 @@ const injectedRtkApi = api
             verification_status: queryArg.verificationStatus,
           },
         }),
-        providesTags: ["Expenses"],
+        providesTags: ['Expenses'],
       }),
-      postExpenses: build.mutation<PostExpensesApiResponse, PostExpensesApiArg>(
-        {
-          query: (queryArg) => ({
-            url: `/expenses`,
-            method: "POST",
-            body: queryArg.expenseCreate,
-          }),
-          invalidatesTags: ["Expenses", "Analytics"],
-        },
-      ),
+      postExpenses: build.mutation<PostExpensesApiResponse, PostExpensesApiArg>({
+        query: (queryArg) => ({
+          url: `/expenses`,
+          method: 'POST',
+          body: queryArg.expenseCreate,
+        }),
+        invalidatesTags: ['Expenses', 'Analytics'],
+      }),
       getExpensesByExpenseId: build.query<
         GetExpensesByExpenseIdApiResponse,
         GetExpensesByExpenseIdApiArg
       >({
         query: (queryArg) => ({ url: `/expenses/${queryArg.expenseId}` }),
-        providesTags: ["Expenses"],
+        providesTags: ['Expenses'],
       }),
       putExpensesByExpenseId: build.mutation<
         PutExpensesByExpenseIdApiResponse,
@@ -174,10 +161,10 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/expenses/${queryArg.expenseId}`,
-          method: "PUT",
+          method: 'PUT',
           body: queryArg.expenseUpdate,
         }),
-        invalidatesTags: ["Expenses", "Analytics"],
+        invalidatesTags: ['Expenses', 'Analytics'],
       }),
       deleteExpensesByExpenseId: build.mutation<
         DeleteExpensesByExpenseIdApiResponse,
@@ -185,9 +172,9 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/expenses/${queryArg.expenseId}`,
-          method: "DELETE",
+          method: 'DELETE',
         }),
-        invalidatesTags: ["Expenses", "Analytics"],
+        invalidatesTags: ['Expenses', 'Analytics'],
       }),
       postExpensesByExpenseIdVerify: build.mutation<
         PostExpensesByExpenseIdVerifyApiResponse,
@@ -195,9 +182,9 @@ const injectedRtkApi = api
       >({
         query: (queryArg) => ({
           url: `/expenses/${queryArg.expenseId}/verify`,
-          method: "POST",
+          method: 'POST',
         }),
-        invalidatesTags: ["Expenses", "Analytics"],
+        invalidatesTags: ['Expenses', 'Analytics'],
       }),
       getAnalyticsBudgetOverview: build.query<
         GetAnalyticsBudgetOverviewApiResponse,
@@ -210,7 +197,7 @@ const injectedRtkApi = api
             year: queryArg.year,
           },
         }),
-        providesTags: ["Analytics"],
+        providesTags: ['Analytics'],
       }),
       getAnalyticsCategoriesBreakdown: build.query<
         GetAnalyticsCategoriesBreakdownApiResponse,
@@ -223,7 +210,7 @@ const injectedRtkApi = api
             year: queryArg.year,
           },
         }),
-        providesTags: ["Analytics"],
+        providesTags: ['Analytics'],
       }),
       getAnalyticsPaymentMethodsBreakdown: build.query<
         GetAnalyticsPaymentMethodsBreakdownApiResponse,
@@ -236,7 +223,7 @@ const injectedRtkApi = api
             year: queryArg.year,
           },
         }),
-        providesTags: ["Analytics"],
+        providesTags: ['Analytics'],
       }),
       getAnalyticsRecentTransactions: build.query<
         GetAnalyticsRecentTransactionsApiResponse,
@@ -250,22 +237,19 @@ const injectedRtkApi = api
             year: queryArg.year,
           },
         }),
-        providesTags: ["Analytics"],
+        providesTags: ['Analytics'],
       }),
     }),
     overrideExisting: false,
   });
 export { injectedRtkApi as api };
-export type GetUsersMeApiResponse =
-  /** status 200 User profile retrieved successfully */ User;
+export type GetUsersMeApiResponse = /** status 200 User profile retrieved successfully */ User;
 export type GetUsersMeApiArg = void;
-export type PostUsersMeApiResponse =
-  /** status 201 User created successfully */ User;
+export type PostUsersMeApiResponse = /** status 201 User created successfully */ User;
 export type PostUsersMeApiArg = {
   userCreate: UserCreate;
 };
-export type PutUsersMeApiResponse =
-  /** status 200 User profile updated successfully */ User;
+export type PutUsersMeApiResponse = /** status 200 User profile updated successfully */ User;
 export type PutUsersMeApiArg = {
   userUpdate: UserUpdate;
 };
@@ -275,8 +259,7 @@ export type GetCategoriesApiArg = {
   /** Include soft-deleted categories */
   includeDeleted?: boolean;
 };
-export type PostCategoriesApiResponse =
-  /** status 201 Category created successfully */ Category;
+export type PostCategoriesApiResponse = /** status 201 Category created successfully */ Category;
 export type PostCategoriesApiArg = {
   categoryCreate: CategoryCreate;
 };
@@ -343,7 +326,7 @@ export type GetExpensesApiArg = {
   /** Filter expenses to this date (YYYY-MM-DD) */
   dateTo?: string;
   /** Filter by verification status */
-  verificationStatus?: "verified" | "unverified";
+  verificationStatus?: 'verified' | 'unverified';
 };
 export type PostExpensesApiResponse =
   /** status 201 Expense created successfully */ ExpenseWithDetails;
@@ -414,37 +397,37 @@ export type BaseEntity = {
   updated_at: string;
 };
 export type CurrencyType =
-  | "USD"
-  | "EUR"
-  | "GBP"
-  | "JPY"
-  | "KRW"
-  | "CAD"
-  | "AUD"
-  | "CHF"
-  | "CNY"
-  | "SEK"
-  | "NOK"
-  | "MXN"
-  | "NZD"
-  | "SGD"
-  | "HKD"
-  | "INR"
-  | "RUB"
-  | "ZAR"
-  | "TRY"
-  | "BRL"
-  | "PLN"
-  | "MYR"
-  | "THB"
-  | "VND"
-  | "IDR"
-  | "PHP"
-  | "TWD"
-  | "DKK"
-  | "CZK"
-  | "HUF";
-export type SupportedLanguage = "en" | "ja";
+  | 'USD'
+  | 'EUR'
+  | 'GBP'
+  | 'JPY'
+  | 'KRW'
+  | 'CAD'
+  | 'AUD'
+  | 'CHF'
+  | 'CNY'
+  | 'SEK'
+  | 'NOK'
+  | 'MXN'
+  | 'NZD'
+  | 'SGD'
+  | 'HKD'
+  | 'INR'
+  | 'RUB'
+  | 'ZAR'
+  | 'TRY'
+  | 'BRL'
+  | 'PLN'
+  | 'MYR'
+  | 'THB'
+  | 'VND'
+  | 'IDR'
+  | 'PHP'
+  | 'TWD'
+  | 'DKK'
+  | 'CZK'
+  | 'HUF';
+export type SupportedLanguage = 'en' | 'ja';
 export type User = BaseEntity & {
   currency: CurrencyType;
   preferred_language: SupportedLanguage;
@@ -489,12 +472,12 @@ export type SuccessResponse = {
   message: string;
 };
 export type PaymentMethodType =
-  | "credit_card"
-  | "debit_card"
-  | "cash"
-  | "bank_transfer"
-  | "digital_wallet"
-  | "other";
+  | 'credit_card'
+  | 'debit_card'
+  | 'cash'
+  | 'bank_transfer'
+  | 'digital_wallet'
+  | 'other';
 export type PaymentMethod = BaseEntity & {
   /** User ID */
   user_id: string;

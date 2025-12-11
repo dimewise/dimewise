@@ -1,5 +1,5 @@
 import React, { memo, type ReactNode } from 'react';
-import { View, Pressable, type ViewProps } from 'react-native';
+import { Pressable, View, type ViewProps } from 'react-native';
 import { cn } from '@/utils/cn';
 
 interface CardProps extends ViewProps {
@@ -28,7 +28,7 @@ export const Card = memo(function Card({
     'bg-white rounded-2xl border border-neutral-200',
     paddingClasses[padding],
     elevated && 'shadow-sm',
-    className
+    className,
   );
 
   if (onPress) {
@@ -44,7 +44,10 @@ export const Card = memo(function Card({
   }
 
   return (
-    <View className={cardClasses} {...props}>
+    <View
+      className={cardClasses}
+      {...props}
+    >
       {children}
     </View>
   );

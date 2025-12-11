@@ -1,29 +1,29 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { FormTextInput } from '@/components/forms/FormTextInput';
+import { ModalButton } from '@/components/modals/ModalButton';
+import { ModalContainer } from '@/components/modals/ModalContainer';
+import { ModalFooter } from '@/components/modals/ModalFooter';
+import { ModalHeader } from '@/components/modals/ModalHeader';
 import {
+  type CategoryCreate,
+  type CategoryUpdate,
   useGetCategoriesByCategoryIdQuery,
   usePostCategoriesMutation,
   usePutCategoriesByCategoryIdMutation,
-  type CategoryCreate,
-  type CategoryUpdate,
 } from '@/generated/api/api';
 import { postCategoryBody } from '@/generated/types/categories/categories.zod';
-import { colors } from '@/theme/colors';
 import { useUserLocale } from '@/hooks/useUserLocale';
+import { colors } from '@/theme/colors';
 import {
   currencyUsesDecimals,
-  parseCurrencyInput,
   formatCurrencyForInput,
   getCurrencyPlaceholder,
+  parseCurrencyInput,
 } from '@/utils/currency';
-import { ModalContainer } from '@/components/modals/ModalContainer';
-import { ModalHeader } from '@/components/modals/ModalHeader';
-import { ModalFooter } from '@/components/modals/ModalFooter';
-import { ModalButton } from '@/components/modals/ModalButton';
 
 type FormData = {
   title: string;
@@ -212,10 +212,18 @@ export const CategoryFormModal = ({
         </ScrollView>
 
         <ModalFooter>
-          <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
+          <ModalButton
+            onPress={onClose}
+            variant="cancel"
+            disabled={isLoading}
+          >
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={onSubmit} variant="primary" loading={isLoading}>
+          <ModalButton
+            onPress={onSubmit}
+            variant="primary"
+            loading={isLoading}
+          >
             {t('form_save')}
           </ModalButton>
         </ModalFooter>
@@ -255,4 +263,3 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
-

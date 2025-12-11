@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
-import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors } from '@/theme/colors';
+import { Pressable, Text, View } from 'react-native';
 import type { Filter } from '@/app/(app)/(tabs)/transactions';
+import { colors } from '@/theme/colors';
 
 type Props = {
   filters: Filter;
@@ -36,8 +36,10 @@ export const FilterChips = ({
       chips.push({
         key: 'categoryId',
         label: t('transactions_filter_category'),
-        value: category?.title 
-          ? (isDeleted ? `${category.title} (${t('common_deleted')})` : category.title)
+        value: category?.title
+          ? isDeleted
+            ? `${category.title} (${t('common_deleted')})`
+            : category.title
           : t('common_unknown', 'Unknown'),
       });
     }
@@ -48,8 +50,10 @@ export const FilterChips = ({
       chips.push({
         key: 'paymentMethodId',
         label: t('transactions_filter_payment_method'),
-        value: method?.title 
-          ? (isDeleted ? `${method.title} (${t('common_deleted')})` : method.title)
+        value: method?.title
+          ? isDeleted
+            ? `${method.title} (${t('common_deleted')})`
+            : method.title
           : t('common_unknown', 'Unknown'),
       });
     }
@@ -104,10 +108,7 @@ export const FilterChips = ({
             </Text>
             <Pressable
               onPress={() => onRemoveFilter(chip.key)}
-              style={({ pressed }) => [
-                styles.removeButton,
-                pressed && styles.removeButtonPressed,
-              ]}
+              style={({ pressed }) => [styles.removeButton, pressed && styles.removeButtonPressed]}
             >
               <Text style={styles.removeButtonText}>×</Text>
             </Pressable>
@@ -118,10 +119,7 @@ export const FilterChips = ({
       {chips.length > 1 && (
         <Pressable
           onPress={onClearAll}
-          style={({ pressed }) => [
-            styles.clearAllButton,
-            pressed && styles.clearAllButtonPressed,
-          ]}
+          style={({ pressed }) => [styles.clearAllButton, pressed && styles.clearAllButtonPressed]}
         >
           <Text style={styles.clearAllButtonText}>{t('transactions_filter_clear_all')}</Text>
         </Pressable>

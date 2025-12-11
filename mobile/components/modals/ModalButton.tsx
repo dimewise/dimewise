@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { Pressable, Text, ActivityIndicator } from 'react-native';
+import type { ReactNode } from 'react';
+import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { cn } from '@/utils/cn';
 
 type Props = {
@@ -28,7 +28,13 @@ const variantStyles = {
   },
 };
 
-export const ModalButton = ({ onPress, children, variant = 'primary', disabled = false, loading = false }: Props) => {
+export const ModalButton = ({
+  onPress,
+  children,
+  variant = 'primary',
+  disabled = false,
+  loading = false,
+}: Props) => {
   const styles = variantStyles[variant];
 
   return (
@@ -42,11 +48,13 @@ export const ModalButton = ({ onPress, children, variant = 'primary', disabled =
       disabled={disabled || loading}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={styles.spinner} />
+        <ActivityIndicator
+          size="small"
+          color={styles.spinner}
+        />
       ) : (
         <Text className={cn('text-base font-semibold', styles.text)}>{children}</Text>
       )}
     </Pressable>
   );
 };
-

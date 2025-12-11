@@ -1,13 +1,14 @@
-import React, { memo } from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import type React from 'react';
+import { memo } from 'react';
 import {
-  TouchableOpacity,
-  Text,
   ActivityIndicator,
+  Text,
+  TouchableOpacity,
   type TouchableOpacityProps,
 } from 'react-native';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { cn } from '@/utils/cn';
 import { colors } from '@/theme/colors';
+import { cn } from '@/utils/cn';
 
 const buttonVariants = cva(
   'flex-row items-center justify-center rounded-xl gap-2 active:opacity-80',
@@ -35,7 +36,7 @@ const buttonVariants = cva(
       size: 'md',
       fullWidth: false,
     },
-  }
+  },
 );
 
 const textVariants = cva('font-semibold text-center', {
@@ -89,7 +90,7 @@ export const Button = memo(function Button({
       className={cn(
         buttonVariants({ variant, size, fullWidth }),
         isDisabled && 'opacity-50',
-        className
+        className,
       )}
       disabled={isDisabled}
       activeOpacity={0.8}
@@ -98,16 +99,12 @@ export const Button = memo(function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={
-            variant === 'primary' ? colors.text.inverse : colors.primary.DEFAULT
-          }
+          color={variant === 'primary' ? colors.text.inverse : colors.primary.DEFAULT}
         />
       ) : (
         <>
           {leftIcon}
-          <Text className={cn(textVariants({ variant, size }), textClassName)}>
-            {title}
-          </Text>
+          <Text className={cn(textVariants({ variant, size }), textClassName)}>{title}</Text>
           {rightIcon}
         </>
       )}

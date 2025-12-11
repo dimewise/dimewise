@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './app/**/*.{js,jsx,ts,tsx}',
-    './components/**/*.{js,jsx,ts,tsx}',
-  ],
+  content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
@@ -69,8 +66,8 @@ module.exports = {
         '4xl': '32px',
       },
       spacing: {
-        '18': '72px',
-        '88': '352px',
+        18: '72px',
+        88: '352px',
       },
     },
   },

@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
 import Octicons from '@expo/vector-icons/Octicons';
+import type { ReactNode } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 
 type Props = {
@@ -29,19 +29,18 @@ export const ModalHeader = ({ title, leftAction, rightAction, onClose }: Props) 
             onPress={onClose}
             className="w-10 h-10 items-center justify-center rounded-full active:bg-neutral-100"
           >
-            <Octicons name="x" size={20} color={colors.neutral[600]} />
+            <Octicons
+              name="x"
+              size={20}
+              color={colors.neutral[600]}
+            />
           </Pressable>
         ) : leftAction ? (
           leftAction
         ) : null}
       </View>
-      <Text className="text-lg font-semibold text-neutral-900 flex-1 text-center">
-        {title}
-      </Text>
-      <View className="w-10 items-end">
-        {rightAction}
-      </View>
+      <Text className="text-lg font-semibold text-neutral-900 flex-1 text-center">{title}</Text>
+      <View className="w-10 items-end">{rightAction}</View>
     </View>
   );
 };
-

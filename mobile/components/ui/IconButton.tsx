@@ -1,9 +1,9 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { memo } from 'react';
 import { TouchableOpacity, type TouchableOpacityProps } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { cn } from '@/utils/cn';
 import { colors } from '@/theme/colors';
 import type { IconName } from '@/types';
+import { cn } from '@/utils/cn';
 
 interface IconButtonProps extends TouchableOpacityProps {
   icon: IconName;
@@ -35,13 +35,17 @@ export const IconButton = memo(function IconButton({
         'p-2 rounded-lg active:opacity-70',
         variant === 'filled' && 'bg-primary-500/10',
         disabled && 'opacity-50',
-        className
+        className,
       )}
       disabled={disabled}
       activeOpacity={0.7}
       {...props}
     >
-      <Ionicons name={icon} size={size} color={iconColor} />
+      <Ionicons
+        name={icon}
+        size={size}
+        color={iconColor}
+      />
     </TouchableOpacity>
   );
 });

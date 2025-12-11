@@ -1,10 +1,10 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { TextInput, View, Pressable } from 'react-native';
-import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Pressable, TextInput, View } from 'react-native';
 import type { Filter } from '@/app/(app)/(tabs)/transactions';
-import { useDebounce } from '@/hooks/useDebounce';
 import { useGetCategoriesQuery, useGetPaymentMethodsQuery } from '@/generated/api/api';
+import { useDebounce } from '@/hooks/useDebounce';
 import { colors } from '@/theme/colors';
 import { FilterChips } from './FilterChips';
 

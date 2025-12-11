@@ -1,14 +1,14 @@
 import { Picker } from '@react-native-picker/picker';
 import { DateTime, Info } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { colors } from '@/theme/colors';
+import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useUserLocale } from '@/hooks/useUserLocale';
-import { ModalContainer } from './ModalContainer';
-import { ModalHeader } from './ModalHeader';
-import { ModalFooter } from './ModalFooter';
+import { colors } from '@/theme/colors';
 import { ModalButton } from './ModalButton';
+import { ModalContainer } from './ModalContainer';
+import { ModalFooter } from './ModalFooter';
+import { ModalHeader } from './ModalHeader';
 
 type Props = {
   visible: boolean;
@@ -109,10 +109,16 @@ export const MonthYearPicker = ({
         </ScrollView>
 
         <ModalFooter>
-          <ModalButton onPress={onClose} variant="cancel">
+          <ModalButton
+            onPress={onClose}
+            variant="cancel"
+          >
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={handleDone} variant="primary">
+          <ModalButton
+            onPress={handleDone}
+            variant="primary"
+          >
             {t('common_done')}
           </ModalButton>
         </ModalFooter>
@@ -146,4 +152,3 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 });
-
