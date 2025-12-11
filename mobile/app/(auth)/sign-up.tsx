@@ -10,8 +10,8 @@ import { Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
-import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
+import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import {
   createSignUpSchema,
   createVerificationSchema,
@@ -21,8 +21,8 @@ import {
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { Button, Card, Divider } from '@/components/ui';
 import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
-import { colors } from '@/theme/colors';
 import { logger } from '@/lib/logger';
+import { colors } from '@/theme/colors';
 
 // handle any pending authentication session
 WebBrowser.maybeCompleteAuthSession();
@@ -126,7 +126,11 @@ export default function SignUpScreen() {
               onPress={() => router.back()}
               className="absolute left-0 z-10 p-2 -ml-2"
             >
-              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={colors.text.primary}
+              />
             </TouchableOpacity>
             <Text className="flex-1 text-center text-2xl font-semibold text-neutral-900">
               {t('auth_sign_up_create_account')}
@@ -168,9 +172,7 @@ export default function SignUpScreen() {
                 t={t}
               />
 
-              {!!apiError && (
-                <Text className="text-error text-sm">{apiError}</Text>
-              )}
+              {!!apiError && <Text className="text-error text-sm">{apiError}</Text>}
 
               <Button
                 title={t('auth_sign_up_create_account')}
@@ -187,7 +189,10 @@ export default function SignUpScreen() {
             <View className="items-center mt-2">
               <Text className="text-zinc-400">
                 {t('auth_sign_up_already_have_an_account')}{' '}
-                <Link href="/sign-in" className="text-primary-500 font-semibold underline">
+                <Link
+                  href="/sign-in"
+                  className="text-primary-500 font-semibold underline"
+                >
                   {t('auth_sign_in')}
                 </Link>
               </Text>
@@ -225,7 +230,10 @@ export default function SignUpScreen() {
           visible={pendingVerification}
         >
           <View className="flex-1 bg-black/50 justify-center items-center px-6">
-            <Card className="w-full" padding="lg">
+            <Card
+              className="w-full"
+              padding="lg"
+            >
               <Text className="text-2xl font-semibold text-zinc-50 mb-6">
                 {t('auth_sign_up_verify_your_email')}
               </Text>
@@ -238,9 +246,7 @@ export default function SignUpScreen() {
                 errors={codeErrors}
                 t={t}
               />
-              {!!apiError && (
-                <Text className="text-error text-sm mt-2">{apiError}</Text>
-              )}
+              {!!apiError && <Text className="text-error text-sm mt-2">{apiError}</Text>}
               <Button
                 title={t('common_verify')}
                 onPress={handleVerifySubmit(onVerifyPress)}

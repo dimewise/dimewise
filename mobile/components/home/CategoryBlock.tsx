@@ -1,12 +1,12 @@
+import { useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Card } from '@/components/ui/Card';
 import type { CategoryBreakdown } from '@/generated/api/api';
+import { useUserLocale } from '@/hooks/useUserLocale';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
-import { useUserLocale } from '@/hooks/useUserLocale';
-import { Card } from '@/components/ui/Card';
 
 interface Props {
   items: CategoryBreakdown[];
@@ -36,9 +36,7 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
         </Text>
         <Card>
           <View className="py-6 items-center">
-            <Text className="text-sm text-neutral-500 text-center">
-              {t('categories_empty')}
-            </Text>
+            <Text className="text-sm text-neutral-500 text-center">{t('categories_empty')}</Text>
             <Text className="text-xs text-neutral-400 mt-1 text-center">
               {t('categories_empty_hint')}
             </Text>
@@ -50,10 +48,8 @@ export const CategoryBlock = ({ items, selectedMonth, selectedYear }: Props) => 
 
   return (
     <View className="px-4 mb-6">
-      <Text className="text-xl font-semibold text-neutral-900 mb-3">
-        {t('common_categories')}
-      </Text>
-      
+      <Text className="text-xl font-semibold text-neutral-900 mb-3">{t('common_categories')}</Text>
+
       <View className="gap-3">
         {items.map((c) => {
           const pct = spentPercent(c.spent, c.budget);

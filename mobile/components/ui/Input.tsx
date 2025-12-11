@@ -1,15 +1,9 @@
-import React, { forwardRef, memo, useState } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  TouchableOpacity,
-  type TextInputProps,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cn } from '@/utils/cn';
+import React, { forwardRef, memo, useState } from 'react';
+import { Text, TextInput, type TextInputProps, TouchableOpacity, View } from 'react-native';
 import { colors } from '@/theme/colors';
 import type { IconName } from '@/types';
+import { cn } from '@/utils/cn';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -34,22 +28,18 @@ export const Input = memo(
       className,
       ...props
     },
-    ref
+    ref,
   ) {
     const [isFocused, setIsFocused] = useState(false);
 
     return (
       <View className={cn('w-full', containerClassName)}>
-        {label && (
-          <Text className="text-neutral-600 text-sm font-medium mb-2">
-            {label}
-          </Text>
-        )}
+        {label && <Text className="text-neutral-600 text-sm font-medium mb-2">{label}</Text>}
         <View
           className={cn(
             'flex-row items-center bg-white rounded-xl border px-4',
             isFocused ? 'border-primary-500' : 'border-neutral-200',
-            error && 'border-error'
+            error && 'border-error',
           )}
         >
           {leftIcon && (
@@ -73,18 +63,20 @@ export const Input = memo(
               onPress={onRightIconPress}
               disabled={!onRightIconPress}
             >
-              <Ionicons name={rightIcon} size={20} color={colors.text.secondary} />
+              <Ionicons
+                name={rightIcon}
+                size={20}
+                color={colors.text.secondary}
+              />
             </TouchableOpacity>
           )}
         </View>
         {(error || hint) && (
-          <Text
-            className={cn('text-sm mt-1.5', error ? 'text-error' : 'text-neutral-500')}
-          >
+          <Text className={cn('text-sm mt-1.5', error ? 'text-error' : 'text-neutral-500')}>
             {error || hint}
           </Text>
         )}
       </View>
     );
-  })
+  }),
 );

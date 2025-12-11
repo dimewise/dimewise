@@ -26,28 +26,28 @@ export function initSentry() {
   Sentry.init({
     dsn,
     environment: isPreview ? 'preview' : 'production',
-    
+
     // Performance monitoring sample rates
     // Set to 1.0 to capture 100% of transactions for performance monitoring.
     // Reduce in production for cost optimization.
     tracesSampleRate: isPreview ? 1.0 : 0.2,
-    
+
     // Enable profiling (sample rate relative to tracesSampleRate)
     profilesSampleRate: isPreview ? 1.0 : 0.1,
-    
+
     // Session tracking
     enableAutoSessionTracking: true,
     sessionTrackingIntervalMillis: 30000, // 30 seconds
-    
+
     // Enable auto-instrumentation
     enableAutoPerformanceTracing: true,
-    
+
     // Attach screenshots on error (iOS/Android only)
     attachScreenshot: true,
-    
+
     // Attach view hierarchy on error
     attachViewHierarchy: true,
-    
+
     // Filter out certain errors if needed
     beforeSend(event, hint) {
       // You can filter or modify events here
@@ -57,15 +57,13 @@ export function initSentry() {
       // }
       return event;
     },
-    
+
     // Breadcrumb configuration
     enableNativeCrashHandling: true,
     enableNativeNagger: false,
-    
+
     // Integration configuration
-    integrations: [
-      Sentry.reactNativeTracingIntegration(),
-    ],
+    integrations: [Sentry.reactNativeTracingIntegration()],
   });
 }
 

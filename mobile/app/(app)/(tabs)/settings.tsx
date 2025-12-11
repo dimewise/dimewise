@@ -4,34 +4,34 @@ import { useRouter } from 'expo-router';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ScrollView,
-  Text,
-  View,
-  RefreshControl,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { EmptyState, LoadingState } from '@/components/feedback';
 import { AppLayout } from '@/components/layouts/AppLayout';
 import { CategoryFormModal } from '@/components/settings/CategoryFormModal';
-import { PaymentMethodFormModal } from '@/components/settings/PaymentMethodFormModal';
 import { CurrencySelectorModal } from '@/components/settings/CurrencySelectorModal';
 import { LanguageSelectorModal } from '@/components/settings/LanguageSelectorModal';
+import { PaymentMethodFormModal } from '@/components/settings/PaymentMethodFormModal';
 import { Button, Card } from '@/components/ui';
-import { EmptyState, LoadingState } from '@/components/feedback';
-import { useCategories, usePaymentMethods } from '@/hooks/api';
-import { useModal } from '@/hooks/ui';
-import { useUserLocale } from '@/hooks/useUserLocale';
 import {
   type Category,
   type PaymentMethod,
   type PaymentMethodType,
   useGetUsersMeQuery,
 } from '@/generated/api/api';
+import { useCategories, usePaymentMethods } from '@/hooks/api';
+import { useModal } from '@/hooks/ui';
+import { useUserLocale } from '@/hooks/useUserLocale';
+import { logger } from '@/lib/logger';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
-import { logger } from '@/lib/logger';
 
 // Types for modal props
 interface CategoryModalData {
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
             }
           },
         },
-      ]
+      ],
     );
   }, [signOut, router, t]);
 
@@ -115,7 +115,7 @@ export default function SettingsScreen() {
         initialAmount: category.amount?.toString(),
       });
     },
-    [categoryModal]
+    [categoryModal],
   );
 
   const handleEditPaymentMethod = useCallback(
@@ -126,7 +126,7 @@ export default function SettingsScreen() {
         initialMethodType: pm.method_type,
       });
     },
-    [paymentMethodModal]
+    [paymentMethodModal],
   );
 
   const handleAddCategory = useCallback(() => {
@@ -138,21 +138,29 @@ export default function SettingsScreen() {
   }, [paymentMethodModal]);
 
   // Show loading state on initial load
-  const isInitialLoading = (categoriesLoading || paymentMethodsLoading) 
-    && categories.length === 0 && paymentMethods.length === 0;
+  const isInitialLoading =
+    (categoriesLoading || paymentMethodsLoading) &&
+    categories.length === 0 &&
+    paymentMethods.length === 0;
 
   if (!user) return null;
 
   if (isInitialLoading) {
     return (
       <AppLayout>
-        <SafeAreaView className="flex-1 w-full px-6 bg-white" edges={['top']}>
+        <SafeAreaView
+          className="flex-1 w-full px-6 bg-white"
+          edges={['top']}
+        >
           <View className="w-full py-4">
             <Text className="text-2xl font-semibold text-neutral-900">
               {t('page_title_settings')}
             </Text>
           </View>
-          <LoadingState fullScreen={false} className="flex-1" />
+          <LoadingState
+            fullScreen={false}
+            className="flex-1"
+          />
         </SafeAreaView>
       </AppLayout>
     );
@@ -160,7 +168,10 @@ export default function SettingsScreen() {
 
   return (
     <AppLayout>
-      <SafeAreaView className="flex-1 w-full px-6 bg-white" edges={['top']}>
+      <SafeAreaView
+        className="flex-1 w-full px-6 bg-white"
+        edges={['top']}
+      >
         {/* Header */}
         <View className="w-full py-4">
           <Text className="text-2xl font-semibold text-neutral-900">
@@ -217,7 +228,13 @@ export default function SettingsScreen() {
                 title={t('settings_add_category')}
                 onPress={handleAddCategory}
                 size="sm"
-                leftIcon={<Ionicons name="add" size={16} color={colors.text.inverse} />}
+                leftIcon={
+                  <Ionicons
+                    name="add"
+                    size={16}
+                    color={colors.text.inverse}
+                  />
+                }
               />
             </View>
 
@@ -257,7 +274,13 @@ export default function SettingsScreen() {
                 title={t('settings_add_payment')}
                 onPress={handleAddPaymentMethod}
                 size="sm"
-                leftIcon={<Ionicons name="add" size={16} color={colors.text.inverse} />}
+                leftIcon={
+                  <Ionicons
+                    name="add"
+                    size={16}
+                    color={colors.text.inverse}
+                  />
+                }
               />
             </View>
 
@@ -336,11 +359,7 @@ interface SettingsRowProps {
   onPress: () => void;
 }
 
-const SettingsRow = React.memo(function SettingsRow({
-  label,
-  value,
-  onPress,
-}: SettingsRowProps) {
+const SettingsRow = React.memo(function SettingsRow({ label, value, onPress }: SettingsRowProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -349,7 +368,11 @@ const SettingsRow = React.memo(function SettingsRow({
       <Text className="text-base text-neutral-900">{label}</Text>
       <View className="flex-row items-center gap-2">
         <Text className="text-base text-neutral-500">{value}</Text>
-        <Ionicons name="chevron-forward" size={20} color={colors.neutral[400]} />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={colors.neutral[400]}
+        />
       </View>
     </TouchableOpacity>
   );
@@ -378,20 +401,31 @@ const ItemRow = React.memo(function ItemRow({
       </View>
       <View className="flex-row gap-2">
         {isDeleting ? (
-          <ActivityIndicator size="small" color={colors.primary.DEFAULT} />
+          <ActivityIndicator
+            size="small"
+            color={colors.primary.DEFAULT}
+          />
         ) : (
           <>
             <TouchableOpacity
               onPress={onEdit}
               className="p-2.5 rounded-lg bg-neutral-100 border border-neutral-200 active:bg-neutral-200"
             >
-              <Ionicons name="pencil" size={16} color={colors.neutral[600]} />
+              <Ionicons
+                name="pencil"
+                size={16}
+                color={colors.neutral[600]}
+              />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={onDelete}
               className="p-2.5 rounded-lg bg-red-50 border border-red-100 active:bg-red-100"
             >
-              <Ionicons name="trash" size={16} color={colors.error} />
+              <Ionicons
+                name="trash"
+                size={16}
+                color={colors.error}
+              />
             </TouchableOpacity>
           </>
         )}

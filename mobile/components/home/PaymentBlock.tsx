@@ -1,12 +1,12 @@
+import { useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Card } from '@/components/ui/Card';
 import type { PaymentMethodBreakdown } from '@/generated/api/api';
+import { useUserLocale } from '@/hooks/useUserLocale';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
-import { useUserLocale } from '@/hooks/useUserLocale';
-import { Card } from '@/components/ui/Card';
 
 type Props = {
   items: PaymentMethodBreakdown[];
@@ -44,7 +44,7 @@ export const PaymentBlock = ({ items, selectedMonth, selectedYear }: Props) => {
       <Text className="text-xl font-semibold text-neutral-900 mb-3">
         {t('common_payment_methods')}
       </Text>
-      
+
       <Card padding="none">
         {items.map((p, index) => {
           const handlePress = () => {

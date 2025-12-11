@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGetCategoriesQuery, useGetPaymentMethodsQuery } from '@/generated/api/api';
-import { colors } from '@/theme/colors';
-import { useUserLocale } from '@/hooks/useUserLocale';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import type { Filter } from '@/app/(app)/(tabs)/transactions';
-import { ModalContainer } from './ModalContainer';
-import { ModalHeader } from './ModalHeader';
-import { ModalFooter } from './ModalFooter';
+import { useGetCategoriesQuery, useGetPaymentMethodsQuery } from '@/generated/api/api';
+import { useUserLocale } from '@/hooks/useUserLocale';
+import { colors } from '@/theme/colors';
 import { ModalButton } from './ModalButton';
+import { ModalContainer } from './ModalContainer';
+import { ModalFooter } from './ModalFooter';
+import { ModalHeader } from './ModalHeader';
 
 type Props = {
   visible: boolean;
@@ -103,7 +103,10 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
         <ModalHeader
           title={t('transactions_filter_title')}
           rightAction={
-            <Pressable onPress={handleClear} style={styles.clearButton}>
+            <Pressable
+              onPress={handleClear}
+              style={styles.clearButton}
+            >
               <Text style={styles.clearButtonText}>{t('transactions_filter_clear')}</Text>
             </Pressable>
           }
@@ -296,10 +299,16 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
         </ScrollView>
 
         <ModalFooter>
-          <ModalButton onPress={handleClose} variant="cancel">
+          <ModalButton
+            onPress={handleClose}
+            variant="cancel"
+          >
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={handleApply} variant="primary">
+          <ModalButton
+            onPress={handleApply}
+            variant="primary"
+          >
             {t('transactions_filter_apply')}
           </ModalButton>
         </ModalFooter>
@@ -371,4 +380,3 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral[50],
   },
 });
-

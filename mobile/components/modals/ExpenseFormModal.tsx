@@ -1,43 +1,36 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import {
-  Alert,
-  Modal,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { DateTime } from 'luxon';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { Alert, Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import type { z } from 'zod';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import {
-  useGetCategoriesQuery,
-  useGetPaymentMethodsQuery,
-  usePostExpensesMutation,
-  useGetExpensesByExpenseIdQuery,
-  usePutExpensesByExpenseIdMutation,
   type ExpenseCreate,
   type ExpenseUpdate,
+  useGetCategoriesQuery,
+  useGetExpensesByExpenseIdQuery,
+  useGetPaymentMethodsQuery,
+  usePostExpensesMutation,
+  usePutExpensesByExpenseIdMutation,
 } from '@/generated/api/api';
 import { postExpenseBody } from '@/generated/types/expenses/expenses.zod';
-import { z } from 'zod';
-import { colors } from '@/theme/colors';
 import { useUserLocale } from '@/hooks/useUserLocale';
+import { colors } from '@/theme/colors';
 import {
   currencyUsesDecimals,
-  parseCurrencyInput,
   formatCurrencyForInput,
   getCurrencyPlaceholder,
+  parseCurrencyInput,
 } from '@/utils/currency';
-import { ModalContainer } from './ModalContainer';
-import { ModalHeader } from './ModalHeader';
-import { ModalFooter } from './ModalFooter';
 import { ModalButton } from './ModalButton';
+import { ModalContainer } from './ModalContainer';
+import { ModalFooter } from './ModalFooter';
+import { ModalHeader } from './ModalHeader';
 
 // Use the generated zod schema directly
 type FormData = z.infer<typeof postExpenseBody>;
@@ -211,7 +204,10 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
           keyboardShouldPersistTaps="handled"
           bottomOffset={20}
         >
-          <Pressable className="gap-5" onPress={() => setExpandedField(null)}>
+          <Pressable
+            className="gap-5"
+            onPress={() => setExpandedField(null)}
+          >
             {/* Title */}
             <FormTextInput
               control={control}
@@ -292,9 +288,7 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
                     className="flex-row justify-between items-center bg-neutral-100 rounded-xl px-4 h-12"
                     onPress={() => toggleField('date')}
                   >
-                    <Text className="text-base text-neutral-900">
-                      {formatDate(value)}
-                    </Text>
+                    <Text className="text-base text-neutral-900">{formatDate(value)}</Text>
                   </Pressable>
                   {expandedField === 'date' && (
                     <View className="bg-neutral-100 rounded-xl overflow-hidden">
@@ -332,7 +326,9 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
                     className="flex-row justify-between items-center bg-neutral-100 rounded-xl px-4 h-12"
                     onPress={() => toggleField('category')}
                   >
-                    <Text className={`text-base ${value ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                    <Text
+                      className={`text-base ${value ? 'text-neutral-900' : 'text-neutral-400'}`}
+                    >
                       {getSelectedCategoryTitle()}
                     </Text>
                   </Pressable>
@@ -382,7 +378,9 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
                     className="flex-row justify-between items-center bg-neutral-100 rounded-xl px-4 h-12"
                     onPress={() => toggleField('payment_method')}
                   >
-                    <Text className={`text-base ${value ? 'text-neutral-900' : 'text-neutral-400'}`}>
+                    <Text
+                      className={`text-base ${value ? 'text-neutral-900' : 'text-neutral-400'}`}
+                    >
                       {getSelectedPaymentMethodTitle()}
                     </Text>
                   </Pressable>
@@ -395,7 +393,11 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
                         itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
                       >
                         <Picker.Item
-                          label={paymentMethodsLoading ? t('form_loading') : t('form_select_payment_method')}
+                          label={
+                            paymentMethodsLoading
+                              ? t('form_loading')
+                              : t('form_select_payment_method')
+                          }
                           value=""
                           color="#A3A3A3"
                         />
@@ -434,10 +436,18 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
         </KeyboardAwareScrollView>
 
         <ModalFooter>
-          <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
+          <ModalButton
+            onPress={onClose}
+            variant="cancel"
+            disabled={isLoading}
+          >
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={onSubmit} variant="primary" loading={isLoading}>
+          <ModalButton
+            onPress={onSubmit}
+            variant="primary"
+            loading={isLoading}
+          >
             {t('form_save')}
           </ModalButton>
         </ModalFooter>
@@ -445,4 +455,3 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
     </Modal>
   );
 };
-

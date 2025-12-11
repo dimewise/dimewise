@@ -9,13 +9,13 @@ import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
-import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import { FormTextInput } from '@/components/forms/FormTextInput';
+import { GoogleSignInButton, LineSignInButton } from '@/components/forms/SocialSignInButton';
 import { createSignInSchema, type signInData } from '@/components/forms/schemas/auth';
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { Button, Divider } from '@/components/ui';
-import { colors } from '@/theme/colors';
 import { logger } from '@/lib/logger';
+import { colors } from '@/theme/colors';
 
 export default function SignInScreen() {
   const { signIn, setActive, isLoaded } = useSignIn();
@@ -79,7 +79,11 @@ export default function SignInScreen() {
               onPress={() => router.back()}
               className="absolute left-0 z-10 p-2 -ml-2"
             >
-              <Ionicons name="arrow-back" size={24} color={colors.text.primary} />
+              <Ionicons
+                name="arrow-back"
+                size={24}
+                color={colors.text.primary}
+              />
             </TouchableOpacity>
             <Text className="flex-1 text-center text-2xl font-semibold text-neutral-900">
               {t('auth_sign_in_welcome_back')}
@@ -122,9 +126,7 @@ export default function SignInScreen() {
               />
 
               {/* API error */}
-              {!!apiError && (
-                <Text className="text-error text-sm">{apiError}</Text>
-              )}
+              {!!apiError && <Text className="text-error text-sm">{apiError}</Text>}
 
               <Button
                 title={t('common_continue')}
@@ -141,7 +143,10 @@ export default function SignInScreen() {
             <View className="items-center mt-4">
               <Text className="text-neutral-500">
                 {t('auth_sign_in_no_account')}{' '}
-                <Link href="/sign-up" className="text-neutral-900 font-semibold underline">
+                <Link
+                  href="/sign-up"
+                  className="text-neutral-900 font-semibold underline"
+                >
                   {t('auth_sign_up')}
                 </Link>
               </Text>

@@ -1,16 +1,12 @@
 import { useCallback } from 'react';
-import { Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Alert } from 'react-native';
+import type { PaymentMethod, PaymentMethodCreate, PaymentMethodUpdate } from '@/generated/api/api';
 import {
+  useDeletePaymentMethodsByPaymentMethodIdMutation,
   useGetPaymentMethodsQuery,
   usePostPaymentMethodsMutation,
   usePutPaymentMethodsByPaymentMethodIdMutation,
-  useDeletePaymentMethodsByPaymentMethodIdMutation,
-} from '@/generated/api/api';
-import type {
-  PaymentMethod,
-  PaymentMethodCreate,
-  PaymentMethodUpdate,
 } from '@/generated/api/api';
 import { logger } from '@/lib/logger';
 
@@ -23,16 +19,10 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
   const { t } = useTranslation();
 
   // Queries - pass empty object to avoid undefined error
-  const {
-    data: paymentMethods = [],
-    isLoading,
-    error,
-    refetch,
-  } = useGetPaymentMethodsQuery({});
+  const { data: paymentMethods = [], isLoading, error, refetch } = useGetPaymentMethodsQuery({});
 
   // Mutations
-  const [createPaymentMethodMutation, createState] =
-    usePostPaymentMethodsMutation();
+  const [createPaymentMethodMutation, createState] = usePostPaymentMethodsMutation();
   const [updatePaymentMethodMutation, updateState] =
     usePutPaymentMethodsByPaymentMethodIdMutation();
   const [deletePaymentMethodMutation, deleteState] =
@@ -52,16 +42,13 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
         options?.onMutationSuccess?.();
         return result;
       } catch (err) {
-        const error =
-          err instanceof Error
-            ? err
-            : new Error('Failed to create payment method');
+        const error = err instanceof Error ? err : new Error('Failed to create payment method');
         logger.error(error, { context: 'usePaymentMethods' });
         options?.onMutationError?.(error);
         throw error;
       }
     },
-    [createPaymentMethodMutation, options]
+    [createPaymentMethodMutation, options],
   );
 
   // Update
@@ -79,16 +66,13 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
         options?.onMutationSuccess?.();
         return result;
       } catch (err) {
-        const error =
-          err instanceof Error
-            ? err
-            : new Error('Failed to update payment method');
+        const error = err instanceof Error ? err : new Error('Failed to update payment method');
         logger.error(error, { context: 'usePaymentMethods' });
         options?.onMutationError?.(error);
         throw error;
       }
     },
-    [updatePaymentMethodMutation, options]
+    [updatePaymentMethodMutation, options],
   );
 
   // Delete with confirmation
@@ -117,18 +101,16 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
                 options?.onMutationSuccess?.();
               } catch (err) {
                 const error =
-                  err instanceof Error
-                    ? err
-                    : new Error('Failed to delete payment method');
+                  err instanceof Error ? err : new Error('Failed to delete payment method');
                 logger.error(error, { context: 'usePaymentMethods' });
                 options?.onMutationError?.(error);
               }
             },
           },
-        ]
+        ],
       );
     },
-    [deletePaymentMethodMutation, options, t]
+    [deletePaymentMethodMutation, options, t],
   );
 
   return {
@@ -147,7 +129,6 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
     isCreating: createState.isLoading,
     isUpdating: updateState.isLoading,
     isDeleting: deleteState.isLoading,
-    isMutating:
-      createState.isLoading || updateState.isLoading || deleteState.isLoading,
+    isMutating: createState.isLoading || updateState.isLoading || deleteState.isLoading,
   };
 }

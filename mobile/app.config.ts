@@ -29,14 +29,14 @@ const getAppName = () => {
 
 const getIOSAppIcon = () => {
   if (IS_DEV) {
-    return './assets/icons/dev-ios-composer.icon'
+    return './assets/icons/dev-ios-composer.icon';
   }
 
   if (IS_PREVIEW) {
-    return './assets/icons/preview-ios-composer.icon'
+    return './assets/icons/preview-ios-composer.icon';
   }
 
-  return './assets/icons/prod-ios-composer.icon'
+  return './assets/icons/prod-ios-composer.icon';
 };
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -82,6 +82,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-font',
     'expo-web-browser',
     'expo-router',
+    'expo-secure-store',
     // TODO: Uncomment when Sentry is configured
     // [
     //   '@sentry/react-native/expo',

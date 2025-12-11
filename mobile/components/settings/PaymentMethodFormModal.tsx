@@ -1,24 +1,24 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Picker } from '@react-native-picker/picker';
 import { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import { FormTextInput } from '@/components/forms/FormTextInput';
+import { ModalButton } from '@/components/modals/ModalButton';
+import { ModalContainer } from '@/components/modals/ModalContainer';
+import { ModalFooter } from '@/components/modals/ModalFooter';
+import { ModalHeader } from '@/components/modals/ModalHeader';
 import {
+  type PaymentMethodCreate,
+  type PaymentMethodType,
+  type PaymentMethodUpdate,
   useGetPaymentMethodsByPaymentMethodIdQuery,
   usePostPaymentMethodsMutation,
   usePutPaymentMethodsByPaymentMethodIdMutation,
-  type PaymentMethodCreate,
-  type PaymentMethodUpdate,
-  type PaymentMethodType,
 } from '@/generated/api/api';
 import { postPaymentMethodBody } from '@/generated/types/payment-methods/payment-methods.zod';
 import { colors } from '@/theme/colors';
-import { ModalContainer } from '@/components/modals/ModalContainer';
-import { ModalHeader } from '@/components/modals/ModalHeader';
-import { ModalFooter } from '@/components/modals/ModalFooter';
-import { ModalButton } from '@/components/modals/ModalButton';
 
 const PAYMENT_METHOD_TYPES: { value: PaymentMethodType; labelKey: string }[] = [
   { value: 'credit_card', labelKey: 'payment_method_credit_card' },
@@ -175,10 +175,18 @@ export const PaymentMethodFormModal = ({
         </ScrollView>
 
         <ModalFooter>
-          <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
+          <ModalButton
+            onPress={onClose}
+            variant="cancel"
+            disabled={isLoading}
+          >
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={onSubmit} variant="primary" loading={isLoading}>
+          <ModalButton
+            onPress={onSubmit}
+            variant="primary"
+            loading={isLoading}
+          >
             {t('form_save')}
           </ModalButton>
         </ModalFooter>
@@ -219,4 +227,3 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
-

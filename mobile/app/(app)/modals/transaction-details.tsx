@@ -1,29 +1,22 @@
-import { useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { DateTime } from 'luxon';
-import { useTranslation } from 'react-i18next';
 import Octicons from '@expo/vector-icons/Octicons';
-import {
-  useGetExpensesByExpenseIdQuery,
-  usePostExpensesByExpenseIdVerifyMutation,
-  useDeleteExpensesByExpenseIdMutation,
-} from '@/generated/api/api';
-import { colors } from '@/theme/colors';
-import { useUserLocale } from '@/hooks/useUserLocale';
-import { formatCurrency } from '@/utils/localization/currencies';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { DateTime } from 'luxon';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { LoadingState } from '@/components/feedback';
 import { ExpenseFormModal } from '@/components/modals/ExpenseFormModal';
 import { ModalContainer } from '@/components/modals/ModalContainer';
-import { ModalHeader } from '@/components/modals/ModalHeader';
 import { ModalFooter } from '@/components/modals/ModalFooter';
-import { LoadingState } from '@/components/feedback';
+import { ModalHeader } from '@/components/modals/ModalHeader';
+import {
+  useDeleteExpensesByExpenseIdMutation,
+  useGetExpensesByExpenseIdQuery,
+  usePostExpensesByExpenseIdVerifyMutation,
+} from '@/generated/api/api';
+import { useUserLocale } from '@/hooks/useUserLocale';
+import { colors } from '@/theme/colors';
+import { formatCurrency } from '@/utils/localization/currencies';
 
 export default function TransactionDetailsModal() {
   const router = useRouter();
@@ -54,8 +47,14 @@ export default function TransactionDetailsModal() {
   if (isLoading) {
     return (
       <ModalContainer>
-        <ModalHeader title={t('transaction_details_title')} onClose={onClose} />
-        <LoadingState fullScreen={false} className="flex-1" />
+        <ModalHeader
+          title={t('transaction_details_title')}
+          onClose={onClose}
+        />
+        <LoadingState
+          fullScreen={false}
+          className="flex-1"
+        />
       </ModalContainer>
     );
   }
@@ -63,18 +62,17 @@ export default function TransactionDetailsModal() {
   if (error || !expense) {
     return (
       <ModalContainer>
-        <ModalHeader title={t('transaction_details_title')} onClose={onClose} />
+        <ModalHeader
+          title={t('transaction_details_title')}
+          onClose={onClose}
+        />
         <View className="flex-1 items-center justify-center p-6">
-          <Text className="text-base text-red-500 mb-4">
-            {t('error_generic_message')}
-          </Text>
+          <Text className="text-base text-red-500 mb-4">{t('error_generic_message')}</Text>
           <Pressable
             onPress={onClose}
             className="bg-primary-500 px-6 py-3 rounded-xl"
           >
-            <Text className="text-base font-semibold text-white">
-              {t('form_cancel')}
-            </Text>
+            <Text className="text-base font-semibold text-white">{t('form_cancel')}</Text>
           </Pressable>
         </View>
       </ModalContainer>
@@ -137,7 +135,10 @@ export default function TransactionDetailsModal() {
 
   return (
     <ModalContainer>
-      <ModalHeader title={t('transaction_details_title')} onClose={onClose} />
+      <ModalHeader
+        title={t('transaction_details_title')}
+        onClose={onClose}
+      />
 
       <ScrollView
         className="flex-1"
@@ -149,12 +150,14 @@ export default function TransactionDetailsModal() {
           <Text className="text-5xl font-bold text-neutral-900 mb-1">
             {formatCurrency(expense.amount, currency, locale)}
           </Text>
-          <Text className="text-lg text-neutral-600 text-center mb-2">
-            {expense.title}
-          </Text>
+          <Text className="text-lg text-neutral-600 text-center mb-2">{expense.title}</Text>
           {isVerified && (
             <View className="bg-emerald-50 px-3 py-1 rounded-full flex-row items-center gap-1.5">
-              <Octicons name="check-circle-fill" size={14} color={colors.success} />
+              <Octicons
+                name="check-circle-fill"
+                size={14}
+                color={colors.success}
+              />
               <Text className="text-sm font-medium text-emerald-700">
                 {t('transaction_details_verified')}
               </Text>
@@ -169,9 +172,7 @@ export default function TransactionDetailsModal() {
               {t('form_expense_description')}
             </Text>
             <View className="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
-              <Text className="text-base text-neutral-700 leading-6">
-                {expense.description}
-              </Text>
+              <Text className="text-base text-neutral-700 leading-6">{expense.description}</Text>
             </View>
           </View>
         )}
@@ -215,7 +216,11 @@ export default function TransactionDetailsModal() {
               {t('transaction_details_status')}
             </Text>
             <View className="bg-amber-50 rounded-xl p-4 border border-amber-200 flex-row items-center gap-2">
-              <Octicons name="alert" size={16} color={colors.warning} />
+              <Octicons
+                name="alert"
+                size={16}
+                color={colors.warning}
+              />
               <Text className="text-base font-medium text-amber-700">
                 {t('transaction_details_unverified')}
               </Text>
@@ -270,12 +275,26 @@ export default function TransactionDetailsModal() {
 }
 
 // Detail Row Component
-function DetailRow({ label, value, isDeleted = false, deletedLabel = 'Deleted' }: { label: string; value: string; isDeleted?: boolean; deletedLabel?: string }) {
+function DetailRow({
+  label,
+  value,
+  isDeleted = false,
+  deletedLabel = 'Deleted',
+}: {
+  label: string;
+  value: string;
+  isDeleted?: boolean;
+  deletedLabel?: string;
+}) {
   return (
     <View className="flex-row justify-between items-center px-4 py-3.5">
       <Text className="text-sm text-neutral-500">{label}</Text>
       <View className="flex-row items-center gap-2">
-        <Text className={`text-base font-medium ${isDeleted ? 'text-neutral-400 line-through' : 'text-neutral-900'}`}>{value}</Text>
+        <Text
+          className={`text-base font-medium ${isDeleted ? 'text-neutral-400 line-through' : 'text-neutral-900'}`}
+        >
+          {value}
+        </Text>
         {isDeleted && (
           <View className="bg-red-100 px-2 py-0.5 rounded">
             <Text className="text-xs text-red-600 font-medium">{deletedLabel}</Text>
@@ -332,13 +351,18 @@ function ActionButton({
       className={`flex-1 items-center justify-center py-3 rounded-xl ${style.bg} ${!disabled && style.activeBg} ${disabled ? 'opacity-50' : ''}`}
     >
       {isLoading ? (
-        <ActivityIndicator size="small" color={style.iconColor} />
+        <ActivityIndicator
+          size="small"
+          color={style.iconColor}
+        />
       ) : (
         <>
-          <Octicons name={icon} size={20} color={style.iconColor} />
-          <Text className={`text-xs font-medium mt-1 ${style.textColor}`}>
-            {label}
-          </Text>
+          <Octicons
+            name={icon}
+            size={20}
+            color={style.iconColor}
+          />
+          <Text className={`text-xs font-medium mt-1 ${style.textColor}`}>{label}</Text>
         </>
       )}
     </Pressable>

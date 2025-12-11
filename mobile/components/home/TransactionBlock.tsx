@@ -1,11 +1,11 @@
+import { useRouter } from 'expo-router';
 import { DateTime } from 'luxon';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import type { ExpenseWithDetails } from '@/generated/api/api';
 import { ExpenseRow } from '@/components/transactions';
 import { Card } from '@/components/ui/Card';
+import type { ExpenseWithDetails } from '@/generated/api/api';
 
 type Props = {
   items: ExpenseWithDetails[];
@@ -54,16 +54,20 @@ export const TransactionBlock: React.FC<Props> = ({ items, selectedMonth, select
         <Text className="text-xl font-semibold text-neutral-900">
           {t('overview_recent_transactions')}
         </Text>
-        <Pressable onPress={handleSeeMore} className="px-2 py-1">
-          <Text className="text-sm font-medium text-primary-600">
-            {t('common_see_more')}
-          </Text>
+        <Pressable
+          onPress={handleSeeMore}
+          className="px-2 py-1"
+        >
+          <Text className="text-sm font-medium text-primary-600">{t('common_see_more')}</Text>
         </Pressable>
       </View>
-      
+
       <View className="gap-2">
         {items.map((item) => (
-          <ExpenseRow key={item.id} item={item} />
+          <ExpenseRow
+            key={item.id}
+            item={item}
+          />
         ))}
       </View>
     </View>

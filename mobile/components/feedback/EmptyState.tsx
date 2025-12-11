@@ -1,10 +1,10 @@
-import React, { memo, type ReactNode } from 'react';
-import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { cn } from '@/utils/cn';
-import { colors } from '@/theme/colors';
+import React, { memo, type ReactNode } from 'react';
+import { Text, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
+import { colors } from '@/theme/colors';
 import type { IconName } from '@/types';
+import { cn } from '@/utils/cn';
 
 interface EmptyStateProps {
   icon?: IconName;
@@ -29,15 +29,15 @@ export const EmptyState = memo(function EmptyState({
   return (
     <View className={cn('items-center justify-center p-6 py-12', className)}>
       <View className="mb-4">
-        <Ionicons name={icon} size={64} color={colors.neutral[300]} />
+        <Ionicons
+          name={icon}
+          size={64}
+          color={colors.neutral[300]}
+        />
       </View>
-      <Text className="text-base font-medium text-neutral-600 text-center mb-1">
-        {title}
-      </Text>
+      <Text className="text-base font-medium text-neutral-600 text-center mb-1">{title}</Text>
       {message && (
-        <Text className="text-sm text-neutral-500 text-center mb-6 max-w-xs">
-          {message}
-        </Text>
+        <Text className="text-sm text-neutral-500 text-center mb-6 max-w-xs">{message}</Text>
       )}
       {action && (
         <Button

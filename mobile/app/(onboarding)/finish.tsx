@@ -84,24 +84,16 @@ export default function FinishScreen() {
           <Text className="text-base font-semibold mb-1 text-neutral-900">
             {t('finish_language_label')}
           </Text>
-          <Text className="text-sm text-neutral-500 mb-1">
-            {t('finish_language_helper')}
-          </Text>
-          <Text className="text-xs text-amber-600 mb-2">
-            {t('finish_language_warning')}
-          </Text>
+          <Text className="text-sm text-neutral-500 mb-1">{t('finish_language_helper')}</Text>
+          <Text className="text-xs text-amber-600 mb-2">{t('finish_language_warning')}</Text>
           <Pressable
             onPress={openLanguage}
             className="bg-neutral-50 p-4 rounded-xl border border-neutral-200 active:bg-neutral-100"
           >
-            <Text className="text-neutral-900">
-              {language === 'en' ? 'English' : '日本語'}
-            </Text>
+            <Text className="text-neutral-900">{language === 'en' ? 'English' : '日本語'}</Text>
           </Pressable>
           {errors.preferred_language && (
-            <Text className="text-red-500 text-xs">
-              {errors.preferred_language.message}
-            </Text>
+            <Text className="text-red-500 text-xs">{errors.preferred_language.message}</Text>
           )}
         </View>
 

@@ -1,14 +1,14 @@
+import { Picker } from '@react-native-picker/picker';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, ScrollView, StyleSheet, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { ModalButton } from '@/components/modals/ModalButton';
+import { ModalContainer } from '@/components/modals/ModalContainer';
+import { ModalFooter } from '@/components/modals/ModalFooter';
+import { ModalHeader } from '@/components/modals/ModalHeader';
 import { useGetUsersMeQuery, usePutUsersMeMutation } from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 import { CURRENCIES } from '@/utils/constants';
-import { useState, useEffect } from 'react';
-import { ModalContainer } from '@/components/modals/ModalContainer';
-import { ModalHeader } from '@/components/modals/ModalHeader';
-import { ModalFooter } from '@/components/modals/ModalFooter';
-import { ModalButton } from '@/components/modals/ModalButton';
 
 type Props = {
   visible: boolean;
@@ -101,10 +101,18 @@ export const CurrencySelectorModal = ({ visible, onClose, onSuccess }: Props) =>
         </ScrollView>
 
         <ModalFooter>
-          <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
+          <ModalButton
+            onPress={onClose}
+            variant="cancel"
+            disabled={isLoading}
+          >
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={onSave} variant="primary" disabled={isLoading}>
+          <ModalButton
+            onPress={onSave}
+            variant="primary"
+            disabled={isLoading}
+          >
             {isLoading ? '...' : t('form_save')}
           </ModalButton>
         </ModalFooter>
@@ -129,4 +137,3 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 });
-

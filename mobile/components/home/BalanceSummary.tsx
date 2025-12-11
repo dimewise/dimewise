@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Text, View } from 'react-native';
 import { useGetAnalyticsBudgetOverviewQuery } from '@/generated/api/api';
+import { useUserLocale } from '@/hooks/useUserLocale';
 import { colors } from '@/theme/colors';
 import { formatCurrency } from '@/utils/localization/currencies';
-import { useUserLocale } from '@/hooks/useUserLocale';
 
 interface Props {
   selectedMonth: number;
@@ -57,18 +57,14 @@ export const BalanceSummary = ({ selectedMonth, selectedYear }: Props) => {
           <Text className="text-xs text-neutral-400 uppercase tracking-wide mb-1">
             {t('budget_used')}
           </Text>
-          <Text className="text-2xl font-semibold text-neutral-900">
-            {spent}
-          </Text>
+          <Text className="text-2xl font-semibold text-neutral-900">{spent}</Text>
         </View>
         <View className="w-px h-12 bg-neutral-200" />
         <View className="items-center px-4">
           <Text className="text-xs text-neutral-400 uppercase tracking-wide mb-1">
             {t('budget_total')}
           </Text>
-          <Text className="text-2xl font-semibold text-neutral-900">
-            {budget}
-          </Text>
+          <Text className="text-2xl font-semibold text-neutral-900">{budget}</Text>
         </View>
       </View>
     </View>

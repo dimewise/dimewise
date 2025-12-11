@@ -1,13 +1,13 @@
 import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from 'react';
-import { Modal, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { ModalButton } from '@/components/modals/ModalButton';
+import { ModalContainer } from '@/components/modals/ModalContainer';
+import { ModalFooter } from '@/components/modals/ModalFooter';
+import { ModalHeader } from '@/components/modals/ModalHeader';
 import { colors } from '@/theme/colors';
 import { LANGUAGES } from '@/utils/constants';
-import { ModalContainer } from '@/components/modals/ModalContainer';
-import { ModalHeader } from '@/components/modals/ModalHeader';
-import { ModalFooter } from '@/components/modals/ModalFooter';
-import { ModalButton } from '@/components/modals/ModalButton';
 
 type Props = {
   visible: boolean;
@@ -69,10 +69,16 @@ export const LanguagePickerModal = ({ visible, onClose, selected, onChange }: Pr
         </ScrollView>
 
         <ModalFooter>
-          <ModalButton onPress={onClose} variant="cancel">
+          <ModalButton
+            onPress={onClose}
+            variant="cancel"
+          >
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={handleDone} variant="primary">
+          <ModalButton
+            onPress={handleDone}
+            variant="primary"
+          >
             {t('common_done')}
           </ModalButton>
         </ModalFooter>
@@ -97,4 +103,3 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
 });
-

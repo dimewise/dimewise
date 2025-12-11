@@ -1,18 +1,18 @@
-import React, { memo, useCallback, useState } from 'react';
-import { Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useSignIn, useSignUp, useSSO } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
-import { useSSO, useSignIn, useSignUp } from '@clerk/clerk-expo';
-import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
 import * as Linking from 'expo-linking';
+import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
+import React, { memo, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 import { logger } from '@/lib/logger';
 import { cn } from '@/utils/cn';
 
 // Warm up browser for faster OAuth
 WebBrowser.maybeCompleteAuthSession();
 
-export type SocialProvider = 
+export type SocialProvider =
   | 'oauth_google'
   | 'oauth_facebook'
   | 'oauth_twitter'
@@ -92,7 +92,7 @@ export const SocialSignInButton = memo(function SocialSignInButton({
   const { startSSOFlow } = useSSO();
   const router = useRouter();
   const { t } = useTranslation();
-  
+
   const config = PROVIDER_CONFIG[provider];
 
   const handlePress = useCallback(async () => {
@@ -113,7 +113,7 @@ export const SocialSignInButton = memo(function SocialSignInButton({
         await setActive({ session: createdSessionId });
         logger.info(`${config.name} Sign-In successful`, { context: 'SocialSignInButton' });
         onSuccess?.();
-        
+
         // Navigate to app - layout will handle onboarding redirect if needed
         router.replace('/(app)');
         return;
@@ -123,16 +123,17 @@ export const SocialSignInButton = memo(function SocialSignInButton({
       if (signUp?.verifications?.externalAccount?.status === 'unverified') {
         logger.debug('External account needs verification', { context: 'SocialSignInButton' });
       }
-
     } catch (error: any) {
       // Handle user cancellation gracefully
-      if (error.code === 'ERR_REQUEST_CANCELED' || 
-          error.message?.includes('cancelled') ||
-          error.message?.includes('canceled')) {
+      if (
+        error.code === 'ERR_REQUEST_CANCELED' ||
+        error.message?.includes('cancelled') ||
+        error.message?.includes('canceled')
+      ) {
         logger.debug(`${config.name} Sign-In cancelled by user`, { context: 'SocialSignInButton' });
         return;
       }
-      
+
       logger.error(error, { context: 'SocialSignInButton', data: { provider } });
       onError?.(error);
     } finally {
@@ -149,19 +150,31 @@ export const SocialSignInButton = memo(function SocialSignInButton({
         'flex-row items-center justify-center w-full py-3.5 px-6 rounded-xl',
         config.bgColor,
         isLoading && 'opacity-70',
-        className
+        className,
       )}
     >
       {isLoading ? (
-        <ActivityIndicator color={config.iconColor} size="small" />
+        <ActivityIndicator
+          color={config.iconColor}
+          size="small"
+        />
       ) : (
         <>
-          <Ionicons name={config.icon} size={20} color={config.iconColor} />
+          <Ionicons
+            name={config.icon}
+            size={20}
+            color={config.iconColor}
+          />
           <Text className={cn('ml-3 text-base font-semibold', config.textColor)}>
             {mode === 'sign-in'
-              ? t('auth_social_sign_in', { provider: config.name, defaultValue: `Sign in with ${config.name}` })
-              : t('auth_social_sign_up', { provider: config.name, defaultValue: `Sign up with ${config.name}` })
-            }
+              ? t('auth_social_sign_in', {
+                  provider: config.name,
+                  defaultValue: `Sign in with ${config.name}`,
+                })
+              : t('auth_social_sign_up', {
+                  provider: config.name,
+                  defaultValue: `Sign up with ${config.name}`,
+                })}
           </Text>
         </>
       )}
@@ -171,21 +184,36 @@ export const SocialSignInButton = memo(function SocialSignInButton({
 
 // Convenience components for each provider
 export const GoogleSignInButton = memo((props: Omit<SocialSignInButtonProps, 'provider'>) => (
-  <SocialSignInButton provider="oauth_google" {...props} />
+  <SocialSignInButton
+    provider="oauth_google"
+    {...props}
+  />
 ));
 
 export const FacebookSignInButton = memo((props: Omit<SocialSignInButtonProps, 'provider'>) => (
-  <SocialSignInButton provider="oauth_facebook" {...props} />
+  <SocialSignInButton
+    provider="oauth_facebook"
+    {...props}
+  />
 ));
 
 export const TwitterSignInButton = memo((props: Omit<SocialSignInButtonProps, 'provider'>) => (
-  <SocialSignInButton provider="oauth_twitter" {...props} />
+  <SocialSignInButton
+    provider="oauth_twitter"
+    {...props}
+  />
 ));
 
 export const LineSignInButton = memo((props: Omit<SocialSignInButtonProps, 'provider'>) => (
-  <SocialSignInButton provider="oauth_line" {...props} />
+  <SocialSignInButton
+    provider="oauth_line"
+    {...props}
+  />
 ));
 
 export const GitHubSignInButton = memo((props: Omit<SocialSignInButtonProps, 'provider'>) => (
-  <SocialSignInButton provider="oauth_github" {...props} />
+  <SocialSignInButton
+    provider="oauth_github"
+    {...props}
+  />
 ));

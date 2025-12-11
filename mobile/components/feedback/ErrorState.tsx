@@ -1,10 +1,10 @@
-import React, { memo } from 'react';
-import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React, { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/utils/cn';
-import { colors } from '@/theme/colors';
+import { Text, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
+import { colors } from '@/theme/colors';
+import { cn } from '@/utils/cn';
 
 interface ErrorStateProps {
   title?: string;
@@ -27,14 +27,14 @@ export const ErrorState = memo(function ErrorState({
 
   return (
     <View
-      className={cn(
-        'items-center justify-center p-6',
-        fullScreen && 'flex-1 bg-white',
-        className
-      )}
+      className={cn('items-center justify-center p-6', fullScreen && 'flex-1 bg-white', className)}
     >
       <View className="mb-4 p-4 rounded-full bg-red-50">
-        <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
+        <Ionicons
+          name="alert-circle-outline"
+          size={48}
+          color={colors.error}
+        />
       </View>
       <Text className="text-xl font-semibold text-neutral-900 text-center mb-2">
         {title || t('error_generic_title')}
