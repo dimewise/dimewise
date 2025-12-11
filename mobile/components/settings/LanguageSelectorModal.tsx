@@ -6,7 +6,11 @@ import { ModalButton } from '@/components/modals/ModalButton';
 import { ModalContainer } from '@/components/modals/ModalContainer';
 import { ModalFooter } from '@/components/modals/ModalFooter';
 import { ModalHeader } from '@/components/modals/ModalHeader';
-import { useGetUsersMeQuery, usePutUsersMeMutation } from '@/generated/api/api';
+import {
+  type SupportedLanguage,
+  useGetUsersMeQuery,
+  usePutUsersMeMutation,
+} from '@/generated/api/api';
 import { colors } from '@/theme/colors';
 
 const LANGUAGES = [
@@ -22,9 +26,11 @@ type Props = {
 
 export const LanguageSelectorModal = ({ visible, onClose, onSuccess }: Props) => {
   const { t } = useTranslation();
-  const { data: user } = useGetUsersMeQuery();
+  const { data: user } = useGetUsersMeQuery(undefined);
   const [updateUser, { isLoading }] = usePutUsersMeMutation();
-  const [selectedLanguage, setSelectedLanguage] = useState(user?.preferred_language ?? 'en');
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>(
+    user?.preferred_language ?? 'en',
+  );
 
   // Reset selected language when modal opens
   useEffect(() => {
@@ -40,7 +46,7 @@ export const LanguageSelectorModal = ({ visible, onClose, onSuccess }: Props) =>
       await updateUser({
         userUpdate: {
           currency: user.currency,
-          preferred_language: selectedLanguage as any,
+          preferred_language: selectedLanguage,
         },
       }).unwrap();
       onSuccess?.();

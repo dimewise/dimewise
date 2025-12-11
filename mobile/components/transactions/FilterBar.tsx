@@ -32,7 +32,7 @@ export const FilterBar = ({ filter, setFilter, onOpenFilterModal, onFilterChange
       const { search: _, ...rest } = prev;
       return rest;
     });
-  }, [debouncedSearch]);
+  }, [debouncedSearch, setFilter]);
 
   const removeFilter = (filterKey: keyof Filter) => {
     const newFilter = { ...filter };

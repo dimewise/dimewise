@@ -31,7 +31,7 @@ export default function TransactionDetailsModal() {
     data: expense,
     isLoading,
     error,
-  } = useGetExpensesByExpenseIdQuery({ expenseId: expenseId! }, { skip: !expenseId });
+  } = useGetExpensesByExpenseIdQuery({ expenseId: expenseId }, { skip: !expenseId });
 
   const [verifyExpense] = usePostExpensesByExpenseIdVerifyMutation();
   const [deleteExpense] = useDeleteExpensesByExpenseIdMutation();
@@ -90,6 +90,7 @@ export default function TransactionDetailsModal() {
       setIsVerifying(true);
       await verifyExpense({ expenseId: expense.id }).unwrap();
     } catch (err) {
+      console.error(err);
       Alert.alert(t('common_error'), t('transaction_verify_error'));
     } finally {
       setIsVerifying(false);
@@ -115,6 +116,7 @@ export default function TransactionDetailsModal() {
               await deleteExpense({ expenseId: expense.id }).unwrap();
               onClose();
             } catch (err) {
+              console.error(err);
               Alert.alert(t('common_error'), t('transaction_delete_error'));
             } finally {
               setIsDeleting(false);

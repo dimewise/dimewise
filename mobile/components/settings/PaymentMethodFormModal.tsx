@@ -51,8 +51,8 @@ export const PaymentMethodFormModal = ({
 
   // API hooks
   const { data: existingPaymentMethod } = useGetPaymentMethodsByPaymentMethodIdQuery(
-    { paymentMethodId: paymentMethodId! },
-    { skip: !isEdit },
+    { paymentMethodId: paymentMethodId ?? '' },
+    { skip: !paymentMethodId || !isEdit },
   );
   const [createPaymentMethod, { isLoading: isCreating }] = usePostPaymentMethodsMutation();
   const [updatePaymentMethod, { isLoading: isUpdating }] =

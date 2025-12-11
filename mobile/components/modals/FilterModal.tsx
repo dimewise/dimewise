@@ -1,4 +1,4 @@
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
@@ -64,14 +64,14 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
       : t('transactions_filter_unverified');
   };
 
-  const onDateFromChange = (event: any, selectedDate?: Date) => {
+  const onDateFromChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
     if (selectedDate) {
       const isoDate = DateTime.fromJSDate(selectedDate).toISODate();
       setTempFilters((prev) => ({ ...prev, dateFrom: isoDate || undefined }));
     }
   };
 
-  const onDateToChange = (event: any, selectedDate?: Date) => {
+  const onDateToChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
     if (selectedDate) {
       const isoDate = DateTime.fromJSDate(selectedDate).toISODate();
       setTempFilters((prev) => ({ ...prev, dateTo: isoDate || undefined }));

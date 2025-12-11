@@ -244,7 +244,7 @@ const injectedRtkApi = api
   });
 export { injectedRtkApi as api };
 export type GetUsersMeApiResponse = /** status 200 User profile retrieved successfully */ User;
-export type GetUsersMeApiArg = void;
+export type GetUsersMeApiArg = undefined;
 export type PostUsersMeApiResponse = /** status 201 User created successfully */ User;
 export type PostUsersMeApiArg = {
   userCreate: UserCreate;

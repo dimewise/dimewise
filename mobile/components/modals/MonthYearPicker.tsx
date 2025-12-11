@@ -74,7 +74,7 @@ export const MonthYearPicker = ({
               >
                 {months.map((monthName, idx) => (
                   <Picker.Item
-                    key={idx}
+                    key={monthName}
                     label={monthName}
                     value={idx + 1}
                     color={colors.textPrimary}

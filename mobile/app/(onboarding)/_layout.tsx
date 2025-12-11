@@ -4,7 +4,7 @@ import { useGetUsersMeQuery } from '@/generated/api/api';
 export { default as ErrorBoundary } from '../_error';
 
 export default function OnboardingLayout() {
-  const { data: user } = useGetUsersMeQuery();
+  const { data: user } = useGetUsersMeQuery(undefined);
 
   if (user?.currency && user?.preferred_language) {
     // user already finished – jump to app

@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
@@ -63,7 +63,7 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
 
   // Fetch existing expense data for edit mode
   const { data: existingExpense, isLoading: isLoadingExpense } = useGetExpensesByExpenseIdQuery(
-    { expenseId: expenseId! },
+    { expenseId: expenseId || '' },
     { skip: !isEditMode },
   );
 
@@ -117,7 +117,7 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
     }
   }, [visible, existingExpense, reset, currency]);
 
-  const watchedDate = watch('incurred_at');
+  const _watchedDate = watch('incurred_at');
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -155,7 +155,7 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
     }
   });
 
-  const onDateChange = (event: any, selectedDate?: Date) => {
+  const onDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
     if (selectedDate) {
       setSelectedDate(selectedDate);
       // Use native toISOString() for proper zod.iso.datetime format
@@ -237,7 +237,7 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
                     const parts = cleanText.split('.');
                     if (parts.length <= 2) {
                       const decimalPart = parts[1] ? parts[1].substring(0, 2) : '';
-                      const formattedText = parts[0] + '.' + decimalPart;
+                      const formattedText = `${parts[0]}.${decimalPart}`;
                       setDisplayValue(formattedText);
                       const numValue = formattedText ? parseFloat(formattedText) : 0;
                       onChange(numValue);

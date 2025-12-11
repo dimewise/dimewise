@@ -53,7 +53,7 @@ export default function SettingsScreen() {
   const { currency, locale } = useUserLocale();
 
   // API hooks
-  const { data: user, refetch: refetchUser } = useGetUsersMeQuery();
+  const { data: user, refetch: refetchUser } = useGetUsersMeQuery(undefined);
   const {
     categories,
     isLoading: categoriesLoading,

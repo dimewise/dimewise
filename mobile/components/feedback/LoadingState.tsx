@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { colors } from '@/theme/colors';
 import { cn } from '@/utils/cn';

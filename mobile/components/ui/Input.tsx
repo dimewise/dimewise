@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { forwardRef, memo, useState } from 'react';
+import { forwardRef, memo, useState } from 'react';
 import { Text, TextInput, type TextInputProps, TouchableOpacity, View } from 'react-native';
 import { colors } from '@/theme/colors';
 import type { IconName } from '@/types';

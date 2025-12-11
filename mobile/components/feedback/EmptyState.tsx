@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { memo, type ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Text, View } from 'react-native';
 import { Button } from '@/components/ui/Button';
 import { colors } from '@/theme/colors';

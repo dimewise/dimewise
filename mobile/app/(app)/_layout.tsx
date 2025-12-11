@@ -2,7 +2,7 @@ import { useAuth } from '@clerk/clerk-expo';
 import { Redirect } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useEffect } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { useGetUsersMeQuery } from '@/generated/api/api';
 import { colors } from '@/theme/colors';

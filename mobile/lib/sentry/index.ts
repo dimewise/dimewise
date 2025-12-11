@@ -49,7 +49,7 @@ export function initSentry() {
     attachViewHierarchy: true,
 
     // Filter out certain errors if needed
-    beforeSend(event, hint) {
+    beforeSend(event, _hint) {
       // You can filter or modify events here
       // Example: Filter out network errors from specific domains
       // if (event.exception?.values?.[0]?.value?.includes('Network request failed')) {

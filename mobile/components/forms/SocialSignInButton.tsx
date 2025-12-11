@@ -1,9 +1,9 @@
-import { useSignIn, useSignUp, useSSO } from '@clerk/clerk-expo';
+import { useSSO } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import React, { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, TouchableOpacity } from 'react-native';
 import { logger } from '@/lib/logger';
@@ -103,7 +103,7 @@ export const SocialSignInButton = memo(function SocialSignInButton({
       const redirectUrl = Linking.createURL('/oauth-callback');
 
       // Start the SSO flow
-      const { createdSessionId, setActive, signIn, signUp } = await startSSOFlow({
+      const { createdSessionId, setActive, signUp } = await startSSOFlow({
         strategy: provider,
         redirectUrl,
       });
@@ -123,19 +123,23 @@ export const SocialSignInButton = memo(function SocialSignInButton({
       if (signUp?.verifications?.externalAccount?.status === 'unverified') {
         logger.debug('External account needs verification', { context: 'SocialSignInButton' });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
       // Handle user cancellation gracefully
       if (
-        error.code === 'ERR_REQUEST_CANCELED' ||
-        error.message?.includes('cancelled') ||
-        error.message?.includes('canceled')
+        err.code === 'ERR_REQUEST_CANCELED' ||
+        err.message?.includes('cancelled') ||
+        err.message?.includes('canceled')
       ) {
         logger.debug(`${config.name} Sign-In cancelled by user`, { context: 'SocialSignInButton' });
         return;
       }
 
-      logger.error(error, { context: 'SocialSignInButton', data: { provider } });
-      onError?.(error);
+      logger.error(error instanceof Error ? error : String(error), {
+        context: 'SocialSignInButton',
+        data: { provider },
+      });
+      onError?.(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsLoading(false);
     }
