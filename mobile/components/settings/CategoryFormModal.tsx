@@ -215,8 +215,8 @@ export const CategoryFormModal = ({
           <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={onSubmit} variant="primary" disabled={isLoading}>
-            {isLoading ? '...' : t('form_save')}
+          <ModalButton onPress={onSubmit} variant="primary" loading={isLoading}>
+            {t('form_save')}
           </ModalButton>
         </ModalFooter>
       </ModalContainer>

@@ -13,6 +13,8 @@
   "auth_sign_up_verify_your_email": "メールを確認してください",
   "auth_social_sign_in": "{{provider}}でサインイン",
   "auth_social_sign_up": "{{provider}}で登録",
+  "auth_apple_sign_in": "Appleでサインイン",
+  "auth_apple_sign_up": "Appleで登録",
   "common_email_address": "メールアドレス",
   "common_email_address_prompt": "メールアドレスを入力してください",
   "common_password": "パスワード",
@@ -73,6 +75,10 @@
   "settings_add_category": "追加",
   "settings_add_payment": "追加",
   "settings_logout": "ログアウト",
+  "settings_logout_title": "ログアウト",
+  "settings_logout_message": "ログアウトしてもよろしいですか？",
+  "settings_logout_cancel": "キャンセル",
+  "settings_logout_confirm": "ログアウト",
   "settings_edit": "編集",
   "settings_delete": "削除",
   "settings_edit_category": "カテゴリを編集",
@@ -169,5 +175,7 @@
   "auth_error_additional_steps": "サインインには追加の手順が必要です。",
   "auth_error_invalid_credentials": "サインインに失敗しました：無効な認証情報またはネットワークエラー",
   "transaction_verify_error": "取引の確認に失敗しました",
-  "transaction_delete_error": "取引の削除に失敗しました"
+  "transaction_delete_error": "取引の削除に失敗しました",
+  "common_deleted": "削除済み",
+  "common_unknown": "不明"
 }

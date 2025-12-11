@@ -177,8 +177,8 @@ export default function ExpensesScreen() {
             <RefreshControl
               refreshing={isFetching}
               onRefresh={refetch}
-              tintColor={colors.text.primary}
-              colors={[colors.text.primary]}
+              tintColor={colors.primary.DEFAULT}
+              colors={[colors.primary.DEFAULT]}
             />
           }
         />

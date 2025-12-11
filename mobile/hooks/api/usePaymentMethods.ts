@@ -95,15 +95,15 @@ export function usePaymentMethods(options?: UsePaymentMethodsOptions) {
   const deletePaymentMethod = useCallback(
     (paymentMethod: PaymentMethod) => {
       Alert.alert(
-        t('settings.paymentMethods.deleteTitle', 'Delete Payment Method'),
-        t('settings.paymentMethods.deleteMessage', {
+        t('settings_delete_confirm_title', 'Delete Payment Method'),
+        t('settings_delete_payment_method_confirm', {
           defaultValue: 'Are you sure you want to delete "{{name}}"?',
           name: paymentMethod.title,
         }),
         [
-          { text: t('common.cancel', 'Cancel'), style: 'cancel' },
+          { text: t('settings_delete_confirm_cancel', 'Cancel'), style: 'cancel' },
           {
-            text: t('common.delete', 'Delete'),
+            text: t('settings_delete_confirm_delete', 'Delete'),
             style: 'destructive',
             onPress: async () => {
               try {

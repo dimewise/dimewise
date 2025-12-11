@@ -47,7 +47,15 @@ export default function RootLayout() {
 
   // Handle error state
   if (error) {
+    // If user is not found in backend (401), redirect to onboarding to create them
+    if ('originalStatus' in error && error.originalStatus === 401) {
+      console.log('[AppLayout] User not found in backend, redirecting to onboarding');
+      return <Redirect href="/(onboarding)/finish" />;
+    }
+    
+    // Log actual errors
     console.error('[AppLayout] Error loading user data:', error);
+    
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorTitle}>Failed to load user data</Text>
@@ -110,7 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   retryButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primary.DEFAULT,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,

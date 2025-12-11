@@ -10,6 +10,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppLayout } from '@/components/layouts/AppLayout';
@@ -84,14 +85,27 @@ export default function SettingsScreen() {
     await Promise.all([refetchCategories(), refetchPaymentMethods(), refetchUser()]);
   }, [refetchCategories, refetchPaymentMethods, refetchUser]);
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await signOut();
-      router.replace('/welcome');
-    } catch (err) {
-      logger.error(err as Error, { context: 'Settings' });
-    }
-  }, [signOut, router]);
+  const handleLogout = useCallback(() => {
+    Alert.alert(
+      t('settings_logout_title', 'Log out'),
+      t('settings_logout_message', 'Are you sure you want to log out?'),
+      [
+        { text: t('settings_logout_cancel', 'Cancel'), style: 'cancel' },
+        {
+          text: t('settings_logout_confirm', 'Log out'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              router.replace('/welcome');
+            } catch (err) {
+              logger.error(err as Error, { context: 'Settings' });
+            }
+          },
+        },
+      ]
+    );
+  }, [signOut, router, t]);
 
   const handleEditCategory = useCallback(
     (category: Category) => {

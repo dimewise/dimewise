@@ -437,12 +437,8 @@ export const ExpenseFormModal = ({ visible, onClose, expenseId, onSuccess }: Pro
           <ModalButton onPress={onClose} variant="cancel" disabled={isLoading}>
             {t('form_cancel')}
           </ModalButton>
-          <ModalButton onPress={onSubmit} variant="primary" disabled={isLoading}>
-            {isLoadingExpense
-              ? t('form_loading')
-              : isCreating || isUpdating
-                ? '...'
-                : t('form_save')}
+          <ModalButton onPress={onSubmit} variant="primary" loading={isLoading}>
+            {t('form_save')}
           </ModalButton>
         </ModalFooter>
       </ModalContainer>

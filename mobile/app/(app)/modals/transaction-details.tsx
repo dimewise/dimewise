@@ -82,6 +82,8 @@ export default function TransactionDetailsModal() {
   }
 
   const isVerified = !!expense.verified_at;
+  const isPaymentMethodDeleted = !!expense.payment_method.deleted_at;
+  const isCategoryDeleted = !!expense.category.deleted_at;
 
   const handleVerify = async () => {
     if (isVerified || isVerifying) return;
@@ -193,11 +195,15 @@ export default function TransactionDetailsModal() {
             <DetailRow
               label={t('form_expense_category')}
               value={expense.category.title}
+              isDeleted={isCategoryDeleted}
+              deletedLabel={t('common_deleted')}
             />
             <View className="h-px bg-neutral-200 mx-4" />
             <DetailRow
               label={t('form_expense_payment_method')}
               value={expense.payment_method.title}
+              isDeleted={isPaymentMethodDeleted}
+              deletedLabel={t('common_deleted')}
             />
           </View>
         </View>
@@ -264,11 +270,18 @@ export default function TransactionDetailsModal() {
 }
 
 // Detail Row Component
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, value, isDeleted = false, deletedLabel = 'Deleted' }: { label: string; value: string; isDeleted?: boolean; deletedLabel?: string }) {
   return (
     <View className="flex-row justify-between items-center px-4 py-3.5">
       <Text className="text-sm text-neutral-500">{label}</Text>
-      <Text className="text-base font-medium text-neutral-900">{value}</Text>
+      <View className="flex-row items-center gap-2">
+        <Text className={`text-base font-medium ${isDeleted ? 'text-neutral-400 line-through' : 'text-neutral-900'}`}>{value}</Text>
+        {isDeleted && (
+          <View className="bg-red-100 px-2 py-0.5 rounded">
+            <Text className="text-xs text-red-600 font-medium">{deletedLabel}</Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 }

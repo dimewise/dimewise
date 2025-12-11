@@ -1,6 +1,5 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
-  View,
   Text,
   TouchableOpacity,
   ActivityIndicator,
@@ -8,7 +7,7 @@ import {
 } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { Ionicons } from '@expo/vector-icons';
-import { useSignIn, useSignUp } from '@clerk/clerk-expo';
+import { useSignInWithApple } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { logger } from '@/lib/logger';
@@ -29,8 +28,7 @@ export const AppleSignInButton = memo(function AppleSignInButton({
 }: AppleSignInButtonProps) {
   const [isAvailable, setIsAvailable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, setActive: setSignInActive } = useSignIn();
-  const { signUp, setActive: setSignUpActive } = useSignUp();
+  const { startAppleAuthenticationFlow } = useSignInWithApple();
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -42,71 +40,38 @@ export const AppleSignInButton = memo(function AppleSignInButton({
   }, []);
 
   const handlePress = useCallback(async () => {
-    if (!signIn || !signUp) return;
-
     setIsLoading(true);
-
+    
     try {
-      // Get Apple credential using native flow
-      const appleCredential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
+      // Use Clerk's native Apple Sign-In hook
+      // This handles both sign-in and sign-up automatically
+      const { createdSessionId, setActive } = await startAppleAuthenticationFlow();
 
-      if (!appleCredential.identityToken) {
-        throw new Error('No identity token received from Apple');
-      }
-
-      // Try signing in with Clerk using the Apple ID token
-      try {
-        const { createdSessionId } = await signIn.create({
-          strategy: 'oauth_apple',
-          redirectUrl: 'dimewise://oauth-callback',
-        });
-
-        if (createdSessionId) {
-          await setSignInActive({ session: createdSessionId });
-          logger.info('Apple Sign-In successful', { context: 'AppleSignInButton' });
-          onSuccess?.();
-          router.replace('/(app)/(tabs)');
-          return;
-        }
-      } catch (signInError: any) {
-        // If sign-in fails because user doesn't exist, try sign-up
-        if (signInError?.errors?.[0]?.code === 'form_identifier_not_found' ||
-            signInError?.errors?.[0]?.code === 'external_account_not_found') {
-          logger.debug('User not found, attempting sign up', { context: 'AppleSignInButton' });
-          
-          const { createdSessionId } = await signUp.create({
-            strategy: 'oauth_apple',
-            redirectUrl: 'dimewise://oauth-callback',
-          });
-
-          if (createdSessionId) {
-            await setSignUpActive({ session: createdSessionId });
-            logger.info('Apple Sign-Up successful', { context: 'AppleSignInButton' });
-            onSuccess?.();
-            router.replace('/(onboarding)/finish');
-            return;
-          }
-        }
-        throw signInError;
+      if (createdSessionId && setActive) {
+        await setActive({ session: createdSessionId });
+        logger.info('Apple Sign-In successful (native)', { context: 'AppleSignInButton' });
+        onSuccess?.();
+        // Navigate to app - layout will handle onboarding redirect if needed
+        router.replace('/(app)');
       }
     } catch (error: any) {
       // Handle user cancellation gracefully
-      if (error.code === 'ERR_REQUEST_CANCELED') {
+      if (
+        error.code === 'ERR_REQUEST_CANCELED' ||
+        error.code === 'ERR_CANCELED' ||
+        error.message?.includes('cancelled') ||
+        error.message?.includes('canceled')
+      ) {
         logger.debug('Apple Sign-In cancelled by user', { context: 'AppleSignInButton' });
         return;
       }
-      
+
       logger.error(error, { context: 'AppleSignInButton' });
       onError?.(error);
     } finally {
       setIsLoading(false);
     }
-  }, [signIn, signUp, setSignInActive, setSignUpActive, onSuccess, onError, router]);
+  }, [startAppleAuthenticationFlow, onSuccess, onError, router]);
 
   // Don't render on Android or if not available
   if (Platform.OS !== 'ios' || !isAvailable) {
@@ -119,7 +84,7 @@ export const AppleSignInButton = memo(function AppleSignInButton({
       disabled={isLoading}
       activeOpacity={0.8}
       className={cn(
-        'flex-row items-center justify-center w-full py-3.5 px-6 rounded-xl bg-white',
+        'flex-row items-center justify-center w-full py-3.5 px-6 rounded-xl bg-white border border-neutral-300',
         isLoading && 'opacity-70',
         className
       )}
@@ -130,7 +95,7 @@ export const AppleSignInButton = memo(function AppleSignInButton({
         <>
           <Ionicons name="logo-apple" size={20} color="#000" />
           <Text className="ml-3 text-base font-semibold text-black">
-            {mode === 'sign-in' 
+            {mode === 'sign-in'
               ? t('auth_apple_sign_in', 'Sign in with Apple')
               : t('auth_apple_sign_up', 'Sign up with Apple')
             }
