@@ -103,6 +103,8 @@
   "form_payment_method_title": "Payment Method Name",
   "form_payment_method_title_prompt": "e.g. My Credit Card",
   "form_payment_method_type": "Payment Type",
+  "form_currency": "Currency",
+  "form_language": "Language",
   "form_save": "Save",
   "form_cancel": "Cancel",
   "settings_total_budget": "Total Budget",

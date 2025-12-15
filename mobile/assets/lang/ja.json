@@ -103,6 +103,8 @@
   "form_payment_method_title": "支払い方法名",
   "form_payment_method_title_prompt": "例: 私のクレジットカード",
   "form_payment_method_type": "支払いタイプ",
+  "form_currency": "通貨",
+  "form_language": "言語",
   "form_save": "保存",
   "form_cancel": "キャンセル",
   "settings_total_budget": "総予算",

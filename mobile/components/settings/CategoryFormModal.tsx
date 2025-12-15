@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Modal, ScrollView, Text, TextInput, View } from 'react-native';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import { ModalButton } from '@/components/modals/ModalButton';
 import { ModalContainer } from '@/components/modals/ModalContainer';
@@ -17,7 +17,6 @@ import {
 } from '@/generated/api/api';
 import { postCategoryBody } from '@/generated/types/categories/categories.zod';
 import { useUserLocale } from '@/hooks/useUserLocale';
-import { colors } from '@/theme/colors';
 import {
   currencyUsesDecimals,
   formatCurrencyForInput,
@@ -141,10 +140,11 @@ export const CategoryFormModal = ({
         />
 
         <ScrollView
-          style={styles.content}
+          className="flex-1"
+          contentContainerClassName="p-6"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.form}>
+          <View className="gap-5">
             <FormTextInput
               control={control}
               name="title"
@@ -185,24 +185,25 @@ export const CategoryFormModal = ({
                 };
 
                 return (
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>
+                  <View className="gap-2">
+                    <Text className="text-sm font-medium text-neutral-500">
                       {t('form_budget_amount')} ({currency})
                     </Text>
                     <TextInput
-                      style={[
-                        styles.input,
-                        errors?.amount && { borderWidth: 1, borderColor: colors.error },
-                      ]}
+                      className={`bg-neutral-100 rounded-xl px-4 h-12 text-base text-neutral-900 ${
+                        errors?.amount ? 'border border-red-500' : ''
+                      }`}
                       keyboardType="numeric"
                       placeholder={getCurrencyPlaceholder(currency)}
                       value={displayValue}
                       onChangeText={handleTextChange}
                       onBlur={onBlur}
-                      placeholderTextColor={colors.disabled}
+                      placeholderTextColor="#A3A3A3"
                     />
                     {errors?.amount && (
-                      <Text style={styles.errorText}>{String(errors.amount?.message ?? '')}</Text>
+                      <Text className="text-sm text-red-500">
+                        {String(errors.amount?.message ?? '')}
+                      </Text>
                     )}
                   </View>
                 );
@@ -231,35 +232,3 @@ export const CategoryFormModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-  },
-  form: {
-    padding: 24,
-    gap: 20,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.textPrimary,
-  },
-  input: {
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    borderWidth: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.textPrimary,
-  },
-  errorText: {
-    fontSize: 14,
-    color: colors.error,
-    marginTop: 4,
-  },
-});

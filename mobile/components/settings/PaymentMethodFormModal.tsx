@@ -3,7 +3,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, ScrollView, Text, View } from 'react-native';
 import { FormTextInput } from '@/components/forms/FormTextInput';
 import { ModalButton } from '@/components/modals/ModalButton';
 import { ModalContainer } from '@/components/modals/ModalContainer';
@@ -132,10 +132,11 @@ export const PaymentMethodFormModal = ({
         />
 
         <ScrollView
-          style={styles.content}
+          className="flex-1"
+          contentContainerClassName="p-6"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.form}>
+          <View className="gap-5">
             <FormTextInput
               control={control}
               name="title"
@@ -149,21 +150,23 @@ export const PaymentMethodFormModal = ({
               control={control}
               name="method_type"
               render={({ field: { onChange, value } }) => (
-                <View style={styles.methodTypeContainer}>
-                  <Text style={styles.label}>{t('form_payment_method_type')}</Text>
-                  <View style={styles.pickerContainer}>
+                <View className="gap-2">
+                  <Text className="text-sm font-medium text-neutral-500">
+                    {t('form_payment_method_type')}
+                  </Text>
+                  <View className="bg-neutral-100 rounded-xl overflow-hidden min-h-[200px]">
                     <Picker
                       selectedValue={value}
                       onValueChange={onChange}
-                      style={styles.picker}
-                      itemStyle={styles.pickerItem}
+                      style={{ height: 200 }}
+                      itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
                     >
                       {PAYMENT_METHOD_TYPES.map((type) => (
                         <Picker.Item
                           key={type.value}
                           label={t(type.labelKey)}
                           value={type.value}
-                          color={colors.textPrimary}
+                          color={colors.neutral[900]}
                         />
                       ))}
                     </Picker>
@@ -194,36 +197,3 @@ export const PaymentMethodFormModal = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-  },
-  form: {
-    padding: 24,
-    gap: 20,
-  },
-  methodTypeContainer: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.textPrimary,
-  },
-  pickerContainer: {
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    borderWidth: 0,
-    overflow: 'hidden',
-    minHeight: 200,
-  },
-  picker: {
-    height: 50,
-    color: colors.textPrimary,
-  },
-  pickerItem: {
-    color: colors.textPrimary,
-    fontSize: 16,
-  },
-});

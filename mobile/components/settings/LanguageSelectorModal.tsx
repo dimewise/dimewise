@@ -1,7 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Modal, ScrollView, Text, View } from 'react-native';
 import { ModalButton } from '@/components/modals/ModalButton';
 import { ModalContainer } from '@/components/modals/ModalContainer';
 import { ModalFooter } from '@/components/modals/ModalFooter';
@@ -68,24 +68,31 @@ export const LanguageSelectorModal = ({ visible, onClose, onSuccess }: Props) =>
         <ModalHeader title={t('settings_select_language')} />
 
         <ScrollView
-          style={styles.content}
+          className="flex-1"
+          contentContainerClassName="p-6"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedLanguage}
-              onValueChange={setSelectedLanguage}
-              style={styles.picker}
-            >
-              {LANGUAGES.map((language) => (
-                <Picker.Item
-                  key={language.code}
-                  label={language.name}
-                  value={language.code}
-                  color={colors.textPrimary}
-                />
-              ))}
-            </Picker>
+          <View className="gap-5">
+            <View className="gap-2">
+              <Text className="text-sm font-medium text-neutral-500">{t('form_language')}</Text>
+              <View className="bg-neutral-100 rounded-xl overflow-hidden">
+                <Picker
+                  selectedValue={selectedLanguage}
+                  onValueChange={setSelectedLanguage}
+                  style={{ height: 200 }}
+                  itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
+                >
+                  {LANGUAGES.map((language) => (
+                    <Picker.Item
+                      key={language.code}
+                      label={language.name}
+                      value={language.code}
+                      color={colors.neutral[900]}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
           </View>
         </ScrollView>
 
@@ -100,29 +107,12 @@ export const LanguageSelectorModal = ({ visible, onClose, onSuccess }: Props) =>
           <ModalButton
             onPress={onSave}
             variant="primary"
-            disabled={isLoading}
+            loading={isLoading}
           >
-            {isLoading ? '...' : t('form_save')}
+            {t('form_save')}
           </ModalButton>
         </ModalFooter>
       </ModalContainer>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-  },
-  pickerContainer: {
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    borderWidth: 0,
-    overflow: 'hidden',
-    margin: 24,
-  },
-  picker: {
-    height: 200,
-    color: colors.textPrimary,
-  },
-});
