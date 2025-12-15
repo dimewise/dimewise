@@ -2,10 +2,9 @@ import { useAuth } from '@clerk/clerk-expo';
 import { Redirect } from 'expo-router';
 import { Stack } from 'expo-router/stack';
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { LoadingScreen } from '@/components/LoadingScreen';
 import { useGetUsersMeQuery } from '@/generated/api/api';
-import { colors } from '@/theme/colors';
 import { syncLanguageWithUser } from '@/utils/localization/i18n';
 
 export default function RootLayout() {
@@ -62,18 +61,20 @@ export default function RootLayout() {
     console.error('[AppLayout] Error loading user data:', error);
 
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>Failed to load user data</Text>
-        <Text style={styles.errorMessage}>
+      <View className="flex-1 justify-center items-center bg-neutral-950 p-6">
+        <Text className="text-xl font-semibold text-neutral-100 mb-2">
+          Failed to load user data
+        </Text>
+        <Text className="text-sm text-neutral-400 text-center mb-6">
           {error && 'data' in error
             ? String(error.data)
             : 'Network error. Please check your connection.'}
         </Text>
         <Pressable
           onPress={() => refetch()}
-          style={styles.retryButton}
+          className="bg-primary px-6 py-3 rounded-lg"
         >
-          <Text style={styles.retryButtonText}>Retry</Text>
+          <Text className="text-base font-semibold text-white">Retry</Text>
         </Pressable>
       </View>
     );
@@ -101,36 +102,3 @@ export default function RootLayout() {
     </Stack>
   );
 }
-
-const styles = StyleSheet.create({
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.backgroundDefault,
-    padding: 24,
-  },
-  errorTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.textPrimary,
-    marginBottom: 8,
-  },
-  errorMessage: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  retryButton: {
-    backgroundColor: colors.primary.DEFAULT,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.primaryTextOn,
-  },
-});
