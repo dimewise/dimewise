@@ -2,7 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { DateTime, Info } from 'luxon';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, ScrollView, Text, View } from 'react-native';
 import { useUserLocale } from '@/hooks/useUserLocale';
 import { colors } from '@/theme/colors';
 import { ModalButton } from './ModalButton';
@@ -59,18 +59,18 @@ export const MonthYearPicker = ({
         <ModalHeader title={t('common_select_month_year') || 'Select month & year'} />
 
         <ScrollView
-          style={styles.content}
+          className="flex-1"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.pickerContainer}>
+          <View className="flex-row px-6 py-6 gap-4">
             {/* Month */}
-            <View style={styles.pickerWrapper}>
-              <Text style={styles.label}>{t('common_month') || 'Month'}</Text>
+            <View className="flex-1">
+              <Text className="text-xs text-neutral-400 mb-2">{t('common_month') || 'Month'}</Text>
               <Picker
                 selectedValue={month}
                 onValueChange={setMonth}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
+                style={{ height: 200 }}
+                itemStyle={{ color: colors.textPrimary }}
               >
                 {months.map((monthName, idx) => (
                   <Picker.Item
@@ -84,13 +84,13 @@ export const MonthYearPicker = ({
             </View>
 
             {/* Year */}
-            <View style={styles.pickerWrapper}>
-              <Text style={styles.label}>{t('common_year') || 'Year'}</Text>
+            <View className="flex-1">
+              <Text className="text-xs text-neutral-400 mb-2">{t('common_year') || 'Year'}</Text>
               <Picker
                 selectedValue={year}
                 onValueChange={setYear}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
+                style={{ height: 200 }}
+                itemStyle={{ color: colors.textPrimary }}
               >
                 {Array.from({ length: 11 }, (_, i) => {
                   const y = DateTime.now().year - 5 + i;
@@ -126,29 +126,3 @@ export const MonthYearPicker = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-  },
-  pickerContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-    gap: 16,
-  },
-  pickerWrapper: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 12,
-    color: colors.disabled,
-    marginBottom: 8,
-  },
-  picker: {
-    height: 200,
-  },
-  pickerItem: {
-    color: colors.textPrimary,
-  },
-});

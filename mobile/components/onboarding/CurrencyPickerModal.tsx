@@ -1,7 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, ScrollView, StyleSheet, View } from 'react-native';
+import { Modal, ScrollView, View } from 'react-native';
 import { ModalButton } from '@/components/modals/ModalButton';
 import { ModalContainer } from '@/components/modals/ModalContainer';
 import { ModalFooter } from '@/components/modals/ModalFooter';
@@ -43,14 +43,15 @@ export const CurrencyPickerModal = ({ visible, onClose, selected, onChange }: Pr
         <ModalHeader title={t('finish_select_currency')} />
 
         <ScrollView
-          style={styles.content}
+          className="flex-1"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.pickerContainer}>
+          <View className="m-6 bg-neutral-100 rounded-xl overflow-hidden">
             <Picker
               selectedValue={inner}
               onValueChange={setInner}
-              style={styles.picker}
+              style={{ height: 200 }}
+              itemStyle={{ color: colors.textPrimary }}
             >
               {CURRENCIES.map((currency) => (
                 <Picker.Item
@@ -82,20 +83,3 @@ export const CurrencyPickerModal = ({ visible, onClose, selected, onChange }: Pr
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    flex: 1,
-  },
-  pickerContainer: {
-    backgroundColor: colors.backgroundSurface,
-    borderRadius: 12,
-    borderWidth: 0,
-    overflow: 'hidden',
-    margin: 24,
-  },
-  picker: {
-    height: 200,
-    color: colors.textPrimary,
-  },
-});

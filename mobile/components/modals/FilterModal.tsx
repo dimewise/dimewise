@@ -3,7 +3,7 @@ import { Picker } from '@react-native-picker/picker';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import type { Filter } from '@/app/(app)/(tabs)/transactions';
 import { useGetCategoriesQuery, useGetPaymentMethodsQuery } from '@/generated/api/api';
 import { useUserLocale } from '@/hooks/useUserLocale';
@@ -105,36 +105,42 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
           rightAction={
             <Pressable
               onPress={handleClear}
-              style={styles.clearButton}
+              className="py-1 px-1"
             >
-              <Text style={styles.clearButtonText}>{t('transactions_filter_clear')}</Text>
+              <Text className="text-sm text-neutral-500 font-medium">
+                {t('transactions_filter_clear')}
+              </Text>
             </Pressable>
           }
         />
 
         <ScrollView
-          style={styles.content}
+          className="flex-1"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.form}>
+          <View className="p-6 gap-5">
             {/* Category Filter */}
-            <View style={styles.collapsibleContainer}>
+            <View className="gap-2">
               <Pressable
-                style={styles.collapsibleHeader}
+                className="flex-row justify-between items-center py-4 px-4 bg-neutral-50 rounded-xl border border-neutral-200"
                 onPress={() => toggleField('category')}
               >
-                <Text style={styles.collapsibleLabel}>{t('transactions_filter_category')}</Text>
-                <Text style={styles.collapsibleValue}>{getSelectedCategoryTitle()}</Text>
+                <Text className="text-base font-semibold text-neutral-900">
+                  {t('transactions_filter_category')}
+                </Text>
+                <Text className="text-base text-neutral-500 flex-1 text-right">
+                  {getSelectedCategoryTitle()}
+                </Text>
               </Pressable>
               {expandedField === 'category' && (
-                <View style={styles.pickerWrapper}>
+                <View className="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden min-h-[200px]">
                   <Picker
                     selectedValue={tempFilters.categoryId || ''}
                     onValueChange={(value) =>
                       setTempFilters((prev) => ({ ...prev, categoryId: value || undefined }))
                     }
-                    style={styles.picker}
-                    itemStyle={styles.pickerItem}
+                    style={{ height: 50 }}
+                    itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
                   >
                     <Picker.Item
                       label={t('transactions_filter_all')}
@@ -155,25 +161,27 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
             </View>
 
             {/* Payment Method Filter */}
-            <View style={styles.collapsibleContainer}>
+            <View className="gap-2">
               <Pressable
-                style={styles.collapsibleHeader}
+                className="flex-row justify-between items-center py-4 px-4 bg-neutral-50 rounded-xl border border-neutral-200"
                 onPress={() => toggleField('payment_method')}
               >
-                <Text style={styles.collapsibleLabel}>
+                <Text className="text-base font-semibold text-neutral-900">
                   {t('transactions_filter_payment_method')}
                 </Text>
-                <Text style={styles.collapsibleValue}>{getSelectedPaymentMethodTitle()}</Text>
+                <Text className="text-base text-neutral-500 flex-1 text-right">
+                  {getSelectedPaymentMethodTitle()}
+                </Text>
               </Pressable>
               {expandedField === 'payment_method' && (
-                <View style={styles.pickerWrapper}>
+                <View className="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden min-h-[200px]">
                   <Picker
                     selectedValue={tempFilters.paymentMethodId || ''}
                     onValueChange={(value) =>
                       setTempFilters((prev) => ({ ...prev, paymentMethodId: value || undefined }))
                     }
-                    style={styles.picker}
-                    itemStyle={styles.pickerItem}
+                    style={{ height: 50 }}
+                    itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
                   >
                     <Picker.Item
                       label={t('transactions_filter_all')}
@@ -194,16 +202,20 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
             </View>
 
             {/* Date From Filter */}
-            <View style={styles.collapsibleContainer}>
+            <View className="gap-2">
               <Pressable
-                style={styles.collapsibleHeader}
+                className="flex-row justify-between items-center py-4 px-4 bg-neutral-50 rounded-xl border border-neutral-200"
                 onPress={() => toggleField('date_from')}
               >
-                <Text style={styles.collapsibleLabel}>{t('transactions_filter_date_from')}</Text>
-                <Text style={styles.collapsibleValue}>{formatDate(tempFilters.dateFrom)}</Text>
+                <Text className="text-base font-semibold text-neutral-900">
+                  {t('transactions_filter_date_from')}
+                </Text>
+                <Text className="text-base text-neutral-500 flex-1 text-right">
+                  {formatDate(tempFilters.dateFrom)}
+                </Text>
               </Pressable>
               {expandedField === 'date_from' && (
-                <View style={styles.pickerWrapper}>
+                <View className="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden min-h-[200px]">
                   <DateTimePicker
                     value={
                       tempFilters.dateFrom
@@ -213,7 +225,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                     mode="date"
                     display="spinner"
                     onChange={onDateFromChange}
-                    style={styles.datePicker}
+                    style={{ height: 200, backgroundColor: colors.neutral[50] }}
                     textColor={colors.textPrimary}
                     themeVariant="dark"
                     locale={locale}
@@ -223,16 +235,20 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
             </View>
 
             {/* Date To Filter */}
-            <View style={styles.collapsibleContainer}>
+            <View className="gap-2">
               <Pressable
-                style={styles.collapsibleHeader}
+                className="flex-row justify-between items-center py-4 px-4 bg-neutral-50 rounded-xl border border-neutral-200"
                 onPress={() => toggleField('date_to')}
               >
-                <Text style={styles.collapsibleLabel}>{t('transactions_filter_date_to')}</Text>
-                <Text style={styles.collapsibleValue}>{formatDate(tempFilters.dateTo)}</Text>
+                <Text className="text-base font-semibold text-neutral-900">
+                  {t('transactions_filter_date_to')}
+                </Text>
+                <Text className="text-base text-neutral-500 flex-1 text-right">
+                  {formatDate(tempFilters.dateTo)}
+                </Text>
               </Pressable>
               {expandedField === 'date_to' && (
-                <View style={styles.pickerWrapper}>
+                <View className="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden min-h-[200px]">
                   <DateTimePicker
                     value={
                       tempFilters.dateTo
@@ -242,7 +258,7 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                     mode="date"
                     display="spinner"
                     onChange={onDateToChange}
-                    style={styles.datePicker}
+                    style={{ height: 200, backgroundColor: colors.neutral[50] }}
                     textColor={colors.textPrimary}
                     themeVariant="dark"
                     locale={locale}
@@ -252,18 +268,20 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
             </View>
 
             {/* Verification Status Filter */}
-            <View style={styles.collapsibleContainer}>
+            <View className="gap-2">
               <Pressable
-                style={styles.collapsibleHeader}
+                className="flex-row justify-between items-center py-4 px-4 bg-neutral-50 rounded-xl border border-neutral-200"
                 onPress={() => toggleField('verification_status')}
               >
-                <Text style={styles.collapsibleLabel}>
+                <Text className="text-base font-semibold text-neutral-900">
                   {t('transactions_filter_verification_status')}
                 </Text>
-                <Text style={styles.collapsibleValue}>{getVerificationStatusTitle()}</Text>
+                <Text className="text-base text-neutral-500 flex-1 text-right">
+                  {getVerificationStatusTitle()}
+                </Text>
               </Pressable>
               {expandedField === 'verification_status' && (
-                <View style={styles.pickerWrapper}>
+                <View className="bg-neutral-50 rounded-xl border border-neutral-200 overflow-hidden min-h-[200px]">
                   <Picker
                     selectedValue={tempFilters.verificationStatus || ''}
                     onValueChange={(value) =>
@@ -273,8 +291,8 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
                           value === 'verified' || value === 'unverified' ? value : undefined,
                       }))
                     }
-                    style={styles.picker}
-                    itemStyle={styles.pickerItem}
+                    style={{ height: 50 }}
+                    itemStyle={{ color: colors.neutral[900], fontSize: 16 }}
                   >
                     <Picker.Item
                       label={t('transactions_filter_all')}
@@ -316,67 +334,3 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  clearButton: {
-    paddingVertical: 4,
-    paddingHorizontal: 4,
-  },
-  clearButtonText: {
-    fontSize: 13,
-    color: colors.neutral[500],
-    fontWeight: '500' as const,
-  },
-  content: {
-    flex: 1,
-  },
-  form: {
-    padding: 24,
-    gap: 20,
-  },
-  collapsibleContainer: {
-    gap: 8,
-  },
-  collapsibleHeader: {
-    flexDirection: 'row' as const,
-    justifyContent: 'space-between' as const,
-    alignItems: 'center' as const,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    backgroundColor: colors.neutral[50],
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.neutral[200],
-  },
-  collapsibleLabel: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: colors.neutral[900],
-  },
-  collapsibleValue: {
-    fontSize: 16,
-    color: colors.neutral[500],
-    flex: 1,
-    textAlign: 'right' as const,
-  },
-  pickerWrapper: {
-    backgroundColor: colors.neutral[50],
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.neutral[200],
-    overflow: 'hidden',
-    minHeight: 200,
-  },
-  picker: {
-    height: 50,
-    color: colors.neutral[900],
-  },
-  pickerItem: {
-    color: colors.neutral[900],
-    fontSize: 16,
-  },
-  datePicker: {
-    height: 200,
-    backgroundColor: colors.neutral[50],
-  },
-});

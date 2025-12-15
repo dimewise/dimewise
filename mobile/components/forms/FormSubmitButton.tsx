@@ -6,7 +6,6 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { colors } from '@/theme/colors';
-import { sharedStyles } from '@/theme/stylesheets';
 
 interface Props {
   loading: boolean;
@@ -19,19 +18,15 @@ interface Props {
 export const FormSubmitButton = ({ loading, onPress, title, style, disabled = false }: Props) => {
   return (
     <TouchableOpacity
-      style={[
-        sharedStyles.buttonContained,
-        { width: '100%', marginTop: 16 },
-        style,
-        (loading || disabled) && { backgroundColor: colors.disabled },
-      ]}
+      className={`w-full mt-4 py-3.5 px-6 rounded-lg items-center justify-center ${loading || disabled ? 'bg-neutral-400' : 'bg-primary'}`}
+      style={style}
       onPress={onPress}
       disabled={loading || disabled}
     >
       {loading ? (
         <ActivityIndicator color={colors.white} />
       ) : (
-        <Text style={sharedStyles.buttonContainedText}>{title}</Text>
+        <Text className="text-base font-semibold text-neutral-950">{title}</Text>
       )}
     </TouchableOpacity>
   );
