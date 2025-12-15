@@ -92,6 +92,8 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
     onClose();
   };
 
+  const hasActiveFilters = Object.keys(tempFilters).length > 0;
+
   return (
     <Modal
       visible={visible}
@@ -100,25 +102,25 @@ export const FilterModal = ({ visible, onClose, onApply, currentFilters }: Props
       onRequestClose={handleClose}
     >
       <ModalContainer>
-        <ModalHeader
-          title={t('transactions_filter_title')}
-          rightAction={
-            <Pressable
-              onPress={handleClear}
-              className="py-1 px-1"
-            >
-              <Text className="text-sm text-neutral-500 font-medium">
-                {t('transactions_filter_clear')}
-              </Text>
-            </Pressable>
-          }
-        />
+        <ModalHeader title={t('transactions_filter_title')} />
 
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
         >
           <View className="p-6 gap-5">
+            {/* Clear All - only show if filters are applied */}
+            {hasActiveFilters && (
+              <Pressable
+                onPress={handleClear}
+                className="self-end"
+              >
+                <Text className="text-sm text-red-500 font-medium">
+                  {t('transactions_filter_clear')}
+                </Text>
+              </Pressable>
+            )}
+
             {/* Category Filter */}
             <View className="gap-2">
               <Pressable

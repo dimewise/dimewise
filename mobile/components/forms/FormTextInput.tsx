@@ -47,7 +47,6 @@ export const FormTextInput = <TFieldValues extends FieldValues = FieldValues>({
             className={`bg-neutral-100 rounded-xl px-4 text-base text-neutral-900 ${
               multiline ? 'min-h-[100px] py-3' : 'h-12'
             } ${errors?.[name] ? 'border border-red-500' : ''}`}
-            style={multiline ? { textAlignVertical: 'top' } : undefined}
             autoCapitalize={autoCapitalize}
             keyboardType={keyboardType}
             secureTextEntry={secureTextEntry}
