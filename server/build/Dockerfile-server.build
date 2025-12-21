@@ -8,13 +8,13 @@ ENV CGO_ENABLED=0 \
 
 # Cache go.mod/go.sum and download dependencies
 RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=bind,source=./server/go.mod,target=/app/go.mod \
-    --mount=type=bind,source=./server/go.sum,target=/app/go.sum \
+    --mount=type=bind,source=./go.mod,target=/app/go.mod \
+    --mount=type=bind,source=./go.sum,target=/app/go.sum \
     go mod download
 
 # Build the binary
 RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=bind,source=./server,target=/app \
+    --mount=type=bind,source=./,target=/app \
     go build -ldflags="-w -s" -o /usr/local/bin/server ./cmd/server
 
 FROM alpine:3.20 AS runner
