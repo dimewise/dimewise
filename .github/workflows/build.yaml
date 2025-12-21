@@ -1,59 +1,42 @@
 name: Build and Push Images to GHCR
+run-name: Build and Push - ${{ github.ref_name }}
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Git tag to build and deploy (e.g. 1.2.3)'
-        required: true
-        type: string
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Only need read permission now
-      packages: write # Needed to push images to GHCR
+      contents: read
+      packages: write
 
     steps:
-    - name: Checkout tag
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.inputs.tag }}
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # --- Docker Setup ---
-    - name: Setup Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Login to GHCR
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    # --------------------
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    # 1. Build and Push Application Image
-    - name: Build and push Application Image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./server/build/Dockerfile-server.build
-        push: true
-        tags: ghcr.io/${{ github.repository_owner }}/dimewise-server:${{ github.event.inputs.tag }}
+      - name: Build and push Application Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./server/build/Dockerfile-server.build
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/dimewise-server:${{ github.ref_name }}
 
-    # 2. Build and Push Migration Image
-    - name: Build and push Migration Image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./server/build/Dockerfile-migrate.build
-        push: true
-        tags: ghcr.io/${{ github.repository_owner }}/dimewise-migrate:${{ github.event.inputs.tag }}
-
-    - name: Deployment Trigger Instructions
-      run: |
-        echo "✅ Both images pushed to GHCR with tag: ${{ github.event.inputs.tag }}"
-        echo "⏭ Manual Step Required:"
-        echo "Please update the 'dimewise-server' and 'dimewise-migrate' image tags"
-        echo "to '${{ github.event.inputs.tag }}' in your manifests repository."
+      - name: Build and push Migration Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./server/build/Dockerfile-migrate.build
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/dimewise-migrate:${{ github.ref_name }}
