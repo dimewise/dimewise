@@ -11,4 +11,3 @@ run-server: ## Starts the server
 	@$(call use_env,local) \
 		&& cd ./server && \
 		go run ./cmd/server/main.go
-

@@ -46,4 +46,3 @@ init-db: ## Initializes database (pgsql in docker)
 	@echo ">> [3/3] Applying migrations..."
 	@$(MAKE) migration-up
 	@echo ">> Database initialization complete."
-
