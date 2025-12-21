@@ -9,7 +9,7 @@ FROM alpine:latest
 COPY --from=build /go/bin/goose /usr/local/bin/
 
 # Copy SQL migration files
-COPY ./server/db/migrations /app/migrations
+COPY ./db/migrations /app/migrations
 
 # Set a working directory
 WORKDIR /app
