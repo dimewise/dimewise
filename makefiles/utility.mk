@@ -18,4 +18,3 @@ format-server: ## Formats server code only
 	@cd ./server && go tool goimports -w .
 	@cd ./server && go tool golines -w .
 	@cd ./server && gofmt -w .
-
