@@ -1,8 +1,17 @@
 import * as Sentry from '@sentry/react-native';
+import { isRunningInExpoGo } from 'expo';
 import Constants from 'expo-constants';
 
 const isDev = __DEV__ || Constants.expoConfig?.extra?.APP_ENV === 'development';
 const isPreview = Constants.expoConfig?.extra?.APP_ENV === 'preview';
+
+/**
+ * Wrap your navigation container with Sentry's navigation instrumentation.
+ * This enables performance monitoring for screen transitions.
+ */
+export const routingInstrumentation = Sentry.reactNavigationIntegration({
+  enableTimeToInitialDisplay: !isRunningInExpoGo(),
+});
 
 /**
  * Initialize Sentry for error tracking and performance monitoring.
@@ -12,8 +21,7 @@ export function initSentry() {
   // Only initialize Sentry in production/preview builds
   // In development, we rely on React Native's error handling
   if (isDev) {
-    console.log('[Sentry] Skipping initialization in development mode');
-    return;
+    console.log('[Sentry] Running in Dev - Sentry is disabled');
   }
 
   const dsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
@@ -25,15 +33,16 @@ export function initSentry() {
 
   Sentry.init({
     dsn,
+    enabled: !isDev,
     environment: isPreview ? 'preview' : 'production',
 
-    // Performance monitoring sample rates
-    // Set to 1.0 to capture 100% of transactions for performance monitoring.
-    // Reduce in production for cost optimization.
+    // Performance
     tracesSampleRate: isPreview ? 1.0 : 0.2,
-
-    // Enable profiling (sample rate relative to tracesSampleRate)
     profilesSampleRate: isPreview ? 1.0 : 0.1,
+
+    // UI/Debug metadata
+    attachScreenshot: true,
+    attachViewHierarchy: true,
 
     // Session tracking
     enableAutoSessionTracking: true,
@@ -42,11 +51,9 @@ export function initSentry() {
     // Enable auto-instrumentation
     enableAutoPerformanceTracing: true,
 
-    // Attach screenshots on error (iOS/Android only)
-    attachScreenshot: true,
-
-    // Attach view hierarchy on error
-    attachViewHierarchy: true,
+    // Adds more context data to events (IP address, cookies, user, etc.)
+    // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+    sendDefaultPii: true,
 
     // Filter out certain errors if needed
     beforeSend(event, _hint) {
@@ -60,18 +67,14 @@ export function initSentry() {
 
     // Breadcrumb configuration
     enableNativeCrashHandling: true,
+    enableLogs: true,
     enableNativeNagger: false,
 
     // Integration configuration
-    integrations: [Sentry.reactNativeTracingIntegration()],
+    integrations: [Sentry.reactNativeTracingIntegration(), routingInstrumentation],
+    enableNativeFramesTracking: !isRunningInExpoGo(),
   });
 }
-
-/**
- * Wrap your navigation container with Sentry's navigation instrumentation.
- * This enables performance monitoring for screen transitions.
- */
-export const routingInstrumentation = Sentry.reactNavigationIntegration();
 
 /**
  * Set user context for better error attribution.
