@@ -20,12 +20,24 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // TODO: Uncomment when Sentry is configured
 // function RootLayout() {
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
 export default function RootLayout() {
+  if (!publishableKey) {
+    throw new Error(
+      'Missing publishable key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env',
+    );
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
       <Provider store={store}>
         <KeyboardProvider>
-          <ClerkProvider tokenCache={tokenCache}>
+          <ClerkProvider
+            tokenCache={tokenCache}
+            publishableKey={publishableKey}
+          >
             <StatusBar
               barStyle={'dark-content'}
               translucent
