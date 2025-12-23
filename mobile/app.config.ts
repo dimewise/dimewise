@@ -83,14 +83,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-web-browser',
     'expo-router',
     'expo-secure-store',
-    // TODO: Uncomment when Sentry is configured
-    // [
-    //   '@sentry/react-native/expo',
-    //   {
-    //     organization: process.env.SENTRY_ORG,
-    //     project: process.env.SENTRY_PROJECT,
-    //   },
-    // ],
+    [
+      '@sentry/react-native/expo',
+      {
+        url: 'https://sentry.io/',
+        project: process.env.SENTRY_PROJECT,
+        organization: process.env.SENTRY_ORG,
+      },
+    ],
     [
       'expo-splash-screen',
       {
