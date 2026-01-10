@@ -18,20 +18,8 @@
           }
         },
         {
-          "image-name" : "Gemini_Generated_Image_dbvysudbvysudbvy.png",
-          "name" : "Gemini_Generated_Image_dbvysudbvysudbvy",
-          "position" : {
-            "scale" : 2.5,
-            "translation-in-points" : [
-              -42,
-              195
-            ]
-          }
-        },
-        {
           "blend-mode" : "normal",
           "fill" : "automatic",
-          "hidden" : true,
           "image-name" : "dw_mascot.svg",
           "name" : "dw_mascot",
           "opacity" : 1,
