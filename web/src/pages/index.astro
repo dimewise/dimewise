@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Dimewise" description="Personal Finance Tracker">
+  <script>
+    // Client-side redirect based on browser language
+    const supportedLocales = ['en', 'ja'];
+    const defaultLocale = 'en';
+    
+    function detectLocale() {
+      const browserLang = navigator.language.split('-')[0];
+      return supportedLocales.includes(browserLang) ? browserLang : defaultLocale;
+    }
+    
+    const locale = detectLocale();
+    window.location.href = `/${locale}/`;
+  </script>
+  <div class="text-center py-12">
+    <p style="color: var(--color-text-secondary);">Redirecting...</p>
+  </div>
+</BaseLayout>
