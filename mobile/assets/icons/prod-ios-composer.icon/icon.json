@@ -6,13 +6,22 @@
     {
       "layers" : [
         {
-          "image-name" : "dw_mascot.svg",
-          "name" : "dw_mascot",
+          "blend-mode" : "normal",
+          "fill" : {
+            "linear-gradient" : [
+              "display-p3:0.10196,0.73725,0.61176,1.00000",
+              "srgb:1.00000,0.43529,0.38039,1.00000"
+            ]
+          },
+          "glass" : false,
+          "hidden" : false,
+          "image-name" : "Vector(1).svg",
+          "name" : "Vector(1)",
           "position" : {
-            "scale" : 0.73,
+            "scale" : 1,
             "translation-in-points" : [
-              1,
-              200
+              33.6328125,
+              -23.1171875
             ]
           }
         }
