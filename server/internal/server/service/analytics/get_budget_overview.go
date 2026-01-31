@@ -53,7 +53,13 @@ func GetBudgetOverview(
 		return nil, err
 	}
 
-	spentResult, err := repository.GetTotalSpentByUserIDAndDateRange(ctx, c.DB(), user.ID, startDate, endDate)
+	spentResult, err := repository.GetTotalSpentByUserIDAndDateRange(
+		ctx,
+		c.DB(),
+		user.ID,
+		startDate,
+		endDate,
+	)
 	if err != nil {
 		return nil, err
 	}

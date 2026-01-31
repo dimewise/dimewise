@@ -112,7 +112,8 @@ func GetPaymentMethodsBreakdown(
 	stmt := paymentTbl.SELECT(
 		paymentTbl.ID.AS("payment_method.id"),
 		paymentTbl.Title.AS("payment_method.title"),
-		postgres.COALESCE(postgres.SUM(expenseTbl.Amount), postgres.Int(0)).AS("expense.total_spent"),
+		postgres.COALESCE(postgres.SUM(expenseTbl.Amount), postgres.Int(0)).
+			AS("expense.total_spent"),
 	).FROM(
 		paymentTbl.
 			LEFT_JOIN(expenseTbl, expenseTbl.PaymentMethodID.EQ(paymentTbl.ID).

@@ -56,7 +56,14 @@ func GetRecentTransactions(
 	}
 
 	// Call repository function with explicit parameters
-	recentExpenses, err := repository.GetRecentTransactions(ctx, c.DB(), user.ID, limit, startDate, endDate)
+	recentExpenses, err := repository.GetRecentTransactions(
+		ctx,
+		c.DB(),
+		user.ID,
+		limit,
+		startDate,
+		endDate,
+	)
 	if err != nil {
 		return nil, err
 	}
