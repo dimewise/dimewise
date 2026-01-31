@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   RefreshControl,
   ScrollView,
   Text,
@@ -31,6 +32,7 @@ import { useModal } from '@/hooks/ui';
 import { useUserLocale } from '@/hooks/useUserLocale';
 import { logger } from '@/lib/logger';
 import { colors } from '@/theme/colors';
+import { getLegalPageUrl } from '@/utils/constants';
 import { formatCurrency } from '@/utils/localization/currencies';
 
 // Types for modal props
@@ -50,7 +52,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { signOut } = useClerk();
-  const { currency, locale } = useUserLocale();
+  const { currency, locale, language } = useUserLocale();
 
   // API hooks
   const { data: user, refetch: refetchUser } = useGetUsersMeQuery(undefined);
@@ -308,6 +310,24 @@ export default function SettingsScreen() {
                 ))}
               </Card>
             )}
+          </View>
+
+          {/* Legal Section */}
+          <View className="mb-6">
+            <Text className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
+              {t('settings_legal', 'Legal')}
+            </Text>
+            <Card padding="none">
+              <SettingsRow
+                label={t('settings_privacy_policy', 'Privacy Policy')}
+                onPress={() => Linking.openURL(getLegalPageUrl('privacy-policy', language))}
+              />
+              <View className="h-px bg-neutral-200 mx-4" />
+              <SettingsRow
+                label={t('settings_terms_and_conditions', 'Terms & Conditions')}
+                onPress={() => Linking.openURL(getLegalPageUrl('terms-and-conditions', language))}
+              />
+            </Card>
           </View>
 
           {/* Logout Button */}
