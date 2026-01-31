@@ -6,7 +6,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans, useTranslation } from 'react-i18next';
-import { Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppleSignInButton } from '@/components/forms/AppleSignInButton';
@@ -23,6 +23,7 @@ import { Button, Card, Divider } from '@/components/ui';
 import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
 import { logger } from '@/lib/logger';
 import { colors } from '@/theme/colors';
+import { getLegalPageUrl } from '@/utils/constants';
 
 // handle any pending authentication session
 WebBrowser.maybeCompleteAuthSession();
@@ -31,7 +32,7 @@ export default function SignUpScreen() {
   useWarmUpBrowser();
 
   const { isLoaded, signUp, setActive } = useSignUp();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
 
   const [pendingVerification, setPendingVerification] = useState(false);
@@ -205,14 +206,18 @@ export default function SignUpScreen() {
                   i18nKey="auth_sign_up_agreement"
                   components={{
                     terms: (
-                      <Link
-                        href="/terms-of-service"
+                      <Text
+                        onPress={() =>
+                          Linking.openURL(getLegalPageUrl('terms-and-conditions', i18n.language))
+                        }
                         className="text-primary-500 font-semibold underline"
                       />
                     ),
                     privacy: (
-                      <Link
-                        href="/privacy-policy"
+                      <Text
+                        onPress={() =>
+                          Linking.openURL(getLegalPageUrl('privacy-policy', i18n.language))
+                        }
                         className="text-primary-500 font-semibold underline"
                       />
                     ),
