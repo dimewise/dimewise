@@ -1,12 +1,12 @@
-##@ Runners - Commands used for running scripts
+##@ Runners
 
-.PHONY: run-mobile
-run-mobile: ## Starts mobile servers using Expo (requires emulation)
+.PHONY: rclient rserver
+
+rclient: ## Starts client servers
 	@echo "Starting mobile..."
-	@cd ./mobile && bun run dev
+	@cd ./client && bun run dev
 
-.PHONY: run-server
-run-server: ## Starts the server
+rserver: ## Starts the server
 	@echo "Starting server, press Ctrl + C to stop..."
 	@$(call use_env,local) \
 		&& cd ./server && \

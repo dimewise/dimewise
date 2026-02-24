@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/dimewise/dimewise/config"
-	"github.com/dimewise/dimewise/internal/server"
+	"dimewise/internal/boot"
+	"dimewise/internal/config"
 )
 
 func main() {
 	c := config.NewConfig()
-	s := server.NewServer(c)
+	s := boot.NewServer(c)
 
 	s.Start()
 }
