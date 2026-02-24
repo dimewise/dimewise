@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Dimewise" description="Personal Finance Tracker">
+  <div class="text-center py-16 sm:py-20">
+    <div class="flex justify-center mb-6">
+      <img src="/logo.svg" alt="Dimewise" class="h-32 w-32" />
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-bold mb-4" style="color: var(--color-text-primary);">
+      Welcome to Dimewise
+    </h1>
+    <p class="text-xl sm:text-2xl mb-3" style="color: var(--color-text-secondary);">
+      Your personal finance companion
+    </p>
+    <p class="text-base sm:text-lg mb-12 max-w-2xl mx-auto px-4" style="color: var(--color-text-muted);">
+      Track expenses, manage budgets, and gain insights into your spending habits. 
+      Make wise choices with your dimes.
+    </p>
+    
+    <div class="mb-12">
+      <h2 class="text-lg font-semibold mb-6" style="color: var(--color-text-primary);">
+        Legal Information
+      </h2>
+      <nav class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/en/privacy-policy"
+          class="px-6 py-3 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors font-medium"
+        >
+          Privacy Policy
+        </a>
+        <a
+          href="/en/terms-and-conditions"
+          class="px-6 py-3 border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors font-medium"
+          style="color: var(--color-text-primary);"
+        >
+          Terms & Conditions
+        </a>
+      </nav>
+    </div>
+  </div>
+</BaseLayout>
