@@ -12,8 +12,12 @@ package table
 func UseSchema(schema string) {
 	BudgetCategories = BudgetCategories.FromSchema(schema)
 	BudgetHistory = BudgetHistory.FromSchema(schema)
+	ExpenseSplits = ExpenseSplits.FromSchema(schema)
+	Expenses = Expenses.FromSchema(schema)
 	GooseDbVersion = GooseDbVersion.FromSchema(schema)
 	HouseholdMembers = HouseholdMembers.FromSchema(schema)
 	Households = Households.FromSchema(schema)
+	SettlementTransfers = SettlementTransfers.FromSchema(schema)
+	Settlements = Settlements.FromSchema(schema)
 	Users = Users.FromSchema(schema)
 }

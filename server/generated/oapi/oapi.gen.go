@@ -84,6 +84,18 @@ type CreateBudgetCategoryRequest struct {
 	Name   string `json:"name"`
 }
 
+// CreateExpenseRequest defines model for CreateExpenseRequest.
+type CreateExpenseRequest struct {
+	// Amount Amount in smallest currency unit
+	Amount           int64               `json:"amount"`
+	BudgetCategoryId *openapi_types.UUID `json:"budget_category_id,omitempty"`
+	IncurredAt       time.Time           `json:"incurred_at"`
+	Notes            *string             `json:"notes,omitempty"`
+	PaidBy           openapi_types.UUID  `json:"paid_by"`
+	Splits           []ExpenseSplitInput `json:"splits"`
+	Title            string              `json:"title"`
+}
+
 // CreateHouseholdRequest defines model for CreateHouseholdRequest.
 type CreateHouseholdRequest struct {
 	// Currency ISO 4217 currency code
@@ -93,6 +105,69 @@ type CreateHouseholdRequest struct {
 
 // CreateHouseholdRequestCurrency ISO 4217 currency code
 type CreateHouseholdRequestCurrency string
+
+// Expense defines model for Expense.
+type Expense struct {
+	// Amount Amount in smallest currency unit
+	Amount           int64               `json:"amount"`
+	BudgetCategoryId *openapi_types.UUID `json:"budget_category_id,omitempty"`
+	CreatedAt        time.Time           `json:"created_at"`
+	HouseholdId      openapi_types.UUID  `json:"household_id"`
+	Id               openapi_types.UUID  `json:"id"`
+	IncurredAt       time.Time           `json:"incurred_at"`
+	LoggedBy         openapi_types.UUID  `json:"logged_by"`
+	Notes            *string             `json:"notes,omitempty"`
+	PaidBy           openapi_types.UUID  `json:"paid_by"`
+	Title            string              `json:"title"`
+	UpdatedAt        time.Time           `json:"updated_at"`
+}
+
+// ExpenseListResponse defines model for ExpenseListResponse.
+type ExpenseListResponse struct {
+	Expenses []ExpenseWithSplits `json:"expenses"`
+
+	// Total Total number of matching expenses (for pagination)
+	Total int `json:"total"`
+}
+
+// ExpenseSplit defines model for ExpenseSplit.
+type ExpenseSplit struct {
+	// Amount Split amount in smallest currency unit
+	Amount    int64              `json:"amount"`
+	ExpenseId openapi_types.UUID `json:"expense_id"`
+	Id        openapi_types.UUID `json:"id"`
+	UserId    openapi_types.UUID `json:"user_id"`
+}
+
+// ExpenseSplitInput defines model for ExpenseSplitInput.
+type ExpenseSplitInput struct {
+	// Amount Split amount in smallest currency unit
+	Amount int64              `json:"amount"`
+	UserId openapi_types.UUID `json:"user_id"`
+}
+
+// ExpenseWithSplits defines model for ExpenseWithSplits.
+type ExpenseWithSplits struct {
+	// Amount Amount in smallest currency unit
+	Amount           int64               `json:"amount"`
+	BudgetCategoryId *openapi_types.UUID `json:"budget_category_id,omitempty"`
+	CreatedAt        time.Time           `json:"created_at"`
+	HouseholdId      openapi_types.UUID  `json:"household_id"`
+	Id               openapi_types.UUID  `json:"id"`
+	IncurredAt       time.Time           `json:"incurred_at"`
+	LoggedBy         openapi_types.UUID  `json:"logged_by"`
+	Notes            *string             `json:"notes,omitempty"`
+	PaidBy           openapi_types.UUID  `json:"paid_by"`
+	Splits           []ExpenseSplit      `json:"splits"`
+	Title            string              `json:"title"`
+	UpdatedAt        time.Time           `json:"updated_at"`
+}
+
+// GenerateSettlementRequest defines model for GenerateSettlementRequest.
+type GenerateSettlementRequest struct {
+	Month int `json:"month"`
+	Year  int `json:"year"`
+}
 
 // Household defines model for Household.
 type Household struct {
@@ -158,12 +233,59 @@ type ProblemDetails struct {
 	Type *string `json:"type,omitempty"`
 }
 
+// Settlement defines model for Settlement.
+type Settlement struct {
+	CreatedAt   time.Time          `json:"created_at"`
+	GeneratedAt time.Time          `json:"generated_at"`
+	HouseholdId openapi_types.UUID `json:"household_id"`
+	Id          openapi_types.UUID `json:"id"`
+	Month       int                `json:"month"`
+	UpdatedAt   time.Time          `json:"updated_at"`
+	Year        int                `json:"year"`
+}
+
+// SettlementTransfer defines model for SettlementTransfer.
+type SettlementTransfer struct {
+	// Amount Transfer amount in smallest currency unit
+	Amount       int64              `json:"amount"`
+	CreatedAt    time.Time          `json:"created_at"`
+	FromUserId   openapi_types.UUID `json:"from_user_id"`
+	Id           openapi_types.UUID `json:"id"`
+	PaidAt       *time.Time         `json:"paid_at,omitempty"`
+	SettlementId openapi_types.UUID `json:"settlement_id"`
+	ToUserId     openapi_types.UUID `json:"to_user_id"`
+	UpdatedAt    time.Time          `json:"updated_at"`
+}
+
+// SettlementWithTransfers defines model for SettlementWithTransfers.
+type SettlementWithTransfers struct {
+	CreatedAt   time.Time            `json:"created_at"`
+	GeneratedAt time.Time            `json:"generated_at"`
+	HouseholdId openapi_types.UUID   `json:"household_id"`
+	Id          openapi_types.UUID   `json:"id"`
+	Month       int                  `json:"month"`
+	Transfers   []SettlementTransfer `json:"transfers"`
+	UpdatedAt   time.Time            `json:"updated_at"`
+	Year        int                  `json:"year"`
+}
+
 // UpdateBudgetCategoryRequest defines model for UpdateBudgetCategoryRequest.
 type UpdateBudgetCategoryRequest struct {
 	// Amount Monthly budget in smallest currency unit
 	Amount    *int64  `json:"amount,omitempty"`
 	Name      *string `json:"name,omitempty"`
 	SortOrder *int    `json:"sort_order,omitempty"`
+}
+
+// UpdateExpenseRequest defines model for UpdateExpenseRequest.
+type UpdateExpenseRequest struct {
+	Amount           *int64               `json:"amount,omitempty"`
+	BudgetCategoryId *openapi_types.UUID  `json:"budget_category_id,omitempty"`
+	IncurredAt       *time.Time           `json:"incurred_at,omitempty"`
+	Notes            *string              `json:"notes,omitempty"`
+	PaidBy           *openapi_types.UUID  `json:"paid_by,omitempty"`
+	Splits           *[]ExpenseSplitInput `json:"splits,omitempty"`
+	Title            *string              `json:"title,omitempty"`
 }
 
 // User defines model for User.
@@ -201,17 +323,36 @@ type NotFound = ProblemDetails
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = ProblemDetails
 
+// ListExpensesParams defines parameters for ListExpenses.
+type ListExpensesParams struct {
+	CategoryId *openapi_types.UUID `form:"category_id,omitempty" json:"category_id,omitempty"`
+	PaidBy     *openapi_types.UUID `form:"paid_by,omitempty" json:"paid_by,omitempty"`
+	From       *openapi_types.Date `form:"from,omitempty" json:"from,omitempty"`
+	To         *openapi_types.Date `form:"to,omitempty" json:"to,omitempty"`
+	Limit      *int                `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset     *int                `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
 // CreateBudgetCategoryJSONRequestBody defines body for CreateBudgetCategory for application/json ContentType.
 type CreateBudgetCategoryJSONRequestBody = CreateBudgetCategoryRequest
 
 // UpdateBudgetCategoryJSONRequestBody defines body for UpdateBudgetCategory for application/json ContentType.
 type UpdateBudgetCategoryJSONRequestBody = UpdateBudgetCategoryRequest
 
+// CreateExpenseJSONRequestBody defines body for CreateExpense for application/json ContentType.
+type CreateExpenseJSONRequestBody = CreateExpenseRequest
+
+// UpdateExpenseJSONRequestBody defines body for UpdateExpense for application/json ContentType.
+type UpdateExpenseJSONRequestBody = UpdateExpenseRequest
+
 // CreateHouseholdJSONRequestBody defines body for CreateHousehold for application/json ContentType.
 type CreateHouseholdJSONRequestBody = CreateHouseholdRequest
 
 // JoinHouseholdJSONRequestBody defines body for JoinHousehold for application/json ContentType.
 type JoinHouseholdJSONRequestBody = JoinHouseholdRequest
+
+// GenerateSettlementJSONRequestBody defines body for GenerateSettlement for application/json ContentType.
+type GenerateSettlementJSONRequestBody = GenerateSettlementRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -305,6 +446,25 @@ type ClientInterface interface {
 
 	UpdateBudgetCategory(ctx context.Context, budgetId openapi_types.UUID, body UpdateBudgetCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ListExpenses request
+	ListExpenses(ctx context.Context, params *ListExpensesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateExpenseWithBody request with any body
+	CreateExpenseWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateExpense(ctx context.Context, body CreateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteExpense request
+	DeleteExpense(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetExpense request
+	GetExpense(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateExpenseWithBody request with any body
+	UpdateExpenseWithBody(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateExpense(ctx context.Context, expenseId openapi_types.UUID, body UpdateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeleteHousehold request
 	DeleteHousehold(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -329,6 +489,20 @@ type ClientInterface interface {
 
 	// RemoveHouseholdMember request
 	RemoveHouseholdMember(ctx context.Context, userId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListSettlements request
+	ListSettlements(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GenerateSettlementWithBody request with any body
+	GenerateSettlementWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	GenerateSettlement(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// MarkTransferPaid request
+	MarkTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetSettlement request
+	GetSettlement(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetUsersMe request
 	GetUsersMe(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -408,6 +582,90 @@ func (c *Client) UpdateBudgetCategoryWithBody(ctx context.Context, budgetId open
 
 func (c *Client) UpdateBudgetCategory(ctx context.Context, budgetId openapi_types.UUID, body UpdateBudgetCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateBudgetCategoryRequest(c.Server, budgetId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ListExpenses(ctx context.Context, params *ListExpensesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListExpensesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateExpenseWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateExpenseRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateExpense(ctx context.Context, body CreateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateExpenseRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteExpense(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteExpenseRequest(c.Server, expenseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetExpense(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetExpenseRequest(c.Server, expenseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateExpenseWithBody(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateExpenseRequestWithBody(c.Server, expenseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateExpense(ctx context.Context, expenseId openapi_types.UUID, body UpdateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateExpenseRequest(c.Server, expenseId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -516,6 +774,66 @@ func (c *Client) GetMyHousehold(ctx context.Context, reqEditors ...RequestEditor
 
 func (c *Client) RemoveHouseholdMember(ctx context.Context, userId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRemoveHouseholdMemberRequest(c.Server, userId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ListSettlements(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListSettlementsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GenerateSettlementWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGenerateSettlementRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GenerateSettlement(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGenerateSettlementRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) MarkTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewMarkTransferPaidRequest(c.Server, transferId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetSettlement(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetSettlementRequest(c.Server, settlementId)
 	if err != nil {
 		return nil, err
 	}
@@ -694,6 +1012,290 @@ func NewUpdateBudgetCategoryRequestWithBody(server string, budgetId openapi_type
 	}
 
 	operationPath := fmt.Sprintf("/budgets/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewListExpensesRequest generates requests for ListExpenses
+func NewListExpensesRequest(server string, params *ListExpensesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.CategoryId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "category_id", runtime.ParamLocationQuery, *params.CategoryId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PaidBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "paid_by", runtime.ParamLocationQuery, *params.PaidBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.From != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "from", runtime.ParamLocationQuery, *params.From); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.To != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "to", runtime.ParamLocationQuery, *params.To); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Offset != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "offset", runtime.ParamLocationQuery, *params.Offset); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateExpenseRequest calls the generic CreateExpense builder with application/json body
+func NewCreateExpenseRequest(server string, body CreateExpenseJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateExpenseRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewCreateExpenseRequestWithBody generates requests for CreateExpense with any type of body
+func NewCreateExpenseRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteExpenseRequest generates requests for DeleteExpense
+func NewDeleteExpenseRequest(server string, expenseId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "expenseId", runtime.ParamLocationPath, expenseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetExpenseRequest generates requests for GetExpense
+func NewGetExpenseRequest(server string, expenseId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "expenseId", runtime.ParamLocationPath, expenseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateExpenseRequest calls the generic UpdateExpense builder with application/json body
+func NewUpdateExpenseRequest(server string, expenseId openapi_types.UUID, body UpdateExpenseJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateExpenseRequestWithBody(server, expenseId, "application/json", bodyReader)
+}
+
+// NewUpdateExpenseRequestWithBody generates requests for UpdateExpense with any type of body
+func NewUpdateExpenseRequestWithBody(server string, expenseId openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "expenseId", runtime.ParamLocationPath, expenseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/expenses/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -935,6 +1537,141 @@ func NewRemoveHouseholdMemberRequest(server string, userId openapi_types.UUID) (
 	return req, nil
 }
 
+// NewListSettlementsRequest generates requests for ListSettlements
+func NewListSettlementsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/settlements")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGenerateSettlementRequest calls the generic GenerateSettlement builder with application/json body
+func NewGenerateSettlementRequest(server string, body GenerateSettlementJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewGenerateSettlementRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewGenerateSettlementRequestWithBody generates requests for GenerateSettlement with any type of body
+func NewGenerateSettlementRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/settlements/generate")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewMarkTransferPaidRequest generates requests for MarkTransferPaid
+func NewMarkTransferPaidRequest(server string, transferId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "transferId", runtime.ParamLocationPath, transferId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/settlements/transfers/%s/pay", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetSettlementRequest generates requests for GetSettlement
+func NewGetSettlementRequest(server string, settlementId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "settlementId", runtime.ParamLocationPath, settlementId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/settlements/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetUsersMeRequest generates requests for GetUsersMe
 func NewGetUsersMeRequest(server string) (*http.Request, error) {
 	var err error
@@ -1024,6 +1761,25 @@ type ClientWithResponsesInterface interface {
 
 	UpdateBudgetCategoryWithResponse(ctx context.Context, budgetId openapi_types.UUID, body UpdateBudgetCategoryJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateBudgetCategoryResponse, error)
 
+	// ListExpensesWithResponse request
+	ListExpensesWithResponse(ctx context.Context, params *ListExpensesParams, reqEditors ...RequestEditorFn) (*ListExpensesResponse, error)
+
+	// CreateExpenseWithBodyWithResponse request with any body
+	CreateExpenseWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateExpenseResponse, error)
+
+	CreateExpenseWithResponse(ctx context.Context, body CreateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateExpenseResponse, error)
+
+	// DeleteExpenseWithResponse request
+	DeleteExpenseWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteExpenseResponse, error)
+
+	// GetExpenseWithResponse request
+	GetExpenseWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetExpenseResponse, error)
+
+	// UpdateExpenseWithBodyWithResponse request with any body
+	UpdateExpenseWithBodyWithResponse(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateExpenseResponse, error)
+
+	UpdateExpenseWithResponse(ctx context.Context, expenseId openapi_types.UUID, body UpdateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateExpenseResponse, error)
+
 	// DeleteHouseholdWithResponse request
 	DeleteHouseholdWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteHouseholdResponse, error)
 
@@ -1048,6 +1804,20 @@ type ClientWithResponsesInterface interface {
 
 	// RemoveHouseholdMemberWithResponse request
 	RemoveHouseholdMemberWithResponse(ctx context.Context, userId openapi_types.UUID, reqEditors ...RequestEditorFn) (*RemoveHouseholdMemberResponse, error)
+
+	// ListSettlementsWithResponse request
+	ListSettlementsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListSettlementsResponse, error)
+
+	// GenerateSettlementWithBodyWithResponse request with any body
+	GenerateSettlementWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error)
+
+	GenerateSettlementWithResponse(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error)
+
+	// MarkTransferPaidWithResponse request
+	MarkTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*MarkTransferPaidResponse, error)
+
+	// GetSettlementWithResponse request
+	GetSettlementWithResponse(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetSettlementResponse, error)
 
 	// GetUsersMeWithResponse request
 	GetUsersMeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetUsersMeResponse, error)
@@ -1170,6 +1940,129 @@ func (r UpdateBudgetCategoryResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r UpdateBudgetCategoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type ListExpensesResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *ExpenseListResponse
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r ListExpensesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListExpensesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateExpenseResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON201                   *ExpenseWithSplits
+	ApplicationproblemJSON400 *BadRequest
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateExpenseResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateExpenseResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteExpenseResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON403 *Forbidden
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteExpenseResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteExpenseResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetExpenseResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *ExpenseWithSplits
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r GetExpenseResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetExpenseResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateExpenseResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *ExpenseWithSplits
+	ApplicationproblemJSON400 *BadRequest
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON403 *Forbidden
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateExpenseResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateExpenseResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1349,6 +2242,105 @@ func (r RemoveHouseholdMemberResponse) StatusCode() int {
 	return 0
 }
 
+type ListSettlementsResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *[]Settlement
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r ListSettlementsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListSettlementsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GenerateSettlementResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON201                   *SettlementWithTransfers
+	ApplicationproblemJSON400 *BadRequest
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+	ApplicationproblemJSON409 *Conflict
+}
+
+// Status returns HTTPResponse.Status
+func (r GenerateSettlementResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GenerateSettlementResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type MarkTransferPaidResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *SettlementTransfer
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON403 *Forbidden
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r MarkTransferPaidResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r MarkTransferPaidResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetSettlementResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *SettlementWithTransfers
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r GetSettlementResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetSettlementResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetUsersMeResponse struct {
 	Body                      []byte
 	HTTPResponse              *http.Response
@@ -1434,6 +2426,67 @@ func (c *ClientWithResponses) UpdateBudgetCategoryWithResponse(ctx context.Conte
 	return ParseUpdateBudgetCategoryResponse(rsp)
 }
 
+// ListExpensesWithResponse request returning *ListExpensesResponse
+func (c *ClientWithResponses) ListExpensesWithResponse(ctx context.Context, params *ListExpensesParams, reqEditors ...RequestEditorFn) (*ListExpensesResponse, error) {
+	rsp, err := c.ListExpenses(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListExpensesResponse(rsp)
+}
+
+// CreateExpenseWithBodyWithResponse request with arbitrary body returning *CreateExpenseResponse
+func (c *ClientWithResponses) CreateExpenseWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateExpenseResponse, error) {
+	rsp, err := c.CreateExpenseWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateExpenseResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateExpenseWithResponse(ctx context.Context, body CreateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateExpenseResponse, error) {
+	rsp, err := c.CreateExpense(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateExpenseResponse(rsp)
+}
+
+// DeleteExpenseWithResponse request returning *DeleteExpenseResponse
+func (c *ClientWithResponses) DeleteExpenseWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*DeleteExpenseResponse, error) {
+	rsp, err := c.DeleteExpense(ctx, expenseId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteExpenseResponse(rsp)
+}
+
+// GetExpenseWithResponse request returning *GetExpenseResponse
+func (c *ClientWithResponses) GetExpenseWithResponse(ctx context.Context, expenseId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetExpenseResponse, error) {
+	rsp, err := c.GetExpense(ctx, expenseId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetExpenseResponse(rsp)
+}
+
+// UpdateExpenseWithBodyWithResponse request with arbitrary body returning *UpdateExpenseResponse
+func (c *ClientWithResponses) UpdateExpenseWithBodyWithResponse(ctx context.Context, expenseId openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateExpenseResponse, error) {
+	rsp, err := c.UpdateExpenseWithBody(ctx, expenseId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateExpenseResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateExpenseWithResponse(ctx context.Context, expenseId openapi_types.UUID, body UpdateExpenseJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateExpenseResponse, error) {
+	rsp, err := c.UpdateExpense(ctx, expenseId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateExpenseResponse(rsp)
+}
+
 // DeleteHouseholdWithResponse request returning *DeleteHouseholdResponse
 func (c *ClientWithResponses) DeleteHouseholdWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*DeleteHouseholdResponse, error) {
 	rsp, err := c.DeleteHousehold(ctx, reqEditors...)
@@ -1511,6 +2564,50 @@ func (c *ClientWithResponses) RemoveHouseholdMemberWithResponse(ctx context.Cont
 		return nil, err
 	}
 	return ParseRemoveHouseholdMemberResponse(rsp)
+}
+
+// ListSettlementsWithResponse request returning *ListSettlementsResponse
+func (c *ClientWithResponses) ListSettlementsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListSettlementsResponse, error) {
+	rsp, err := c.ListSettlements(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListSettlementsResponse(rsp)
+}
+
+// GenerateSettlementWithBodyWithResponse request with arbitrary body returning *GenerateSettlementResponse
+func (c *ClientWithResponses) GenerateSettlementWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error) {
+	rsp, err := c.GenerateSettlementWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGenerateSettlementResponse(rsp)
+}
+
+func (c *ClientWithResponses) GenerateSettlementWithResponse(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error) {
+	rsp, err := c.GenerateSettlement(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGenerateSettlementResponse(rsp)
+}
+
+// MarkTransferPaidWithResponse request returning *MarkTransferPaidResponse
+func (c *ClientWithResponses) MarkTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*MarkTransferPaidResponse, error) {
+	rsp, err := c.MarkTransferPaid(ctx, transferId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseMarkTransferPaidResponse(rsp)
+}
+
+// GetSettlementWithResponse request returning *GetSettlementResponse
+func (c *ClientWithResponses) GetSettlementWithResponse(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetSettlementResponse, error) {
+	rsp, err := c.GetSettlement(ctx, settlementId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetSettlementResponse(rsp)
 }
 
 // GetUsersMeWithResponse request returning *GetUsersMeResponse
@@ -1705,6 +2802,227 @@ func ParseUpdateBudgetCategoryResponse(rsp *http.Response) (*UpdateBudgetCategor
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest BudgetCategory
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListExpensesResponse parses an HTTP response from a ListExpensesWithResponse call
+func ParseListExpensesResponse(rsp *http.Response) (*ListExpensesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListExpensesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExpenseListResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateExpenseResponse parses an HTTP response from a CreateExpenseWithResponse call
+func ParseCreateExpenseResponse(rsp *http.Response) (*CreateExpenseResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateExpenseResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest ExpenseWithSplits
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteExpenseResponse parses an HTTP response from a DeleteExpenseWithResponse call
+func ParseDeleteExpenseResponse(rsp *http.Response) (*DeleteExpenseResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteExpenseResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetExpenseResponse parses an HTTP response from a GetExpenseWithResponse call
+func ParseGetExpenseResponse(rsp *http.Response) (*GetExpenseResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetExpenseResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExpenseWithSplits
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateExpenseResponse parses an HTTP response from a UpdateExpenseWithResponse call
+func ParseUpdateExpenseResponse(rsp *http.Response) (*UpdateExpenseResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateExpenseResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExpenseWithSplits
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -2058,6 +3376,187 @@ func ParseRemoveHouseholdMemberResponse(rsp *http.Response) (*RemoveHouseholdMem
 	return response, nil
 }
 
+// ParseListSettlementsResponse parses an HTTP response from a ListSettlementsWithResponse call
+func ParseListSettlementsResponse(rsp *http.Response) (*ListSettlementsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListSettlementsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Settlement
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGenerateSettlementResponse parses an HTTP response from a GenerateSettlementWithResponse call
+func ParseGenerateSettlementResponse(rsp *http.Response) (*GenerateSettlementResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GenerateSettlementResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest SettlementWithTransfers
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
+		var dest Conflict
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON409 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseMarkTransferPaidResponse parses an HTTP response from a MarkTransferPaidWithResponse call
+func ParseMarkTransferPaidResponse(rsp *http.Response) (*MarkTransferPaidResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &MarkTransferPaidResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SettlementTransfer
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetSettlementResponse parses an HTTP response from a GetSettlementWithResponse call
+func ParseGetSettlementResponse(rsp *http.Response) (*GetSettlementResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetSettlementResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest SettlementWithTransfers
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetUsersMeResponse parses an HTTP response from a GetUsersMeWithResponse call
 func ParseGetUsersMeResponse(rsp *http.Response) (*GetUsersMeResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -2115,6 +3614,21 @@ type ServerInterface interface {
 	// Update a budget category
 	// (PATCH /budgets/{budgetId})
 	UpdateBudgetCategory(w http.ResponseWriter, r *http.Request, budgetId openapi_types.UUID)
+	// List expenses for the current household
+	// (GET /expenses)
+	ListExpenses(w http.ResponseWriter, r *http.Request, params ListExpensesParams)
+	// Create an expense with splits
+	// (POST /expenses)
+	CreateExpense(w http.ResponseWriter, r *http.Request)
+	// Delete an expense
+	// (DELETE /expenses/{expenseId})
+	DeleteExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
+	// Get expense detail with splits
+	// (GET /expenses/{expenseId})
+	GetExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
+	// Update an expense
+	// (PATCH /expenses/{expenseId})
+	UpdateExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID)
 	// Delete the current user's household (owner only)
 	// (DELETE /households)
 	DeleteHousehold(w http.ResponseWriter, r *http.Request)
@@ -2136,6 +3650,18 @@ type ServerInterface interface {
 	// Remove a member from the household (owner only)
 	// (DELETE /households/members/{userId})
 	RemoveHouseholdMember(w http.ResponseWriter, r *http.Request, userId openapi_types.UUID)
+	// List settlements for the current household
+	// (GET /settlements)
+	ListSettlements(w http.ResponseWriter, r *http.Request)
+	// Manually generate a settlement for a given month
+	// (POST /settlements/generate)
+	GenerateSettlement(w http.ResponseWriter, r *http.Request)
+	// Mark a settlement transfer as paid
+	// (PATCH /settlements/transfers/{transferId}/pay)
+	MarkTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID)
+	// Get settlement detail with transfers
+	// (GET /settlements/{settlementId})
+	GetSettlement(w http.ResponseWriter, r *http.Request, settlementId openapi_types.UUID)
 	// Get current user profile
 	// (GET /users/me)
 	GetUsersMe(w http.ResponseWriter, r *http.Request)
@@ -2172,6 +3698,36 @@ func (_ Unimplemented) DeleteBudgetCategory(w http.ResponseWriter, r *http.Reque
 // Update a budget category
 // (PATCH /budgets/{budgetId})
 func (_ Unimplemented) UpdateBudgetCategory(w http.ResponseWriter, r *http.Request, budgetId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// List expenses for the current household
+// (GET /expenses)
+func (_ Unimplemented) ListExpenses(w http.ResponseWriter, r *http.Request, params ListExpensesParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Create an expense with splits
+// (POST /expenses)
+func (_ Unimplemented) CreateExpense(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Delete an expense
+// (DELETE /expenses/{expenseId})
+func (_ Unimplemented) DeleteExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get expense detail with splits
+// (GET /expenses/{expenseId})
+func (_ Unimplemented) GetExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update an expense
+// (PATCH /expenses/{expenseId})
+func (_ Unimplemented) UpdateExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2214,6 +3770,30 @@ func (_ Unimplemented) GetMyHousehold(w http.ResponseWriter, r *http.Request) {
 // Remove a member from the household (owner only)
 // (DELETE /households/members/{userId})
 func (_ Unimplemented) RemoveHouseholdMember(w http.ResponseWriter, r *http.Request, userId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// List settlements for the current household
+// (GET /settlements)
+func (_ Unimplemented) ListSettlements(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Manually generate a settlement for a given month
+// (POST /settlements/generate)
+func (_ Unimplemented) GenerateSettlement(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Mark a settlement transfer as paid
+// (PATCH /settlements/transfers/{transferId}/pay)
+func (_ Unimplemented) MarkTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get settlement detail with transfers
+// (GET /settlements/{settlementId})
+func (_ Unimplemented) GetSettlement(w http.ResponseWriter, r *http.Request, settlementId openapi_types.UUID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -2324,6 +3904,162 @@ func (siw *ServerInterfaceWrapper) UpdateBudgetCategory(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
+// ListExpenses operation middleware
+func (siw *ServerInterfaceWrapper) ListExpenses(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListExpensesParams
+
+	// ------------- Optional query parameter "category_id" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "category_id", r.URL.Query(), &params.CategoryId)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "category_id", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "paid_by" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "paid_by", r.URL.Query(), &params.PaidBy)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "paid_by", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "from" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "from", r.URL.Query(), &params.From)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "from", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "to" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "to", r.URL.Query(), &params.To)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "to", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", r.URL.Query(), &params.Limit)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "offset" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "offset", r.URL.Query(), &params.Offset)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "offset", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListExpenses(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateExpense operation middleware
+func (siw *ServerInterfaceWrapper) CreateExpense(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateExpense(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteExpense operation middleware
+func (siw *ServerInterfaceWrapper) DeleteExpense(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "expenseId" -------------
+	var expenseId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "expenseId", chi.URLParam(r, "expenseId"), &expenseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "expenseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteExpense(w, r, expenseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetExpense operation middleware
+func (siw *ServerInterfaceWrapper) GetExpense(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "expenseId" -------------
+	var expenseId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "expenseId", chi.URLParam(r, "expenseId"), &expenseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "expenseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetExpense(w, r, expenseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateExpense operation middleware
+func (siw *ServerInterfaceWrapper) UpdateExpense(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "expenseId" -------------
+	var expenseId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "expenseId", chi.URLParam(r, "expenseId"), &expenseId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "expenseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateExpense(w, r, expenseId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // DeleteHousehold operation middleware
 func (siw *ServerInterfaceWrapper) DeleteHousehold(w http.ResponseWriter, r *http.Request) {
 
@@ -2424,6 +4160,84 @@ func (siw *ServerInterfaceWrapper) RemoveHouseholdMember(w http.ResponseWriter, 
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RemoveHouseholdMember(w, r, userId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListSettlements operation middleware
+func (siw *ServerInterfaceWrapper) ListSettlements(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListSettlements(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GenerateSettlement operation middleware
+func (siw *ServerInterfaceWrapper) GenerateSettlement(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GenerateSettlement(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// MarkTransferPaid operation middleware
+func (siw *ServerInterfaceWrapper) MarkTransferPaid(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "transferId" -------------
+	var transferId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "transferId", chi.URLParam(r, "transferId"), &transferId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "transferId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.MarkTransferPaid(w, r, transferId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetSettlement operation middleware
+func (siw *ServerInterfaceWrapper) GetSettlement(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "settlementId" -------------
+	var settlementId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "settlementId", chi.URLParam(r, "settlementId"), &settlementId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "settlementId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetSettlement(w, r, settlementId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2576,6 +4390,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Patch(options.BaseURL+"/budgets/{budgetId}", wrapper.UpdateBudgetCategory)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/expenses", wrapper.ListExpenses)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/expenses", wrapper.CreateExpense)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/expenses/{expenseId}", wrapper.DeleteExpense)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/expenses/{expenseId}", wrapper.GetExpense)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/expenses/{expenseId}", wrapper.UpdateExpense)
+	})
+	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/households", wrapper.DeleteHousehold)
 	})
 	r.Group(func(r chi.Router) {
@@ -2595,6 +4424,18 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Delete(options.BaseURL+"/households/members/{userId}", wrapper.RemoveHouseholdMember)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/settlements", wrapper.ListSettlements)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/settlements/generate", wrapper.GenerateSettlement)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/settlements/transfers/{transferId}/pay", wrapper.MarkTransferPaid)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/settlements/{settlementId}", wrapper.GetSettlement)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
@@ -2844,6 +4685,245 @@ type UpdateBudgetCategory404ApplicationProblemPlusJSONResponse struct {
 }
 
 func (response UpdateBudgetCategory404ApplicationProblemPlusJSONResponse) VisitUpdateBudgetCategoryResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListExpensesRequestObject struct {
+	Params ListExpensesParams
+}
+
+type ListExpensesResponseObject interface {
+	VisitListExpensesResponse(w http.ResponseWriter) error
+}
+
+type ListExpenses200JSONResponse ExpenseListResponse
+
+func (response ListExpenses200JSONResponse) VisitListExpensesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListExpenses401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response ListExpenses401ApplicationProblemPlusJSONResponse) VisitListExpensesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListExpenses404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response ListExpenses404ApplicationProblemPlusJSONResponse) VisitListExpensesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateExpenseRequestObject struct {
+	Body *CreateExpenseJSONRequestBody
+}
+
+type CreateExpenseResponseObject interface {
+	VisitCreateExpenseResponse(w http.ResponseWriter) error
+}
+
+type CreateExpense201JSONResponse ExpenseWithSplits
+
+func (response CreateExpense201JSONResponse) VisitCreateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateExpense400ApplicationProblemPlusJSONResponse struct {
+	BadRequestApplicationProblemPlusJSONResponse
+}
+
+func (response CreateExpense400ApplicationProblemPlusJSONResponse) VisitCreateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateExpense401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response CreateExpense401ApplicationProblemPlusJSONResponse) VisitCreateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type CreateExpense404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response CreateExpense404ApplicationProblemPlusJSONResponse) VisitCreateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteExpenseRequestObject struct {
+	ExpenseId openapi_types.UUID `json:"expenseId"`
+}
+
+type DeleteExpenseResponseObject interface {
+	VisitDeleteExpenseResponse(w http.ResponseWriter) error
+}
+
+type DeleteExpense204Response struct {
+}
+
+func (response DeleteExpense204Response) VisitDeleteExpenseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteExpense401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response DeleteExpense401ApplicationProblemPlusJSONResponse) VisitDeleteExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteExpense403ApplicationProblemPlusJSONResponse struct {
+	ForbiddenApplicationProblemPlusJSONResponse
+}
+
+func (response DeleteExpense403ApplicationProblemPlusJSONResponse) VisitDeleteExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteExpense404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response DeleteExpense404ApplicationProblemPlusJSONResponse) VisitDeleteExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpenseRequestObject struct {
+	ExpenseId openapi_types.UUID `json:"expenseId"`
+}
+
+type GetExpenseResponseObject interface {
+	VisitGetExpenseResponse(w http.ResponseWriter) error
+}
+
+type GetExpense200JSONResponse ExpenseWithSplits
+
+func (response GetExpense200JSONResponse) VisitGetExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpense401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response GetExpense401ApplicationProblemPlusJSONResponse) VisitGetExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetExpense404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response GetExpense404ApplicationProblemPlusJSONResponse) VisitGetExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateExpenseRequestObject struct {
+	ExpenseId openapi_types.UUID `json:"expenseId"`
+	Body      *UpdateExpenseJSONRequestBody
+}
+
+type UpdateExpenseResponseObject interface {
+	VisitUpdateExpenseResponse(w http.ResponseWriter) error
+}
+
+type UpdateExpense200JSONResponse ExpenseWithSplits
+
+func (response UpdateExpense200JSONResponse) VisitUpdateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateExpense400ApplicationProblemPlusJSONResponse struct {
+	BadRequestApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateExpense400ApplicationProblemPlusJSONResponse) VisitUpdateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateExpense401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateExpense401ApplicationProblemPlusJSONResponse) VisitUpdateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateExpense403ApplicationProblemPlusJSONResponse struct {
+	ForbiddenApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateExpense403ApplicationProblemPlusJSONResponse) VisitUpdateExpenseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateExpense404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateExpense404ApplicationProblemPlusJSONResponse) VisitUpdateExpenseResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(404)
 
@@ -3204,6 +5284,194 @@ func (response RemoveHouseholdMember404ApplicationProblemPlusJSONResponse) Visit
 	return json.NewEncoder(w).Encode(response)
 }
 
+type ListSettlementsRequestObject struct {
+}
+
+type ListSettlementsResponseObject interface {
+	VisitListSettlementsResponse(w http.ResponseWriter) error
+}
+
+type ListSettlements200JSONResponse []Settlement
+
+func (response ListSettlements200JSONResponse) VisitListSettlementsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListSettlements401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response ListSettlements401ApplicationProblemPlusJSONResponse) VisitListSettlementsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type ListSettlements404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response ListSettlements404ApplicationProblemPlusJSONResponse) VisitListSettlementsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GenerateSettlementRequestObject struct {
+	Body *GenerateSettlementJSONRequestBody
+}
+
+type GenerateSettlementResponseObject interface {
+	VisitGenerateSettlementResponse(w http.ResponseWriter) error
+}
+
+type GenerateSettlement201JSONResponse SettlementWithTransfers
+
+func (response GenerateSettlement201JSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GenerateSettlement400ApplicationProblemPlusJSONResponse struct {
+	BadRequestApplicationProblemPlusJSONResponse
+}
+
+func (response GenerateSettlement400ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GenerateSettlement401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response GenerateSettlement401ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GenerateSettlement404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response GenerateSettlement404ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GenerateSettlement409ApplicationProblemPlusJSONResponse struct {
+	ConflictApplicationProblemPlusJSONResponse
+}
+
+func (response GenerateSettlement409ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type MarkTransferPaidRequestObject struct {
+	TransferId openapi_types.UUID `json:"transferId"`
+}
+
+type MarkTransferPaidResponseObject interface {
+	VisitMarkTransferPaidResponse(w http.ResponseWriter) error
+}
+
+type MarkTransferPaid200JSONResponse SettlementTransfer
+
+func (response MarkTransferPaid200JSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type MarkTransferPaid401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response MarkTransferPaid401ApplicationProblemPlusJSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type MarkTransferPaid403ApplicationProblemPlusJSONResponse struct {
+	ForbiddenApplicationProblemPlusJSONResponse
+}
+
+func (response MarkTransferPaid403ApplicationProblemPlusJSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type MarkTransferPaid404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response MarkTransferPaid404ApplicationProblemPlusJSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetSettlementRequestObject struct {
+	SettlementId openapi_types.UUID `json:"settlementId"`
+}
+
+type GetSettlementResponseObject interface {
+	VisitGetSettlementResponse(w http.ResponseWriter) error
+}
+
+type GetSettlement200JSONResponse SettlementWithTransfers
+
+func (response GetSettlement200JSONResponse) VisitGetSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetSettlement401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response GetSettlement401ApplicationProblemPlusJSONResponse) VisitGetSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetSettlement404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response GetSettlement404ApplicationProblemPlusJSONResponse) VisitGetSettlementResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetUsersMeRequestObject struct {
 }
 
@@ -3259,6 +5527,21 @@ type StrictServerInterface interface {
 	// Update a budget category
 	// (PATCH /budgets/{budgetId})
 	UpdateBudgetCategory(ctx context.Context, request UpdateBudgetCategoryRequestObject) (UpdateBudgetCategoryResponseObject, error)
+	// List expenses for the current household
+	// (GET /expenses)
+	ListExpenses(ctx context.Context, request ListExpensesRequestObject) (ListExpensesResponseObject, error)
+	// Create an expense with splits
+	// (POST /expenses)
+	CreateExpense(ctx context.Context, request CreateExpenseRequestObject) (CreateExpenseResponseObject, error)
+	// Delete an expense
+	// (DELETE /expenses/{expenseId})
+	DeleteExpense(ctx context.Context, request DeleteExpenseRequestObject) (DeleteExpenseResponseObject, error)
+	// Get expense detail with splits
+	// (GET /expenses/{expenseId})
+	GetExpense(ctx context.Context, request GetExpenseRequestObject) (GetExpenseResponseObject, error)
+	// Update an expense
+	// (PATCH /expenses/{expenseId})
+	UpdateExpense(ctx context.Context, request UpdateExpenseRequestObject) (UpdateExpenseResponseObject, error)
 	// Delete the current user's household (owner only)
 	// (DELETE /households)
 	DeleteHousehold(ctx context.Context, request DeleteHouseholdRequestObject) (DeleteHouseholdResponseObject, error)
@@ -3280,6 +5563,18 @@ type StrictServerInterface interface {
 	// Remove a member from the household (owner only)
 	// (DELETE /households/members/{userId})
 	RemoveHouseholdMember(ctx context.Context, request RemoveHouseholdMemberRequestObject) (RemoveHouseholdMemberResponseObject, error)
+	// List settlements for the current household
+	// (GET /settlements)
+	ListSettlements(ctx context.Context, request ListSettlementsRequestObject) (ListSettlementsResponseObject, error)
+	// Manually generate a settlement for a given month
+	// (POST /settlements/generate)
+	GenerateSettlement(ctx context.Context, request GenerateSettlementRequestObject) (GenerateSettlementResponseObject, error)
+	// Mark a settlement transfer as paid
+	// (PATCH /settlements/transfers/{transferId}/pay)
+	MarkTransferPaid(ctx context.Context, request MarkTransferPaidRequestObject) (MarkTransferPaidResponseObject, error)
+	// Get settlement detail with transfers
+	// (GET /settlements/{settlementId})
+	GetSettlement(ctx context.Context, request GetSettlementRequestObject) (GetSettlementResponseObject, error)
 	// Get current user profile
 	// (GET /users/me)
 	GetUsersMe(ctx context.Context, request GetUsersMeRequestObject) (GetUsersMeResponseObject, error)
@@ -3445,6 +5740,148 @@ func (sh *strictHandler) UpdateBudgetCategory(w http.ResponseWriter, r *http.Req
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(UpdateBudgetCategoryResponseObject); ok {
 		if err := validResponse.VisitUpdateBudgetCategoryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListExpenses operation middleware
+func (sh *strictHandler) ListExpenses(w http.ResponseWriter, r *http.Request, params ListExpensesParams) {
+	var request ListExpensesRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListExpenses(ctx, request.(ListExpensesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListExpenses")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListExpensesResponseObject); ok {
+		if err := validResponse.VisitListExpensesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateExpense operation middleware
+func (sh *strictHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
+	var request CreateExpenseRequestObject
+
+	var body CreateExpenseJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateExpense(ctx, request.(CreateExpenseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateExpense")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateExpenseResponseObject); ok {
+		if err := validResponse.VisitCreateExpenseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteExpense operation middleware
+func (sh *strictHandler) DeleteExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	var request DeleteExpenseRequestObject
+
+	request.ExpenseId = expenseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteExpense(ctx, request.(DeleteExpenseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteExpense")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteExpenseResponseObject); ok {
+		if err := validResponse.VisitDeleteExpenseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetExpense operation middleware
+func (sh *strictHandler) GetExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	var request GetExpenseRequestObject
+
+	request.ExpenseId = expenseId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetExpense(ctx, request.(GetExpenseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetExpense")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetExpenseResponseObject); ok {
+		if err := validResponse.VisitGetExpenseResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateExpense operation middleware
+func (sh *strictHandler) UpdateExpense(w http.ResponseWriter, r *http.Request, expenseId openapi_types.UUID) {
+	var request UpdateExpenseRequestObject
+
+	request.ExpenseId = expenseId
+
+	var body UpdateExpenseJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateExpense(ctx, request.(UpdateExpenseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateExpense")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateExpenseResponseObject); ok {
+		if err := validResponse.VisitUpdateExpenseResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -3629,6 +6066,113 @@ func (sh *strictHandler) RemoveHouseholdMember(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(RemoveHouseholdMemberResponseObject); ok {
 		if err := validResponse.VisitRemoveHouseholdMemberResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListSettlements operation middleware
+func (sh *strictHandler) ListSettlements(w http.ResponseWriter, r *http.Request) {
+	var request ListSettlementsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListSettlements(ctx, request.(ListSettlementsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListSettlements")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListSettlementsResponseObject); ok {
+		if err := validResponse.VisitListSettlementsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GenerateSettlement operation middleware
+func (sh *strictHandler) GenerateSettlement(w http.ResponseWriter, r *http.Request) {
+	var request GenerateSettlementRequestObject
+
+	var body GenerateSettlementJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GenerateSettlement(ctx, request.(GenerateSettlementRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GenerateSettlement")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GenerateSettlementResponseObject); ok {
+		if err := validResponse.VisitGenerateSettlementResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// MarkTransferPaid operation middleware
+func (sh *strictHandler) MarkTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
+	var request MarkTransferPaidRequestObject
+
+	request.TransferId = transferId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.MarkTransferPaid(ctx, request.(MarkTransferPaidRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "MarkTransferPaid")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(MarkTransferPaidResponseObject); ok {
+		if err := validResponse.VisitMarkTransferPaidResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetSettlement operation middleware
+func (sh *strictHandler) GetSettlement(w http.ResponseWriter, r *http.Request, settlementId openapi_types.UUID) {
+	var request GetSettlementRequestObject
+
+	request.SettlementId = settlementId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetSettlement(ctx, request.(GetSettlementRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetSettlement")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetSettlementResponseObject); ok {
+		if err := validResponse.VisitGetSettlementResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

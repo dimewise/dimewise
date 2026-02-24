@@ -9,6 +9,8 @@ export const RoutesEnum = {
 	// authenticated
 	dashboard: "/dashboard",
 	budgets: "/budgets",
+	expenses: "/expenses",
+	settlements: "/settlements",
 	householdSetup: "/household/setup",
 	householdSettings: "/household/settings",
 };

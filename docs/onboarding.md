@@ -60,9 +60,9 @@ internal/
 ├── config/          # Central config struct + providers
 │   └── provider/    # Lazy-init providers (env, db, clerk, logger)
 ├── middleware/      # HTTP middleware (auth)
-├── web/             # Handler layer (implements oapi StrictServerInterface)
-├── service/         # Business logic layer (TO BE CREATED)
-└── repository/      # Data access layer (TO BE CREATED)
+├── repository/      # Data access layer (go-jet queries, transactions)
+├── service/         # Business logic layer (validation, orchestration)
+└── web/             # Handler layer (implements oapi StrictServerInterface)
 ```
 
 ### Code Generation Pipeline
@@ -78,7 +78,7 @@ openapi/openapi.yml
 
 PostgreSQL schema
         │
-        └──▶ go-jet → server/generated/horizon/public/{model,table}/
+        └──▶ go-jet → server/generated/dimewise/public/{model,table}/
               (type-safe table references and model structs)
 ```
 
@@ -142,19 +142,20 @@ All monetary amounts are stored as **integers in the smallest currency unit** (e
 
 - **User** — Authenticated via Clerk. Has a `clerk_id` linking to the external identity provider.
 - **Household** — A group of users sharing budgets. Has a designated currency.
-- **HouseholdMember** — Join table linking users to households with roles (owner/member).
-- **Budget** — A monthly spending category within a household (e.g., "Groceries", "Rent"). Has a capped amount.
-- **Expense** — A recorded spend against a budget. Logged by any household member.
-- **ExpenseSplit** — Defines how an expense's cost is distributed among household members (by percentage).
-- **Settlement** — End-of-month report showing net transfers between members.
+- **HouseholdMember** — Join table linking users to households.
+- **BudgetCategory** — A monthly spending category within a household (e.g., "Groceries", "Rent"). Has a capped amount.
+- **Expense** — A recorded spend, optionally linked to a budget category. Logged by any household member.
+- **ExpenseSplit** — Defines how an expense's cost is distributed among household members (by absolute amount).
+- **Settlement** — Monthly report generated for a specific month/year showing net transfers between members.
+- **SettlementTransfer** — A single directional transfer (from → to) within a settlement, markable as paid.
 
 ### Key Business Rules
 
 1. A household has a set of monthly budgets; the sum of all budget amounts = total monthly budget.
-2. Any household member can create expenses against any budget in their household.
-3. Each expense can be split by percentage among a subset of household members.
-4. Split percentages for an expense must sum to exactly 100%.
-5. At month-end, the system calculates net balances: who owes whom and how much.
+2. Any household member can create expenses in their household (budget category is optional).
+3. Each expense is split by absolute amounts among household members; splits must sum to the total expense amount.
+4. Settlements are manually generated for a given month/year (unique per household + month + year).
+5. The debt simplification algorithm calculates net balances (paid − owed) and minimizes the number of transfers using a two-pointer approach.
 6. The person who paid for an expense is credited; split members who didn't pay are debited.
 
 ---

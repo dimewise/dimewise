@@ -1,5 +1,11 @@
 import { api } from "./client";
-export const addTagTypes = ["Users", "Households", "Budgets"] as const;
+export const addTagTypes = [
+	"Users",
+	"Households",
+	"Budgets",
+	"Expenses",
+	"Settlements",
+] as const;
 const injectedRtkApi = api
 	.enhanceEndpoints({
 		addTagTypes,
@@ -119,6 +125,92 @@ const injectedRtkApi = api
 				query: () => ({ url: `/budgets/overview` }),
 				providesTags: ["Budgets"],
 			}),
+			listExpenses: build.query<ListExpensesApiResponse, ListExpensesApiArg>({
+				query: (queryArg) => ({
+					url: `/expenses`,
+					params: {
+						category_id: queryArg.categoryId,
+						paid_by: queryArg.paidBy,
+						from: queryArg["from"],
+						to: queryArg.to,
+						limit: queryArg.limit,
+						offset: queryArg.offset,
+					},
+				}),
+				providesTags: ["Expenses"],
+			}),
+			createExpense: build.mutation<
+				CreateExpenseApiResponse,
+				CreateExpenseApiArg
+			>({
+				query: (queryArg) => ({
+					url: `/expenses`,
+					method: "POST",
+					body: queryArg.createExpenseRequest,
+				}),
+				invalidatesTags: ["Expenses"],
+			}),
+			getExpense: build.query<GetExpenseApiResponse, GetExpenseApiArg>({
+				query: (queryArg) => ({ url: `/expenses/${queryArg.expenseId}` }),
+				providesTags: ["Expenses"],
+			}),
+			updateExpense: build.mutation<
+				UpdateExpenseApiResponse,
+				UpdateExpenseApiArg
+			>({
+				query: (queryArg) => ({
+					url: `/expenses/${queryArg.expenseId}`,
+					method: "PATCH",
+					body: queryArg.updateExpenseRequest,
+				}),
+				invalidatesTags: ["Expenses"],
+			}),
+			deleteExpense: build.mutation<
+				DeleteExpenseApiResponse,
+				DeleteExpenseApiArg
+			>({
+				query: (queryArg) => ({
+					url: `/expenses/${queryArg.expenseId}`,
+					method: "DELETE",
+				}),
+				invalidatesTags: ["Expenses"],
+			}),
+			listSettlements: build.query<
+				ListSettlementsApiResponse,
+				ListSettlementsApiArg
+			>({
+				query: () => ({ url: `/settlements` }),
+				providesTags: ["Settlements"],
+			}),
+			generateSettlement: build.mutation<
+				GenerateSettlementApiResponse,
+				GenerateSettlementApiArg
+			>({
+				query: (queryArg) => ({
+					url: `/settlements/generate`,
+					method: "POST",
+					body: queryArg.generateSettlementRequest,
+				}),
+				invalidatesTags: ["Settlements"],
+			}),
+			getSettlement: build.query<GetSettlementApiResponse, GetSettlementApiArg>(
+				{
+					query: (queryArg) => ({
+						url: `/settlements/${queryArg.settlementId}`,
+					}),
+					providesTags: ["Settlements"],
+				},
+			),
+			markTransferPaid: build.mutation<
+				MarkTransferPaidApiResponse,
+				MarkTransferPaidApiArg
+			>({
+				query: (queryArg) => ({
+					url: `/settlements/transfers/${queryArg.transferId}/pay`,
+					method: "PATCH",
+				}),
+				invalidatesTags: ["Settlements"],
+			}),
 		}),
 		overrideExisting: false,
 	});
@@ -169,6 +261,51 @@ export type DeleteBudgetCategoryApiArg = {
 };
 export type GetBudgetOverviewApiResponse = /** status 200 OK */ BudgetOverview;
 export type GetBudgetOverviewApiArg = void;
+export type ListExpensesApiResponse = /** status 200 OK */ ExpenseListResponse;
+export type ListExpensesApiArg = {
+	categoryId?: string;
+	paidBy?: string;
+	from?: string;
+	to?: string;
+	limit?: number;
+	offset?: number;
+};
+export type CreateExpenseApiResponse =
+	/** status 201 Expense created */ ExpenseWithSplits;
+export type CreateExpenseApiArg = {
+	createExpenseRequest: CreateExpenseRequest;
+};
+export type GetExpenseApiResponse = /** status 200 OK */ ExpenseWithSplits;
+export type GetExpenseApiArg = {
+	expenseId: string;
+};
+export type UpdateExpenseApiResponse =
+	/** status 200 Expense updated */ ExpenseWithSplits;
+export type UpdateExpenseApiArg = {
+	expenseId: string;
+	updateExpenseRequest: UpdateExpenseRequest;
+};
+export type DeleteExpenseApiResponse = unknown;
+export type DeleteExpenseApiArg = {
+	expenseId: string;
+};
+export type ListSettlementsApiResponse = /** status 200 OK */ Settlement[];
+export type ListSettlementsApiArg = void;
+export type GenerateSettlementApiResponse =
+	/** status 201 Settlement generated */ SettlementWithTransfers;
+export type GenerateSettlementApiArg = {
+	generateSettlementRequest: GenerateSettlementRequest;
+};
+export type GetSettlementApiResponse =
+	/** status 200 OK */ SettlementWithTransfers;
+export type GetSettlementApiArg = {
+	settlementId: string;
+};
+export type MarkTransferPaidApiResponse =
+	/** status 200 Transfer marked as paid */ SettlementTransfer;
+export type MarkTransferPaidApiArg = {
+	transferId: string;
+};
 export type BaseEntity = {
 	id: string;
 	created_at: string;
@@ -272,6 +409,77 @@ export type BudgetOverview = {
 	remaining: number;
 	categories: BudgetCategoryOverview[];
 };
+export type Expense = BaseEntity & {
+	household_id: string;
+	budget_category_id?: string;
+	paid_by: string;
+	logged_by: string;
+	title: string;
+	/** Amount in smallest currency unit */
+	amount: number;
+	notes?: string;
+	incurred_at: string;
+};
+export type ExpenseSplit = {
+	id: string;
+	expense_id: string;
+	user_id: string;
+	/** Split amount in smallest currency unit */
+	amount: number;
+};
+export type ExpenseWithSplits = Expense & {
+	splits: ExpenseSplit[];
+};
+export type ExpenseListResponse = {
+	expenses: ExpenseWithSplits[];
+	/** Total number of matching expenses (for pagination) */
+	total: number;
+};
+export type ExpenseSplitInput = {
+	user_id: string;
+	/** Split amount in smallest currency unit */
+	amount: number;
+};
+export type CreateExpenseRequest = {
+	paid_by: string;
+	budget_category_id?: string;
+	title: string;
+	/** Amount in smallest currency unit */
+	amount: number;
+	notes?: string;
+	incurred_at: string;
+	splits: ExpenseSplitInput[];
+};
+export type UpdateExpenseRequest = {
+	paid_by?: string;
+	budget_category_id?: string;
+	title?: string;
+	amount?: number;
+	notes?: string;
+	incurred_at?: string;
+	splits?: ExpenseSplitInput[];
+};
+export type Settlement = BaseEntity & {
+	household_id: string;
+	month: number;
+	year: number;
+	generated_at: string;
+};
+export type SettlementTransfer = BaseEntity & {
+	settlement_id: string;
+	from_user_id: string;
+	to_user_id: string;
+	/** Transfer amount in smallest currency unit */
+	amount: number;
+	paid_at?: string;
+};
+export type SettlementWithTransfers = Settlement & {
+	transfers: SettlementTransfer[];
+};
+export type GenerateSettlementRequest = {
+	month: number;
+	year: number;
+};
 export const {
 	useGetUsersMeQuery,
 	useLazyGetUsersMeQuery,
@@ -290,4 +498,17 @@ export const {
 	useDeleteBudgetCategoryMutation,
 	useGetBudgetOverviewQuery,
 	useLazyGetBudgetOverviewQuery,
+	useListExpensesQuery,
+	useLazyListExpensesQuery,
+	useCreateExpenseMutation,
+	useGetExpenseQuery,
+	useLazyGetExpenseQuery,
+	useUpdateExpenseMutation,
+	useDeleteExpenseMutation,
+	useListSettlementsQuery,
+	useLazyListSettlementsQuery,
+	useGenerateSettlementMutation,
+	useGetSettlementQuery,
+	useLazyGetSettlementQuery,
+	useMarkTransferPaidMutation,
 } = injectedRtkApi;

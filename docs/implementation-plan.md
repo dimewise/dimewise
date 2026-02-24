@@ -4,9 +4,19 @@
 
 This plan is broken into phases. Each phase is self-contained: it delivers working functionality end-to-end (database → server → client). Phases should be completed sequentially — each one builds on the previous.
 
+**Status:** All 5 phases are complete. The application is functional end-to-end.
+
+| Phase | Status |
+|-------|--------|
+| Phase 1: Users & Households | ✅ Complete |
+| Phase 2: Budget Categories | ✅ Complete |
+| Phase 3: Expenses | ✅ Complete |
+| Phase 4: Settlements | ✅ Complete |
+| Phase 5: Dashboard & Polish | ✅ Complete |
+
 ---
 
-## Phase 1: Users & Households
+## Phase 1: Users & Households ✅
 
 **Goal:** Users can create a household, generate an invite code, and others can join.
 
@@ -52,7 +62,7 @@ A user can register/login, create or join a household, and see household members
 
 ---
 
-## Phase 2: Budget Categories
+## Phase 2: Budget Categories ✅
 
 **Goal:** Household members can set up and manage monthly budget categories.
 
@@ -91,55 +101,63 @@ Household members can create, edit, and delete budget categories with a monthly 
 
 ---
 
-## Phase 3: Expenses
+## Phase 3: Expenses ✅
 
 **Goal:** Household members can log expenses with splitting.
 
 ### Database Migrations
 
 - `00004_create_expense_tables.sql`
-  - `expenses` table (id, household_id, budget_category_id, paid_by → users, logged_by → users, title, amount, notes, incurred_at, timestamps)
-  - `expense_splits` table (id, expense_id, user_id, split_type, value, timestamps)
+  - `expenses` table (id, household_id, budget_category_id (nullable, ON DELETE SET NULL), paid_by → users, logged_by → users, title, amount, notes, incurred_at, timestamps)
+  - `expense_splits` table (id, expense_id → expenses (CASCADE), user_id → users, amount BIGINT, timestamps)
+  - Indexes on household_id, budget_category_id, paid_by, incurred_at, expense_id, user_id
 
 ### OpenAPI Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/expenses` | List expenses (with filters: date range, category, member) |
+| GET | `/expenses` | List expenses (with filters: date range, category, member; pagination via limit/offset) |
 | POST | `/expenses` | Create an expense (with splits) |
 | GET | `/expenses/{expenseId}` | Get expense detail with splits |
-| PATCH | `/expenses/{expenseId}` | Update an expense |
+| PATCH | `/expenses/{expenseId}` | Update an expense (partial update) |
 | DELETE | `/expenses/{expenseId}` | Delete an expense |
 
 ### Server
 
-- **Repository:** `ExpenseReader` interface (list with filters & pagination, get by ID with splits)
-- **Repository:** `ExpenseWriter` interface (create with splits, update, delete)
-- **Service:** `ExpenseService` (CRUD, split validation — sums to 100% or total amount, date validation)
+- **Repository:** `ExpenseReader` interface (list with filters & pagination, get by ID with splits, get spending aggregations)
+- **Repository:** `ExpenseWriter` interface (create with splits in transaction, update with splits in transaction, delete)
+- **Service:** `ExpenseService` (CRUD, split validation — splits must sum to total expense amount)
 - **Web/Handler:** Implement generated interface methods
+
+### Implementation Notes
+
+- **Budget category is optional** on expenses (nullable FK with ON DELETE SET NULL)
+- **Splits store absolute amounts** (not percentages) — simpler and avoids rounding issues
+- **Split validation:** all split amounts must be non-negative and must sum exactly to the expense total
+- **Transactions:** create and update operations use `db.BeginTx` since they write to both `expenses` and `expense_splits` tables
+- **Aggregation queries** use `postgres.RawStatement` with named parameters for GROUP BY queries
 
 ### Client
 
-- Expense list view with filters (date range, category, payer)
-- Add expense form (select payer, budget category, configure splits)
-- Split configuration UI (toggle percentage/fixed, add/remove members, live validation)
-- Expense detail view
-- Edit/delete expense
+- Expense list view with filters (date range picker, category dropdown, payer dropdown) and pagination
+- Add/edit expense modal with dynamic split management and "Split Evenly" button
+- Client-side split validation (splits must sum to total amount)
+- Delete expense with confirmation dialog
 
 ### Deliverable
 Members can log expenses, split them among household members, and browse/filter the expense list.
 
 ---
 
-## Phase 4: Settlements
+## Phase 4: Settlements ✅
 
-**Goal:** Monthly settlement reports auto-generate and show who owes whom.
+**Goal:** Monthly settlement reports show who owes whom.
 
 ### Database Migrations
 
 - `00005_create_settlement_tables.sql`
-  - `settlements` table (id, household_id, month, year, generated_at, unique on household+month+year)
-  - `settlement_transfers` table (id, settlement_id, from_user_id, to_user_id, amount, paid_at, timestamps)
+  - `settlements` table (id, household_id → households (CASCADE), month, year, generated_at, timestamps, UNIQUE on household+month+year)
+  - `settlement_transfers` table (id, settlement_id → settlements (CASCADE), from_user_id → users, to_user_id → users, amount BIGINT, paid_at, timestamps)
 
 ### OpenAPI Endpoints
 
@@ -147,44 +165,58 @@ Members can log expenses, split them among household members, and browse/filter 
 |--------|------|-------------|
 | GET | `/settlements` | List settlements (history) |
 | GET | `/settlements/{settlementId}` | Get settlement detail with transfers |
-| POST | `/settlements/generate` | Manually trigger settlement generation (for testing/admin) |
-| PATCH | `/settlements/transfers/{transferId}` | Mark a transfer as paid |
+| POST | `/settlements/generate` | Generate settlement for a given month/year |
+| PATCH | `/settlements/transfers/{transferId}/pay` | Mark a transfer as paid |
 
 ### Server
 
-- **Repository:** `SettlementReader` interface (list by household, get by ID with transfers)
-- **Repository:** `SettlementWriter` interface (create settlement + transfers, mark paid)
-- **Service:** `SettlementService` (settlement calculation algorithm, debt simplification, generation logic)
-- **Scheduled job / cron:** Auto-generate settlements on 1st of each month (can be a simple goroutine or external cron)
+- **Repository:** `SettlementReader` interface (list by household, get by ID with transfers, get by month/year, get transfer by ID)
+- **Repository:** `SettlementWriter` interface (create settlement + transfers in transaction, mark paid)
+- **Service:** `SettlementService` (settlement calculation with debt simplification, generation logic, mark paid validation)
+- **Debt simplification algorithm:** Two-pointer approach on sorted net balances (paid − owed) to minimize number of transfers
+
+### Implementation Notes
+
+- **No auto-generation cron yet** — settlements are manually triggered via the API / UI
+- **Duplicate prevention:** UNIQUE constraint on (household_id, month, year) prevents generating twice for the same period
+- **Transactions:** settlement + transfers created atomically in a single transaction
 
 ### Client
 
-- Settlement history list
-- Settlement detail view (itemized breakdown, transfer list)
-- Mark transfer as paid button
-- Settlement summary card on dashboard
+- Settlement history list with month labels
+- Generate settlement modal with month picker
+- Settlement detail view showing transfers (from → to with amounts)
+- Mark transfer as paid button with confirmation
+- Visual indicators for paid/pending status
 
 ### Deliverable
 Monthly settlement reports generate automatically, showing net transfers. Members can mark transfers as completed.
 
 ---
 
-## Phase 5: Dashboard & Polish
+## Phase 5: Dashboard & Polish ✅
 
 **Goal:** A polished home experience with insights and budget health indicators.
 
-### Features
+### Features (Implemented)
 
 - **Dashboard home page:**
-  - Current month budget overview (total budget, spent, remaining)
-  - Per-category spending progress bars with warning colors
-  - Recent expenses list
-  - Pending settlement transfers (if any)
-- **Budget warnings:** Visual indicators when spending hits 80% and 100% of a category's budget
-- **Responsive polish:** Ensure all views work well on mobile viewports
-- **Empty states:** Friendly onboarding prompts when no household, no budgets, or no expenses exist
-- **Error handling:** Toast notifications for errors, loading skeletons for data fetching
-- **Theme:** Configure Ant Design theme tokens for the Dimewise brand (playful color palette)
+  - Quick stats cards (household name, member count, currency)
+  - Current month budget overview card (total budget, spent, remaining with progress bar)
+  - Recent expenses list (last 5) with "View All" link
+  - Recent settlements list (last 3) with "View All" link
+- **Budget warnings:** Visual indicators (progress bar color change at 80% and 100%)
+- **Sidebar navigation:** Dashboard, Expenses, Budgets, Settlements, Settings
+- **Empty states:** Friendly prompts when no expenses or settlements exist
+- **Error handling:** Toast notifications (`message.success`/`message.error`) for all mutations
+- **Loading states:** Spin components during data fetching
+
+### Remaining Polish (Future)
+
+- Responsive optimizations for mobile viewports
+- Ant Design theme token customization for brand colors
+- Loading skeletons (instead of simple spinners)
+- Per-category spending progress bars on dashboard
 
 ---
 
@@ -208,17 +240,17 @@ Each phase follows the same sequence:
 
 ## Architecture Checklist (applied per phase)
 
-- [ ] Migration follows naming conventions (sequential, descriptive)
-- [ ] All monetary values stored as BIGINT (cents/smallest unit)
-- [ ] OpenAPI spec uses `$ref` to shared schemas, RFC 9457 error responses
-- [ ] Generated code committed after `make gen-openapi`
-- [ ] Repository accepts interfaces, returns structs
-- [ ] Service validates input, returns domain errors
-- [ ] Handler does zero business logic — delegates to service
-- [ ] Client uses only RTK Query hooks for server state
-- [ ] Forms use React Hook Form + Zod validation
-- [ ] All errors handled explicitly (no silent swallowing)
-- [ ] `make lint` passes
+- [x] Migration follows naming conventions (sequential, descriptive)
+- [x] All monetary values stored as BIGINT (cents/smallest unit)
+- [x] OpenAPI spec uses `$ref` to shared schemas, RFC 9457 error responses
+- [x] Generated code committed after `make gen-openapi`
+- [x] Repository accepts interfaces, returns structs
+- [x] Service validates input, returns domain errors
+- [x] Handler does zero business logic — delegates to service
+- [x] Client uses only RTK Query hooks for server state
+- [ ] Forms use React Hook Form + Zod validation (currently using Ant Design Form)
+- [x] All errors handled explicitly (no silent swallowing)
+- [x] `make lint` passes
 
 ---
 
@@ -243,6 +275,6 @@ Currencies are categorized by their **exponent** (number of decimal places in th
 The exponent is used for:
 - **Storage:** Amount `1050` in USD = $10.50, in JPY = ¥1050
 - **Display:** Format with `exponent` decimal places
-- **Split validation:** Percentage basis points (10000 = 100%) work identically regardless of currency
+- **Split validation:** Splits must sum exactly to the expense amount. All amounts are in smallest currency unit.
 
 This table should be maintained as a constant in both server and client code (not in the database).

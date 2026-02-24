@@ -38,34 +38,34 @@ Dimewise is a playful, mobile-first household budgeting app. Households set mont
 
 ### Expenses
 
-- Any household member can log an expense against any budget category.
+- Any household member can log an expense.
+- **Budget category is optional** — expenses can exist without being tied to a category.
 - The **payer is selectable** — the person logging the expense can specify who actually paid.
 - Expense metadata:
   - **Title** (required)
   - **Amount** (required, integer in smallest currency unit)
   - **Date incurred** (required)
-  - **Budget category** (required)
+  - **Budget category** (optional)
   - **Notes** (optional)
 - Receipt upload is **deferred** (not in MVP).
 
 ### Expense Splitting
 
-- Each expense can be split among a subset of household members.
-- The user picks either **percentage-based** or **fixed-amount** splitting per expense:
-  - **Percentage:** Each member's share is a percentage; all must sum to 100%.
-  - **Fixed amount:** Each member's share is a fixed dollar amount; all must sum to the expense total.
-- Default: if no split is configured, the expense is evenly split among all household members.
+- Each expense must be split among one or more household members.
+- Splits are stored as **absolute amounts** (in smallest currency unit), not percentages.
+- All split amounts must be non-negative and must **sum exactly to the total expense amount**.
+- The UI provides a "Split Evenly" button to distribute the amount equally (with remainder distributed to the first members).
+- Members can be added/removed from splits dynamically.
 
 ### Settlement Reports
 
-- **Auto-generated on the 1st of each month** for the previous month.
+- **Manually generated** via the UI for any given month/year.
+- Cannot generate the same month twice (unique constraint on household + month + year).
 - The report contains:
-  - Itemized breakdown by budget category
-  - Per-member spending summary
-  - **Net transfer amounts** — who owes whom and how much
+  - **Net transfer amounts** — who owes whom and how much (debt-simplified)
 - **Viewable as history** (past months can be browsed).
-- Each settlement has a **status**: generated → members can **mark transfers as paid/completed**.
-- **No mid-month settlements** for MVP.
+- Each transfer has a **paid status**: members can **mark transfers as paid/completed**.
+- **Auto-generation on 1st of month** is a future enhancement.
 
 ---
 
@@ -113,7 +113,7 @@ Household members: Alice, Bob, Charlie
 
 ---
 
-## Data Model (Planned)
+## Data Model
 
 ### Tables
 
@@ -165,11 +165,11 @@ budget_history
 expenses
   id              UUID PK
   household_id    UUID FK → households.id NOT NULL
-  budget_category_id  UUID FK → budget_categories.id NOT NULL
+  budget_category_id  UUID FK → budget_categories.id  -- nullable, ON DELETE SET NULL
   paid_by         UUID FK → users.id NOT NULL  -- who actually paid
   logged_by       UUID FK → users.id NOT NULL  -- who entered it
   title           VARCHAR(255) NOT NULL
-  amount          BIGINT NOT NULL          -- total amount in cents
+  amount          BIGINT NOT NULL          -- total amount in smallest unit
   notes           TEXT
   incurred_at     TIMESTAMPTZ NOT NULL
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -177,35 +177,38 @@ expenses
 
 expense_splits
   id              UUID PK
-  expense_id      UUID FK → expenses.id NOT NULL
+  expense_id      UUID FK → expenses.id ON DELETE CASCADE NOT NULL
   user_id         UUID FK → users.id NOT NULL
-  split_type      VARCHAR(10) NOT NULL     -- 'percentage' or 'fixed'
-  value           BIGINT NOT NULL          -- percentage (basis points) or fixed amount (cents)
+  amount          BIGINT NOT NULL          -- split amount in smallest unit
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 
 settlements
   id              UUID PK
-  household_id    UUID FK → households.id NOT NULL
+  household_id    UUID FK → households.id ON DELETE CASCADE NOT NULL
   month           INT NOT NULL             -- 1-12
   year            INT NOT NULL
   generated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
   UNIQUE(household_id, month, year)
 
 settlement_transfers
   id              UUID PK
-  settlement_id   UUID FK → settlements.id NOT NULL
+  settlement_id   UUID FK → settlements.id ON DELETE CASCADE NOT NULL
   from_user_id    UUID FK → users.id NOT NULL
   to_user_id      UUID FK → users.id NOT NULL
-  amount          BIGINT NOT NULL          -- in cents
+  amount          BIGINT NOT NULL          -- in smallest unit
   paid_at         TIMESTAMPTZ              -- NULL until marked as paid
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 ```
 
 ### Notes on Split Values
 
-- For **percentage** splits: `value` is stored in **basis points** (1% = 100). This gives precision to 0.01% without floating-point issues. Sum must equal 10000 (= 100.00%).
-- For **fixed amount** splits: `value` is in **cents** (same unit as the expense amount). Sum must equal the expense amount.
-- All splits for an expense must use the **same split_type**.
+- Splits store **absolute amounts** in the smallest currency unit (same unit as the expense amount).
+- All splits for an expense must sum exactly to the expense's total amount.
+- The UI provides a "Split Evenly" helper that distributes the total equally, assigning any remainder (from integer division) to the first members.
 
 ---
 

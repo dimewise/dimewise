@@ -101,14 +101,24 @@ func (r *BudgetRepository) GetSpendingByCategory(
 	from time.Time,
 	to time.Time,
 ) ([]BudgetCategorySpending, error) {
-	// This will be fully implemented once the expenses table exists.
-	// For now, return empty spending (no expenses table yet).
-	_ = ctx
-	_ = householdID
-	_ = from
-	_ = to
+	var results []BudgetCategorySpending
 
-	return []BudgetCategorySpending{}, nil
+	stmt := postgres.RawStatement(`
+		SELECT budget_category_id, SUM(amount) AS spent
+		FROM expenses
+		WHERE household_id = :householdID::uuid
+		  AND budget_category_id IS NOT NULL
+		  AND incurred_at >= :from::timestamptz
+		  AND incurred_at < :to::timestamptz
+		GROUP BY budget_category_id
+	`, postgres.RawArgs{"householdID": householdID.String(), "from": from, "to": to})
+
+	err := stmt.QueryContext(ctx, r.db, &results)
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
 
 func (r *BudgetRepository) Create(
