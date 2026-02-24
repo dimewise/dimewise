@@ -1,0 +1,68 @@
+package dto
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/dimewise/dimewise/generated/dimewise/public/model"
+	"github.com/dimewise/dimewise/generated/oapi"
+)
+
+func NewCategory(userID uuid.UUID, form oapi.CategoryCreate) model.Category {
+	now := time.Now()
+
+	newCategory := model.Category{
+		ID:        uuid.New(),
+		UserID:    userID,
+		Title:     form.Title,
+		Amount:    int64(form.Amount),
+		DeletedAt: nil,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	return newCategory
+}
+
+func TransformModelCategoryToOAPICategory(category model.Category) oapi.Category {
+	return oapi.Category{
+		Id:        category.ID,
+		UserId:    category.UserID,
+		Title:     category.Title,
+		Amount:    int(category.Amount),
+		CreatedAt: category.CreatedAt,
+		UpdatedAt: category.UpdatedAt,
+		DeletedAt: category.DeletedAt,
+	}
+}
+
+func BatchTransformModelCategoryToOAPICategory(categories []model.Category) []oapi.Category {
+	oapiCategories := make([]oapi.Category, 0, len(categories))
+
+	for _, category := range categories {
+		oapiCategory := oapi.Category{
+			Id:        category.ID,
+			UserId:    category.UserID,
+			Title:     category.Title,
+			Amount:    int(category.Amount),
+			CreatedAt: category.CreatedAt,
+			UpdatedAt: category.UpdatedAt,
+			DeletedAt: category.DeletedAt,
+		}
+		oapiCategories = append(oapiCategories, oapiCategory)
+	}
+
+	return oapiCategories
+}
+
+func UpdateCategoryByForm(category model.Category, form oapi.CategoryUpdate) model.Category {
+	now := time.Now()
+
+	updatedCategory := category
+	updatedCategory.Amount = int64(form.Amount)
+	updatedCategory.Title = form.Title
+	updatedCategory.UpdatedAt = now
+
+	return updatedCategory
+}

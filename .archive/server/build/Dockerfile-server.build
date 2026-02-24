@@ -1,0 +1,24 @@
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /app
+
+# Set Go build flags for a smaller, statically linked binary
+ENV CGO_ENABLED=0 \
+    GOOS=linux
+
+# Cache go.mod/go.sum and download dependencies
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=bind,source=./go.mod,target=/app/go.mod \
+    --mount=type=bind,source=./go.sum,target=/app/go.sum \
+    go mod download
+
+# Build the binary
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=bind,source=./,target=/app \
+    go build -ldflags="-w -s" -o /usr/local/bin/server ./cmd/server
+
+FROM alpine:3.20 AS runner
+
+COPY --from=builder /usr/local/bin/server /usr/local/bin/server
+
+ENTRYPOINT [ "/usr/local/bin/server" ]

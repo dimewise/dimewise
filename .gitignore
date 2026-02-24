@@ -47,6 +47,3 @@ tmp/
 # Lockfiles (bun)
 bun.lock
 bun.lockb
-
-# Archive (old codebase reference)
-.archive/
