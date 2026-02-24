@@ -1,0 +1,514 @@
+openapi: 3.0.0
+info:
+  title: Dimewise API
+  version: 1.0.0
+
+paths:
+  /users/me:
+    get:
+      summary: Get current user profile
+      operationId: getUsersMe
+      tags:
+        - Users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /households:
+    post:
+      summary: Create a new household
+      operationId: createHousehold
+      tags:
+        - Households
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHouseholdRequest'
+      responses:
+        '201':
+          description: Household created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Household'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      summary: Delete the current user's household (owner only)
+      operationId: deleteHousehold
+      tags:
+        - Households
+      responses:
+        '204':
+          description: Household deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /households/me:
+    get:
+      summary: Get the current user's household with members
+      operationId: getMyHousehold
+      tags:
+        - Households
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseholdWithMembers'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /households/join:
+    post:
+      summary: Join a household via invite code
+      operationId: joinHousehold
+      tags:
+        - Households
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinHouseholdRequest'
+      responses:
+        '200':
+          description: Joined household
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseholdWithMembers'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /households/invite-code/regenerate:
+    post:
+      summary: Regenerate the household invite code (owner only)
+      operationId: regenerateInviteCode
+      tags:
+        - Households
+      responses:
+        '200':
+          description: New invite code generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Household'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /households/members/{userId}:
+    delete:
+      summary: Remove a member from the household (owner only)
+      operationId: removeHouseholdMember
+      tags:
+        - Households
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Member removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /households/leave:
+    post:
+      summary: Leave the current household (non-owner only)
+      operationId: leaveHousehold
+      tags:
+        - Households
+      responses:
+        '204':
+          description: Left household
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /budgets:
+    get:
+      summary: List budget categories for the current household
+      operationId: listBudgetCategories
+      tags:
+        - Budgets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BudgetCategory'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      summary: Create a budget category
+      operationId: createBudgetCategory
+      tags:
+        - Budgets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBudgetCategoryRequest'
+      responses:
+        '201':
+          description: Budget category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetCategory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /budgets/{budgetId}:
+    patch:
+      summary: Update a budget category
+      operationId: updateBudgetCategory
+      tags:
+        - Budgets
+      parameters:
+        - name: budgetId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBudgetCategoryRequest'
+      responses:
+        '200':
+          description: Budget category updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetCategory'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      summary: Soft-delete a budget category
+      operationId: deleteBudgetCategory
+      tags:
+        - Budgets
+      parameters:
+        - name: budgetId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Budget category deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /budgets/overview:
+    get:
+      summary: Get budget overview for the current month
+      operationId: getBudgetOverview
+      tags:
+        - Budgets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetOverview'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  responses:
+    BadRequest:
+      description: The request was malformed or invalid
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Authentication is required
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Forbidden:
+      description: The authenticated user does not have permission
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: The requested resource was not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: The request conflicts with the current state
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+
+  schemas:
+    BaseEntity:
+      type: object
+      required: [id, created_at, updated_at]
+      properties:
+        id: { type: string, format: uuid }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    User:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          required: [email]
+          properties:
+            email: { type: string, format: email }
+            first_name: { type: string }
+            last_name: { type: string }
+            avatar_url: { type: string }
+
+    Household:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          required: [name, currency, invite_code, owner_id]
+          properties:
+            name: { type: string }
+            currency: { type: string, description: 'ISO 4217 currency code' }
+            invite_code: { type: string }
+            owner_id: { type: string, format: uuid }
+
+    HouseholdMember:
+      type: object
+      required: [id, user_id, email, joined_at]
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        first_name: { type: string }
+        last_name: { type: string }
+        avatar_url: { type: string }
+        joined_at: { type: string, format: date-time }
+
+    HouseholdWithMembers:
+      allOf:
+        - $ref: '#/components/schemas/Household'
+        - type: object
+          required: [members]
+          properties:
+            members:
+              type: array
+              items:
+                $ref: '#/components/schemas/HouseholdMember'
+
+    CreateHouseholdRequest:
+      type: object
+      required: [name, currency]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        currency:
+          type: string
+          description: 'ISO 4217 currency code'
+          enum: [USD, EUR, GBP, CAD, AUD, SGD, HKD, NZD, CHF, JPY, KRW]
+
+    JoinHouseholdRequest:
+      type: object
+      required: [invite_code]
+      properties:
+        invite_code:
+          type: string
+
+    BudgetCategory:
+      allOf:
+        - $ref: '#/components/schemas/BaseEntity'
+        - type: object
+          required: [household_id, name, amount, sort_order]
+          properties:
+            household_id: { type: string, format: uuid }
+            name: { type: string }
+            amount:
+              type: integer
+              format: int64
+              description: Monthly budget in smallest currency unit (e.g. cents)
+            sort_order: { type: integer }
+
+    CreateBudgetCategoryRequest:
+      type: object
+      required: [name, amount]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        amount:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Monthly budget in smallest currency unit
+
+    UpdateBudgetCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        amount:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Monthly budget in smallest currency unit
+        sort_order:
+          type: integer
+          minimum: 0
+
+    BudgetOverview:
+      type: object
+      required: [total_budget, total_spent, remaining, categories]
+      properties:
+        total_budget:
+          type: integer
+          format: int64
+          description: Sum of all budget category amounts
+        total_spent:
+          type: integer
+          format: int64
+          description: Total spent this month across all categories
+        remaining:
+          type: integer
+          format: int64
+          description: total_budget minus total_spent
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/BudgetCategoryOverview'
+
+    BudgetCategoryOverview:
+      type: object
+      required: [id, name, budget, spent, remaining]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        budget:
+          type: integer
+          format: int64
+        spent:
+          type: integer
+          format: int64
+        remaining:
+          type: integer
+          format: int64
+
+    # RFC 9457 Problem Details
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          default: 'about:blank'
+          description: A URI reference that identifies the problem type.
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type.
+        status:
+          type: integer
+          description: The HTTP status code generated by the origin server.
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence.
+        instance:
+          type: string
+          format: uri
+          description: A URI reference that identifies the specific occurrence.
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          description: Optional list of individual field errors (common for 400 errors).
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          description: The JSON path to the field that failed (e.g., "email").
+        message:
+          type: string
+          description: A description of why the field failed validation.
