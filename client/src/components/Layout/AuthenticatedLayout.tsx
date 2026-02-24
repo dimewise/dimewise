@@ -2,6 +2,8 @@ import {
 	DollarOutlined,
 	HomeOutlined,
 	SettingOutlined,
+	ShoppingCartOutlined,
+	SwapOutlined,
 } from "@ant-design/icons";
 import { UserButton } from "@clerk/clerk-react";
 import { Flex, Layout, Menu, Typography } from "antd";
@@ -17,9 +19,19 @@ const menuItems = [
 		label: "Dashboard",
 	},
 	{
+		key: RoutesEnum.expenses,
+		icon: <ShoppingCartOutlined />,
+		label: "Expenses",
+	},
+	{
 		key: RoutesEnum.budgets,
 		icon: <DollarOutlined />,
 		label: "Budgets",
+	},
+	{
+		key: RoutesEnum.settlements,
+		icon: <SwapOutlined />,
+		label: "Settlements",
 	},
 	{
 		key: RoutesEnum.householdSettings,

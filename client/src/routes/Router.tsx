@@ -4,11 +4,13 @@ import { AuthenticatedLayout } from "@/components/Layout/AuthenticatedLayout";
 import { PublicLayout } from "@/components/Layout/PublicLayout";
 import { BudgetsPage } from "@/pages/BudgetsPage";
 import { DashboardPage } from "@/pages/DashboardPage";
+import { ExpensesPage } from "@/pages/ExpensesPage";
 import { HouseholdSettingsPage } from "@/pages/HouseholdSettingsPage";
 import { HouseholdSetupPage } from "@/pages/HouseholdSetupPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { SettlementsPage } from "@/pages/SettlementsPage";
 import { RoutesEnum } from "./Routes";
 
 export const router = createBrowserRouter([
@@ -34,6 +36,14 @@ export const router = createBrowserRouter([
 					{
 						path: RoutesEnum.budgets,
 						Component: BudgetsPage,
+					},
+					{
+						path: RoutesEnum.expenses,
+						Component: ExpensesPage,
+					},
+					{
+						path: RoutesEnum.settlements,
+						Component: SettlementsPage,
 					},
 					{
 						path: RoutesEnum.householdSetup,
