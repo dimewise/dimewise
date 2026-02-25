@@ -4,7 +4,7 @@ import {
 	Calendar,
 	DollarSign,
 	Receipt,
-	Scale,
+	FileBarChart,
 	Users,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
@@ -22,7 +22,7 @@ import {
 	useGetMyHouseholdQuery,
 	useListBudgetCategoriesQuery,
 	useListExpensesQuery,
-	useListSettlementsQuery,
+	useListReportsQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
 
@@ -52,7 +52,7 @@ export const DashboardPage = () => {
 		{ limit: 5, offset: 0 },
 		{ skip: !household },
 	);
-	const { data: settlements } = useListSettlementsQuery(undefined, {
+	const { data: reports } = useListReportsQuery(undefined, {
 		skip: !household,
 	});
 	const { data: categories } = useListBudgetCategoriesQuery(undefined, {
@@ -120,9 +120,9 @@ export const DashboardPage = () => {
 				</Card>
 				<Card>
 					<CardContent className="p-3 flex flex-col items-center text-center">
-						<Scale className="h-5 w-5 text-warning mb-1.5" />
-						<p className="text-lg font-bold">{settlements?.length ?? 0}</p>
-						<p className="text-xs text-muted-foreground">Settlements</p>
+						<FileBarChart className="h-5 w-5 text-warning mb-1.5" />
+						<p className="text-lg font-bold">{reports?.length ?? 0}</p>
+						<p className="text-xs text-muted-foreground">Reports</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -185,29 +185,29 @@ export const DashboardPage = () => {
 				</CardContent>
 			</Card>
 
-			{/* Recent settlements */}
+			{/* Recent reports */}
 			<Card>
 				<CardHeader className="flex-row items-center justify-between pb-0">
 					<CardTitle className="flex items-center gap-2 text-base">
-						<Scale className="h-4 w-4 text-muted-foreground" />
-						Recent Settlements
+						<FileBarChart className="h-4 w-4 text-muted-foreground" />
+						Recent Reports
 					</CardTitle>
 					<Button
 						variant="ghost"
 						size="sm"
 						className="text-brand gap-1"
-						onClick={() => navigate(RoutesEnum.settlements)}
+						onClick={() => navigate(RoutesEnum.reports)}
 					>
 						View All
 						<ArrowRight className="h-3.5 w-3.5" />
 					</Button>
 				</CardHeader>
 				<CardContent>
-					{settlements && settlements.length > 0 ? (
+					{reports && reports.length > 0 ? (
 						<div className="divide-y divide-border">
-							{settlements.slice(0, 3).map((s) => (
+							{reports.slice(0, 3).map((r) => (
 								<div
-									key={s.id}
+									key={r.id}
 									className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
 								>
 									<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
@@ -215,11 +215,11 @@ export const DashboardPage = () => {
 									</div>
 									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium">
-											{MONTH_NAMES[s.month]} {s.year}
+											{MONTH_NAMES[r.month]} {r.year}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											Generated{" "}
-											{format(parseISO(s.generated_at), "MMM d, yyyy")}
+											{r.total_expenses} expense{r.total_expenses !== 1 && "s"}{" "}
+											&middot; {formatCurrency(r.total_amount, currency)}
 										</p>
 									</div>
 								</div>
@@ -227,8 +227,8 @@ export const DashboardPage = () => {
 						</div>
 					) : (
 						<EmptyState
-							icon={<Scale className="h-6 w-6" />}
-							title="No settlements yet"
+							icon={<FileBarChart className="h-6 w-6" />}
+							title="No reports yet"
 							description="Generate one for a completed month."
 							className="py-6"
 						/>

@@ -13,13 +13,16 @@ import (
 	"github.com/google/uuid"
 )
 
-type SettlementTransfers struct {
+type ReportLineItems struct {
 	ID           uuid.UUID `sql:"primary_key"`
-	SettlementID uuid.UUID
-	FromUserID   uuid.UUID
-	ToUserID     uuid.UUID
+	ReportID     uuid.UUID
+	ExpenseID    *uuid.UUID
+	ExpenseTitle string
+	CategoryName *string
+	PaidByUserID uuid.UUID
+	PaidByName   string
 	Amount       int64
-	PaidAt       *time.Time
+	IncurredAt   time.Time
+	Notes        *string
 	CreatedAt    time.Time
-	UpdatedAt    time.Time
 }

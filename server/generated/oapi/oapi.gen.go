@@ -163,8 +163,8 @@ type ExpenseWithSplits struct {
 	UpdatedAt        time.Time           `json:"updated_at"`
 }
 
-// GenerateSettlementRequest defines model for GenerateSettlementRequest.
-type GenerateSettlementRequest struct {
+// GenerateReportRequest defines model for GenerateReportRequest.
+type GenerateReportRequest struct {
 	Month int `json:"month"`
 	Year  int `json:"year"`
 }
@@ -233,40 +233,104 @@ type ProblemDetails struct {
 	Type *string `json:"type,omitempty"`
 }
 
-// Settlement defines model for Settlement.
-type Settlement struct {
+// Report defines model for Report.
+type Report struct {
 	CreatedAt   time.Time          `json:"created_at"`
 	GeneratedAt time.Time          `json:"generated_at"`
 	HouseholdId openapi_types.UUID `json:"household_id"`
 	Id          openapi_types.UUID `json:"id"`
 	Month       int                `json:"month"`
-	UpdatedAt   time.Time          `json:"updated_at"`
-	Year        int                `json:"year"`
+
+	// TotalAmount Total expenditure in smallest currency unit
+	TotalAmount int64 `json:"total_amount"`
+
+	// TotalExpenses Number of expenses in the month
+	TotalExpenses int       `json:"total_expenses"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	Year          int       `json:"year"`
 }
 
-// SettlementTransfer defines model for SettlementTransfer.
-type SettlementTransfer struct {
-	// Amount Transfer amount in smallest currency unit
-	Amount       int64              `json:"amount"`
-	CreatedAt    time.Time          `json:"created_at"`
-	FromUserId   openapi_types.UUID `json:"from_user_id"`
+// ReportCategoryBreakdown defines model for ReportCategoryBreakdown.
+type ReportCategoryBreakdown struct {
+	// BudgetAmount Monthly budget for this category
+	BudgetAmount int64              `json:"budget_amount"`
+	CategoryName string             `json:"category_name"`
 	Id           openapi_types.UUID `json:"id"`
-	PaidAt       *time.Time         `json:"paid_at,omitempty"`
-	SettlementId openapi_types.UUID `json:"settlement_id"`
-	ToUserId     openapi_types.UUID `json:"to_user_id"`
-	UpdatedAt    time.Time          `json:"updated_at"`
+
+	// TotalSpent Total spent in this category
+	TotalSpent int64 `json:"total_spent"`
 }
 
-// SettlementWithTransfers defines model for SettlementWithTransfers.
-type SettlementWithTransfers struct {
-	CreatedAt   time.Time            `json:"created_at"`
-	GeneratedAt time.Time            `json:"generated_at"`
-	HouseholdId openapi_types.UUID   `json:"household_id"`
-	Id          openapi_types.UUID   `json:"id"`
-	Month       int                  `json:"month"`
-	Transfers   []SettlementTransfer `json:"transfers"`
-	UpdatedAt   time.Time            `json:"updated_at"`
-	Year        int                  `json:"year"`
+// ReportLineItem defines model for ReportLineItem.
+type ReportLineItem struct {
+	Amount       int64                 `json:"amount"`
+	CategoryName *string               `json:"category_name,omitempty"`
+	ExpenseId    *openapi_types.UUID   `json:"expense_id,omitempty"`
+	ExpenseTitle string                `json:"expense_title"`
+	Id           openapi_types.UUID    `json:"id"`
+	IncurredAt   time.Time             `json:"incurred_at"`
+	Notes        *string               `json:"notes,omitempty"`
+	PaidByName   string                `json:"paid_by_name"`
+	PaidByUserId openapi_types.UUID    `json:"paid_by_user_id"`
+	Splits       []ReportLineItemSplit `json:"splits"`
+}
+
+// ReportLineItemSplit defines model for ReportLineItemSplit.
+type ReportLineItemSplit struct {
+	Amount     int64              `json:"amount"`
+	Id         openapi_types.UUID `json:"id"`
+	MemberName string             `json:"member_name"`
+	UserId     openapi_types.UUID `json:"user_id"`
+}
+
+// ReportMemberSummary defines model for ReportMemberSummary.
+type ReportMemberSummary struct {
+	Id         openapi_types.UUID `json:"id"`
+	MemberName string             `json:"member_name"`
+
+	// NetBalance total_paid minus total_owed (positive means owed money)
+	NetBalance int64 `json:"net_balance"`
+
+	// TotalOwed Total amount this member owes (from splits)
+	TotalOwed int64 `json:"total_owed"`
+
+	// TotalPaid Total amount this member paid for expenses
+	TotalPaid int64              `json:"total_paid"`
+	UserId    openapi_types.UUID `json:"user_id"`
+}
+
+// ReportTransfer defines model for ReportTransfer.
+type ReportTransfer struct {
+	// Amount Transfer amount in smallest currency unit
+	Amount     int64               `json:"amount"`
+	FromName   string              `json:"from_name"`
+	FromUserId openapi_types.UUID  `json:"from_user_id"`
+	Id         openapi_types.UUID  `json:"id"`
+	PaidAt     *time.Time          `json:"paid_at,omitempty"`
+	ReportId   *openapi_types.UUID `json:"report_id,omitempty"`
+	ToName     string              `json:"to_name"`
+	ToUserId   openapi_types.UUID  `json:"to_user_id"`
+}
+
+// ReportWithDetails defines model for ReportWithDetails.
+type ReportWithDetails struct {
+	CategoryBreakdowns []ReportCategoryBreakdown `json:"category_breakdowns"`
+	CreatedAt          time.Time                 `json:"created_at"`
+	GeneratedAt        time.Time                 `json:"generated_at"`
+	HouseholdId        openapi_types.UUID        `json:"household_id"`
+	Id                 openapi_types.UUID        `json:"id"`
+	LineItems          []ReportLineItem          `json:"line_items"`
+	MemberSummaries    []ReportMemberSummary     `json:"member_summaries"`
+	Month              int                       `json:"month"`
+
+	// TotalAmount Total expenditure in smallest currency unit
+	TotalAmount int64 `json:"total_amount"`
+
+	// TotalExpenses Number of expenses in the month
+	TotalExpenses int              `json:"total_expenses"`
+	Transfers     []ReportTransfer `json:"transfers"`
+	UpdatedAt     time.Time        `json:"updated_at"`
+	Year          int              `json:"year"`
 }
 
 // UpdateBudgetCategoryRequest defines model for UpdateBudgetCategoryRequest.
@@ -351,8 +415,8 @@ type CreateHouseholdJSONRequestBody = CreateHouseholdRequest
 // JoinHouseholdJSONRequestBody defines body for JoinHousehold for application/json ContentType.
 type JoinHouseholdJSONRequestBody = JoinHouseholdRequest
 
-// GenerateSettlementJSONRequestBody defines body for GenerateSettlement for application/json ContentType.
-type GenerateSettlementJSONRequestBody = GenerateSettlementRequest
+// GenerateReportJSONRequestBody defines body for GenerateReport for application/json ContentType.
+type GenerateReportJSONRequestBody = GenerateReportRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -490,19 +554,19 @@ type ClientInterface interface {
 	// RemoveHouseholdMember request
 	RemoveHouseholdMember(ctx context.Context, userId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListSettlements request
-	ListSettlements(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ListReports request
+	ListReports(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GenerateSettlementWithBody request with any body
-	GenerateSettlementWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GenerateReportWithBody request with any body
+	GenerateReportWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	GenerateSettlement(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GenerateReport(ctx context.Context, body GenerateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// MarkTransferPaid request
-	MarkTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// MarkReportTransferPaid request
+	MarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetSettlement request
-	GetSettlement(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetReport request
+	GetReport(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetUsersMe request
 	GetUsersMe(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -784,8 +848,8 @@ func (c *Client) RemoveHouseholdMember(ctx context.Context, userId openapi_types
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListSettlements(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListSettlementsRequest(c.Server)
+func (c *Client) ListReports(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListReportsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -796,8 +860,8 @@ func (c *Client) ListSettlements(ctx context.Context, reqEditors ...RequestEdito
 	return c.Client.Do(req)
 }
 
-func (c *Client) GenerateSettlementWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGenerateSettlementRequestWithBody(c.Server, contentType, body)
+func (c *Client) GenerateReportWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGenerateReportRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -808,8 +872,8 @@ func (c *Client) GenerateSettlementWithBody(ctx context.Context, contentType str
 	return c.Client.Do(req)
 }
 
-func (c *Client) GenerateSettlement(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGenerateSettlementRequest(c.Server, body)
+func (c *Client) GenerateReport(ctx context.Context, body GenerateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGenerateReportRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -820,8 +884,8 @@ func (c *Client) GenerateSettlement(ctx context.Context, body GenerateSettlement
 	return c.Client.Do(req)
 }
 
-func (c *Client) MarkTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewMarkTransferPaidRequest(c.Server, transferId)
+func (c *Client) MarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewMarkReportTransferPaidRequest(c.Server, transferId)
 	if err != nil {
 		return nil, err
 	}
@@ -832,8 +896,8 @@ func (c *Client) MarkTransferPaid(ctx context.Context, transferId openapi_types.
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSettlement(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetSettlementRequest(c.Server, settlementId)
+func (c *Client) GetReport(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetReportRequest(c.Server, reportId)
 	if err != nil {
 		return nil, err
 	}
@@ -1537,8 +1601,8 @@ func NewRemoveHouseholdMemberRequest(server string, userId openapi_types.UUID) (
 	return req, nil
 }
 
-// NewListSettlementsRequest generates requests for ListSettlements
-func NewListSettlementsRequest(server string) (*http.Request, error) {
+// NewListReportsRequest generates requests for ListReports
+func NewListReportsRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1546,7 +1610,7 @@ func NewListSettlementsRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/settlements")
+	operationPath := fmt.Sprintf("/reports")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1564,19 +1628,19 @@ func NewListSettlementsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewGenerateSettlementRequest calls the generic GenerateSettlement builder with application/json body
-func NewGenerateSettlementRequest(server string, body GenerateSettlementJSONRequestBody) (*http.Request, error) {
+// NewGenerateReportRequest calls the generic GenerateReport builder with application/json body
+func NewGenerateReportRequest(server string, body GenerateReportJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewGenerateSettlementRequestWithBody(server, "application/json", bodyReader)
+	return NewGenerateReportRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewGenerateSettlementRequestWithBody generates requests for GenerateSettlement with any type of body
-func NewGenerateSettlementRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewGenerateReportRequestWithBody generates requests for GenerateReport with any type of body
+func NewGenerateReportRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1584,7 +1648,7 @@ func NewGenerateSettlementRequestWithBody(server string, contentType string, bod
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/settlements/generate")
+	operationPath := fmt.Sprintf("/reports/generate")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1604,8 +1668,8 @@ func NewGenerateSettlementRequestWithBody(server string, contentType string, bod
 	return req, nil
 }
 
-// NewMarkTransferPaidRequest generates requests for MarkTransferPaid
-func NewMarkTransferPaidRequest(server string, transferId openapi_types.UUID) (*http.Request, error) {
+// NewMarkReportTransferPaidRequest generates requests for MarkReportTransferPaid
+func NewMarkReportTransferPaidRequest(server string, transferId openapi_types.UUID) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1620,7 +1684,7 @@ func NewMarkTransferPaidRequest(server string, transferId openapi_types.UUID) (*
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/settlements/transfers/%s/pay", pathParam0)
+	operationPath := fmt.Sprintf("/reports/transfers/%s/pay", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1638,13 +1702,13 @@ func NewMarkTransferPaidRequest(server string, transferId openapi_types.UUID) (*
 	return req, nil
 }
 
-// NewGetSettlementRequest generates requests for GetSettlement
-func NewGetSettlementRequest(server string, settlementId openapi_types.UUID) (*http.Request, error) {
+// NewGetReportRequest generates requests for GetReport
+func NewGetReportRequest(server string, reportId openapi_types.UUID) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "settlementId", runtime.ParamLocationPath, settlementId)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "reportId", runtime.ParamLocationPath, reportId)
 	if err != nil {
 		return nil, err
 	}
@@ -1654,7 +1718,7 @@ func NewGetSettlementRequest(server string, settlementId openapi_types.UUID) (*h
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/settlements/%s", pathParam0)
+	operationPath := fmt.Sprintf("/reports/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -1805,19 +1869,19 @@ type ClientWithResponsesInterface interface {
 	// RemoveHouseholdMemberWithResponse request
 	RemoveHouseholdMemberWithResponse(ctx context.Context, userId openapi_types.UUID, reqEditors ...RequestEditorFn) (*RemoveHouseholdMemberResponse, error)
 
-	// ListSettlementsWithResponse request
-	ListSettlementsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListSettlementsResponse, error)
+	// ListReportsWithResponse request
+	ListReportsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListReportsResponse, error)
 
-	// GenerateSettlementWithBodyWithResponse request with any body
-	GenerateSettlementWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error)
+	// GenerateReportWithBodyWithResponse request with any body
+	GenerateReportWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GenerateReportResponse, error)
 
-	GenerateSettlementWithResponse(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error)
+	GenerateReportWithResponse(ctx context.Context, body GenerateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*GenerateReportResponse, error)
 
-	// MarkTransferPaidWithResponse request
-	MarkTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*MarkTransferPaidResponse, error)
+	// MarkReportTransferPaidWithResponse request
+	MarkReportTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*MarkReportTransferPaidResponse, error)
 
-	// GetSettlementWithResponse request
-	GetSettlementWithResponse(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetSettlementResponse, error)
+	// GetReportWithResponse request
+	GetReportWithResponse(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetReportResponse, error)
 
 	// GetUsersMeWithResponse request
 	GetUsersMeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetUsersMeResponse, error)
@@ -2242,16 +2306,16 @@ func (r RemoveHouseholdMemberResponse) StatusCode() int {
 	return 0
 }
 
-type ListSettlementsResponse struct {
+type ListReportsResponse struct {
 	Body                      []byte
 	HTTPResponse              *http.Response
-	JSON200                   *[]Settlement
+	JSON200                   *[]Report
 	ApplicationproblemJSON401 *Unauthorized
 	ApplicationproblemJSON404 *NotFound
 }
 
 // Status returns HTTPResponse.Status
-func (r ListSettlementsResponse) Status() string {
+func (r ListReportsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2259,25 +2323,24 @@ func (r ListSettlementsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListSettlementsResponse) StatusCode() int {
+func (r ListReportsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GenerateSettlementResponse struct {
+type GenerateReportResponse struct {
 	Body                      []byte
 	HTTPResponse              *http.Response
-	JSON201                   *SettlementWithTransfers
+	JSON201                   *ReportWithDetails
 	ApplicationproblemJSON400 *BadRequest
 	ApplicationproblemJSON401 *Unauthorized
 	ApplicationproblemJSON404 *NotFound
-	ApplicationproblemJSON409 *Conflict
 }
 
 // Status returns HTTPResponse.Status
-func (r GenerateSettlementResponse) Status() string {
+func (r GenerateReportResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2285,24 +2348,24 @@ func (r GenerateSettlementResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GenerateSettlementResponse) StatusCode() int {
+func (r GenerateReportResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type MarkTransferPaidResponse struct {
+type MarkReportTransferPaidResponse struct {
 	Body                      []byte
 	HTTPResponse              *http.Response
-	JSON200                   *SettlementTransfer
+	JSON200                   *ReportTransfer
 	ApplicationproblemJSON401 *Unauthorized
 	ApplicationproblemJSON403 *Forbidden
 	ApplicationproblemJSON404 *NotFound
 }
 
 // Status returns HTTPResponse.Status
-func (r MarkTransferPaidResponse) Status() string {
+func (r MarkReportTransferPaidResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2310,23 +2373,23 @@ func (r MarkTransferPaidResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r MarkTransferPaidResponse) StatusCode() int {
+func (r MarkReportTransferPaidResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetSettlementResponse struct {
+type GetReportResponse struct {
 	Body                      []byte
 	HTTPResponse              *http.Response
-	JSON200                   *SettlementWithTransfers
+	JSON200                   *ReportWithDetails
 	ApplicationproblemJSON401 *Unauthorized
 	ApplicationproblemJSON404 *NotFound
 }
 
 // Status returns HTTPResponse.Status
-func (r GetSettlementResponse) Status() string {
+func (r GetReportResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2334,7 +2397,7 @@ func (r GetSettlementResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetSettlementResponse) StatusCode() int {
+func (r GetReportResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -2566,48 +2629,48 @@ func (c *ClientWithResponses) RemoveHouseholdMemberWithResponse(ctx context.Cont
 	return ParseRemoveHouseholdMemberResponse(rsp)
 }
 
-// ListSettlementsWithResponse request returning *ListSettlementsResponse
-func (c *ClientWithResponses) ListSettlementsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListSettlementsResponse, error) {
-	rsp, err := c.ListSettlements(ctx, reqEditors...)
+// ListReportsWithResponse request returning *ListReportsResponse
+func (c *ClientWithResponses) ListReportsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListReportsResponse, error) {
+	rsp, err := c.ListReports(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListSettlementsResponse(rsp)
+	return ParseListReportsResponse(rsp)
 }
 
-// GenerateSettlementWithBodyWithResponse request with arbitrary body returning *GenerateSettlementResponse
-func (c *ClientWithResponses) GenerateSettlementWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error) {
-	rsp, err := c.GenerateSettlementWithBody(ctx, contentType, body, reqEditors...)
+// GenerateReportWithBodyWithResponse request with arbitrary body returning *GenerateReportResponse
+func (c *ClientWithResponses) GenerateReportWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GenerateReportResponse, error) {
+	rsp, err := c.GenerateReportWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGenerateSettlementResponse(rsp)
+	return ParseGenerateReportResponse(rsp)
 }
 
-func (c *ClientWithResponses) GenerateSettlementWithResponse(ctx context.Context, body GenerateSettlementJSONRequestBody, reqEditors ...RequestEditorFn) (*GenerateSettlementResponse, error) {
-	rsp, err := c.GenerateSettlement(ctx, body, reqEditors...)
+func (c *ClientWithResponses) GenerateReportWithResponse(ctx context.Context, body GenerateReportJSONRequestBody, reqEditors ...RequestEditorFn) (*GenerateReportResponse, error) {
+	rsp, err := c.GenerateReport(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGenerateSettlementResponse(rsp)
+	return ParseGenerateReportResponse(rsp)
 }
 
-// MarkTransferPaidWithResponse request returning *MarkTransferPaidResponse
-func (c *ClientWithResponses) MarkTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*MarkTransferPaidResponse, error) {
-	rsp, err := c.MarkTransferPaid(ctx, transferId, reqEditors...)
+// MarkReportTransferPaidWithResponse request returning *MarkReportTransferPaidResponse
+func (c *ClientWithResponses) MarkReportTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*MarkReportTransferPaidResponse, error) {
+	rsp, err := c.MarkReportTransferPaid(ctx, transferId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseMarkTransferPaidResponse(rsp)
+	return ParseMarkReportTransferPaidResponse(rsp)
 }
 
-// GetSettlementWithResponse request returning *GetSettlementResponse
-func (c *ClientWithResponses) GetSettlementWithResponse(ctx context.Context, settlementId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetSettlementResponse, error) {
-	rsp, err := c.GetSettlement(ctx, settlementId, reqEditors...)
+// GetReportWithResponse request returning *GetReportResponse
+func (c *ClientWithResponses) GetReportWithResponse(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetReportResponse, error) {
+	rsp, err := c.GetReport(ctx, reportId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetSettlementResponse(rsp)
+	return ParseGetReportResponse(rsp)
 }
 
 // GetUsersMeWithResponse request returning *GetUsersMeResponse
@@ -3376,22 +3439,22 @@ func ParseRemoveHouseholdMemberResponse(rsp *http.Response) (*RemoveHouseholdMem
 	return response, nil
 }
 
-// ParseListSettlementsResponse parses an HTTP response from a ListSettlementsWithResponse call
-func ParseListSettlementsResponse(rsp *http.Response) (*ListSettlementsResponse, error) {
+// ParseListReportsResponse parses an HTTP response from a ListReportsWithResponse call
+func ParseListReportsResponse(rsp *http.Response) (*ListReportsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListSettlementsResponse{
+	response := &ListReportsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []Settlement
+		var dest []Report
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3416,22 +3479,22 @@ func ParseListSettlementsResponse(rsp *http.Response) (*ListSettlementsResponse,
 	return response, nil
 }
 
-// ParseGenerateSettlementResponse parses an HTTP response from a GenerateSettlementWithResponse call
-func ParseGenerateSettlementResponse(rsp *http.Response) (*GenerateSettlementResponse, error) {
+// ParseGenerateReportResponse parses an HTTP response from a GenerateReportWithResponse call
+func ParseGenerateReportResponse(rsp *http.Response) (*GenerateReportResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GenerateSettlementResponse{
+	response := &GenerateReportResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest SettlementWithTransfers
+		var dest ReportWithDetails
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3458,34 +3521,27 @@ func ParseGenerateSettlementResponse(rsp *http.Response) (*GenerateSettlementRes
 		}
 		response.ApplicationproblemJSON404 = &dest
 
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 409:
-		var dest Conflict
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.ApplicationproblemJSON409 = &dest
-
 	}
 
 	return response, nil
 }
 
-// ParseMarkTransferPaidResponse parses an HTTP response from a MarkTransferPaidWithResponse call
-func ParseMarkTransferPaidResponse(rsp *http.Response) (*MarkTransferPaidResponse, error) {
+// ParseMarkReportTransferPaidResponse parses an HTTP response from a MarkReportTransferPaidWithResponse call
+func ParseMarkReportTransferPaidResponse(rsp *http.Response) (*MarkReportTransferPaidResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &MarkTransferPaidResponse{
+	response := &MarkReportTransferPaidResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest SettlementTransfer
+		var dest ReportTransfer
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3517,22 +3573,22 @@ func ParseMarkTransferPaidResponse(rsp *http.Response) (*MarkTransferPaidRespons
 	return response, nil
 }
 
-// ParseGetSettlementResponse parses an HTTP response from a GetSettlementWithResponse call
-func ParseGetSettlementResponse(rsp *http.Response) (*GetSettlementResponse, error) {
+// ParseGetReportResponse parses an HTTP response from a GetReportWithResponse call
+func ParseGetReportResponse(rsp *http.Response) (*GetReportResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetSettlementResponse{
+	response := &GetReportResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest SettlementWithTransfers
+		var dest ReportWithDetails
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3650,18 +3706,18 @@ type ServerInterface interface {
 	// Remove a member from the household (owner only)
 	// (DELETE /households/members/{userId})
 	RemoveHouseholdMember(w http.ResponseWriter, r *http.Request, userId openapi_types.UUID)
-	// List settlements for the current household
-	// (GET /settlements)
-	ListSettlements(w http.ResponseWriter, r *http.Request)
-	// Manually generate a settlement for a given month
-	// (POST /settlements/generate)
-	GenerateSettlement(w http.ResponseWriter, r *http.Request)
-	// Mark a settlement transfer as paid
-	// (PATCH /settlements/transfers/{transferId}/pay)
-	MarkTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID)
-	// Get settlement detail with transfers
-	// (GET /settlements/{settlementId})
-	GetSettlement(w http.ResponseWriter, r *http.Request, settlementId openapi_types.UUID)
+	// List monthly reports for the current household
+	// (GET /reports)
+	ListReports(w http.ResponseWriter, r *http.Request)
+	// Generate (or regenerate) a monthly report
+	// (POST /reports/generate)
+	GenerateReport(w http.ResponseWriter, r *http.Request)
+	// Mark a report transfer as paid
+	// (PATCH /reports/transfers/{transferId}/pay)
+	MarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID)
+	// Get full report with all details
+	// (GET /reports/{reportId})
+	GetReport(w http.ResponseWriter, r *http.Request, reportId openapi_types.UUID)
 	// Get current user profile
 	// (GET /users/me)
 	GetUsersMe(w http.ResponseWriter, r *http.Request)
@@ -3773,27 +3829,27 @@ func (_ Unimplemented) RemoveHouseholdMember(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// List settlements for the current household
-// (GET /settlements)
-func (_ Unimplemented) ListSettlements(w http.ResponseWriter, r *http.Request) {
+// List monthly reports for the current household
+// (GET /reports)
+func (_ Unimplemented) ListReports(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Manually generate a settlement for a given month
-// (POST /settlements/generate)
-func (_ Unimplemented) GenerateSettlement(w http.ResponseWriter, r *http.Request) {
+// Generate (or regenerate) a monthly report
+// (POST /reports/generate)
+func (_ Unimplemented) GenerateReport(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Mark a settlement transfer as paid
-// (PATCH /settlements/transfers/{transferId}/pay)
-func (_ Unimplemented) MarkTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
+// Mark a report transfer as paid
+// (PATCH /reports/transfers/{transferId}/pay)
+func (_ Unimplemented) MarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-// Get settlement detail with transfers
-// (GET /settlements/{settlementId})
-func (_ Unimplemented) GetSettlement(w http.ResponseWriter, r *http.Request, settlementId openapi_types.UUID) {
+// Get full report with all details
+// (GET /reports/{reportId})
+func (_ Unimplemented) GetReport(w http.ResponseWriter, r *http.Request, reportId openapi_types.UUID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4169,11 +4225,11 @@ func (siw *ServerInterfaceWrapper) RemoveHouseholdMember(w http.ResponseWriter, 
 	handler.ServeHTTP(w, r)
 }
 
-// ListSettlements operation middleware
-func (siw *ServerInterfaceWrapper) ListSettlements(w http.ResponseWriter, r *http.Request) {
+// ListReports operation middleware
+func (siw *ServerInterfaceWrapper) ListReports(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.ListSettlements(w, r)
+		siw.Handler.ListReports(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4183,11 +4239,11 @@ func (siw *ServerInterfaceWrapper) ListSettlements(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
-// GenerateSettlement operation middleware
-func (siw *ServerInterfaceWrapper) GenerateSettlement(w http.ResponseWriter, r *http.Request) {
+// GenerateReport operation middleware
+func (siw *ServerInterfaceWrapper) GenerateReport(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GenerateSettlement(w, r)
+		siw.Handler.GenerateReport(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4197,8 +4253,8 @@ func (siw *ServerInterfaceWrapper) GenerateSettlement(w http.ResponseWriter, r *
 	handler.ServeHTTP(w, r)
 }
 
-// MarkTransferPaid operation middleware
-func (siw *ServerInterfaceWrapper) MarkTransferPaid(w http.ResponseWriter, r *http.Request) {
+// MarkReportTransferPaid operation middleware
+func (siw *ServerInterfaceWrapper) MarkReportTransferPaid(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
@@ -4212,7 +4268,7 @@ func (siw *ServerInterfaceWrapper) MarkTransferPaid(w http.ResponseWriter, r *ht
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.MarkTransferPaid(w, r, transferId)
+		siw.Handler.MarkReportTransferPaid(w, r, transferId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4222,22 +4278,22 @@ func (siw *ServerInterfaceWrapper) MarkTransferPaid(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
-// GetSettlement operation middleware
-func (siw *ServerInterfaceWrapper) GetSettlement(w http.ResponseWriter, r *http.Request) {
+// GetReport operation middleware
+func (siw *ServerInterfaceWrapper) GetReport(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
-	// ------------- Path parameter "settlementId" -------------
-	var settlementId openapi_types.UUID
+	// ------------- Path parameter "reportId" -------------
+	var reportId openapi_types.UUID
 
-	err = runtime.BindStyledParameterWithOptions("simple", "settlementId", chi.URLParam(r, "settlementId"), &settlementId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "reportId", chi.URLParam(r, "reportId"), &reportId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "settlementId", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "reportId", Err: err})
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetSettlement(w, r, settlementId)
+		siw.Handler.GetReport(w, r, reportId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4426,16 +4482,16 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Delete(options.BaseURL+"/households/members/{userId}", wrapper.RemoveHouseholdMember)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/settlements", wrapper.ListSettlements)
+		r.Get(options.BaseURL+"/reports", wrapper.ListReports)
 	})
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/settlements/generate", wrapper.GenerateSettlement)
+		r.Post(options.BaseURL+"/reports/generate", wrapper.GenerateReport)
 	})
 	r.Group(func(r chi.Router) {
-		r.Patch(options.BaseURL+"/settlements/transfers/{transferId}/pay", wrapper.MarkTransferPaid)
+		r.Patch(options.BaseURL+"/reports/transfers/{transferId}/pay", wrapper.MarkReportTransferPaid)
 	})
 	r.Group(func(r chi.Router) {
-		r.Get(options.BaseURL+"/settlements/{settlementId}", wrapper.GetSettlement)
+		r.Get(options.BaseURL+"/reports/{reportId}", wrapper.GetReport)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
@@ -5284,188 +5340,177 @@ func (response RemoveHouseholdMember404ApplicationProblemPlusJSONResponse) Visit
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListSettlementsRequestObject struct {
+type ListReportsRequestObject struct {
 }
 
-type ListSettlementsResponseObject interface {
-	VisitListSettlementsResponse(w http.ResponseWriter) error
+type ListReportsResponseObject interface {
+	VisitListReportsResponse(w http.ResponseWriter) error
 }
 
-type ListSettlements200JSONResponse []Settlement
+type ListReports200JSONResponse []Report
 
-func (response ListSettlements200JSONResponse) VisitListSettlementsResponse(w http.ResponseWriter) error {
+func (response ListReports200JSONResponse) VisitListReportsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListSettlements401ApplicationProblemPlusJSONResponse struct {
+type ListReports401ApplicationProblemPlusJSONResponse struct {
 	UnauthorizedApplicationProblemPlusJSONResponse
 }
 
-func (response ListSettlements401ApplicationProblemPlusJSONResponse) VisitListSettlementsResponse(w http.ResponseWriter) error {
+func (response ListReports401ApplicationProblemPlusJSONResponse) VisitListReportsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListSettlements404ApplicationProblemPlusJSONResponse struct {
+type ListReports404ApplicationProblemPlusJSONResponse struct {
 	NotFoundApplicationProblemPlusJSONResponse
 }
 
-func (response ListSettlements404ApplicationProblemPlusJSONResponse) VisitListSettlementsResponse(w http.ResponseWriter) error {
+func (response ListReports404ApplicationProblemPlusJSONResponse) VisitListReportsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GenerateSettlementRequestObject struct {
-	Body *GenerateSettlementJSONRequestBody
+type GenerateReportRequestObject struct {
+	Body *GenerateReportJSONRequestBody
 }
 
-type GenerateSettlementResponseObject interface {
-	VisitGenerateSettlementResponse(w http.ResponseWriter) error
+type GenerateReportResponseObject interface {
+	VisitGenerateReportResponse(w http.ResponseWriter) error
 }
 
-type GenerateSettlement201JSONResponse SettlementWithTransfers
+type GenerateReport201JSONResponse ReportWithDetails
 
-func (response GenerateSettlement201JSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+func (response GenerateReport201JSONResponse) VisitGenerateReportResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GenerateSettlement400ApplicationProblemPlusJSONResponse struct {
+type GenerateReport400ApplicationProblemPlusJSONResponse struct {
 	BadRequestApplicationProblemPlusJSONResponse
 }
 
-func (response GenerateSettlement400ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+func (response GenerateReport400ApplicationProblemPlusJSONResponse) VisitGenerateReportResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GenerateSettlement401ApplicationProblemPlusJSONResponse struct {
+type GenerateReport401ApplicationProblemPlusJSONResponse struct {
 	UnauthorizedApplicationProblemPlusJSONResponse
 }
 
-func (response GenerateSettlement401ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+func (response GenerateReport401ApplicationProblemPlusJSONResponse) VisitGenerateReportResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GenerateSettlement404ApplicationProblemPlusJSONResponse struct {
+type GenerateReport404ApplicationProblemPlusJSONResponse struct {
 	NotFoundApplicationProblemPlusJSONResponse
 }
 
-func (response GenerateSettlement404ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
+func (response GenerateReport404ApplicationProblemPlusJSONResponse) VisitGenerateReportResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GenerateSettlement409ApplicationProblemPlusJSONResponse struct {
-	ConflictApplicationProblemPlusJSONResponse
-}
-
-func (response GenerateSettlement409ApplicationProblemPlusJSONResponse) VisitGenerateSettlementResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/problem+json")
-	w.WriteHeader(409)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type MarkTransferPaidRequestObject struct {
+type MarkReportTransferPaidRequestObject struct {
 	TransferId openapi_types.UUID `json:"transferId"`
 }
 
-type MarkTransferPaidResponseObject interface {
-	VisitMarkTransferPaidResponse(w http.ResponseWriter) error
+type MarkReportTransferPaidResponseObject interface {
+	VisitMarkReportTransferPaidResponse(w http.ResponseWriter) error
 }
 
-type MarkTransferPaid200JSONResponse SettlementTransfer
+type MarkReportTransferPaid200JSONResponse ReportTransfer
 
-func (response MarkTransferPaid200JSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+func (response MarkReportTransferPaid200JSONResponse) VisitMarkReportTransferPaidResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MarkTransferPaid401ApplicationProblemPlusJSONResponse struct {
+type MarkReportTransferPaid401ApplicationProblemPlusJSONResponse struct {
 	UnauthorizedApplicationProblemPlusJSONResponse
 }
 
-func (response MarkTransferPaid401ApplicationProblemPlusJSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+func (response MarkReportTransferPaid401ApplicationProblemPlusJSONResponse) VisitMarkReportTransferPaidResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MarkTransferPaid403ApplicationProblemPlusJSONResponse struct {
+type MarkReportTransferPaid403ApplicationProblemPlusJSONResponse struct {
 	ForbiddenApplicationProblemPlusJSONResponse
 }
 
-func (response MarkTransferPaid403ApplicationProblemPlusJSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+func (response MarkReportTransferPaid403ApplicationProblemPlusJSONResponse) VisitMarkReportTransferPaidResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type MarkTransferPaid404ApplicationProblemPlusJSONResponse struct {
+type MarkReportTransferPaid404ApplicationProblemPlusJSONResponse struct {
 	NotFoundApplicationProblemPlusJSONResponse
 }
 
-func (response MarkTransferPaid404ApplicationProblemPlusJSONResponse) VisitMarkTransferPaidResponse(w http.ResponseWriter) error {
+func (response MarkReportTransferPaid404ApplicationProblemPlusJSONResponse) VisitMarkReportTransferPaidResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetSettlementRequestObject struct {
-	SettlementId openapi_types.UUID `json:"settlementId"`
+type GetReportRequestObject struct {
+	ReportId openapi_types.UUID `json:"reportId"`
 }
 
-type GetSettlementResponseObject interface {
-	VisitGetSettlementResponse(w http.ResponseWriter) error
+type GetReportResponseObject interface {
+	VisitGetReportResponse(w http.ResponseWriter) error
 }
 
-type GetSettlement200JSONResponse SettlementWithTransfers
+type GetReport200JSONResponse ReportWithDetails
 
-func (response GetSettlement200JSONResponse) VisitGetSettlementResponse(w http.ResponseWriter) error {
+func (response GetReport200JSONResponse) VisitGetReportResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetSettlement401ApplicationProblemPlusJSONResponse struct {
+type GetReport401ApplicationProblemPlusJSONResponse struct {
 	UnauthorizedApplicationProblemPlusJSONResponse
 }
 
-func (response GetSettlement401ApplicationProblemPlusJSONResponse) VisitGetSettlementResponse(w http.ResponseWriter) error {
+func (response GetReport401ApplicationProblemPlusJSONResponse) VisitGetReportResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetSettlement404ApplicationProblemPlusJSONResponse struct {
+type GetReport404ApplicationProblemPlusJSONResponse struct {
 	NotFoundApplicationProblemPlusJSONResponse
 }
 
-func (response GetSettlement404ApplicationProblemPlusJSONResponse) VisitGetSettlementResponse(w http.ResponseWriter) error {
+func (response GetReport404ApplicationProblemPlusJSONResponse) VisitGetReportResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(404)
 
@@ -5563,18 +5608,18 @@ type StrictServerInterface interface {
 	// Remove a member from the household (owner only)
 	// (DELETE /households/members/{userId})
 	RemoveHouseholdMember(ctx context.Context, request RemoveHouseholdMemberRequestObject) (RemoveHouseholdMemberResponseObject, error)
-	// List settlements for the current household
-	// (GET /settlements)
-	ListSettlements(ctx context.Context, request ListSettlementsRequestObject) (ListSettlementsResponseObject, error)
-	// Manually generate a settlement for a given month
-	// (POST /settlements/generate)
-	GenerateSettlement(ctx context.Context, request GenerateSettlementRequestObject) (GenerateSettlementResponseObject, error)
-	// Mark a settlement transfer as paid
-	// (PATCH /settlements/transfers/{transferId}/pay)
-	MarkTransferPaid(ctx context.Context, request MarkTransferPaidRequestObject) (MarkTransferPaidResponseObject, error)
-	// Get settlement detail with transfers
-	// (GET /settlements/{settlementId})
-	GetSettlement(ctx context.Context, request GetSettlementRequestObject) (GetSettlementResponseObject, error)
+	// List monthly reports for the current household
+	// (GET /reports)
+	ListReports(ctx context.Context, request ListReportsRequestObject) (ListReportsResponseObject, error)
+	// Generate (or regenerate) a monthly report
+	// (POST /reports/generate)
+	GenerateReport(ctx context.Context, request GenerateReportRequestObject) (GenerateReportResponseObject, error)
+	// Mark a report transfer as paid
+	// (PATCH /reports/transfers/{transferId}/pay)
+	MarkReportTransferPaid(ctx context.Context, request MarkReportTransferPaidRequestObject) (MarkReportTransferPaidResponseObject, error)
+	// Get full report with all details
+	// (GET /reports/{reportId})
+	GetReport(ctx context.Context, request GetReportRequestObject) (GetReportResponseObject, error)
 	// Get current user profile
 	// (GET /users/me)
 	GetUsersMe(ctx context.Context, request GetUsersMeRequestObject) (GetUsersMeResponseObject, error)
@@ -6073,23 +6118,23 @@ func (sh *strictHandler) RemoveHouseholdMember(w http.ResponseWriter, r *http.Re
 	}
 }
 
-// ListSettlements operation middleware
-func (sh *strictHandler) ListSettlements(w http.ResponseWriter, r *http.Request) {
-	var request ListSettlementsRequestObject
+// ListReports operation middleware
+func (sh *strictHandler) ListReports(w http.ResponseWriter, r *http.Request) {
+	var request ListReportsRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.ListSettlements(ctx, request.(ListSettlementsRequestObject))
+		return sh.ssi.ListReports(ctx, request.(ListReportsRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "ListSettlements")
+		handler = middleware(handler, "ListReports")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(ListSettlementsResponseObject); ok {
-		if err := validResponse.VisitListSettlementsResponse(w); err != nil {
+	} else if validResponse, ok := response.(ListReportsResponseObject); ok {
+		if err := validResponse.VisitListReportsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -6097,11 +6142,11 @@ func (sh *strictHandler) ListSettlements(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// GenerateSettlement operation middleware
-func (sh *strictHandler) GenerateSettlement(w http.ResponseWriter, r *http.Request) {
-	var request GenerateSettlementRequestObject
+// GenerateReport operation middleware
+func (sh *strictHandler) GenerateReport(w http.ResponseWriter, r *http.Request) {
+	var request GenerateReportRequestObject
 
-	var body GenerateSettlementJSONRequestBody
+	var body GenerateReportJSONRequestBody
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
 		return
@@ -6109,18 +6154,18 @@ func (sh *strictHandler) GenerateSettlement(w http.ResponseWriter, r *http.Reque
 	request.Body = &body
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GenerateSettlement(ctx, request.(GenerateSettlementRequestObject))
+		return sh.ssi.GenerateReport(ctx, request.(GenerateReportRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GenerateSettlement")
+		handler = middleware(handler, "GenerateReport")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GenerateSettlementResponseObject); ok {
-		if err := validResponse.VisitGenerateSettlementResponse(w); err != nil {
+	} else if validResponse, ok := response.(GenerateReportResponseObject); ok {
+		if err := validResponse.VisitGenerateReportResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -6128,25 +6173,25 @@ func (sh *strictHandler) GenerateSettlement(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// MarkTransferPaid operation middleware
-func (sh *strictHandler) MarkTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
-	var request MarkTransferPaidRequestObject
+// MarkReportTransferPaid operation middleware
+func (sh *strictHandler) MarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
+	var request MarkReportTransferPaidRequestObject
 
 	request.TransferId = transferId
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.MarkTransferPaid(ctx, request.(MarkTransferPaidRequestObject))
+		return sh.ssi.MarkReportTransferPaid(ctx, request.(MarkReportTransferPaidRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "MarkTransferPaid")
+		handler = middleware(handler, "MarkReportTransferPaid")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(MarkTransferPaidResponseObject); ok {
-		if err := validResponse.VisitMarkTransferPaidResponse(w); err != nil {
+	} else if validResponse, ok := response.(MarkReportTransferPaidResponseObject); ok {
+		if err := validResponse.VisitMarkReportTransferPaidResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -6154,25 +6199,25 @@ func (sh *strictHandler) MarkTransferPaid(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// GetSettlement operation middleware
-func (sh *strictHandler) GetSettlement(w http.ResponseWriter, r *http.Request, settlementId openapi_types.UUID) {
-	var request GetSettlementRequestObject
+// GetReport operation middleware
+func (sh *strictHandler) GetReport(w http.ResponseWriter, r *http.Request, reportId openapi_types.UUID) {
+	var request GetReportRequestObject
 
-	request.SettlementId = settlementId
+	request.ReportId = reportId
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetSettlement(ctx, request.(GetSettlementRequestObject))
+		return sh.ssi.GetReport(ctx, request.(GetReportRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetSettlement")
+		handler = middleware(handler, "GetReport")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetSettlementResponseObject); ok {
-		if err := validResponse.VisitGetSettlementResponse(w); err != nil {
+	} else if validResponse, ok := response.(GetReportResponseObject); ok {
+		if err := validResponse.VisitGetReportResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

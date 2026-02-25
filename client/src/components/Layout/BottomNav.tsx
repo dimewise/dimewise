@@ -2,7 +2,7 @@ import {
 	LayoutDashboard,
 	PiggyBank,
 	Receipt,
-	Scale,
+	FileBarChart,
 	Settings,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -13,7 +13,7 @@ const navItems = [
 	{ path: RoutesEnum.dashboard, icon: LayoutDashboard, label: "Home" },
 	{ path: RoutesEnum.expenses, icon: Receipt, label: "Expenses" },
 	{ path: RoutesEnum.budgets, icon: PiggyBank, label: "Budgets" },
-	{ path: RoutesEnum.settlements, icon: Scale, label: "Settle" },
+	{ path: RoutesEnum.reports, icon: FileBarChart, label: "Reports" },
 	{ path: RoutesEnum.householdSettings, icon: Settings, label: "Settings" },
 ];
 

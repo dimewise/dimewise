@@ -10,7 +10,7 @@ export const RoutesEnum = {
 	dashboard: "/dashboard",
 	budgets: "/budgets",
 	expenses: "/expenses",
-	settlements: "/settlements",
+	reports: "/reports",
 	householdSetup: "/household/setup",
 	householdSettings: "/household/settings",
 };

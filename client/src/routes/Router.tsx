@@ -10,7 +10,7 @@ import { HouseholdSetupPage } from "@/pages/HouseholdSetupPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
-import { SettlementsPage } from "@/pages/SettlementsPage";
+import { ReportsPage } from "@/pages/ReportsPage";
 import { RoutesEnum } from "./Routes";
 
 export const router = createBrowserRouter([
@@ -42,8 +42,8 @@ export const router = createBrowserRouter([
 						Component: ExpensesPage,
 					},
 					{
-						path: RoutesEnum.settlements,
-						Component: SettlementsPage,
+						path: RoutesEnum.reports,
+						Component: ReportsPage,
 					},
 					{
 						path: RoutesEnum.householdSetup,
