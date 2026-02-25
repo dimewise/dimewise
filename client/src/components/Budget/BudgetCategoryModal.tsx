@@ -1,5 +1,15 @@
-import { Form, Input, InputNumber, Modal, message } from "antd";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { BudgetCategory } from "@/store/api/api";
 import {
 	useCreateBudgetCategoryMutation,
@@ -14,116 +24,114 @@ type Props = {
 	category?: BudgetCategory | null;
 };
 
-type FormValues = {
-	name: string;
-	amount: number;
-};
-
 export const BudgetCategoryModal = ({
 	open,
 	onClose,
 	currency,
 	category,
 }: Props) => {
-	const [form] = Form.useForm<FormValues>();
+	const [name, setName] = useState("");
+	const [amount, setAmount] = useState("");
 	const [createCategory, { isLoading: isCreating }] =
 		useCreateBudgetCategoryMutation();
 	const [updateCategory, { isLoading: isUpdating }] =
 		useUpdateBudgetCategoryMutation();
 
 	const isEditing = !!category;
+	const isZeroDecimal = ["JPY", "KRW"].includes(currency.toUpperCase());
 
 	useEffect(() => {
 		if (open) {
 			if (category) {
-				form.setFieldsValue({
-					name: category.name,
-					amount: fromSmallestUnit(category.amount, currency),
-				});
+				setName(category.name);
+				setAmount(String(fromSmallestUnit(category.amount, currency)));
 			} else {
-				form.resetFields();
+				setName("");
+				setAmount("");
 			}
 		}
-	}, [open, category, currency, form]);
+	}, [open, category, currency]);
 
-	const handleSubmit = async () => {
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		const parsedAmount = Number.parseFloat(amount);
+		if (!name.trim() || Number.isNaN(parsedAmount) || parsedAmount <= 0) return;
+
+		const amountInSmallestUnit = toSmallestUnit(parsedAmount, currency);
+
 		try {
-			const values = await form.validateFields();
-			const amountInSmallestUnit = toSmallestUnit(values.amount, currency);
-
 			if (isEditing && category) {
 				await updateCategory({
 					budgetId: category.id,
 					updateBudgetCategoryRequest: {
-						name: values.name,
+						name: name.trim(),
 						amount: amountInSmallestUnit,
 					},
 				}).unwrap();
-				message.success("Category updated!");
+				toast.success("Category updated!");
 			} else {
 				await createCategory({
 					createBudgetCategoryRequest: {
-						name: values.name,
+						name: name.trim(),
 						amount: amountInSmallestUnit,
 					},
 				}).unwrap();
-				message.success("Category created!");
+				toast.success("Category created!");
 			}
 			onClose();
 		} catch {
-			message.error(
+			toast.error(
 				isEditing ? "Failed to update category." : "Failed to create category.",
 			);
 		}
 	};
 
 	return (
-		<Modal
-			open={open}
-			title={isEditing ? "Edit Budget Category" : "New Budget Category"}
-			okText={isEditing ? "Save" : "Create"}
-			onOk={handleSubmit}
-			onCancel={onClose}
-			confirmLoading={isCreating || isUpdating}
-			destroyOnClose
-		>
-			<Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-				<Form.Item
-					name="name"
-					label="Category Name"
-					rules={[
-						{
-							required: true,
-							message: "Please enter a category name",
-						},
-					]}
-				>
-					<Input placeholder="e.g. Groceries, Rent, Utilities" />
-				</Form.Item>
-				<Form.Item
-					name="amount"
-					label="Monthly Budget"
-					rules={[
-						{
-							required: true,
-							message: "Please enter a budget amount",
-						},
-						{
-							type: "number",
-							min: 0.01,
-							message: "Amount must be greater than zero",
-						},
-					]}
-				>
-					<InputNumber
-						style={{ width: "100%" }}
-						prefix={currency}
-						min={0}
-						precision={["JPY", "KRW"].includes(currency.toUpperCase()) ? 0 : 2}
-						placeholder="0.00"
-					/>
-				</Form.Item>
-			</Form>
-		</Modal>
+		<Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>
+						{isEditing ? "Edit Budget Category" : "New Budget Category"}
+					</DialogTitle>
+				</DialogHeader>
+				<form onSubmit={handleSubmit} className="space-y-4">
+					<div className="space-y-2">
+						<Label htmlFor="cat-name">Category Name</Label>
+						<Input
+							id="cat-name"
+							placeholder="e.g. Groceries, Rent, Utilities"
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+							required
+						/>
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="cat-amount">Monthly Budget ({currency})</Label>
+						<Input
+							id="cat-amount"
+							type="number"
+							min="0"
+							step={isZeroDecimal ? "1" : "0.01"}
+							placeholder={isZeroDecimal ? "0" : "0.00"}
+							value={amount}
+							onChange={(e) => setAmount(e.target.value)}
+							required
+						/>
+					</div>
+					<DialogFooter>
+						<Button type="button" variant="outline" onClick={onClose}>
+							Cancel
+						</Button>
+						<Button type="submit" disabled={isCreating || isUpdating}>
+							{isCreating || isUpdating
+								? "Saving..."
+								: isEditing
+									? "Save"
+									: "Create"}
+						</Button>
+					</DialogFooter>
+				</form>
+			</DialogContent>
+		</Dialog>
 	);
 };

@@ -1,84 +1,50 @@
-import {
-	DollarOutlined,
-	HomeOutlined,
-	SettingOutlined,
-	ShoppingCartOutlined,
-	SwapOutlined,
-} from "@ant-design/icons";
 import { UserButton } from "@clerk/clerk-react";
-import { Flex, Layout, Menu, Typography } from "antd";
-import { Content, Header } from "antd/es/layout/layout";
-import Sider from "antd/es/layout/Sider";
-import { Outlet, useLocation, useNavigate } from "react-router";
-import { RoutesEnum } from "@/routes/Routes";
-
-const menuItems = [
-	{
-		key: RoutesEnum.dashboard,
-		icon: <HomeOutlined />,
-		label: "Dashboard",
-	},
-	{
-		key: RoutesEnum.expenses,
-		icon: <ShoppingCartOutlined />,
-		label: "Expenses",
-	},
-	{
-		key: RoutesEnum.budgets,
-		icon: <DollarOutlined />,
-		label: "Budgets",
-	},
-	{
-		key: RoutesEnum.settlements,
-		icon: <SwapOutlined />,
-		label: "Settlements",
-	},
-	{
-		key: RoutesEnum.householdSettings,
-		icon: <SettingOutlined />,
-		label: "Settings",
-	},
-];
+import { Outlet } from "react-router";
+import { Toaster } from "sonner";
+import { BottomNav } from "./BottomNav";
+import { Sidebar } from "./Sidebar";
 
 export const AuthenticatedLayout = () => {
-	const navigate = useNavigate();
-	const location = useLocation();
-
 	return (
-		<Layout style={{ minHeight: "100vh" }}>
-			<Sider breakpoint="lg" collapsedWidth="0">
-				<Flex
-					justify="center"
-					align="center"
-					style={{ height: 64, padding: "0 16px" }}
-				>
-					<Typography.Text strong style={{ color: "white", fontSize: 18 }}>
-						Dimewise
-					</Typography.Text>
-				</Flex>
-				<Menu
-					theme="dark"
-					mode="inline"
-					selectedKeys={[location.pathname]}
-					items={menuItems}
-					onClick={({ key }) => navigate(key)}
-				/>
-			</Sider>
-			<Layout>
-				<Header
-					style={{
-						padding: "0 24px",
-						display: "flex",
-						justifyContent: "flex-end",
-						alignItems: "center",
-					}}
-				>
-					<UserButton afterSignOutUrl={RoutesEnum.root} />
-				</Header>
-				<Content style={{ margin: "24px 16px", padding: 24 }}>
+		<div className="min-h-screen bg-background">
+			<Toaster
+				position="top-center"
+				toastOptions={{
+					className: "!rounded-xl !border-border !shadow-lg",
+				}}
+			/>
+
+			{/* Desktop sidebar */}
+			<Sidebar />
+
+			{/* Main content area */}
+			<div className="md:pl-64">
+				{/* Top bar */}
+				<header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-surface/95 backdrop-blur-md px-4 md:px-6">
+					<div className="flex items-center gap-2 md:hidden">
+						<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white font-bold text-xs">
+							D
+						</div>
+						<span className="text-base font-bold tracking-tight">Dimewise</span>
+					</div>
+					<div className="hidden md:block" />
+					<UserButton
+						appearance={{
+							elements: {
+								avatarBox: "h-8 w-8",
+							},
+						}}
+					/>
+				</header>
+
+				{/* Page content */}
+				<main className="px-4 py-5 pb-24 md:px-6 md:py-6 md:pb-6 max-w-6xl mx-auto">
 					<Outlet />
-				</Content>
-			</Layout>
-		</Layout>
+				</main>
+			</div>
+
+			{/* Mobile bottom navigation */}
+			<BottomNav />
+		</div>
 	);
 };

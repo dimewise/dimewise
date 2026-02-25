@@ -1,25 +1,18 @@
 import {
-	ArrowRightOutlined,
-	CalendarOutlined,
-	DollarOutlined,
-	ShoppingCartOutlined,
-	SwapOutlined,
-} from "@ant-design/icons";
-import {
-	Button,
-	Card,
-	Col,
-	Empty,
-	Flex,
-	List,
-	Row,
-	Spin,
-	Statistic,
-	Typography,
-} from "antd";
-import { DateTime } from "luxon";
+	ArrowRight,
+	Calendar,
+	DollarSign,
+	Receipt,
+	Scale,
+	Users,
+} from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { Navigate, useNavigate } from "react-router";
 import { BudgetOverviewCard } from "@/components/Budget/BudgetOverviewCard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FullPageSpinner } from "@/components/ui/spinner";
 import { RoutesEnum } from "@/routes/Routes";
 import type { HouseholdMember } from "@/store/api/api";
 import {
@@ -29,6 +22,22 @@ import {
 	useListSettlementsQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
+
+const MONTH_NAMES = [
+	"",
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December",
+];
 
 export const DashboardPage = () => {
 	const navigate = useNavigate();
@@ -45,14 +54,9 @@ export const DashboardPage = () => {
 	});
 
 	if (isLoading) {
-		return (
-			<Flex justify="center" align="center" style={{ padding: 48 }}>
-				<Spin size="large" />
-			</Flex>
-		);
+		return <FullPageSpinner />;
 	}
 
-	// 404 means user has no household — redirect to setup
 	if (error && "status" in error && error.status === 404) {
 		return <Navigate to={RoutesEnum.householdSetup} replace />;
 	}
@@ -75,133 +79,144 @@ export const DashboardPage = () => {
 	};
 
 	return (
-		<Flex vertical gap={24}>
-			<Typography.Title level={3} style={{ margin: 0 }}>
-				Dashboard
-			</Typography.Title>
+		<div className="space-y-5 animate-fade-in">
+			{/* Greeting */}
+			<div>
+				<h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+				<p className="text-sm text-muted-foreground mt-0.5">{household.name}</p>
+			</div>
 
 			{/* Quick stats */}
-			<Row gutter={[16, 16]}>
-				<Col xs={24} sm={8}>
-					<Card>
-						<Statistic
-							title="Household"
-							value={household.name}
-							prefix={<CalendarOutlined />}
-						/>
-					</Card>
-				</Col>
-				<Col xs={24} sm={8}>
-					<Card>
-						<Statistic
-							title="Members"
-							value={household.members.length}
-							prefix={<SwapOutlined />}
-						/>
-					</Card>
-				</Col>
-				<Col xs={24} sm={8}>
-					<Card>
-						<Statistic
-							title="Currency"
-							value={household.currency}
-							prefix={<DollarOutlined />}
-						/>
-					</Card>
-				</Col>
-			</Row>
+			<div className="grid grid-cols-3 gap-3">
+				<Card>
+					<CardContent className="p-3 flex flex-col items-center text-center">
+						<Users className="h-5 w-5 text-brand mb-1.5" />
+						<p className="text-lg font-bold">{household.members.length}</p>
+						<p className="text-xs text-muted-foreground">Members</p>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardContent className="p-3 flex flex-col items-center text-center">
+						<DollarSign className="h-5 w-5 text-success mb-1.5" />
+						<p className="text-lg font-bold">{household.currency}</p>
+						<p className="text-xs text-muted-foreground">Currency</p>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardContent className="p-3 flex flex-col items-center text-center">
+						<Scale className="h-5 w-5 text-warning mb-1.5" />
+						<p className="text-lg font-bold">{settlements?.length ?? 0}</p>
+						<p className="text-xs text-muted-foreground">Settlements</p>
+					</CardContent>
+				</Card>
+			</div>
 
 			{/* Budget overview */}
 			{overview && (
 				<BudgetOverviewCard overview={overview} currency={currency} />
 			)}
 
-			<Row gutter={[16, 16]}>
-				{/* Recent expenses */}
-				<Col xs={24} lg={14}>
-					<Card
-						title={
-							<Flex align="center" gap={8}>
-								<ShoppingCartOutlined />
-								<span>Recent Expenses</span>
-							</Flex>
-						}
-						extra={
-							<Button type="link" onClick={() => navigate(RoutesEnum.expenses)}>
-								View All <ArrowRightOutlined />
-							</Button>
-						}
+			{/* Recent expenses */}
+			<Card>
+				<CardHeader className="flex-row items-center justify-between pb-0">
+					<CardTitle className="flex items-center gap-2 text-base">
+						<Receipt className="h-4 w-4 text-muted-foreground" />
+						Recent Expenses
+					</CardTitle>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="text-brand gap-1"
+						onClick={() => navigate(RoutesEnum.expenses)}
 					>
-						{expenseData && expenseData.expenses.length > 0 ? (
-							<List
-								dataSource={expenseData.expenses}
-								renderItem={(expense) => (
-									<List.Item>
-										<List.Item.Meta
-											title={expense.title}
-											description={`${getMemberName(expense.paid_by)} · ${DateTime.fromISO(expense.incurred_at).toLocaleString(DateTime.DATE_MED)}`}
-										/>
-										<Typography.Text strong>
-											{formatCurrency(expense.amount, currency)}
-										</Typography.Text>
-									</List.Item>
-								)}
-							/>
-						) : (
-							<Empty
-								description="No expenses yet"
-								image={Empty.PRESENTED_IMAGE_SIMPLE}
-							/>
-						)}
-					</Card>
-				</Col>
+						View All
+						<ArrowRight className="h-3.5 w-3.5" />
+					</Button>
+				</CardHeader>
+				<CardContent>
+					{expenseData && expenseData.expenses.length > 0 ? (
+						<div className="divide-y divide-border">
+							{expenseData.expenses.map((expense) => (
+								<div
+									key={expense.id}
+									className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+								>
+									<div className="min-w-0 flex-1">
+										<p className="text-sm font-medium truncate">
+											{expense.title}
+										</p>
+										<p className="text-xs text-muted-foreground">
+											{getMemberName(expense.paid_by)} &middot;{" "}
+											{format(parseISO(expense.incurred_at), "MMM d")}
+										</p>
+									</div>
+									<p className="text-sm font-semibold ml-3 shrink-0">
+										{formatCurrency(expense.amount, currency)}
+									</p>
+								</div>
+							))}
+						</div>
+					) : (
+						<EmptyState
+							icon={<Receipt className="h-6 w-6" />}
+							title="No expenses yet"
+							description="Start by adding your first expense."
+							className="py-6"
+						/>
+					)}
+				</CardContent>
+			</Card>
 
-				{/* Settlement status */}
-				<Col xs={24} lg={10}>
-					<Card
-						title={
-							<Flex align="center" gap={8}>
-								<SwapOutlined />
-								<span>Recent Settlements</span>
-							</Flex>
-						}
-						extra={
-							<Button
-								type="link"
-								onClick={() => navigate(RoutesEnum.settlements)}
-							>
-								View All <ArrowRightOutlined />
-							</Button>
-						}
+			{/* Recent settlements */}
+			<Card>
+				<CardHeader className="flex-row items-center justify-between pb-0">
+					<CardTitle className="flex items-center gap-2 text-base">
+						<Scale className="h-4 w-4 text-muted-foreground" />
+						Recent Settlements
+					</CardTitle>
+					<Button
+						variant="ghost"
+						size="sm"
+						className="text-brand gap-1"
+						onClick={() => navigate(RoutesEnum.settlements)}
 					>
-						{settlements && settlements.length > 0 ? (
-							<List
-								dataSource={settlements.slice(0, 3)}
-								renderItem={(s) => {
-									const dt = DateTime.fromObject({
-										month: s.month,
-										year: s.year,
-									});
-									return (
-										<List.Item>
-											<List.Item.Meta
-												avatar={<CalendarOutlined style={{ fontSize: 20 }} />}
-												title={dt.toFormat("MMMM yyyy")}
-												description={`Generated ${DateTime.fromISO(s.generated_at).toLocaleString(DateTime.DATE_MED)}`}
-											/>
-										</List.Item>
-									);
-								}}
-							/>
-						) : (
-							<Empty
-								description="No settlements yet"
-								image={Empty.PRESENTED_IMAGE_SIMPLE}
-							/>
-						)}
-					</Card>
-				</Col>
-			</Row>
-		</Flex>
+						View All
+						<ArrowRight className="h-3.5 w-3.5" />
+					</Button>
+				</CardHeader>
+				<CardContent>
+					{settlements && settlements.length > 0 ? (
+						<div className="divide-y divide-border">
+							{settlements.slice(0, 3).map((s) => (
+								<div
+									key={s.id}
+									className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+								>
+									<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+										<Calendar className="h-4 w-4 text-muted-foreground" />
+									</div>
+									<div className="min-w-0 flex-1">
+										<p className="text-sm font-medium">
+											{MONTH_NAMES[s.month]} {s.year}
+										</p>
+										<p className="text-xs text-muted-foreground">
+											Generated{" "}
+											{format(parseISO(s.generated_at), "MMM d, yyyy")}
+										</p>
+									</div>
+								</div>
+							))}
+						</div>
+					) : (
+						<EmptyState
+							icon={<Scale className="h-6 w-6" />}
+							title="No settlements yet"
+							description="Generate one for a completed month."
+							className="py-6"
+						/>
+					)}
+				</CardContent>
+			</Card>
+		</div>
 	);
 };

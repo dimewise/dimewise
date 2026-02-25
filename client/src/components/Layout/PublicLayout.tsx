@@ -1,55 +1,52 @@
-import { Button, Flex, Layout, Typography } from "antd";
-import { Content, Header } from "antd/es/layout/layout";
 import { Outlet, useNavigate } from "react-router";
+import { Toaster } from "sonner";
+import { Button } from "@/components/ui/button";
 import { RoutesEnum } from "@/routes/Routes";
 
 export const PublicLayout = () => {
 	const navigate = useNavigate();
 
 	return (
-		<Layout>
-			<Header
-				style={{
-					position: "sticky",
-					top: 0,
-					zIndex: 1,
-					width: "100%",
-					display: "flex",
-					alignItems: "center",
+		<div className="min-h-screen bg-background">
+			<Toaster
+				position="top-center"
+				toastOptions={{
+					className: "!rounded-xl !border-border !shadow-lg",
 				}}
-			>
-				<Flex justify="space-between" style={{ width: "100%" }}>
-					<Typography.Text
-						style={{
-							color: "white",
-							fontWeight: "bold",
-							fontSize: 20,
-							cursor: "pointer",
-						}}
+			/>
+
+			{/* Header */}
+			<header className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md">
+				<div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+					<button
+						type="button"
 						onClick={() => navigate(RoutesEnum.root)}
+						className="flex items-center gap-2"
 					>
-						Dimewise
-					</Typography.Text>
-					<Flex gap={8}>
+						<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white font-bold text-xs">
+							D
+						</div>
+						<span className="text-base font-bold tracking-tight">Dimewise</span>
+					</button>
+					<div className="flex items-center gap-2">
 						<Button
-							type="text"
-							style={{ color: "white" }}
+							variant="ghost"
+							size="sm"
 							onClick={() => navigate(RoutesEnum.login)}
 						>
-							Login
+							Log in
 						</Button>
-						<Button
-							type="primary"
-							onClick={() => navigate(RoutesEnum.register)}
-						>
-							Register
+						<Button size="sm" onClick={() => navigate(RoutesEnum.register)}>
+							Sign up
 						</Button>
-					</Flex>
-				</Flex>
-			</Header>
-			<Content style={{ padding: "0 48px" }}>
+					</div>
+				</div>
+			</header>
+
+			{/* Content */}
+			<main>
 				<Outlet />
-			</Content>
-		</Layout>
+			</main>
+		</div>
 	);
 };
