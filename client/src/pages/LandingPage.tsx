@@ -1,4 +1,10 @@
-import { ArrowRight, PiggyBank, Receipt, Scale, Users } from "lucide-react";
+import {
+	ArrowRight,
+	FileBarChart,
+	PiggyBank,
+	Receipt,
+	Users,
+} from "lucide-react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { RoutesEnum } from "@/routes/Routes";
@@ -20,9 +26,9 @@ const features = [
 		description: "Set monthly budgets by category and monitor your spending.",
 	},
 	{
-		icon: Scale,
-		title: "Monthly Settlements",
-		description: "See who owes whom and settle up with minimal transfers.",
+		icon: FileBarChart,
+		title: "Monthly Reports",
+		description: "Get itemized breakdowns of spending and see who owes whom.",
 	},
 ];
 

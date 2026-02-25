@@ -235,15 +235,18 @@ func (r *ExpenseRepository) GetSpendingByCategory(
 ) ([]BudgetCategorySpending, error) {
 	var results []BudgetCategorySpending
 
-	stmt := postgres.RawStatement(`
-		SELECT budget_category_id, SUM(amount) AS spent
-		FROM expenses
-		WHERE household_id = :householdID::uuid
-		  AND budget_category_id IS NOT NULL
-		  AND incurred_at >= :from::timestamptz
-		  AND incurred_at < :to::timestamptz
-		GROUP BY budget_category_id
-	`, postgres.RawArgs{"householdID": householdID.String(), "from": from, "to": to})
+	stmt := postgres.SELECT(
+		table.Expenses.BudgetCategoryID,
+		postgres.SUMi(table.Expenses.Amount).AS("expenses.spent"),
+	).
+		FROM(table.Expenses).
+		WHERE(
+			table.Expenses.HouseholdID.EQ(postgres.UUID(householdID)).
+				AND(table.Expenses.BudgetCategoryID.IS_NOT_NULL()).
+				AND(table.Expenses.IncurredAt.GT_EQ(postgres.TimestampzT(from))).
+				AND(table.Expenses.IncurredAt.LT(postgres.TimestampzT(to))),
+		).
+		GROUP_BY(table.Expenses.BudgetCategoryID)
 
 	err := stmt.QueryContext(ctx, r.db, &results)
 	if err != nil {
@@ -260,18 +263,21 @@ func (r *ExpenseRepository) GetUserSpending(
 	to time.Time,
 ) (map[uuid.UUID]int64, error) {
 	var results []struct {
-		PaidBy uuid.UUID `sql:"primary_key" alias:"paid_by"`
-		Total  int64     `alias:"total"`
+		PaidBy uuid.UUID `sql:"primary_key" alias:"expenses.paid_by"`
+		Total  int64     `alias:"expenses.total"`
 	}
 
-	stmt := postgres.RawStatement(`
-		SELECT paid_by, SUM(amount) AS total
-		FROM expenses
-		WHERE household_id = :householdID::uuid
-		  AND incurred_at >= :from::timestamptz
-		  AND incurred_at < :to::timestamptz
-		GROUP BY paid_by
-	`, postgres.RawArgs{"householdID": householdID.String(), "from": from, "to": to})
+	stmt := postgres.SELECT(
+		table.Expenses.PaidBy,
+		postgres.SUMi(table.Expenses.Amount).AS("expenses.total"),
+	).
+		FROM(table.Expenses).
+		WHERE(
+			table.Expenses.HouseholdID.EQ(postgres.UUID(householdID)).
+				AND(table.Expenses.IncurredAt.GT_EQ(postgres.TimestampzT(from))).
+				AND(table.Expenses.IncurredAt.LT(postgres.TimestampzT(to))),
+		).
+		GROUP_BY(table.Expenses.PaidBy)
 
 	err := stmt.QueryContext(ctx, r.db, &results)
 	if err != nil {
@@ -293,19 +299,24 @@ func (r *ExpenseRepository) GetUserSplits(
 	to time.Time,
 ) (map[uuid.UUID]int64, error) {
 	var results []struct {
-		UserID uuid.UUID `sql:"primary_key" alias:"user_id"`
-		Total  int64     `alias:"total"`
+		UserID uuid.UUID `sql:"primary_key" alias:"expense_splits.user_id"`
+		Total  int64     `alias:"expense_splits.total"`
 	}
 
-	stmt := postgres.RawStatement(`
-		SELECT es.user_id, SUM(es.amount) AS total
-		FROM expense_splits es
-		JOIN expenses e ON e.id = es.expense_id
-		WHERE e.household_id = :householdID::uuid
-		  AND e.incurred_at >= :from::timestamptz
-		  AND e.incurred_at < :to::timestamptz
-		GROUP BY es.user_id
-	`, postgres.RawArgs{"householdID": householdID.String(), "from": from, "to": to})
+	stmt := postgres.SELECT(
+		table.ExpenseSplits.UserID,
+		postgres.SUMi(table.ExpenseSplits.Amount).AS("expense_splits.total"),
+	).
+		FROM(
+			table.ExpenseSplits.
+				INNER_JOIN(table.Expenses, table.Expenses.ID.EQ(table.ExpenseSplits.ExpenseID)),
+		).
+		WHERE(
+			table.Expenses.HouseholdID.EQ(postgres.UUID(householdID)).
+				AND(table.Expenses.IncurredAt.GT_EQ(postgres.TimestampzT(from))).
+				AND(table.Expenses.IncurredAt.LT(postgres.TimestampzT(to))),
+		).
+		GROUP_BY(table.ExpenseSplits.UserID)
 
 	err := stmt.QueryContext(ctx, r.db, &results)
 	if err != nil {

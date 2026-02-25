@@ -30,21 +30,21 @@ func NewServer(config *config.Config) *Server {
 	householdRepo := repository.NewHouseholdRepository(config.DB())
 	budgetRepo := repository.NewBudgetRepository(config.DB())
 	expenseRepo := repository.NewExpenseRepository(config.DB())
-	settlementRepo := repository.NewSettlementRepository(config.DB())
+	reportRepo := repository.NewReportRepository(config.DB())
 
 	// Services
 	userService := service.NewUserService(userRepo)
 	householdService := service.NewHouseholdService(householdRepo, userRepo)
 	budgetService := service.NewBudgetService(budgetRepo, householdRepo)
 	expenseService := service.NewExpenseService(expenseRepo, householdRepo)
-	settlementService := service.NewSettlementService(settlementRepo, expenseRepo, householdRepo)
+	reportService := service.NewReportService(reportRepo, expenseRepo, householdRepo, budgetRepo)
 
 	// Handler
 	h := web.NewHandler(
 		householdService,
 		budgetService,
 		expenseService,
-		settlementService,
+		reportService,
 		userService,
 	)
 	portAddr := fmt.Sprintf(":%s", config.Env().ServerPort())

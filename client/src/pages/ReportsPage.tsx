@@ -1,9 +1,9 @@
-import { ArrowRightLeft, Calendar, ChevronRight, Plus } from "lucide-react";
+import { Calendar, FileBarChart, Plus } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
-import { SettlementDetail } from "@/components/Settlement/SettlementDetail";
+import { ReportDetail } from "@/components/Report/ReportDetail";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,18 +19,21 @@ import { Label } from "@/components/ui/label";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { RoutesEnum } from "@/routes/Routes";
 import {
-	useGenerateSettlementMutation,
+	useGenerateReportMutation,
 	useGetMyHouseholdQuery,
-	useListSettlementsQuery,
+	useListReportsQuery,
 } from "@/store/api/api";
+import { formatCurrency } from "@/utils/currency";
 
-export const SettlementsPage = () => {
+export const ReportsPage = () => {
 	const { data: household, isLoading: isHouseholdLoading } =
 		useGetMyHouseholdQuery();
-	const { data: settlements, isLoading: isSettlementsLoading } =
-		useListSettlementsQuery(undefined, { skip: !household });
-	const [generateSettlement, { isLoading: isGenerating }] =
-		useGenerateSettlementMutation();
+	const { data: reports, isLoading: isReportsLoading } = useListReportsQuery(
+		undefined,
+		{ skip: !household },
+	);
+	const [generateReport, { isLoading: isGenerating }] =
+		useGenerateReportMutation();
 
 	const now = new Date();
 	const [generateOpen, setGenerateOpen] = useState(false);
@@ -48,13 +51,12 @@ export const SettlementsPage = () => {
 
 	const currency = household.currency;
 
-	// If viewing a specific settlement
+	// If viewing a specific report
 	if (selectedId) {
 		return (
-			<SettlementDetail
-				settlementId={selectedId}
+			<ReportDetail
+				reportId={selectedId}
 				currency={currency}
-				members={household.members}
 				onBack={() => setSelectedId(null)}
 			/>
 		);
@@ -62,17 +64,17 @@ export const SettlementsPage = () => {
 
 	const handleGenerate = async () => {
 		try {
-			const result = await generateSettlement({
-				generateSettlementRequest: {
+			const result = await generateReport({
+				generateReportRequest: {
 					month: genMonth,
 					year: genYear,
 				},
 			}).unwrap();
-			toast.success("Settlement generated!");
+			toast.success("Report generated!");
 			setGenerateOpen(false);
 			setSelectedId(result.id);
 		} catch {
-			toast.error("Failed to generate settlement.");
+			toast.error("Failed to generate report.");
 		}
 	};
 
@@ -80,7 +82,7 @@ export const SettlementsPage = () => {
 		<div className="space-y-5 animate-fade-in">
 			{/* Header */}
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold tracking-tight">Settlements</h1>
+				<h1 className="text-2xl font-bold tracking-tight">Reports</h1>
 				<Button
 					size="sm"
 					className="gap-1.5"
@@ -92,34 +94,48 @@ export const SettlementsPage = () => {
 			</div>
 
 			{/* List */}
-			{isSettlementsLoading ? (
+			{isReportsLoading ? (
 				<FullPageSpinner />
-			) : settlements && settlements.length > 0 ? (
+			) : reports && reports.length > 0 ? (
 				<div className="space-y-2">
-					{settlements.map((s) => {
-						const monthName = new Date(s.year, s.month - 1).toLocaleString(
+					{reports.map((r) => {
+						const monthName = new Date(r.year, r.month - 1).toLocaleString(
 							"default",
 							{ month: "long", year: "numeric" },
 						);
 						return (
-							<Card key={s.id}>
+							<Card key={r.id}>
 								<CardContent className="p-0">
 									<button
 										type="button"
 										className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors rounded-xl"
-										onClick={() => setSelectedId(s.id)}
+										onClick={() => setSelectedId(r.id)}
 									>
-										<div className="min-w-0">
+										<div className="min-w-0 flex-1">
 											<div className="flex items-center gap-2">
 												<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
 												<h3 className="text-sm font-semibold">{monthName}</h3>
 											</div>
-											<p className="text-xs text-muted-foreground mt-1 ml-6">
-												Generated{" "}
-												{format(new Date(s.generated_at), "MMM d, yyyy")}
-											</p>
+											<div className="flex items-center gap-3 mt-1 ml-6">
+												<p className="text-xs text-muted-foreground">
+													{r.total_expenses} expense
+													{r.total_expenses !== 1 && "s"}
+												</p>
+												<span className="text-xs text-muted-foreground">
+													&middot;
+												</span>
+												<p className="text-xs font-medium">
+													{formatCurrency(r.total_amount, currency)}
+												</p>
+												<span className="text-xs text-muted-foreground">
+													&middot;
+												</span>
+												<p className="text-xs text-muted-foreground">
+													{format(new Date(r.generated_at), "MMM d, yyyy")}
+												</p>
+											</div>
 										</div>
-										<ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+										<FileBarChart className="h-4 w-4 text-muted-foreground shrink-0" />
 									</button>
 								</CardContent>
 							</Card>
@@ -130,9 +146,9 @@ export const SettlementsPage = () => {
 				<Card>
 					<CardContent>
 						<EmptyState
-							icon={<ArrowRightLeft className="h-6 w-6" />}
-							title="No settlements yet"
-							description="Generate a settlement to balance out expenses among household members."
+							icon={<FileBarChart className="h-6 w-6" />}
+							title="No reports yet"
+							description="Generate a monthly report to see a full breakdown of your household's expenses."
 							action={
 								<Button
 									size="sm"
@@ -140,7 +156,7 @@ export const SettlementsPage = () => {
 									onClick={() => setGenerateOpen(true)}
 								>
 									<Plus className="h-4 w-4" />
-									Generate Settlement
+									Generate Report
 								</Button>
 							}
 						/>
@@ -155,11 +171,12 @@ export const SettlementsPage = () => {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Generate Settlement</DialogTitle>
+						<DialogTitle>Generate Report</DialogTitle>
 					</DialogHeader>
 					<p className="text-sm text-muted-foreground">
-						Choose the month and year to generate a settlement for. This will
-						calculate who owes whom based on that month&apos;s expenses.
+						Choose the month and year to generate a financial report. If a
+						report already exists for that period, it will be regenerated with
+						the latest data.
 					</p>
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-2">

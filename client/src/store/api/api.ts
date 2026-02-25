@@ -4,7 +4,7 @@ export const addTagTypes = [
 	"Households",
 	"Budgets",
 	"Expenses",
-	"Settlements",
+	"Reports",
 ] as const;
 const injectedRtkApi = api
 	.enhanceEndpoints({
@@ -175,41 +175,34 @@ const injectedRtkApi = api
 				}),
 				invalidatesTags: ["Expenses"],
 			}),
-			listSettlements: build.query<
-				ListSettlementsApiResponse,
-				ListSettlementsApiArg
-			>({
-				query: () => ({ url: `/settlements` }),
-				providesTags: ["Settlements"],
+			listReports: build.query<ListReportsApiResponse, ListReportsApiArg>({
+				query: () => ({ url: `/reports` }),
+				providesTags: ["Reports"],
 			}),
-			generateSettlement: build.mutation<
-				GenerateSettlementApiResponse,
-				GenerateSettlementApiArg
+			generateReport: build.mutation<
+				GenerateReportApiResponse,
+				GenerateReportApiArg
 			>({
 				query: (queryArg) => ({
-					url: `/settlements/generate`,
+					url: `/reports/generate`,
 					method: "POST",
-					body: queryArg.generateSettlementRequest,
+					body: queryArg.generateReportRequest,
 				}),
-				invalidatesTags: ["Settlements"],
+				invalidatesTags: ["Reports"],
 			}),
-			getSettlement: build.query<GetSettlementApiResponse, GetSettlementApiArg>(
-				{
-					query: (queryArg) => ({
-						url: `/settlements/${queryArg.settlementId}`,
-					}),
-					providesTags: ["Settlements"],
-				},
-			),
-			markTransferPaid: build.mutation<
-				MarkTransferPaidApiResponse,
-				MarkTransferPaidApiArg
+			getReport: build.query<GetReportApiResponse, GetReportApiArg>({
+				query: (queryArg) => ({ url: `/reports/${queryArg.reportId}` }),
+				providesTags: ["Reports"],
+			}),
+			markReportTransferPaid: build.mutation<
+				MarkReportTransferPaidApiResponse,
+				MarkReportTransferPaidApiArg
 			>({
 				query: (queryArg) => ({
-					url: `/settlements/transfers/${queryArg.transferId}/pay`,
+					url: `/reports/transfers/${queryArg.transferId}/pay`,
 					method: "PATCH",
 				}),
-				invalidatesTags: ["Settlements"],
+				invalidatesTags: ["Reports"],
 			}),
 		}),
 		overrideExisting: false,
@@ -289,21 +282,20 @@ export type DeleteExpenseApiResponse = unknown;
 export type DeleteExpenseApiArg = {
 	expenseId: string;
 };
-export type ListSettlementsApiResponse = /** status 200 OK */ Settlement[];
-export type ListSettlementsApiArg = void;
-export type GenerateSettlementApiResponse =
-	/** status 201 Settlement generated */ SettlementWithTransfers;
-export type GenerateSettlementApiArg = {
-	generateSettlementRequest: GenerateSettlementRequest;
+export type ListReportsApiResponse = /** status 200 OK */ Report[];
+export type ListReportsApiArg = void;
+export type GenerateReportApiResponse =
+	/** status 201 Report generated */ ReportWithDetails;
+export type GenerateReportApiArg = {
+	generateReportRequest: GenerateReportRequest;
 };
-export type GetSettlementApiResponse =
-	/** status 200 OK */ SettlementWithTransfers;
-export type GetSettlementApiArg = {
-	settlementId: string;
+export type GetReportApiResponse = /** status 200 OK */ ReportWithDetails;
+export type GetReportApiArg = {
+	reportId: string;
 };
-export type MarkTransferPaidApiResponse =
-	/** status 200 Transfer marked as paid */ SettlementTransfer;
-export type MarkTransferPaidApiArg = {
+export type MarkReportTransferPaidApiResponse =
+	/** status 200 Transfer marked as paid */ ReportTransfer;
+export type MarkReportTransferPaidApiArg = {
 	transferId: string;
 };
 export type BaseEntity = {
@@ -459,24 +451,71 @@ export type UpdateExpenseRequest = {
 	incurred_at?: string;
 	splits?: ExpenseSplitInput[];
 };
-export type Settlement = BaseEntity & {
+export type Report = BaseEntity & {
 	household_id: string;
 	month: number;
 	year: number;
+	/** Number of expenses in the month */
+	total_expenses: number;
+	/** Total expenditure in smallest currency unit */
+	total_amount: number;
 	generated_at: string;
 };
-export type SettlementTransfer = BaseEntity & {
-	settlement_id: string;
+export type ReportMemberSummary = {
+	id: string;
+	user_id: string;
+	member_name: string;
+	/** Total amount this member paid for expenses */
+	total_paid: number;
+	/** Total amount this member owes (from splits) */
+	total_owed: number;
+	/** total_paid minus total_owed (positive means owed money) */
+	net_balance: number;
+};
+export type ReportCategoryBreakdown = {
+	id: string;
+	category_name: string;
+	/** Monthly budget for this category */
+	budget_amount: number;
+	/** Total spent in this category */
+	total_spent: number;
+};
+export type ReportLineItemSplit = {
+	id: string;
+	user_id: string;
+	member_name: string;
+	amount: number;
+};
+export type ReportLineItem = {
+	id: string;
+	expense_id?: string;
+	expense_title: string;
+	category_name?: string;
+	paid_by_user_id: string;
+	paid_by_name: string;
+	amount: number;
+	incurred_at: string;
+	notes?: string;
+	splits: ReportLineItemSplit[];
+};
+export type ReportTransfer = {
+	id: string;
+	report_id?: string;
 	from_user_id: string;
 	to_user_id: string;
+	from_name: string;
+	to_name: string;
 	/** Transfer amount in smallest currency unit */
 	amount: number;
 	paid_at?: string;
 };
-export type SettlementWithTransfers = Settlement & {
-	transfers: SettlementTransfer[];
+export type ReportWithDetails = Report & {
+	member_summaries: ReportMemberSummary[];
+	category_breakdowns: ReportCategoryBreakdown[];
+	line_items: ReportLineItem[];
+	transfers: ReportTransfer[];
 };
-export type GenerateSettlementRequest = {
+export type GenerateReportRequest = {
 	month: number;
 	year: number;
 };
@@ -505,10 +544,10 @@ export const {
 	useLazyGetExpenseQuery,
 	useUpdateExpenseMutation,
 	useDeleteExpenseMutation,
-	useListSettlementsQuery,
-	useLazyListSettlementsQuery,
-	useGenerateSettlementMutation,
-	useGetSettlementQuery,
-	useLazyGetSettlementQuery,
-	useMarkTransferPaidMutation,
+	useListReportsQuery,
+	useLazyListReportsQuery,
+	useGenerateReportMutation,
+	useGetReportQuery,
+	useLazyGetReportQuery,
+	useMarkReportTransferPaidMutation,
 } = injectedRtkApi;

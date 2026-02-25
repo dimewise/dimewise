@@ -14,8 +14,8 @@ import (
 
 // BudgetCategorySpending holds a category's spent amount for a period.
 type BudgetCategorySpending struct {
-	BudgetCategoryID uuid.UUID
-	Spent            int64
+	BudgetCategoryID uuid.UUID `alias:"expenses.budget_category_id"`
+	Spent            int64     `alias:"expenses.spent"`
 }
 
 // BudgetReader defines read operations for budget categories.
@@ -103,15 +103,18 @@ func (r *BudgetRepository) GetSpendingByCategory(
 ) ([]BudgetCategorySpending, error) {
 	var results []BudgetCategorySpending
 
-	stmt := postgres.RawStatement(`
-		SELECT budget_category_id, SUM(amount) AS spent
-		FROM expenses
-		WHERE household_id = :householdID::uuid
-		  AND budget_category_id IS NOT NULL
-		  AND incurred_at >= :from::timestamptz
-		  AND incurred_at < :to::timestamptz
-		GROUP BY budget_category_id
-	`, postgres.RawArgs{"householdID": householdID.String(), "from": from, "to": to})
+	stmt := postgres.SELECT(
+		table.Expenses.BudgetCategoryID,
+		postgres.SUMi(table.Expenses.Amount).AS("expenses.spent"),
+	).
+		FROM(table.Expenses).
+		WHERE(
+			table.Expenses.HouseholdID.EQ(postgres.UUID(householdID)).
+				AND(table.Expenses.BudgetCategoryID.IS_NOT_NULL()).
+				AND(table.Expenses.IncurredAt.GT_EQ(postgres.TimestampzT(from))).
+				AND(table.Expenses.IncurredAt.LT(postgres.TimestampzT(to))),
+		).
+		GROUP_BY(table.Expenses.BudgetCategoryID)
 
 	err := stmt.QueryContext(ctx, r.db, &results)
 	if err != nil {

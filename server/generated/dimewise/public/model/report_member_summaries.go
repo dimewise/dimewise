@@ -13,12 +13,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type Settlements struct {
-	ID          uuid.UUID `sql:"primary_key"`
-	HouseholdID uuid.UUID
-	Month       int32
-	Year        int32
-	GeneratedAt time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+type ReportMemberSummaries struct {
+	ID         uuid.UUID `sql:"primary_key"`
+	ReportID   uuid.UUID
+	UserID     uuid.UUID
+	MemberName string
+	TotalPaid  int64
+	TotalOwed  int64
+	NetBalance int64
+	CreatedAt  time.Time
 }

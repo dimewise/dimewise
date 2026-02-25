@@ -448,12 +448,12 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /settlements:
+  /reports:
     get:
-      summary: List settlements for the current household
-      operationId: listSettlements
+      summary: List monthly reports for the current household
+      operationId: listReports
       tags:
-        - Settlements
+        - Reports
       responses:
         '200':
           description: OK
@@ -462,48 +462,46 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Settlement'
+                  $ref: '#/components/schemas/Report'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /settlements/generate:
+  /reports/generate:
     post:
-      summary: Manually generate a settlement for a given month
-      operationId: generateSettlement
+      summary: Generate (or regenerate) a monthly report
+      operationId: generateReport
       tags:
-        - Settlements
+        - Reports
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GenerateSettlementRequest'
+              $ref: '#/components/schemas/GenerateReportRequest'
       responses:
         '201':
-          description: Settlement generated
+          description: Report generated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SettlementWithTransfers'
+                $ref: '#/components/schemas/ReportWithDetails'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '409':
-          $ref: '#/components/responses/Conflict'
 
-  /settlements/{settlementId}:
+  /reports/{reportId}:
     get:
-      summary: Get settlement detail with transfers
-      operationId: getSettlement
+      summary: Get full report with all details
+      operationId: getReport
       tags:
-        - Settlements
+        - Reports
       parameters:
-        - name: settlementId
+        - name: reportId
           in: path
           required: true
           schema:
@@ -515,18 +513,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SettlementWithTransfers'
+                $ref: '#/components/schemas/ReportWithDetails'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /settlements/transfers/{transferId}/pay:
+  /reports/transfers/{transferId}/pay:
     patch:
-      summary: Mark a settlement transfer as paid
-      operationId: markTransferPaid
+      summary: Mark a report transfer as paid
+      operationId: markReportTransferPaid
       tags:
-        - Settlements
+        - Reports
       parameters:
         - name: transferId
           in: path
@@ -540,7 +538,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SettlementTransfer'
+                $ref: '#/components/schemas/ReportTransfer'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -862,44 +860,128 @@ components:
           minimum: 0
           description: Split amount in smallest currency unit
 
-    Settlement:
+    Report:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
         - type: object
-          required: [household_id, month, year, generated_at]
+          required: [household_id, month, year, total_expenses, total_amount, generated_at]
           properties:
             household_id: { type: string, format: uuid }
             month: { type: integer }
             year: { type: integer }
-            generated_at: { type: string, format: date-time }
-
-    SettlementTransfer:
-      allOf:
-        - $ref: '#/components/schemas/BaseEntity'
-        - type: object
-          required: [settlement_id, from_user_id, to_user_id, amount]
-          properties:
-            settlement_id: { type: string, format: uuid }
-            from_user_id: { type: string, format: uuid }
-            to_user_id: { type: string, format: uuid }
-            amount:
+            total_expenses: { type: integer, description: Number of expenses in the month }
+            total_amount:
               type: integer
               format: int64
-              description: Transfer amount in smallest currency unit
-            paid_at: { type: string, format: date-time }
+              description: Total expenditure in smallest currency unit
+            generated_at: { type: string, format: date-time }
 
-    SettlementWithTransfers:
+    ReportMemberSummary:
+      type: object
+      required: [id, user_id, member_name, total_paid, total_owed, net_balance]
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        member_name: { type: string }
+        total_paid:
+          type: integer
+          format: int64
+          description: Total amount this member paid for expenses
+        total_owed:
+          type: integer
+          format: int64
+          description: Total amount this member owes (from splits)
+        net_balance:
+          type: integer
+          format: int64
+          description: total_paid minus total_owed (positive means owed money)
+
+    ReportCategoryBreakdown:
+      type: object
+      required: [id, category_name, budget_amount, total_spent]
+      properties:
+        id: { type: string, format: uuid }
+        category_name: { type: string }
+        budget_amount:
+          type: integer
+          format: int64
+          description: Monthly budget for this category
+        total_spent:
+          type: integer
+          format: int64
+          description: Total spent in this category
+
+    ReportLineItemSplit:
+      type: object
+      required: [id, user_id, member_name, amount]
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        member_name: { type: string }
+        amount:
+          type: integer
+          format: int64
+
+    ReportLineItem:
+      type: object
+      required: [id, expense_title, paid_by_user_id, paid_by_name, amount, incurred_at, splits]
+      properties:
+        id: { type: string, format: uuid }
+        expense_id: { type: string, format: uuid }
+        expense_title: { type: string }
+        category_name: { type: string }
+        paid_by_user_id: { type: string, format: uuid }
+        paid_by_name: { type: string }
+        amount:
+          type: integer
+          format: int64
+        incurred_at: { type: string, format: date-time }
+        notes: { type: string }
+        splits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportLineItemSplit'
+
+    ReportTransfer:
+      type: object
+      required: [id, from_user_id, to_user_id, from_name, to_name, amount]
+      properties:
+        id: { type: string, format: uuid }
+        report_id: { type: string, format: uuid }
+        from_user_id: { type: string, format: uuid }
+        to_user_id: { type: string, format: uuid }
+        from_name: { type: string }
+        to_name: { type: string }
+        amount:
+          type: integer
+          format: int64
+          description: Transfer amount in smallest currency unit
+        paid_at: { type: string, format: date-time }
+
+    ReportWithDetails:
       allOf:
-        - $ref: '#/components/schemas/Settlement'
+        - $ref: '#/components/schemas/Report'
         - type: object
-          required: [transfers]
+          required: [member_summaries, category_breakdowns, line_items, transfers]
           properties:
+            member_summaries:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReportMemberSummary'
+            category_breakdowns:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReportCategoryBreakdown'
+            line_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReportLineItem'
             transfers:
               type: array
               items:
-                $ref: '#/components/schemas/SettlementTransfer'
+                $ref: '#/components/schemas/ReportTransfer'
 
-    GenerateSettlementRequest:
+    GenerateReportRequest:
       type: object
       required: [month, year]
       properties:
