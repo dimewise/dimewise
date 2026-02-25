@@ -1,13 +1,13 @@
 # Dimewise — Product Specification
 
-> **Last Updated:** 2026-02-24
+ > **Last Updated:** 2026-02-25
 
 ## Vision
 
 Dimewise is a playful, mobile-first household budgeting app. Households set monthly budgets by category, any member logs expenses, and at the end of each month, a settlement report shows exactly who owes whom.
 
 **Mascot:** Pixel-art penguin accountant (future visual asset).
-**Style:** Playful, intuitive, accessible to all ages. Ant Design UI components.
+**Style:** Playful, intuitive, accessible to all ages. Mobile-first PWA with Tailwind CSS 4 + Radix UI (shadcn/ui pattern).
 
 ---
 

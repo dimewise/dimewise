@@ -1,23 +1,23 @@
-import { CalendarOutlined, EyeOutlined, PlusOutlined } from "@ant-design/icons";
-import {
-	Button,
-	Card,
-	DatePicker,
-	Empty,
-	Flex,
-	List,
-	Modal,
-	message,
-	Spin,
-	Typography,
-} from "antd";
-import type { Dayjs } from "dayjs";
-import dayjs from "dayjs";
+import { ArrowRightLeft, Calendar, ChevronRight, Plus } from "lucide-react";
+import { format } from "date-fns";
 import { useState } from "react";
 import { Navigate } from "react-router";
+import { toast } from "sonner";
 import { SettlementDetail } from "@/components/Settlement/SettlementDetail";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FullPageSpinner } from "@/components/ui/spinner";
 import { RoutesEnum } from "@/routes/Routes";
-import type { Settlement } from "@/store/api/api";
 import {
 	useGenerateSettlementMutation,
 	useGetMyHouseholdQuery,
@@ -32,16 +32,14 @@ export const SettlementsPage = () => {
 	const [generateSettlement, { isLoading: isGenerating }] =
 		useGenerateSettlementMutation();
 
-	const [generateModalOpen, setGenerateModalOpen] = useState(false);
-	const [selectedMonth, setSelectedMonth] = useState<Dayjs>(dayjs());
-	const [detailId, setDetailId] = useState<string | null>(null);
+	const now = new Date();
+	const [generateOpen, setGenerateOpen] = useState(false);
+	const [genMonth, setGenMonth] = useState(now.getMonth() + 1);
+	const [genYear, setGenYear] = useState(now.getFullYear());
+	const [selectedId, setSelectedId] = useState<string | null>(null);
 
 	if (isHouseholdLoading) {
-		return (
-			<Flex justify="center" align="center" style={{ padding: 48 }}>
-				<Spin size="large" />
-			</Flex>
-		);
+		return <FullPageSpinner />;
 	}
 
 	if (!household) {
@@ -50,111 +48,151 @@ export const SettlementsPage = () => {
 
 	const currency = household.currency;
 
-	const handleGenerate = async () => {
-		try {
-			const result = await generateSettlement({
-				generateSettlementRequest: {
-					month: selectedMonth.month() + 1,
-					year: selectedMonth.year(),
-				},
-			}).unwrap();
-			message.success("Settlement generated!");
-			setGenerateModalOpen(false);
-			setDetailId(result.id);
-		} catch {
-			message.error(
-				"Failed to generate settlement. It may already exist for this month.",
-			);
-		}
-	};
-
-	const monthLabel = (s: Settlement) => {
-		const dt = dayjs()
-			.month(s.month - 1)
-			.year(s.year);
-		return dt.format("MMMM YYYY");
-	};
-
-	if (detailId) {
+	// If viewing a specific settlement
+	if (selectedId) {
 		return (
 			<SettlementDetail
-				settlementId={detailId}
+				settlementId={selectedId}
 				currency={currency}
 				members={household.members}
-				onBack={() => setDetailId(null)}
+				onBack={() => setSelectedId(null)}
 			/>
 		);
 	}
 
+	const handleGenerate = async () => {
+		try {
+			const result = await generateSettlement({
+				generateSettlementRequest: {
+					month: genMonth,
+					year: genYear,
+				},
+			}).unwrap();
+			toast.success("Settlement generated!");
+			setGenerateOpen(false);
+			setSelectedId(result.id);
+		} catch {
+			toast.error("Failed to generate settlement.");
+		}
+	};
+
 	return (
-		<Flex vertical gap={24}>
-			<Flex justify="space-between" align="center">
-				<Typography.Title level={3} style={{ margin: 0 }}>
-					Settlements
-				</Typography.Title>
+		<div className="space-y-5 animate-fade-in">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<h1 className="text-2xl font-bold tracking-tight">Settlements</h1>
 				<Button
-					type="primary"
-					icon={<PlusOutlined />}
-					onClick={() => setGenerateModalOpen(true)}
+					size="sm"
+					className="gap-1.5"
+					onClick={() => setGenerateOpen(true)}
 				>
-					Generate Settlement
+					<Plus className="h-4 w-4" />
+					Generate
 				</Button>
-			</Flex>
+			</div>
 
-			<Card>
-				{isSettlementsLoading ? (
-					<Flex justify="center" style={{ padding: 48 }}>
-						<Spin />
-					</Flex>
-				) : settlements && settlements.length > 0 ? (
-					<List
-						dataSource={settlements}
-						renderItem={(s) => (
-							<List.Item
-								actions={[
-									<Button
-										key="view"
-										type="link"
-										icon={<EyeOutlined />}
-										onClick={() => setDetailId(s.id)}
+			{/* List */}
+			{isSettlementsLoading ? (
+				<FullPageSpinner />
+			) : settlements && settlements.length > 0 ? (
+				<div className="space-y-2">
+					{settlements.map((s) => {
+						const monthName = new Date(s.year, s.month - 1).toLocaleString(
+							"default",
+							{ month: "long", year: "numeric" },
+						);
+						return (
+							<Card key={s.id}>
+								<CardContent className="p-0">
+									<button
+										type="button"
+										className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors rounded-2xl"
+										onClick={() => setSelectedId(s.id)}
 									>
-										View
-									</Button>,
-								]}
-							>
-								<List.Item.Meta
-									avatar={<CalendarOutlined style={{ fontSize: 24 }} />}
-									title={monthLabel(s)}
-									description={`Generated ${dayjs(s.generated_at).format("MMM D, YYYY h:mm A")}`}
-								/>
-							</List.Item>
-						)}
-					/>
-				) : (
-					<Empty description="No settlements yet. Generate one for a completed month!" />
-				)}
-			</Card>
+										<div className="min-w-0">
+											<div className="flex items-center gap-2">
+												<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+												<h3 className="text-sm font-semibold">{monthName}</h3>
+											</div>
+											<p className="text-xs text-muted-foreground mt-1 ml-6">
+												Generated{" "}
+												{format(new Date(s.generated_at), "MMM d, yyyy")}
+											</p>
+										</div>
+										<ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+									</button>
+								</CardContent>
+							</Card>
+						);
+					})}
+				</div>
+			) : (
+				<Card>
+					<CardContent>
+						<EmptyState
+							icon={<ArrowRightLeft className="h-6 w-6" />}
+							title="No settlements yet"
+							description="Generate a settlement to balance out expenses among household members."
+							action={
+								<Button
+									size="sm"
+									className="gap-1.5"
+									onClick={() => setGenerateOpen(true)}
+								>
+									<Plus className="h-4 w-4" />
+									Generate Settlement
+								</Button>
+							}
+						/>
+					</CardContent>
+				</Card>
+			)}
 
-			<Modal
-				open={generateModalOpen}
-				title="Generate Monthly Settlement"
-				okText="Generate"
-				onOk={handleGenerate}
-				onCancel={() => setGenerateModalOpen(false)}
-				confirmLoading={isGenerating}
+			{/* Generate dialog */}
+			<Dialog
+				open={generateOpen}
+				onOpenChange={(v) => !v && setGenerateOpen(false)}
 			>
-				<Typography.Paragraph>
-					Select a month to calculate who owes whom based on that month's
-					expenses and splits.
-				</Typography.Paragraph>
-				<DatePicker
-					picker="month"
-					value={selectedMonth}
-					onChange={(val) => val && setSelectedMonth(val)}
-					style={{ width: "100%" }}
-					disabledDate={(current) => current?.isAfter(dayjs())}
-				/>
-			</Modal>
-		</Flex>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Generate Settlement</DialogTitle>
+					</DialogHeader>
+					<p className="text-sm text-muted-foreground">
+						Choose the month and year to generate a settlement for. This will
+						calculate who owes whom based on that month&apos;s expenses.
+					</p>
+					<div className="grid grid-cols-2 gap-3">
+						<div className="space-y-2">
+							<Label>Month</Label>
+							<Input
+								type="number"
+								min={1}
+								max={12}
+								value={genMonth}
+								onChange={(e) => setGenMonth(Number(e.target.value))}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label>Year</Label>
+							<Input
+								type="number"
+								min={2020}
+								max={2099}
+								value={genYear}
+								onChange={(e) => setGenYear(Number(e.target.value))}
+							/>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setGenerateOpen(false)}>
+							Cancel
+						</Button>
+						<Button onClick={handleGenerate} disabled={isGenerating}>
+							{isGenerating ? "Generating..." : "Generate"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</div>
 	);
 };

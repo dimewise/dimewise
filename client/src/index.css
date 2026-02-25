@@ -1,14 +1,176 @@
-/* Reset and Box Model */
-:root {
-	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-	line-height: 1.5;
-	font-weight: 400;
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Dimewise Design System
+ * A playful, mobile-first household budgeting app.
+ */
+
+@theme inline {
+	/* Brand colors */
+	--color-brand: var(--brand);
+	--color-brand-light: var(--brand-light);
+	--color-brand-dark: var(--brand-dark);
+	--color-brand-foreground: var(--brand-foreground);
+
+	/* Semantic surface colors */
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-surface: var(--surface);
+	--color-surface-elevated: var(--surface-elevated);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-border: var(--border-color);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+
+	/* Status colors */
+	--color-success: var(--success);
+	--color-success-light: var(--success-light);
+	--color-warning: var(--warning);
+	--color-warning-light: var(--warning-light);
+	--color-danger: var(--danger);
+	--color-danger-light: var(--danger-light);
+
+	/* Sidebar */
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-active: var(--sidebar-active);
+
+	/* Animation */
+	--animate-fade-in: fade-in 0.3s ease-out;
+	--animate-slide-up: slide-up 0.3s ease-out;
+	--animate-slide-down: slide-down 0.2s ease-in;
+	--animate-scale-in: scale-in 0.2s ease-out;
+
+	/* Border radius */
+	--radius-sm: 0.375rem;
+	--radius-md: 0.5rem;
+	--radius-lg: 0.75rem;
+	--radius-xl: 1rem;
+	--radius-2xl: 1.25rem;
+	--radius-full: 9999px;
+
+	/* Font family */
+	--font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
+/* Light theme (default) */
+:root {
+	--brand: oklch(0.585 0.233 277.117);
+	--brand-light: oklch(0.87 0.108 277.117);
+	--brand-dark: oklch(0.457 0.24 277.117);
+	--brand-foreground: oklch(1 0 0);
+
+	--background: oklch(0.98 0.002 247.839);
+	--foreground: oklch(0.141 0.004 285.823);
+	--surface: oklch(1 0 0);
+	--surface-elevated: oklch(1 0 0);
+	--muted: oklch(0.967 0.001 286.375);
+	--muted-foreground: oklch(0.552 0.016 285.938);
+	--border-color: oklch(0.923 0.003 247.839);
+	--input: oklch(0.923 0.003 247.839);
+	--ring: oklch(0.585 0.233 277.117);
+
+	--success: oklch(0.627 0.194 149.214);
+	--success-light: oklch(0.95 0.052 149.214);
+	--warning: oklch(0.769 0.188 70.08);
+	--warning-light: oklch(0.96 0.06 70.08);
+	--danger: oklch(0.577 0.245 27.325);
+	--danger-light: oklch(0.96 0.05 27.325);
+
+	--sidebar: oklch(0.21 0.034 277.117);
+	--sidebar-foreground: oklch(0.93 0.01 277.117);
+	--sidebar-active: oklch(0.585 0.233 277.117);
+}
+
+/* Animations */
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slide-up {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slide-down {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes scale-in {
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Base styles */
 html,
 body,
 #root {
 	height: 100%;
 	margin: 0;
 	padding: 0;
+}
+
+body {
+	font-family: var(--font-sans);
+	background-color: var(--background);
+	color: var(--foreground);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+	body {
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: oklch(0.8 0.01 277);
+	border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: oklch(0.65 0.02 277);
 }

@@ -1,16 +1,24 @@
-import {
-	Button,
-	Card,
-	Divider,
-	Flex,
-	Form,
-	Input,
-	message,
-	Select,
-	Typography,
-} from "antd";
+import { ArrowLeft, Home, KeyRound, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { RoutesEnum } from "@/routes/Routes";
 import {
 	useCreateHouseholdMutation,
@@ -40,167 +48,180 @@ export const HouseholdSetupPage = () => {
 		useCreateHouseholdMutation();
 	const [joinHousehold, { isLoading: isJoining }] = useJoinHouseholdMutation();
 
-	const handleCreate = async (values: { name: string; currency: string }) => {
-		console.log("creating");
+	const [name, setName] = useState("");
+	const [currency, setCurrency] = useState("");
+	const [inviteCode, setInviteCode] = useState("");
+
+	const handleCreate = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!name.trim() || !currency) return;
 		try {
 			await createHousehold({
 				createHouseholdRequest: {
-					name: values.name,
-					currency: values.currency as "USD",
+					name: name.trim(),
+					currency: currency as "USD",
 				},
 			}).unwrap();
-			message.success("Household created!");
+			toast.success("Household created!");
 			navigate(RoutesEnum.dashboard);
 		} catch {
-			message.error("Failed to create household. Please try again.");
+			toast.error("Failed to create household. Please try again.");
 		}
 	};
 
-	const handleJoin = async (values: { invite_code: string }) => {
+	const handleJoin = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!inviteCode.trim()) return;
 		try {
 			await joinHousehold({
-				joinHouseholdRequest: { invite_code: values.invite_code },
+				joinHouseholdRequest: { invite_code: inviteCode.trim() },
 			}).unwrap();
-			message.success("Joined household!");
+			toast.success("Joined household!");
 			navigate(RoutesEnum.dashboard);
 		} catch {
-			message.error(
-				"Invalid invite code or you already belong to a household.",
-			);
+			toast.error("Invalid invite code or you already belong to a household.");
 		}
 	};
 
 	if (mode === "choose") {
 		return (
-			<Flex justify="center" align="center" style={{ minHeight: "60vh" }}>
-				<Card style={{ maxWidth: 480, width: "100%" }}>
-					<Typography.Title level={3} style={{ textAlign: "center" }}>
-						Welcome to Dimewise!
-					</Typography.Title>
-					<Typography.Paragraph style={{ textAlign: "center" }}>
-						Get started by creating a new household or joining an existing one
-						with an invite code.
-					</Typography.Paragraph>
-					<Flex vertical gap={12}>
+			<div className="flex min-h-[60vh] items-center justify-center px-4">
+				<Card className="w-full max-w-md animate-fade-in">
+					<CardHeader className="items-center text-center pb-2">
+						<div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-light">
+							<Home className="h-7 w-7 text-brand" />
+						</div>
+						<CardTitle className="text-xl">Welcome to Dimewise!</CardTitle>
+						<CardDescription>
+							Get started by creating a new household or joining an existing one
+							with an invite code.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="flex flex-col gap-3">
 						<Button
-							type="primary"
-							size="large"
-							block
+							size="lg"
+							className="w-full gap-2"
 							onClick={() => setMode("create")}
 						>
+							<Plus className="h-4 w-4" />
 							Create a Household
 						</Button>
-						<Button size="large" block onClick={() => setMode("join")}>
+						<Button
+							variant="outline"
+							size="lg"
+							className="w-full gap-2"
+							onClick={() => setMode("join")}
+						>
+							<KeyRound className="h-4 w-4" />
 							Join with Invite Code
 						</Button>
-					</Flex>
+					</CardContent>
 				</Card>
-			</Flex>
+			</div>
 		);
 	}
 
 	if (mode === "create") {
 		return (
-			<Flex justify="center" align="center" style={{ minHeight: "60vh" }}>
-				<Card
-					title="Create a Household"
-					style={{ maxWidth: 480, width: "100%" }}
-					extra={
-						<Button type="link" onClick={() => setMode("choose")}>
-							Back
-						</Button>
-					}
-				>
-					<Form layout="vertical" onFinish={handleCreate}>
-						<Form.Item
-							label="Household Name"
-							name="name"
-							rules={[
-								{
-									required: true,
-									message: "Please enter a name",
-								},
-								{
-									min: 1,
-									max: 100,
-									message: "Name must be between 1 and 100 characters",
-								},
-							]}
-						>
-							<Input placeholder="e.g. The Smith Family" />
-						</Form.Item>
-						<Form.Item
-							label="Currency"
-							name="currency"
-							rules={[
-								{
-									required: true,
-									message: "Please select a currency",
-								},
-							]}
-						>
-							<Select
-								options={currencyOptions}
-								placeholder="Select currency"
-								showSearch
-								filterOption={(input, option) =>
-									(option?.label ?? "")
-										.toLowerCase()
-										.includes(input.toLowerCase())
-								}
-							/>
-						</Form.Item>
-						<Form.Item>
-							<Button
-								type="primary"
-								htmlType="submit"
-								loading={isCreating}
-								block
+			<div className="flex min-h-[60vh] items-center justify-center px-4">
+				<Card className="w-full max-w-md animate-slide-up">
+					<CardHeader>
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => setMode("choose")}
+								className="rounded-lg p-1.5 hover:bg-muted transition-colors"
 							>
-								Create
+								<ArrowLeft className="h-4 w-4" />
+							</button>
+							<CardTitle>Create a Household</CardTitle>
+						</div>
+					</CardHeader>
+					<CardContent>
+						<form onSubmit={handleCreate} className="flex flex-col gap-4">
+							<div className="space-y-2">
+								<Label htmlFor="name">Household Name</Label>
+								<Input
+									id="name"
+									placeholder="e.g. The Smith Family"
+									value={name}
+									onChange={(e) => setName(e.target.value)}
+									required
+									maxLength={100}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label>Currency</Label>
+								<Select value={currency} onValueChange={setCurrency}>
+									<SelectTrigger>
+										<SelectValue placeholder="Select currency" />
+									</SelectTrigger>
+									<SelectContent>
+										{currencyOptions.map((opt) => (
+											<SelectItem key={opt.value} value={opt.value}>
+												{opt.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+							<Button
+								type="submit"
+								size="lg"
+								className="w-full mt-2"
+								disabled={isCreating || !name.trim() || !currency}
+							>
+								{isCreating ? "Creating..." : "Create"}
 							</Button>
-						</Form.Item>
-					</Form>
+						</form>
+					</CardContent>
 				</Card>
-			</Flex>
+			</div>
 		);
 	}
 
 	return (
-		<Flex justify="center" align="center" style={{ minHeight: "60vh" }}>
-			<Card
-				title="Join a Household"
-				style={{ maxWidth: 480, width: "100%" }}
-				extra={
-					<Button type="link" onClick={() => setMode("choose")}>
-						Back
-					</Button>
-				}
-			>
-				<Form layout="vertical" onFinish={handleJoin}>
-					<Form.Item
-						label="Invite Code"
-						name="invite_code"
-						rules={[
-							{
-								required: true,
-								message: "Please enter the invite code",
-							},
-						]}
-					>
-						<Input placeholder="e.g. A1B2C3D4" />
-					</Form.Item>
-					<Form.Item>
-						<Button type="primary" htmlType="submit" loading={isJoining} block>
-							Join
+		<div className="flex min-h-[60vh] items-center justify-center px-4">
+			<Card className="w-full max-w-md animate-slide-up">
+				<CardHeader>
+					<div className="flex items-center gap-2">
+						<button
+							type="button"
+							onClick={() => setMode("choose")}
+							className="rounded-lg p-1.5 hover:bg-muted transition-colors"
+						>
+							<ArrowLeft className="h-4 w-4" />
+						</button>
+						<CardTitle>Join a Household</CardTitle>
+					</div>
+				</CardHeader>
+				<CardContent>
+					<form onSubmit={handleJoin} className="flex flex-col gap-4">
+						<div className="space-y-2">
+							<Label htmlFor="invite-code">Invite Code</Label>
+							<Input
+								id="invite-code"
+								placeholder="e.g. A1B2C3D4"
+								value={inviteCode}
+								onChange={(e) => setInviteCode(e.target.value)}
+								required
+								className="font-mono tracking-wider text-center text-lg"
+							/>
+							<p className="text-xs text-muted-foreground">
+								Ask your household owner for the invite code.
+							</p>
+						</div>
+						<Button
+							type="submit"
+							size="lg"
+							className="w-full mt-2"
+							disabled={isJoining || !inviteCode.trim()}
+						>
+							{isJoining ? "Joining..." : "Join"}
 						</Button>
-					</Form.Item>
-				</Form>
-				<Divider />
-				<Typography.Paragraph type="secondary">
-					Ask your household owner for the invite code to join.
-				</Typography.Paragraph>
+					</form>
+				</CardContent>
 			</Card>
-		</Flex>
+		</div>
 	);
 };

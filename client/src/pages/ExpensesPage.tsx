@@ -1,29 +1,40 @@
 import {
-	DeleteOutlined,
-	EditOutlined,
-	FilterOutlined,
-	PlusOutlined,
-} from "@ant-design/icons";
-import {
-	Button,
-	Card,
-	DatePicker,
-	Empty,
-	Flex,
-	Modal,
-	message,
-	Select,
-	Space,
-	Spin,
-	Table,
-	Tag,
-	Typography,
-} from "antd";
-import type { ColumnsType } from "antd/es/table";
-import { DateTime } from "luxon";
+	ChevronLeft,
+	ChevronRight,
+	Edit2,
+	Filter,
+	Plus,
+	Receipt,
+	Trash2,
+	X,
+} from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { Navigate } from "react-router";
+import { toast } from "sonner";
 import { ExpenseModal } from "@/components/Expense/ExpenseModal";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { FullPageSpinner } from "@/components/ui/spinner";
 import { RoutesEnum } from "@/routes/Routes";
 import type { ExpenseWithSplits, HouseholdMember } from "@/store/api/api";
 import {
@@ -54,6 +65,8 @@ export const ExpensesPage = () => {
 	const [modalOpen, setModalOpen] = useState(false);
 	const [editingExpense, setEditingExpense] =
 		useState<ExpenseWithSplits | null>(null);
+	const [deletingExpense, setDeletingExpense] =
+		useState<ExpenseWithSplits | null>(null);
 
 	const { data: expenseData, isLoading: isExpensesLoading } =
 		useListExpensesQuery(
@@ -67,11 +80,7 @@ export const ExpensesPage = () => {
 	const [deleteExpense] = useDeleteExpenseMutation();
 
 	if (isHouseholdLoading) {
-		return (
-			<Flex justify="center" align="center" style={{ padding: 48 }}>
-				<Spin size="large" />
-			</Flex>
-		);
+		return <FullPageSpinner />;
 	}
 
 	if (!household) {
@@ -99,26 +108,15 @@ export const ExpensesPage = () => {
 		return name || m.email;
 	};
 
-	const handleEdit = (expense: ExpenseWithSplits) => {
-		setEditingExpense(expense);
-		setModalOpen(true);
-	};
-
-	const handleDelete = (expense: ExpenseWithSplits) => {
-		Modal.confirm({
-			title: "Delete Expense",
-			content: `Are you sure you want to delete "${expense.title}"?`,
-			okText: "Delete",
-			okType: "danger",
-			onOk: async () => {
-				try {
-					await deleteExpense({ expenseId: expense.id }).unwrap();
-					message.success("Expense deleted.");
-				} catch {
-					message.error("Failed to delete expense.");
-				}
-			},
-		});
+	const handleDelete = async () => {
+		if (!deletingExpense) return;
+		try {
+			await deleteExpense({ expenseId: deletingExpense.id }).unwrap();
+			toast.success("Expense deleted.");
+			setDeletingExpense(null);
+		} catch {
+			toast.error("Failed to delete expense.");
+		}
 	};
 
 	const handleCloseModal = () => {
@@ -126,190 +124,259 @@ export const ExpensesPage = () => {
 		setEditingExpense(null);
 	};
 
-	const columns: ColumnsType<ExpenseWithSplits> = [
-		{
-			title: "Date",
-			dataIndex: "incurred_at",
-			key: "date",
-			width: 120,
-			render: (val: string) =>
-				DateTime.fromISO(val).toLocaleString(DateTime.DATE_MED),
-		},
-		{
-			title: "Title",
-			dataIndex: "title",
-			key: "title",
-			render: (title: string) => (
-				<Typography.Text strong>{title}</Typography.Text>
-			),
-		},
-		{
-			title: "Amount",
-			dataIndex: "amount",
-			key: "amount",
-			align: "right",
-			width: 130,
-			render: (amount: number) => formatCurrency(amount, currency),
-		},
-		{
-			title: "Paid By",
-			dataIndex: "paid_by",
-			key: "paid_by",
-			width: 150,
-			render: (userId: string) => getMemberName(userId),
-		},
-		{
-			title: "Category",
-			dataIndex: "budget_category_id",
-			key: "category",
-			width: 150,
-			render: (catId: string | undefined) =>
-				catId ? (
-					<Tag>{categoryMap.get(catId) ?? "Unknown"}</Tag>
-				) : (
-					<Typography.Text type="secondary">—</Typography.Text>
-				),
-		},
-		{
-			title: "Split",
-			key: "splits",
-			width: 100,
-			render: (_: unknown, record: ExpenseWithSplits) => (
-				<Typography.Text type="secondary">
-					{record.splits.length} {record.splits.length === 1 ? "way" : "ways"}
-				</Typography.Text>
-			),
-		},
-		{
-			title: "",
-			key: "actions",
-			width: 100,
-			render: (_: unknown, record: ExpenseWithSplits) => (
-				<Flex gap={4}>
-					<Button
-						type="text"
-						icon={<EditOutlined />}
-						onClick={() => handleEdit(record)}
-					/>
-					<Button
-						type="text"
-						danger
-						icon={<DeleteOutlined />}
-						onClick={() => handleDelete(record)}
-					/>
-				</Flex>
-			),
-		},
-	];
+	const totalPages = expenseData ? Math.ceil(expenseData.total / PAGE_SIZE) : 0;
+	const hasActiveFilters = Object.values(filters).some(Boolean);
 
 	return (
-		<Flex vertical gap={24}>
-			<Flex justify="space-between" align="center">
-				<Typography.Title level={3} style={{ margin: 0 }}>
-					Expenses
-				</Typography.Title>
-				<Space>
+		<div className="space-y-5 animate-fade-in">
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<h1 className="text-2xl font-bold tracking-tight">Expenses</h1>
+				<div className="flex items-center gap-2">
 					<Button
-						icon={<FilterOutlined />}
+						variant={showFilters ? "secondary" : "outline"}
+						size="sm"
+						className="gap-1.5"
 						onClick={() => setShowFilters(!showFilters)}
 					>
+						<Filter className="h-3.5 w-3.5" />
 						Filters
+						{hasActiveFilters && (
+							<span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[10px] text-white">
+								!
+							</span>
+						)}
 					</Button>
 					<Button
-						type="primary"
-						icon={<PlusOutlined />}
+						size="sm"
+						className="gap-1.5"
 						onClick={() => setModalOpen(true)}
 					>
-						Add Expense
+						<Plus className="h-4 w-4" />
+						Add
 					</Button>
-				</Space>
-			</Flex>
+				</div>
+			</div>
 
+			{/* Filters */}
 			{showFilters && (
-				<Card size="small">
-					<Flex gap={16} wrap="wrap">
-						<Select
-							placeholder="Category"
-							allowClear
-							style={{ width: 180 }}
-							value={filters.categoryId}
-							onChange={(val) =>
-								setFilters((f) => ({ ...f, categoryId: val ?? undefined }))
-							}
-							options={categories?.map((c) => ({
-								value: c.id,
-								label: c.name,
-							}))}
-						/>
-						<Select
-							placeholder="Paid by"
-							allowClear
-							style={{ width: 180 }}
-							value={filters.paidBy}
-							onChange={(val) =>
-								setFilters((f) => ({ ...f, paidBy: val ?? undefined }))
-							}
-							options={household.members.map((m) => ({
-								value: m.user_id,
-								label:
-									[m.first_name, m.last_name].filter(Boolean).join(" ") ||
-									m.email,
-							}))}
-						/>
-						<DatePicker.RangePicker
-							onChange={(dates) => {
-								const [fromDate, toDate] = dates ?? [];
-								if (fromDate && toDate) {
-									setFilters((f) => ({
-										...f,
-										from: fromDate.toISOString(),
-										to: toDate.toISOString(),
-									}));
-								} else {
-									setFilters((f) => ({
-										...f,
-										from: undefined,
-										to: undefined,
-									}));
-								}
-							}}
-						/>
-						<Button
-							onClick={() => {
-								setFilters({});
-								setPage(1);
-							}}
-						>
-							Clear
-						</Button>
-					</Flex>
+				<Card className="animate-slide-down">
+					<CardContent className="p-4 space-y-3">
+						<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-1.5">
+								<Label className="text-xs">Category</Label>
+								<Select
+									value={filters.categoryId ?? "all"}
+									onValueChange={(v) =>
+										setFilters((f) => ({
+											...f,
+											categoryId: v === "all" ? undefined : v,
+										}))
+									}
+								>
+									<SelectTrigger className="h-9 text-sm">
+										<SelectValue placeholder="All categories" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">All categories</SelectItem>
+										{categories?.map((c) => (
+											<SelectItem key={c.id} value={c.id}>
+												{c.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+							<div className="space-y-1.5">
+								<Label className="text-xs">Paid By</Label>
+								<Select
+									value={filters.paidBy ?? "all"}
+									onValueChange={(v) =>
+										setFilters((f) => ({
+											...f,
+											paidBy: v === "all" ? undefined : v,
+										}))
+									}
+								>
+									<SelectTrigger className="h-9 text-sm">
+										<SelectValue placeholder="Everyone" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all">Everyone</SelectItem>
+										{household.members.map((m) => (
+											<SelectItem key={m.user_id} value={m.user_id}>
+												{getMemberName(m.user_id)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						</div>
+						<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-1.5">
+								<Label className="text-xs">From</Label>
+								<Input
+									type="date"
+									className="h-9 text-sm"
+									value={filters.from?.split("T")[0] ?? ""}
+									onChange={(e) =>
+										setFilters((f) => ({
+											...f,
+											from: e.target.value
+												? new Date(e.target.value).toISOString()
+												: undefined,
+										}))
+									}
+								/>
+							</div>
+							<div className="space-y-1.5">
+								<Label className="text-xs">To</Label>
+								<Input
+									type="date"
+									className="h-9 text-sm"
+									value={filters.to?.split("T")[0] ?? ""}
+									onChange={(e) =>
+										setFilters((f) => ({
+											...f,
+											to: e.target.value
+												? new Date(e.target.value).toISOString()
+												: undefined,
+										}))
+									}
+								/>
+							</div>
+						</div>
+						{hasActiveFilters && (
+							<Button
+								variant="ghost"
+								size="sm"
+								className="gap-1.5 text-muted-foreground"
+								onClick={() => {
+									setFilters({});
+									setPage(1);
+								}}
+							>
+								<X className="h-3.5 w-3.5" />
+								Clear filters
+							</Button>
+						)}
+					</CardContent>
 				</Card>
 			)}
 
-			<Card>
-				{isExpensesLoading ? (
-					<Flex justify="center" style={{ padding: 48 }}>
-						<Spin />
-					</Flex>
-				) : expenseData && expenseData.expenses.length > 0 ? (
-					<Table
-						dataSource={expenseData.expenses}
-						columns={columns}
-						rowKey="id"
-						pagination={{
-							current: page,
-							pageSize: PAGE_SIZE,
-							total: expenseData.total,
-							onChange: (p) => setPage(p),
-							showSizeChanger: false,
-							showTotal: (total) => `${total} expenses`,
-						}}
-					/>
-				) : (
-					<Empty description="No expenses yet. Add one to get started!" />
-				)}
-			</Card>
+			{/* Expense list */}
+			{isExpensesLoading ? (
+				<FullPageSpinner />
+			) : expenseData && expenseData.expenses.length > 0 ? (
+				<>
+					<div className="space-y-2">
+						{expenseData.expenses.map((expense) => (
+							<Card key={expense.id}>
+								<CardContent className="p-4">
+									<div className="flex items-start justify-between">
+										<div className="min-w-0 flex-1">
+											<div className="flex items-center gap-2 flex-wrap">
+												<h3 className="text-sm font-semibold truncate">
+													{expense.title}
+												</h3>
+												{expense.budget_category_id && (
+													<Badge variant="default" className="text-[10px]">
+														{categoryMap.get(expense.budget_category_id) ??
+															"Unknown"}
+													</Badge>
+												)}
+											</div>
+											<p className="text-xs text-muted-foreground mt-1">
+												{getMemberName(expense.paid_by)} &middot;{" "}
+												{format(parseISO(expense.incurred_at), "MMM d, yyyy")}{" "}
+												&middot; {expense.splits.length}-way split
+											</p>
+										</div>
+										<div className="flex items-center gap-1 shrink-0 ml-3">
+											<p className="text-sm font-bold mr-1">
+												{formatCurrency(expense.amount, currency)}
+											</p>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-7 w-7"
+												onClick={() => {
+													setEditingExpense(expense);
+													setModalOpen(true);
+												}}
+											>
+												<Edit2 className="h-3 w-3" />
+											</Button>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-7 w-7 text-danger hover:text-danger"
+												onClick={() => setDeletingExpense(expense)}
+											>
+												<Trash2 className="h-3 w-3" />
+											</Button>
+										</div>
+									</div>
+								</CardContent>
+							</Card>
+						))}
+					</div>
 
+					{/* Pagination */}
+					{totalPages > 1 && (
+						<div className="flex items-center justify-between">
+							<p className="text-xs text-muted-foreground">
+								{expenseData.total} expense{expenseData.total !== 1 && "s"}
+							</p>
+							<div className="flex items-center gap-1">
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-8 w-8"
+									disabled={page <= 1}
+									onClick={() => setPage((p) => p - 1)}
+								>
+									<ChevronLeft className="h-4 w-4" />
+								</Button>
+								<span className="text-xs px-2">
+									{page} / {totalPages}
+								</span>
+								<Button
+									variant="outline"
+									size="icon"
+									className="h-8 w-8"
+									disabled={page >= totalPages}
+									onClick={() => setPage((p) => p + 1)}
+								>
+									<ChevronRight className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
+					)}
+				</>
+			) : (
+				<Card>
+					<CardContent>
+						<EmptyState
+							icon={<Receipt className="h-6 w-6" />}
+							title="No expenses yet"
+							description="Add your first expense to start tracking spending."
+							action={
+								<Button
+									size="sm"
+									className="gap-1.5"
+									onClick={() => setModalOpen(true)}
+								>
+									<Plus className="h-4 w-4" />
+									Add Expense
+								</Button>
+							}
+						/>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Create/Edit modal */}
 			<ExpenseModal
 				open={modalOpen}
 				onClose={handleCloseModal}
@@ -318,6 +385,30 @@ export const ExpensesPage = () => {
 				categories={categories ?? []}
 				expense={editingExpense}
 			/>
-		</Flex>
+
+			{/* Delete confirmation */}
+			<Dialog
+				open={!!deletingExpense}
+				onOpenChange={(v) => !v && setDeletingExpense(null)}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Delete Expense</DialogTitle>
+						<DialogDescription>
+							Are you sure you want to delete &ldquo;{deletingExpense?.title}
+							&rdquo;?
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setDeletingExpense(null)}>
+							Cancel
+						</Button>
+						<Button variant="danger" onClick={handleDelete}>
+							Delete
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		</div>
 	);
 };

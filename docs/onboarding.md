@@ -1,6 +1,6 @@
 # Dimewise — AI Agent Onboarding Guide
 
-> **Last Updated:** 2026-02-24
+> **Last Updated:** 2026-02-25
 
 ## What is Dimewise?
 
@@ -30,7 +30,12 @@ dimewise/
 |---------|-----------|
 | Framework | React 19 + Vite 7 |
 | Language | TypeScript (strict) |
-| UI Library | Ant Design 6 |
+| Styling | Tailwind CSS 4 (`@tailwindcss/vite` plugin) |
+| UI Primitives | Radix UI + CVA (shadcn/ui pattern) |
+| Icons | Lucide React |
+| Animations | Framer Motion 12 |
+| Toasts | Sonner |
+| Dates | date-fns |
 | State Management | Redux Toolkit (RTK Query) |
 | Auth | Clerk (`@clerk/clerk-react`) |
 | Routing | React Router 7 |
@@ -38,6 +43,9 @@ dimewise/
 | i18n | i18next |
 | Linting/Formatting | Biome |
 | Package Manager | Bun |
+| PWA | vite-plugin-pwa (auto-update service worker) |
+
+> **Design philosophy:** Mobile-first PWA. The UI is built as a progressive web app with a bottom tab navigation on mobile and a sidebar on desktop. The design system uses oklch color tokens defined in `index.css` with a `@theme inline` block. All UI primitives live in `components/ui/` following the shadcn/ui composition pattern (Radix + CVA + Tailwind).
 
 ### Server (`server/`)
 

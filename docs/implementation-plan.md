@@ -1,6 +1,6 @@
 # Dimewise — Implementation Plan
 
-> **Last Updated:** 2026-02-24
+> **Last Updated:** 2026-02-25
 
 This plan is broken into phases. Each phase is self-contained: it delivers working functionality end-to-end (database → server → client). Phases should be completed sequentially — each one builds on the previous.
 
@@ -205,18 +205,21 @@ Monthly settlement reports generate automatically, showing net transfers. Member
   - Current month budget overview card (total budget, spent, remaining with progress bar)
   - Recent expenses list (last 5) with "View All" link
   - Recent settlements list (last 3) with "View All" link
-- **Budget warnings:** Visual indicators (progress bar color change at 80% and 100%)
-- **Sidebar navigation:** Dashboard, Expenses, Budgets, Settlements, Settings
-- **Empty states:** Friendly prompts when no expenses or settlements exist
-- **Error handling:** Toast notifications (`message.success`/`message.error`) for all mutations
-- **Loading states:** Spin components during data fetching
+- **Budget warnings:** Visual indicators (progress bar color change at 80% and 100% — green/amber/red)
+- **Responsive layout:** Desktop sidebar (`Sidebar`) + mobile bottom tab nav (`BottomNav`) via `AuthenticatedLayout`
+- **Empty states:** Friendly prompts with icons when no expenses or settlements exist
+- **Error handling:** Sonner toast notifications (`toast.success()`/`toast.error()`) for all mutations
+- **Loading states:** Custom `Spinner` and `FullPageSpinner` components
+- **Mobile-first PWA:** `vite-plugin-pwa` with auto-update service worker, web manifest, API runtime caching
+- **Design system:** oklch color tokens in `index.css`, Tailwind CSS 4 utilities, Radix UI + CVA primitives in `components/ui/`
 
 ### Remaining Polish (Future)
 
-- Responsive optimizations for mobile viewports
-- Ant Design theme token customization for brand colors
 - Loading skeletons (instead of simple spinners)
 - Per-category spending progress bars on dashboard
+- Page transition animations with Framer Motion
+- Pixel art penguin mascot visual assets
+- Code-splitting via dynamic imports (reduce initial bundle size)
 
 ---
 
@@ -248,7 +251,7 @@ Each phase follows the same sequence:
 - [x] Service validates input, returns domain errors
 - [x] Handler does zero business logic — delegates to service
 - [x] Client uses only RTK Query hooks for server state
-- [ ] Forms use React Hook Form + Zod validation (currently using Ant Design Form)
+- [ ] Forms use React Hook Form + Zod validation (currently using controlled state + manual validation)
 - [x] All errors handled explicitly (no silent swallowing)
 - [x] `make lint` passes
 
