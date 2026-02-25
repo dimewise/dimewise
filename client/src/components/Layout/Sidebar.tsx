@@ -44,7 +44,7 @@ export function Sidebar() {
 								type="button"
 								onClick={() => navigate(item.path)}
 								className={cn(
-									"flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+									"flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
 									isActive
 										? "bg-sidebar-active text-white shadow-sm"
 										: "text-sidebar-foreground/70 hover:bg-white/10 hover:text-sidebar-foreground",

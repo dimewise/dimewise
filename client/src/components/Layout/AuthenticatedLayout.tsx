@@ -10,7 +10,7 @@ export const AuthenticatedLayout = () => {
 			<Toaster
 				position="top-center"
 				toastOptions={{
-					className: "!rounded-xl !border-border !shadow-lg",
+					className: "!rounded-lg !border-border !shadow-lg",
 				}}
 			/>
 

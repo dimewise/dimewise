@@ -84,7 +84,7 @@ export const HouseholdDashboard = ({ household }: Props) => {
 								<div
 									key={member.id}
 									className={cn(
-										"flex items-center gap-3 rounded-xl p-2 -mx-2",
+										"flex items-center gap-3 rounded-lg p-2 -mx-2",
 										"hover:bg-muted transition-colors",
 									)}
 								>

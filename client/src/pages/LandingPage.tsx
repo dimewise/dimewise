@@ -33,7 +33,7 @@ export const LandingPage = () => {
 		<div className="flex flex-col">
 			{/* Hero */}
 			<section className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-16 pb-20 text-center md:pt-24 md:pb-28">
-				<div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand text-white shadow-lg">
+				<div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl bg-brand text-white shadow-lg">
 					<PiggyBank className="h-8 w-8" />
 				</div>
 				<h1 className="text-4xl font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
@@ -74,7 +74,7 @@ export const LandingPage = () => {
 						{features.map((feature) => (
 							<div
 								key={feature.title}
-								className="rounded-2xl border border-border bg-surface p-6 transition-shadow hover:shadow-md"
+								className="rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-md"
 							>
 								<div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-light text-brand">
 									<feature.icon className="h-5 w-5" />

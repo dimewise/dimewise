@@ -33,7 +33,7 @@ function DialogContent({
 			<DialogOverlay />
 			<DialogPrimitive.Content
 				className={cn(
-					"fixed z-50 w-full max-w-lg bg-surface rounded-t-2xl md:rounded-2xl shadow-xl border border-border p-6",
+					"fixed z-50 w-full max-w-lg bg-surface rounded-t-xl md:rounded-xl shadow-xl border border-border p-6",
 					// Mobile: bottom sheet style
 					"bottom-0 left-0 right-0 md:bottom-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2",
 					"max-h-[85vh] overflow-y-auto",

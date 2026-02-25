@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
 	ArrowRight,
 	Calendar,
@@ -9,15 +10,17 @@ import {
 import { format, parseISO } from "date-fns";
 import { Navigate, useNavigate } from "react-router";
 import { BudgetOverviewCard } from "@/components/Budget/BudgetOverviewCard";
+import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { RoutesEnum } from "@/routes/Routes";
-import type { HouseholdMember } from "@/store/api/api";
+import type { ExpenseWithSplits, HouseholdMember } from "@/store/api/api";
 import {
 	useGetBudgetOverviewQuery,
 	useGetMyHouseholdQuery,
+	useListBudgetCategoriesQuery,
 	useListExpensesQuery,
 	useListSettlementsQuery,
 } from "@/store/api/api";
@@ -52,6 +55,12 @@ export const DashboardPage = () => {
 	const { data: settlements } = useListSettlementsQuery(undefined, {
 		skip: !household,
 	});
+	const { data: categories } = useListBudgetCategoriesQuery(undefined, {
+		skip: !household,
+	});
+
+	const [viewingExpense, setViewingExpense] =
+		useState<ExpenseWithSplits | null>(null);
 
 	if (isLoading) {
 		return <FullPageSpinner />;
@@ -69,6 +78,13 @@ export const DashboardPage = () => {
 	const memberMap = new Map<string, HouseholdMember>();
 	for (const m of household.members) {
 		memberMap.set(m.user_id, m);
+	}
+
+	const categoryMap = new Map<string, string>();
+	if (categories) {
+		for (const c of categories) {
+			categoryMap.set(c.id, c.name);
+		}
 	}
 
 	const getMemberName = (userId: string) => {
@@ -137,9 +153,11 @@ export const DashboardPage = () => {
 					{expenseData && expenseData.expenses.length > 0 ? (
 						<div className="divide-y divide-border">
 							{expenseData.expenses.map((expense) => (
-								<div
+								<button
 									key={expense.id}
-									className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+									type="button"
+									className="flex items-center justify-between py-3 first:pt-0 last:pb-0 w-full text-left"
+									onClick={() => setViewingExpense(expense)}
 								>
 									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium truncate">
@@ -153,7 +171,7 @@ export const DashboardPage = () => {
 									<p className="text-sm font-semibold ml-3 shrink-0">
 										{formatCurrency(expense.amount, currency)}
 									</p>
-								</div>
+								</button>
 							))}
 						</div>
 					) : (
@@ -217,6 +235,27 @@ export const DashboardPage = () => {
 					)}
 				</CardContent>
 			</Card>
+			{/* Expense detail modal */}
+			<ExpenseDetailModal
+				open={!!viewingExpense}
+				onClose={() => setViewingExpense(null)}
+				expense={viewingExpense}
+				currency={currency}
+				members={household.members}
+				categoryName={
+					viewingExpense?.budget_category_id
+						? categoryMap.get(viewingExpense.budget_category_id)
+						: undefined
+				}
+				onEdit={() => {
+					setViewingExpense(null);
+					navigate(RoutesEnum.expenses);
+				}}
+				onDelete={() => {
+					setViewingExpense(null);
+					navigate(RoutesEnum.expenses);
+				}}
+			/>
 		</div>
 	);
 };
