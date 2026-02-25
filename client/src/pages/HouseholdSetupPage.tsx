@@ -88,7 +88,7 @@ export const HouseholdSetupPage = () => {
 			<div className="flex min-h-[60vh] items-center justify-center px-4">
 				<Card className="w-full max-w-md animate-fade-in">
 					<CardHeader className="items-center text-center pb-2">
-						<div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-light">
+						<div className="mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-brand-light">
 							<Home className="h-7 w-7 text-brand" />
 						</div>
 						<CardTitle className="text-xl">Welcome to Dimewise!</CardTitle>

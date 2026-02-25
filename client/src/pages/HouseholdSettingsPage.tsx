@@ -170,7 +170,7 @@ export const HouseholdSettingsPage = () => {
 				</CardHeader>
 				<CardContent className="space-y-3">
 					<div className="flex items-center gap-2">
-						<code className="flex-1 rounded-xl bg-muted px-3 py-2.5 text-sm font-mono tracking-widest text-center select-all">
+						<code className="flex-1 rounded-lg bg-muted px-3 py-2.5 text-sm font-mono tracking-widest text-center select-all">
 							{household.invite_code}
 						</code>
 						<Button

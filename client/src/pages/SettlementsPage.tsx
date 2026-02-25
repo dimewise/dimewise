@@ -106,7 +106,7 @@ export const SettlementsPage = () => {
 								<CardContent className="p-0">
 									<button
 										type="button"
-										className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors rounded-2xl"
+										className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors rounded-xl"
 										onClick={() => setSelectedId(s.id)}
 									>
 										<div className="min-w-0">

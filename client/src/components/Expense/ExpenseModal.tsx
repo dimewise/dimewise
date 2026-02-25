@@ -328,7 +328,7 @@ export const ExpenseModal = ({
 							{splits.map((split, index) => (
 								<div
 									key={split.user_id}
-									className="flex items-center gap-2 rounded-xl bg-muted p-2.5"
+									className="flex items-center gap-2 rounded-lg bg-muted p-2.5"
 								>
 									<Select
 										value={split.user_id}

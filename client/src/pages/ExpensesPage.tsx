@@ -1,17 +1,16 @@
 import {
 	ChevronLeft,
 	ChevronRight,
-	Edit2,
 	Filter,
 	Plus,
 	Receipt,
-	Trash2,
 	X,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
+import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
 import { ExpenseModal } from "@/components/Expense/ExpenseModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,6 +65,8 @@ export const ExpensesPage = () => {
 	const [editingExpense, setEditingExpense] =
 		useState<ExpenseWithSplits | null>(null);
 	const [deletingExpense, setDeletingExpense] =
+		useState<ExpenseWithSplits | null>(null);
+	const [viewingExpense, setViewingExpense] =
 		useState<ExpenseWithSplits | null>(null);
 
 	const { data: expenseData, isLoading: isExpensesLoading } =
@@ -272,8 +273,12 @@ export const ExpensesPage = () => {
 					<div className="space-y-2">
 						{expenseData.expenses.map((expense) => (
 							<Card key={expense.id}>
-								<CardContent className="p-4">
-									<div className="flex items-start justify-between">
+								<button
+									type="button"
+									className="w-full p-4 text-left"
+									onClick={() => setViewingExpense(expense)}
+								>
+									<div className="flex items-center justify-between">
 										<div className="min-w-0 flex-1">
 											<div className="flex items-center gap-2 flex-wrap">
 												<h3 className="text-sm font-semibold truncate">
@@ -292,32 +297,11 @@ export const ExpensesPage = () => {
 												&middot; {expense.splits.length}-way split
 											</p>
 										</div>
-										<div className="flex items-center gap-1 shrink-0 ml-3">
-											<p className="text-sm font-bold mr-1">
-												{formatCurrency(expense.amount, currency)}
-											</p>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-7 w-7"
-												onClick={() => {
-													setEditingExpense(expense);
-													setModalOpen(true);
-												}}
-											>
-												<Edit2 className="h-3 w-3" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-7 w-7 text-danger hover:text-danger"
-												onClick={() => setDeletingExpense(expense)}
-											>
-												<Trash2 className="h-3 w-3" />
-											</Button>
-										</div>
+										<p className="text-lg font-bold shrink-0 ml-4">
+											{formatCurrency(expense.amount, currency)}
+										</p>
 									</div>
-								</CardContent>
+								</button>
 							</Card>
 						))}
 					</div>
@@ -375,6 +359,27 @@ export const ExpensesPage = () => {
 					</CardContent>
 				</Card>
 			)}
+
+			{/* Expense detail */}
+			<ExpenseDetailModal
+				open={!!viewingExpense}
+				onClose={() => setViewingExpense(null)}
+				expense={viewingExpense}
+				currency={currency}
+				members={household.members}
+				categoryName={
+					viewingExpense?.budget_category_id
+						? categoryMap.get(viewingExpense.budget_category_id)
+						: undefined
+				}
+				onEdit={(exp) => {
+					setEditingExpense(exp);
+					setModalOpen(true);
+				}}
+				onDelete={(exp) => {
+					setDeletingExpense(exp);
+				}}
+			/>
 
 			{/* Create/Edit modal */}
 			<ExpenseModal
