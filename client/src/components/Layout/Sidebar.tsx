@@ -1,8 +1,8 @@
 import {
+	FileBarChart,
 	LayoutDashboard,
 	PiggyBank,
 	Receipt,
-	FileBarChart,
 	Settings,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
@@ -26,9 +26,7 @@ export function Sidebar() {
 			<div className="flex flex-1 flex-col bg-sidebar">
 				{/* Logo */}
 				<div className="flex h-16 items-center gap-2.5 px-6">
-					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white font-bold text-sm">
-						D
-					</div>
+					<img src="/pwa-192x192.png" alt="Dimewise" className="h-8 w-8" />
 					<span className="text-lg font-bold text-sidebar-foreground tracking-tight">
 						Dimewise
 					</span>

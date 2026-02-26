@@ -1,3 +1,4 @@
+import { useUser } from "@clerk/clerk-react";
 import {
 	AlertTriangle,
 	Clipboard,
@@ -8,7 +9,6 @@ import {
 	UserMinus,
 	Users,
 } from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -25,7 +25,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { FullPageSpinner } from "@/components/ui/spinner";
+import { SkeletonPage } from "@/components/ui/skeleton";
 import { RoutesEnum } from "@/routes/Routes";
 import type { HouseholdMember } from "@/store/api/api";
 import {
@@ -54,7 +54,7 @@ export const HouseholdSettingsPage = () => {
 	>(null);
 
 	if (isLoading) {
-		return <FullPageSpinner />;
+		return <SkeletonPage />;
 	}
 
 	if (!household) {

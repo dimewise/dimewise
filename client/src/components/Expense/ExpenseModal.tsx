@@ -1,5 +1,5 @@
-import { Minus, Plus, Split } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AlertCircle, Minus, Plus, Split } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import type {
 	BudgetCategory,
 	ExpenseWithSplits,
@@ -57,6 +58,7 @@ export const ExpenseModal = ({
 
 	const isEditing = !!expense;
 	const isZeroDecimal = ["JPY", "KRW"].includes(currency.toUpperCase());
+	const hasCategories = categories.length > 0;
 
 	const [title, setTitle] = useState("");
 	const [amount, setAmount] = useState("");
@@ -65,6 +67,8 @@ export const ExpenseModal = ({
 	const [notes, setNotes] = useState("");
 	const [date, setDate] = useState("");
 	const [splits, setSplits] = useState<SplitEntry[]>([]);
+	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [submitted, setSubmitted] = useState(false);
 
 	const getMemberName = (userId: string) => {
 		const m = members.find((m) => m.user_id === userId);
@@ -75,6 +79,8 @@ export const ExpenseModal = ({
 
 	useEffect(() => {
 		if (open) {
+			setErrors({});
+			setSubmitted(false);
 			if (expense) {
 				setTitle(expense.title);
 				setAmount(String(fromSmallestUnit(expense.amount, currency)));
@@ -104,6 +110,46 @@ export const ExpenseModal = ({
 			}
 		}
 	}, [open, expense, currency, members]);
+
+	const validate = useCallback((): Record<string, string> => {
+		const errs: Record<string, string> = {};
+		if (!title.trim()) errs.title = "Title is required.";
+		const parsedAmount = Number.parseFloat(amount);
+		if (!amount || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+			errs.amount = "Enter a valid amount greater than 0.";
+		}
+		if (!date) errs.date = "Date is required.";
+		if (!paidBy) errs.paidBy = "Select who paid.";
+		if (hasCategories && categoryId === "none") {
+			errs.category = "Select a category.";
+		}
+		if (!errs.amount && amount) {
+			const amtSmall = toSmallestUnit(parsedAmount, currency);
+			const splitSum = splits.reduce(
+				(sum, s) =>
+					sum + toSmallestUnit(Number.parseFloat(s.amount) || 0, currency),
+				0,
+			);
+			if (splitSum !== amtSmall) {
+				errs.splits = `Splits total ${fromSmallestUnit(splitSum, currency)} but expense is ${parsedAmount}. They must match.`;
+			}
+		}
+		return errs;
+	}, [
+		title,
+		amount,
+		date,
+		paidBy,
+		hasCategories,
+		categoryId,
+		splits,
+		currency,
+	]);
+
+	// Re-validate on field changes after first submission attempt
+	useEffect(() => {
+		if (submitted) setErrors(validate());
+	}, [submitted, validate]);
 
 	const splitEvenly = () => {
 		const total = Number.parseFloat(amount);
@@ -148,26 +194,19 @@ export const ExpenseModal = ({
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		setSubmitted(true);
+
+		const fieldErrors = validate();
+		setErrors(fieldErrors);
+		if (Object.keys(fieldErrors).length > 0) return;
 
 		const parsedAmount = Number.parseFloat(amount);
-		if (!title.trim() || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-			toast.error("Please fill in all required fields.");
-			return;
-		}
 
 		const amountSmallest = toSmallestUnit(parsedAmount, currency);
 		const splitsSmallest = splits.map((s) => ({
 			user_id: s.user_id,
 			amount: toSmallestUnit(Number.parseFloat(s.amount) || 0, currency),
 		}));
-
-		const splitsSum = splitsSmallest.reduce((sum, s) => sum + s.amount, 0);
-		if (splitsSum !== amountSmallest) {
-			toast.error(
-				`Splits must add up to the total amount. Sum: ${fromSmallestUnit(splitsSum, currency)}, expected: ${parsedAmount}`,
-			);
-			return;
-		}
 
 		const dateISO = new Date(`${date}T12:00:00`).toISOString();
 
@@ -208,6 +247,8 @@ export const ExpenseModal = ({
 		}
 	};
 
+	const errCls = "border-danger focus-visible:ring-danger";
+
 	return (
 		<Dialog open={open} onOpenChange={(v) => !v && onClose()}>
 			<DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -217,23 +258,33 @@ export const ExpenseModal = ({
 					</DialogTitle>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit} className="space-y-4">
+				<form onSubmit={handleSubmit} className="space-y-4" noValidate>
 					{/* Title */}
 					<div className="space-y-2">
-						<Label htmlFor="exp-title">Title</Label>
+						<Label htmlFor="exp-title">
+							Title <span className="text-danger">*</span>
+						</Label>
 						<Input
 							id="exp-title"
 							placeholder="e.g. Groceries at Trader Joe's"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
-							required
+							className={cn(errors.title && errCls)}
 						/>
+						{errors.title && (
+							<p className="text-xs text-danger flex items-center gap-1">
+								<AlertCircle className="h-3 w-3" />
+								{errors.title}
+							</p>
+						)}
 					</div>
 
 					{/* Amount & Date row */}
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-2">
-							<Label htmlFor="exp-amount">Amount ({currency})</Label>
+							<Label htmlFor="exp-amount">
+								Amount ({currency}) <span className="text-danger">*</span>
+							</Label>
 							<Input
 								id="exp-amount"
 								type="number"
@@ -242,27 +293,43 @@ export const ExpenseModal = ({
 								placeholder={isZeroDecimal ? "0" : "0.00"}
 								value={amount}
 								onChange={(e) => setAmount(e.target.value)}
-								required
+								className={cn(errors.amount && errCls)}
 							/>
+							{errors.amount && (
+								<p className="text-xs text-danger flex items-center gap-1">
+									<AlertCircle className="h-3 w-3" />
+									{errors.amount}
+								</p>
+							)}
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="exp-date">Date</Label>
+							<Label htmlFor="exp-date">
+								Date <span className="text-danger">*</span>
+							</Label>
 							<Input
 								id="exp-date"
 								type="date"
 								value={date}
 								onChange={(e) => setDate(e.target.value)}
-								required
+								className={cn(errors.date && errCls)}
 							/>
+							{errors.date && (
+								<p className="text-xs text-danger flex items-center gap-1">
+									<AlertCircle className="h-3 w-3" />
+									{errors.date}
+								</p>
+							)}
 						</div>
 					</div>
 
 					{/* Paid By & Category */}
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-2">
-							<Label>Paid By</Label>
+							<Label>
+								Paid By <span className="text-danger">*</span>
+							</Label>
 							<Select value={paidBy} onValueChange={setPaidBy}>
-								<SelectTrigger>
+								<SelectTrigger className={cn(errors.paidBy && errCls)}>
 									<SelectValue placeholder="Select member" />
 								</SelectTrigger>
 								<SelectContent>
@@ -273,22 +340,49 @@ export const ExpenseModal = ({
 									))}
 								</SelectContent>
 							</Select>
+							{errors.paidBy && (
+								<p className="text-xs text-danger flex items-center gap-1">
+									<AlertCircle className="h-3 w-3" />
+									{errors.paidBy}
+								</p>
+							)}
 						</div>
 						<div className="space-y-2">
-							<Label>Category</Label>
-							<Select value={categoryId} onValueChange={setCategoryId}>
-								<SelectTrigger>
-									<SelectValue placeholder="No category" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="none">No category</SelectItem>
-									{categories.map((c) => (
-										<SelectItem key={c.id} value={c.id}>
-											{c.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<Label>
+								Category <span className="text-danger">*</span>
+							</Label>
+							{hasCategories ? (
+								<>
+									<Select value={categoryId} onValueChange={setCategoryId}>
+										<SelectTrigger className={cn(errors.category && errCls)}>
+											<SelectValue placeholder="Select category" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="none" disabled>
+												Select a category
+											</SelectItem>
+											{categories.map((c) => (
+												<SelectItem key={c.id} value={c.id}>
+													{c.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									{errors.category && (
+										<p className="text-xs text-danger flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />
+											{errors.category}
+										</p>
+									)}
+								</>
+							) : (
+								<div className="rounded-lg border border-warning/50 bg-warning-light p-2.5">
+									<p className="text-xs text-warning font-medium">
+										No categories yet. Please create a budget category first on
+										the Budgets page.
+									</p>
+								</div>
+							)}
 						</div>
 					</div>
 
@@ -309,7 +403,7 @@ export const ExpenseModal = ({
 						<div className="flex items-center justify-between">
 							<Label className="flex items-center gap-1.5">
 								<Split className="h-3.5 w-3.5" />
-								Splits
+								Splits <span className="text-danger">*</span>
 							</Label>
 							<Button
 								type="button"
@@ -324,11 +418,23 @@ export const ExpenseModal = ({
 							Splits must add up to the total amount.
 						</p>
 
+						{errors.splits && (
+							<div className="rounded-lg border border-danger/30 bg-danger-light p-2.5">
+								<p className="text-xs text-danger font-medium flex items-center gap-1">
+									<AlertCircle className="h-3 w-3 shrink-0" />
+									{errors.splits}
+								</p>
+							</div>
+						)}
+
 						<div className="space-y-2">
 							{splits.map((split, index) => (
 								<div
 									key={split.user_id}
-									className="flex items-center gap-2 rounded-lg bg-muted p-2.5"
+									className={cn(
+										"flex items-center gap-2 rounded-lg bg-muted p-2.5",
+										errors.splits && "ring-1 ring-danger/30",
+									)}
 								>
 									<Select
 										value={split.user_id}
@@ -389,7 +495,10 @@ export const ExpenseModal = ({
 						<Button type="button" variant="outline" onClick={onClose}>
 							Cancel
 						</Button>
-						<Button type="submit" disabled={isCreating || isUpdating}>
+						<Button
+							type="submit"
+							disabled={isCreating || isUpdating || !hasCategories}
+						>
 							{isCreating || isUpdating
 								? "Saving..."
 								: isEditing

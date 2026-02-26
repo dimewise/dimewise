@@ -219,6 +219,7 @@ paths:
       operationId: updateBudgetCategory
       tags:
         - Budgets
+        - Expenses
       parameters:
         - name: budgetId
           in: path
@@ -252,6 +253,7 @@ paths:
       operationId: deleteBudgetCategory
       tags:
         - Budgets
+        - Expenses
       parameters:
         - name: budgetId
           in: path
@@ -349,6 +351,7 @@ paths:
       operationId: createExpense
       tags:
         - Expenses
+        - Budgets
       requestBody:
         required: true
         content:
@@ -398,6 +401,7 @@ paths:
       operationId: updateExpense
       tags:
         - Expenses
+        - Budgets
       parameters:
         - name: expenseId
           in: path
@@ -431,6 +435,7 @@ paths:
       operationId: deleteExpense
       tags:
         - Expenses
+        - Budgets
       parameters:
         - name: expenseId
           in: path
@@ -535,6 +540,33 @@ paths:
       responses:
         '200':
           description: Transfer marked as paid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTransfer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /reports/transfers/{transferId}/unpay:
+    patch:
+      summary: Unmark a report transfer as paid (undo)
+      operationId: unmarkReportTransferPaid
+      tags:
+        - Reports
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transfer unmarked as paid
           content:
             application/json:
               schema:
@@ -864,7 +896,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
         - type: object
-          required: [household_id, month, year, total_expenses, total_amount, generated_at]
+          required: [household_id, month, year, total_expenses, total_amount, transfers_total, transfers_settled, generated_at]
           properties:
             household_id: { type: string, format: uuid }
             month: { type: integer }
@@ -874,6 +906,12 @@ components:
               type: integer
               format: int64
               description: Total expenditure in smallest currency unit
+            transfers_total:
+              type: integer
+              description: Total number of transfers in this report
+            transfers_settled:
+              type: integer
+              description: Number of transfers that have been marked as paid
             generated_at: { type: string, format: date-time }
 
     ReportMemberSummary:

@@ -16,8 +16,9 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { Progress } from "@/components/ui/progress";
-import { FullPageSpinner } from "@/components/ui/spinner";
+import { SkeletonList, SkeletonPage } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { RoutesEnum } from "@/routes/Routes";
 import type { BudgetCategory } from "@/store/api/api";
@@ -30,8 +31,11 @@ import {
 import { formatCurrency } from "@/utils/currency";
 
 export const BudgetsPage = () => {
-	const { data: household, isLoading: isHouseholdLoading } =
-		useGetMyHouseholdQuery();
+	const {
+		data: household,
+		isLoading: isHouseholdLoading,
+		isError: isHouseholdError,
+	} = useGetMyHouseholdQuery();
 	const { data: categories, isLoading: isCategoriesLoading } =
 		useListBudgetCategoriesQuery(undefined, { skip: !household });
 	const { data: overview } = useGetBudgetOverviewQuery(undefined, {
@@ -47,7 +51,11 @@ export const BudgetsPage = () => {
 		useState<BudgetCategory | null>(null);
 
 	if (isHouseholdLoading) {
-		return <FullPageSpinner />;
+		return <SkeletonPage />;
+	}
+
+	if (isHouseholdError) {
+		return <ErrorState onRetry={() => window.location.reload()} />;
 	}
 
 	if (!household) {
@@ -106,7 +114,7 @@ export const BudgetsPage = () => {
 
 			{/* Category list */}
 			{isCategoriesLoading ? (
-				<FullPageSpinner />
+				<SkeletonList count={3} />
 			) : categories && categories.length > 0 ? (
 				<div className="space-y-3">
 					{categories.map((cat) => {

@@ -106,7 +106,7 @@ const injectedRtkApi = api
 					method: "PATCH",
 					body: queryArg.updateBudgetCategoryRequest,
 				}),
-				invalidatesTags: ["Budgets"],
+				invalidatesTags: ["Budgets", "Expenses"],
 			}),
 			deleteBudgetCategory: build.mutation<
 				DeleteBudgetCategoryApiResponse,
@@ -116,7 +116,7 @@ const injectedRtkApi = api
 					url: `/budgets/${queryArg.budgetId}`,
 					method: "DELETE",
 				}),
-				invalidatesTags: ["Budgets"],
+				invalidatesTags: ["Budgets", "Expenses"],
 			}),
 			getBudgetOverview: build.query<
 				GetBudgetOverviewApiResponse,
@@ -131,7 +131,7 @@ const injectedRtkApi = api
 					params: {
 						category_id: queryArg.categoryId,
 						paid_by: queryArg.paidBy,
-						from: queryArg["from"],
+						from: queryArg.from,
 						to: queryArg.to,
 						limit: queryArg.limit,
 						offset: queryArg.offset,
@@ -148,7 +148,7 @@ const injectedRtkApi = api
 					method: "POST",
 					body: queryArg.createExpenseRequest,
 				}),
-				invalidatesTags: ["Expenses"],
+				invalidatesTags: ["Expenses", "Budgets"],
 			}),
 			getExpense: build.query<GetExpenseApiResponse, GetExpenseApiArg>({
 				query: (queryArg) => ({ url: `/expenses/${queryArg.expenseId}` }),
@@ -163,7 +163,7 @@ const injectedRtkApi = api
 					method: "PATCH",
 					body: queryArg.updateExpenseRequest,
 				}),
-				invalidatesTags: ["Expenses"],
+				invalidatesTags: ["Expenses", "Budgets"],
 			}),
 			deleteExpense: build.mutation<
 				DeleteExpenseApiResponse,
@@ -173,7 +173,7 @@ const injectedRtkApi = api
 					url: `/expenses/${queryArg.expenseId}`,
 					method: "DELETE",
 				}),
-				invalidatesTags: ["Expenses"],
+				invalidatesTags: ["Expenses", "Budgets"],
 			}),
 			listReports: build.query<ListReportsApiResponse, ListReportsApiArg>({
 				query: () => ({ url: `/reports` }),
@@ -204,22 +204,32 @@ const injectedRtkApi = api
 				}),
 				invalidatesTags: ["Reports"],
 			}),
+			unmarkReportTransferPaid: build.mutation<
+				UnmarkReportTransferPaidApiResponse,
+				UnmarkReportTransferPaidApiArg
+			>({
+				query: (queryArg) => ({
+					url: `/reports/transfers/${queryArg.transferId}/unpay`,
+					method: "PATCH",
+				}),
+				invalidatesTags: ["Reports"],
+			}),
 		}),
 		overrideExisting: false,
 	});
 export { injectedRtkApi as api };
 export type GetUsersMeApiResponse = /** status 200 OK */ User;
-export type GetUsersMeApiArg = void;
+export type GetUsersMeApiArg = undefined;
 export type CreateHouseholdApiResponse =
 	/** status 201 Household created */ Household;
 export type CreateHouseholdApiArg = {
 	createHouseholdRequest: CreateHouseholdRequest;
 };
 export type DeleteHouseholdApiResponse = unknown;
-export type DeleteHouseholdApiArg = void;
+export type DeleteHouseholdApiArg = undefined;
 export type GetMyHouseholdApiResponse =
 	/** status 200 OK */ HouseholdWithMembers;
-export type GetMyHouseholdApiArg = void;
+export type GetMyHouseholdApiArg = undefined;
 export type JoinHouseholdApiResponse =
 	/** status 200 Joined household */ HouseholdWithMembers;
 export type JoinHouseholdApiArg = {
@@ -227,16 +237,16 @@ export type JoinHouseholdApiArg = {
 };
 export type RegenerateInviteCodeApiResponse =
 	/** status 200 New invite code generated */ Household;
-export type RegenerateInviteCodeApiArg = void;
+export type RegenerateInviteCodeApiArg = undefined;
 export type RemoveHouseholdMemberApiResponse = unknown;
 export type RemoveHouseholdMemberApiArg = {
 	userId: string;
 };
 export type LeaveHouseholdApiResponse = unknown;
-export type LeaveHouseholdApiArg = void;
+export type LeaveHouseholdApiArg = undefined;
 export type ListBudgetCategoriesApiResponse =
 	/** status 200 OK */ BudgetCategory[];
-export type ListBudgetCategoriesApiArg = void;
+export type ListBudgetCategoriesApiArg = undefined;
 export type CreateBudgetCategoryApiResponse =
 	/** status 201 Budget category created */ BudgetCategory;
 export type CreateBudgetCategoryApiArg = {
@@ -253,7 +263,7 @@ export type DeleteBudgetCategoryApiArg = {
 	budgetId: string;
 };
 export type GetBudgetOverviewApiResponse = /** status 200 OK */ BudgetOverview;
-export type GetBudgetOverviewApiArg = void;
+export type GetBudgetOverviewApiArg = undefined;
 export type ListExpensesApiResponse = /** status 200 OK */ ExpenseListResponse;
 export type ListExpensesApiArg = {
 	categoryId?: string;
@@ -283,7 +293,7 @@ export type DeleteExpenseApiArg = {
 	expenseId: string;
 };
 export type ListReportsApiResponse = /** status 200 OK */ Report[];
-export type ListReportsApiArg = void;
+export type ListReportsApiArg = undefined;
 export type GenerateReportApiResponse =
 	/** status 201 Report generated */ ReportWithDetails;
 export type GenerateReportApiArg = {
@@ -296,6 +306,11 @@ export type GetReportApiArg = {
 export type MarkReportTransferPaidApiResponse =
 	/** status 200 Transfer marked as paid */ ReportTransfer;
 export type MarkReportTransferPaidApiArg = {
+	transferId: string;
+};
+export type UnmarkReportTransferPaidApiResponse =
+	/** status 200 Transfer unmarked as paid */ ReportTransfer;
+export type UnmarkReportTransferPaidApiArg = {
 	transferId: string;
 };
 export type BaseEntity = {
@@ -459,6 +474,10 @@ export type Report = BaseEntity & {
 	total_expenses: number;
 	/** Total expenditure in smallest currency unit */
 	total_amount: number;
+	/** Total number of transfers in this report */
+	transfers_total: number;
+	/** Number of transfers that have been marked as paid */
+	transfers_settled: number;
 	generated_at: string;
 };
 export type ReportMemberSummary = {
@@ -550,4 +569,5 @@ export const {
 	useGetReportQuery,
 	useLazyGetReportQuery,
 	useMarkReportTransferPaidMutation,
+	useUnmarkReportTransferPaidMutation,
 } = injectedRtkApi;

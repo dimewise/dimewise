@@ -1,3 +1,4 @@
+import { format, parseISO } from "date-fns";
 import {
 	ArrowRight,
 	Check,
@@ -6,9 +7,9 @@ import {
 	FileText,
 	PiggyBank,
 	Receipt,
+	Undo2,
 	Users,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -16,23 +17,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { FullPageSpinner } from "@/components/ui/spinner";
+import { SkeletonPage } from "@/components/ui/skeleton";
 import type { ReportLineItem } from "@/store/api/api";
 import {
 	useGetReportQuery,
 	useMarkReportTransferPaidMutation,
+	useUnmarkReportTransferPaidMutation,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
 
 type Props = {
 	reportId: string;
 	currency: string;
+	isOwner: boolean;
 	onBack: () => void;
 };
 
-export const ReportDetail = ({ reportId, currency, onBack }: Props) => {
+export const ReportDetail = ({
+	reportId,
+	currency,
+	isOwner,
+	onBack,
+}: Props) => {
 	const { data: report, isLoading } = useGetReportQuery({ reportId });
 	const [markPaid] = useMarkReportTransferPaidMutation();
+	const [unmarkPaid] = useUnmarkReportTransferPaidMutation();
 	const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
 	const handleMarkPaid = async (transferId: string) => {
@@ -44,8 +53,17 @@ export const ReportDetail = ({ reportId, currency, onBack }: Props) => {
 		}
 	};
 
+	const handleUnmarkPaid = async (transferId: string) => {
+		try {
+			await unmarkPaid({ transferId }).unwrap();
+			toast.success("Transfer marked as unpaid.");
+		} catch {
+			toast.error("Failed to undo payment status.");
+		}
+	};
+
 	if (isLoading || !report) {
-		return <FullPageSpinner />;
+		return <SkeletonPage />;
 	}
 
 	const monthName = new Date(report.year, report.month - 1).toLocaleString(
@@ -238,7 +256,7 @@ export const ReportDetail = ({ reportId, currency, onBack }: Props) => {
 											)}
 										</div>
 
-										{!isPaid && (
+										{isOwner && !isPaid && (
 											<Button
 												size="sm"
 												variant="outline"
@@ -249,7 +267,18 @@ export const ReportDetail = ({ reportId, currency, onBack }: Props) => {
 												Mark Paid
 											</Button>
 										)}
-										{isPaid && (
+										{isOwner && isPaid && (
+											<Button
+												size="sm"
+												variant="ghost"
+												className="shrink-0 gap-1.5 text-muted-foreground"
+												onClick={() => handleUnmarkPaid(transfer.id)}
+											>
+												<Undo2 className="h-3.5 w-3.5" />
+												Undo
+											</Button>
+										)}
+										{!isOwner && isPaid && (
 											<div className="flex items-center gap-1 text-success shrink-0">
 												<Check className="h-4 w-4" />
 											</div>

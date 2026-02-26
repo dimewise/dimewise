@@ -7,6 +7,7 @@
 		"build": "tsc -b && vite build",
 		"bump": "bunx npm-check-updates -p bun -ui",
 		"check": "biome check --write .",
+		"check:unsafe": "biome check --write --unsafe .",
 		"dev": "vite",
 		"format": "biome format --write",
 		"format:openapi": "openapi-format ../openapi/openapi.yaml -o ../openapi/openapi.yml --sortComponentsProps --no-bundle -c ../openapi/openapi-format-options.json",
