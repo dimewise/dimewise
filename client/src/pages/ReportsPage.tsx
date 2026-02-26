@@ -1,9 +1,11 @@
-import { Calendar, FileBarChart, Plus } from "lucide-react";
+import { useUser } from "@clerk/clerk-react";
 import { format } from "date-fns";
+import { Calendar, CheckCircle, Clock, FileBarChart, Plus } from "lucide-react";
 import { useState } from "react";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
 import { ReportDetail } from "@/components/Report/ReportDetail";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -14,9 +16,10 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FullPageSpinner } from "@/components/ui/spinner";
+import { SkeletonList, SkeletonPage } from "@/components/ui/skeleton";
 import { RoutesEnum } from "@/routes/Routes";
 import {
 	useGenerateReportMutation,
@@ -26,8 +29,12 @@ import {
 import { formatCurrency } from "@/utils/currency";
 
 export const ReportsPage = () => {
-	const { data: household, isLoading: isHouseholdLoading } =
-		useGetMyHouseholdQuery();
+	const { user } = useUser();
+	const {
+		data: household,
+		isLoading: isHouseholdLoading,
+		isError: isHouseholdError,
+	} = useGetMyHouseholdQuery();
 	const { data: reports, isLoading: isReportsLoading } = useListReportsQuery(
 		undefined,
 		{ skip: !household },
@@ -42,7 +49,11 @@ export const ReportsPage = () => {
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
 	if (isHouseholdLoading) {
-		return <FullPageSpinner />;
+		return <SkeletonPage />;
+	}
+
+	if (isHouseholdError) {
+		return <ErrorState onRetry={() => window.location.reload()} />;
 	}
 
 	if (!household) {
@@ -50,6 +61,7 @@ export const ReportsPage = () => {
 	}
 
 	const currency = household.currency;
+	const isOwner = user?.id === household.owner_id;
 
 	// If viewing a specific report
 	if (selectedId) {
@@ -57,6 +69,7 @@ export const ReportsPage = () => {
 			<ReportDetail
 				reportId={selectedId}
 				currency={currency}
+				isOwner={isOwner}
 				onBack={() => setSelectedId(null)}
 			/>
 		);
@@ -95,7 +108,7 @@ export const ReportsPage = () => {
 
 			{/* List */}
 			{isReportsLoading ? (
-				<FullPageSpinner />
+				<SkeletonList count={3} />
 			) : reports && reports.length > 0 ? (
 				<div className="space-y-2">
 					{reports.map((r) => {
@@ -103,6 +116,11 @@ export const ReportsPage = () => {
 							"default",
 							{ month: "long", year: "numeric" },
 						);
+						const allSettled =
+							r.transfers_total > 0 &&
+							r.transfers_settled === r.transfers_total;
+						const hasPending =
+							r.transfers_total > 0 && r.transfers_settled < r.transfers_total;
 						return (
 							<Card key={r.id}>
 								<CardContent className="p-0">
@@ -115,6 +133,18 @@ export const ReportsPage = () => {
 											<div className="flex items-center gap-2">
 												<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
 												<h3 className="text-sm font-semibold">{monthName}</h3>
+												{allSettled && (
+													<Badge variant="success" className="gap-1">
+														<CheckCircle className="h-3 w-3" />
+														Settled
+													</Badge>
+												)}
+												{hasPending && (
+													<Badge variant="warning" className="gap-1">
+														<Clock className="h-3 w-3" />
+														{r.transfers_total - r.transfers_settled} Pending
+													</Badge>
+												)}
 											</div>
 											<div className="flex items-center gap-3 mt-1 ml-6">
 												<p className="text-xs text-muted-foreground">

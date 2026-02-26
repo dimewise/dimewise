@@ -23,9 +23,7 @@ export const PublicLayout = () => {
 						onClick={() => navigate(RoutesEnum.root)}
 						className="flex items-center gap-2"
 					>
-						<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white font-bold text-xs">
-							D
-						</div>
+						<img src="/pwa-192x192.png" alt="Dimewise" className="h-7 w-7" />
 						<span className="text-base font-bold tracking-tight">Dimewise</span>
 					</button>
 					<div className="flex items-center gap-2">

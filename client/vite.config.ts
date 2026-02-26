@@ -15,12 +15,12 @@ export default defineConfig({
 		}),
 		VitePWA({
 			registerType: "autoUpdate",
-			includeAssets: ["vite.svg"],
+			includeAssets: ["favicon.ico", "apple-touch-icon.png"],
 			manifest: {
 				name: "Dimewise",
 				short_name: "Dimewise",
 				description:
-					"Split expenses, not friendships. Track household spending together.",
+					"Family finances, finally simple. Track household spending together.",
 				theme_color: "#6366f1",
 				background_color: "#fafaf9",
 				display: "standalone",

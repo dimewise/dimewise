@@ -34,7 +34,7 @@ func (h *Handler) ListReports(
 
 	result := make(oapi.ListReports200JSONResponse, 0, len(reports))
 	for i := range reports {
-		result = append(result, reportToAPI(&reports[i]))
+		result = append(result, reportListItemToAPI(&reports[i]))
 	}
 
 	return result, nil
@@ -131,17 +131,19 @@ func (h *Handler) MarkReportTransferPaid(
 
 // --- Type mappers ---
 
-func reportToAPI(r *model.Reports) oapi.Report {
+func reportListItemToAPI(r *repository.ReportListItem) oapi.Report {
 	return oapi.Report{
-		Id:            r.ID,
-		CreatedAt:     r.CreatedAt,
-		UpdatedAt:     r.UpdatedAt,
-		HouseholdId:   r.HouseholdID,
-		Month:         int(r.Month),
-		Year:          int(r.Year),
-		TotalExpenses: int(r.TotalExpenses),
-		TotalAmount:   r.TotalAmount,
-		GeneratedAt:   r.GeneratedAt,
+		Id:               r.ID,
+		CreatedAt:        r.CreatedAt,
+		UpdatedAt:        r.UpdatedAt,
+		HouseholdId:      r.HouseholdID,
+		Month:            int(r.Month),
+		Year:             int(r.Year),
+		TotalExpenses:    int(r.TotalExpenses),
+		TotalAmount:      r.TotalAmount,
+		TransfersTotal:   r.TransfersTotal,
+		TransfersSettled: r.TransfersSettled,
+		GeneratedAt:      r.GeneratedAt,
 	}
 }
 
@@ -226,6 +228,13 @@ func reportWithDetailsToAPI(r *repository.ReportWithDetails) oapi.ReportWithDeta
 		transfers = append(transfers, reportTransferToAPI(&r.Transfers[i]))
 	}
 
+	transfersSettled := 0
+	for i := range r.Transfers {
+		if r.Transfers[i].PaidAt != nil {
+			transfersSettled++
+		}
+	}
+
 	return oapi.ReportWithDetails{
 		Id:                 r.ID,
 		CreatedAt:          r.CreatedAt,
@@ -235,6 +244,8 @@ func reportWithDetailsToAPI(r *repository.ReportWithDetails) oapi.ReportWithDeta
 		Year:               int(r.Year),
 		TotalExpenses:      int(r.TotalExpenses),
 		TotalAmount:        r.TotalAmount,
+		TransfersTotal:     len(r.Transfers),
+		TransfersSettled:   transfersSettled,
 		GeneratedAt:        r.GeneratedAt,
 		MemberSummaries:    members,
 		CategoryBreakdowns: categories,
@@ -317,6 +328,37 @@ func mapReportGetError(
 	}
 }
 
+// UnmarkReportTransferPaid handles PATCH /reports/transfers/{transferId}/unpay
+func (h *Handler) UnmarkReportTransferPaid(
+	ctx context.Context,
+	request oapi.UnmarkReportTransferPaidRequestObject,
+) (oapi.UnmarkReportTransferPaidResponseObject, error) {
+	user, ok := middleware.GetAppUserFromContext(ctx)
+	if !ok {
+		return oapi.UnmarkReportTransferPaid401ApplicationProblemPlusJSONResponse{
+			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
+				newProblem(401, "Unauthorized", "user not found in context"),
+			),
+		}, nil
+	}
+
+	transferID, err := uuid.Parse(request.TransferId.String())
+	if err != nil {
+		return oapi.UnmarkReportTransferPaid404ApplicationProblemPlusJSONResponse{
+			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
+				newProblem(404, "Not Found", "invalid transfer ID"),
+			),
+		}, nil
+	}
+
+	transfer, err := h.reportService.UnmarkTransferPaid(ctx, user.ID, transferID)
+	if err != nil {
+		return mapReportTransferUnpaidError(err)
+	}
+
+	return oapi.UnmarkReportTransferPaid200JSONResponse(reportTransferToAPI(transfer)), nil
+}
+
 func mapReportTransferPaidError(
 	err error,
 ) (oapi.MarkReportTransferPaidResponseObject, error) {
@@ -340,6 +382,38 @@ func mapReportTransferPaidError(
 		}, nil
 	case service.ErrConflict:
 		return oapi.MarkReportTransferPaid403ApplicationProblemPlusJSONResponse{
+			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
+				newProblem(403, "Forbidden", svcErr.Message),
+			),
+		}, nil
+	default:
+		return nil, err
+	}
+}
+
+func mapReportTransferUnpaidError(
+	err error,
+) (oapi.UnmarkReportTransferPaidResponseObject, error) {
+	var svcErr *service.Error
+	if !errors.As(err, &svcErr) {
+		return nil, err
+	}
+
+	switch svcErr.Code {
+	case service.ErrForbidden:
+		return oapi.UnmarkReportTransferPaid403ApplicationProblemPlusJSONResponse{
+			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
+				newProblem(403, "Forbidden", svcErr.Message),
+			),
+		}, nil
+	case service.ErrNotFound:
+		return oapi.UnmarkReportTransferPaid404ApplicationProblemPlusJSONResponse{
+			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
+				newProblem(404, "Not Found", svcErr.Message),
+			),
+		}, nil
+	case service.ErrConflict:
+		return oapi.UnmarkReportTransferPaid403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
 				newProblem(403, "Forbidden", svcErr.Message),
 			),

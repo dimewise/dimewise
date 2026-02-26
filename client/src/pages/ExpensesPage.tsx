@@ -1,3 +1,4 @@
+import { format, parseISO } from "date-fns";
 import {
 	ChevronLeft,
 	ChevronRight,
@@ -6,7 +7,6 @@ import {
 	Receipt,
 	X,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -33,7 +34,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { FullPageSpinner } from "@/components/ui/spinner";
+import { SkeletonList, SkeletonPage } from "@/components/ui/skeleton";
 import { RoutesEnum } from "@/routes/Routes";
 import type { ExpenseWithSplits, HouseholdMember } from "@/store/api/api";
 import {
@@ -47,8 +48,11 @@ import { formatCurrency } from "@/utils/currency";
 const PAGE_SIZE = 20;
 
 export const ExpensesPage = () => {
-	const { data: household, isLoading: isHouseholdLoading } =
-		useGetMyHouseholdQuery();
+	const {
+		data: household,
+		isLoading: isHouseholdLoading,
+		isError: isHouseholdError,
+	} = useGetMyHouseholdQuery();
 	const { data: categories } = useListBudgetCategoriesQuery(undefined, {
 		skip: !household,
 	});
@@ -81,7 +85,11 @@ export const ExpensesPage = () => {
 	const [deleteExpense] = useDeleteExpenseMutation();
 
 	if (isHouseholdLoading) {
-		return <FullPageSpinner />;
+		return <SkeletonPage />;
+	}
+
+	if (isHouseholdError) {
+		return <ErrorState onRetry={() => window.location.reload()} />;
 	}
 
 	if (!household) {
@@ -267,7 +275,7 @@ export const ExpensesPage = () => {
 
 			{/* Expense list */}
 			{isExpensesLoading ? (
-				<FullPageSpinner />
+				<SkeletonList count={5} />
 			) : expenseData && expenseData.expenses.length > 0 ? (
 				<>
 					<div className="space-y-2">

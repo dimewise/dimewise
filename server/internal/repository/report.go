@@ -11,6 +11,13 @@ import (
 	"dimewise/generated/dimewise/public/table"
 )
 
+// ReportListItem is a report row with transfer settlement counts for list views.
+type ReportListItem struct {
+	model.Reports
+	TransfersTotal   int
+	TransfersSettled int
+}
+
 // ReportWithDetails is a fully joined result of a report with all child data.
 type ReportWithDetails struct {
 	model.Reports
@@ -28,7 +35,7 @@ type ReportLineItemWithSplits struct {
 
 // ReportReader defines read operations for reports.
 type ReportReader interface {
-	ListByHousehold(ctx context.Context, householdID uuid.UUID) ([]model.Reports, error)
+	ListByHousehold(ctx context.Context, householdID uuid.UUID) ([]ReportListItem, error)
 	GetByID(ctx context.Context, id uuid.UUID) (*ReportWithDetails, error)
 	GetByMonthYear(
 		ctx context.Context,
@@ -43,6 +50,7 @@ type ReportWriter interface {
 	Create(ctx context.Context, data *ReportCreateInput) (*ReportWithDetails, error)
 	DeleteByMonthYear(ctx context.Context, householdID uuid.UUID, month, year int) error
 	MarkTransferPaid(ctx context.Context, transferID uuid.UUID) (*model.ReportTransfers, error)
+	UnmarkTransferPaid(ctx context.Context, transferID uuid.UUID) (*model.ReportTransfers, error)
 }
 
 // ReportCreateInput holds all data needed to create a report.
@@ -67,13 +75,30 @@ func NewReportRepository(db *sql.DB) *ReportRepository {
 func (r *ReportRepository) ListByHousehold(
 	ctx context.Context,
 	householdID uuid.UUID,
-) ([]model.Reports, error) {
-	var reports []model.Reports
+) ([]ReportListItem, error) {
+	rt := table.ReportTransfers
 
-	stmt := postgres.SELECT(table.Reports.AllColumns).
-		FROM(table.Reports).
+	transfersTotal := postgres.SELECT(
+		postgres.COUNT(postgres.STAR),
+	).FROM(rt).WHERE(
+		rt.ReportID.EQ(table.Reports.ID),
+	)
+
+	transfersSettled := postgres.SELECT(
+		postgres.COUNT(postgres.STAR),
+	).FROM(rt).WHERE(
+		rt.ReportID.EQ(table.Reports.ID).AND(rt.PaidAt.IS_NOT_NULL()),
+	)
+
+	stmt := postgres.SELECT(
+		table.Reports.AllColumns,
+		transfersTotal.AS("report_list_item.transfers_total"),
+		transfersSettled.AS("report_list_item.transfers_settled"),
+	).FROM(table.Reports).
 		WHERE(table.Reports.HouseholdID.EQ(postgres.UUID(householdID))).
 		ORDER_BY(table.Reports.Year.DESC(), table.Reports.Month.DESC())
+
+	var reports []ReportListItem
 
 	err := stmt.QueryContext(ctx, r.db, &reports)
 	if err != nil {
@@ -472,6 +497,32 @@ func (r *ReportRepository) MarkTransferPaid(
 		).
 		SET(
 			postgres.NOW(),
+			postgres.NOW(),
+		).
+		WHERE(table.ReportTransfers.ID.EQ(postgres.UUID(transferID))).
+		RETURNING(table.ReportTransfers.AllColumns)
+
+	err := stmt.QueryContext(ctx, r.db, &updated)
+	if err != nil {
+		return nil, err
+	}
+
+	return &updated, nil
+}
+
+func (r *ReportRepository) UnmarkTransferPaid(
+	ctx context.Context,
+	transferID uuid.UUID,
+) (*model.ReportTransfers, error) {
+	var updated model.ReportTransfers
+
+	stmt := table.ReportTransfers.
+		UPDATE(
+			table.ReportTransfers.PaidAt,
+			table.ReportTransfers.UpdatedAt,
+		).
+		SET(
+			postgres.NULL,
 			postgres.NOW(),
 		).
 		WHERE(table.ReportTransfers.ID.EQ(postgres.UUID(transferID))).

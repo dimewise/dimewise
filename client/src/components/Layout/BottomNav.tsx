@@ -1,8 +1,8 @@
 import {
+	FileBarChart,
 	LayoutDashboard,
 	PiggyBank,
 	Receipt,
-	FileBarChart,
 	Settings,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";

@@ -44,7 +44,7 @@ func NewReportService(
 func (s *ReportService) List(
 	ctx context.Context,
 	userID uuid.UUID,
-) ([]model.Reports, error) {
+) ([]repository.ReportListItem, error) {
 	household, err := s.households.GetByUserID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, qrm.ErrNoRows) {
@@ -325,6 +325,11 @@ func (s *ReportService) MarkTransferPaid(
 		return nil, NewError(ErrForbidden, "transfer does not belong to your household")
 	}
 
+	// Only the household owner can manage transfer payment status
+	if household.OwnerID != userID {
+		return nil, NewError(ErrForbidden, "only the household owner can mark transfers as paid")
+	}
+
 	if transfer.PaidAt != nil {
 		return nil, NewError(ErrConflict, "transfer is already marked as paid")
 	}
@@ -332,6 +337,56 @@ func (s *ReportService) MarkTransferPaid(
 	updated, err := s.reports.MarkTransferPaid(ctx, transferID)
 	if err != nil {
 		return nil, WrapError(ErrInternal, "failed to mark transfer as paid", err)
+	}
+
+	return updated, nil
+}
+
+func (s *ReportService) UnmarkTransferPaid(
+	ctx context.Context,
+	userID uuid.UUID,
+	transferID uuid.UUID,
+) (*model.ReportTransfers, error) {
+	household, err := s.households.GetByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return nil, NewError(ErrNotFound, "user does not belong to any household")
+		}
+
+		return nil, WrapError(ErrInternal, "failed to get household", err)
+	}
+
+	transfer, err := s.reports.GetTransferByID(ctx, transferID)
+	if err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return nil, NewError(ErrNotFound, "transfer not found")
+		}
+
+		return nil, WrapError(ErrInternal, "failed to get transfer", err)
+	}
+
+	// Verify the transfer belongs to the user's household
+	report, err := s.reports.GetByID(ctx, transfer.ReportID)
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to get report", err)
+	}
+
+	if report.HouseholdID != household.ID {
+		return nil, NewError(ErrForbidden, "transfer does not belong to your household")
+	}
+
+	// Only the household owner can manage transfer payment status
+	if household.OwnerID != userID {
+		return nil, NewError(ErrForbidden, "only the household owner can undo transfer payments")
+	}
+
+	if transfer.PaidAt == nil {
+		return nil, NewError(ErrConflict, "transfer is not marked as paid")
+	}
+
+	updated, err := s.reports.UnmarkTransferPaid(ctx, transferID)
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to unmark transfer as paid", err)
 	}
 
 	return updated, nil

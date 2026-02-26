@@ -1,20 +1,21 @@
-import { useState } from "react";
+import { format, parseISO } from "date-fns";
 import {
 	ArrowRight,
 	Calendar,
 	DollarSign,
-	Receipt,
 	FileBarChart,
+	Receipt,
 	Users,
 } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 import { BudgetOverviewCard } from "@/components/Budget/BudgetOverviewCard";
 import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { FullPageSpinner } from "@/components/ui/spinner";
+import { ErrorState } from "@/components/ui/error-state";
+import { SkeletonDashboard } from "@/components/ui/skeleton";
 import { RoutesEnum } from "@/routes/Routes";
 import type { ExpenseWithSplits, HouseholdMember } from "@/store/api/api";
 import {
@@ -63,11 +64,15 @@ export const DashboardPage = () => {
 		useState<ExpenseWithSplits | null>(null);
 
 	if (isLoading) {
-		return <FullPageSpinner />;
+		return <SkeletonDashboard />;
 	}
 
 	if (error && "status" in error && error.status === 404) {
 		return <Navigate to={RoutesEnum.householdSetup} replace />;
+	}
+
+	if (error) {
+		return <ErrorState onRetry={() => window.location.reload()} />;
 	}
 
 	if (!household) {

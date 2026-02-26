@@ -9,6 +9,7 @@ import { HouseholdSettingsPage } from "@/pages/HouseholdSettingsPage";
 import { HouseholdSetupPage } from "@/pages/HouseholdSetupPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ReportsPage } from "@/pages/ReportsPage";
 import { RoutesEnum } from "./Routes";
@@ -56,5 +57,9 @@ export const router = createBrowserRouter([
 				],
 			},
 		],
+	},
+	{
+		path: "*",
+		Component: NotFoundPage,
 	},
 ]);

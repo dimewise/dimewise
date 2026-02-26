@@ -245,9 +245,15 @@ type Report struct {
 	TotalAmount int64 `json:"total_amount"`
 
 	// TotalExpenses Number of expenses in the month
-	TotalExpenses int       `json:"total_expenses"`
-	UpdatedAt     time.Time `json:"updated_at"`
-	Year          int       `json:"year"`
+	TotalExpenses int `json:"total_expenses"`
+
+	// TransfersSettled Number of transfers that have been marked as paid
+	TransfersSettled int `json:"transfers_settled"`
+
+	// TransfersTotal Total number of transfers in this report
+	TransfersTotal int       `json:"transfers_total"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	Year           int       `json:"year"`
 }
 
 // ReportCategoryBreakdown defines model for ReportCategoryBreakdown.
@@ -329,8 +335,14 @@ type ReportWithDetails struct {
 	// TotalExpenses Number of expenses in the month
 	TotalExpenses int              `json:"total_expenses"`
 	Transfers     []ReportTransfer `json:"transfers"`
-	UpdatedAt     time.Time        `json:"updated_at"`
-	Year          int              `json:"year"`
+
+	// TransfersSettled Number of transfers that have been marked as paid
+	TransfersSettled int `json:"transfers_settled"`
+
+	// TransfersTotal Total number of transfers in this report
+	TransfersTotal int       `json:"transfers_total"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	Year           int       `json:"year"`
 }
 
 // UpdateBudgetCategoryRequest defines model for UpdateBudgetCategoryRequest.
@@ -564,6 +576,9 @@ type ClientInterface interface {
 
 	// MarkReportTransferPaid request
 	MarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UnmarkReportTransferPaid request
+	UnmarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetReport request
 	GetReport(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -886,6 +901,18 @@ func (c *Client) GenerateReport(ctx context.Context, body GenerateReportJSONRequ
 
 func (c *Client) MarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewMarkReportTransferPaidRequest(c.Server, transferId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UnmarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUnmarkReportTransferPaidRequest(c.Server, transferId)
 	if err != nil {
 		return nil, err
 	}
@@ -1702,6 +1729,40 @@ func NewMarkReportTransferPaidRequest(server string, transferId openapi_types.UU
 	return req, nil
 }
 
+// NewUnmarkReportTransferPaidRequest generates requests for UnmarkReportTransferPaid
+func NewUnmarkReportTransferPaidRequest(server string, transferId openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "transferId", runtime.ParamLocationPath, transferId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/reports/transfers/%s/unpay", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetReportRequest generates requests for GetReport
 func NewGetReportRequest(server string, reportId openapi_types.UUID) (*http.Request, error) {
 	var err error
@@ -1879,6 +1940,9 @@ type ClientWithResponsesInterface interface {
 
 	// MarkReportTransferPaidWithResponse request
 	MarkReportTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*MarkReportTransferPaidResponse, error)
+
+	// UnmarkReportTransferPaidWithResponse request
+	UnmarkReportTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*UnmarkReportTransferPaidResponse, error)
 
 	// GetReportWithResponse request
 	GetReportWithResponse(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetReportResponse, error)
@@ -2380,6 +2444,31 @@ func (r MarkReportTransferPaidResponse) StatusCode() int {
 	return 0
 }
 
+type UnmarkReportTransferPaidResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *ReportTransfer
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON403 *Forbidden
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r UnmarkReportTransferPaidResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UnmarkReportTransferPaidResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetReportResponse struct {
 	Body                      []byte
 	HTTPResponse              *http.Response
@@ -2662,6 +2751,15 @@ func (c *ClientWithResponses) MarkReportTransferPaidWithResponse(ctx context.Con
 		return nil, err
 	}
 	return ParseMarkReportTransferPaidResponse(rsp)
+}
+
+// UnmarkReportTransferPaidWithResponse request returning *UnmarkReportTransferPaidResponse
+func (c *ClientWithResponses) UnmarkReportTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*UnmarkReportTransferPaidResponse, error) {
+	rsp, err := c.UnmarkReportTransferPaid(ctx, transferId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUnmarkReportTransferPaidResponse(rsp)
 }
 
 // GetReportWithResponse request returning *GetReportResponse
@@ -3573,6 +3671,53 @@ func ParseMarkReportTransferPaidResponse(rsp *http.Response) (*MarkReportTransfe
 	return response, nil
 }
 
+// ParseUnmarkReportTransferPaidResponse parses an HTTP response from a UnmarkReportTransferPaidWithResponse call
+func ParseUnmarkReportTransferPaidResponse(rsp *http.Response) (*UnmarkReportTransferPaidResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UnmarkReportTransferPaidResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ReportTransfer
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 403:
+		var dest Forbidden
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON403 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetReportResponse parses an HTTP response from a GetReportWithResponse call
 func ParseGetReportResponse(rsp *http.Response) (*GetReportResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -3715,6 +3860,9 @@ type ServerInterface interface {
 	// Mark a report transfer as paid
 	// (PATCH /reports/transfers/{transferId}/pay)
 	MarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID)
+	// Unmark a report transfer as paid (undo)
+	// (PATCH /reports/transfers/{transferId}/unpay)
+	UnmarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID)
 	// Get full report with all details
 	// (GET /reports/{reportId})
 	GetReport(w http.ResponseWriter, r *http.Request, reportId openapi_types.UUID)
@@ -3844,6 +3992,12 @@ func (_ Unimplemented) GenerateReport(w http.ResponseWriter, r *http.Request) {
 // Mark a report transfer as paid
 // (PATCH /reports/transfers/{transferId}/pay)
 func (_ Unimplemented) MarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Unmark a report transfer as paid (undo)
+// (PATCH /reports/transfers/{transferId}/unpay)
+func (_ Unimplemented) UnmarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4278,6 +4432,31 @@ func (siw *ServerInterfaceWrapper) MarkReportTransferPaid(w http.ResponseWriter,
 	handler.ServeHTTP(w, r)
 }
 
+// UnmarkReportTransferPaid operation middleware
+func (siw *ServerInterfaceWrapper) UnmarkReportTransferPaid(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "transferId" -------------
+	var transferId openapi_types.UUID
+
+	err = runtime.BindStyledParameterWithOptions("simple", "transferId", chi.URLParam(r, "transferId"), &transferId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "transferId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UnmarkReportTransferPaid(w, r, transferId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetReport operation middleware
 func (siw *ServerInterfaceWrapper) GetReport(w http.ResponseWriter, r *http.Request) {
 
@@ -4489,6 +4668,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Patch(options.BaseURL+"/reports/transfers/{transferId}/pay", wrapper.MarkReportTransferPaid)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/reports/transfers/{transferId}/unpay", wrapper.UnmarkReportTransferPaid)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/reports/{reportId}", wrapper.GetReport)
@@ -5478,6 +5660,56 @@ func (response MarkReportTransferPaid404ApplicationProblemPlusJSONResponse) Visi
 	return json.NewEncoder(w).Encode(response)
 }
 
+type UnmarkReportTransferPaidRequestObject struct {
+	TransferId openapi_types.UUID `json:"transferId"`
+}
+
+type UnmarkReportTransferPaidResponseObject interface {
+	VisitUnmarkReportTransferPaidResponse(w http.ResponseWriter) error
+}
+
+type UnmarkReportTransferPaid200JSONResponse ReportTransfer
+
+func (response UnmarkReportTransferPaid200JSONResponse) VisitUnmarkReportTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UnmarkReportTransferPaid401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response UnmarkReportTransferPaid401ApplicationProblemPlusJSONResponse) VisitUnmarkReportTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UnmarkReportTransferPaid403ApplicationProblemPlusJSONResponse struct {
+	ForbiddenApplicationProblemPlusJSONResponse
+}
+
+func (response UnmarkReportTransferPaid403ApplicationProblemPlusJSONResponse) VisitUnmarkReportTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UnmarkReportTransferPaid404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response UnmarkReportTransferPaid404ApplicationProblemPlusJSONResponse) VisitUnmarkReportTransferPaidResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetReportRequestObject struct {
 	ReportId openapi_types.UUID `json:"reportId"`
 }
@@ -5617,6 +5849,9 @@ type StrictServerInterface interface {
 	// Mark a report transfer as paid
 	// (PATCH /reports/transfers/{transferId}/pay)
 	MarkReportTransferPaid(ctx context.Context, request MarkReportTransferPaidRequestObject) (MarkReportTransferPaidResponseObject, error)
+	// Unmark a report transfer as paid (undo)
+	// (PATCH /reports/transfers/{transferId}/unpay)
+	UnmarkReportTransferPaid(ctx context.Context, request UnmarkReportTransferPaidRequestObject) (UnmarkReportTransferPaidResponseObject, error)
 	// Get full report with all details
 	// (GET /reports/{reportId})
 	GetReport(ctx context.Context, request GetReportRequestObject) (GetReportResponseObject, error)
@@ -6192,6 +6427,32 @@ func (sh *strictHandler) MarkReportTransferPaid(w http.ResponseWriter, r *http.R
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(MarkReportTransferPaidResponseObject); ok {
 		if err := validResponse.VisitMarkReportTransferPaidResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UnmarkReportTransferPaid operation middleware
+func (sh *strictHandler) UnmarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
+	var request UnmarkReportTransferPaidRequestObject
+
+	request.TransferId = transferId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UnmarkReportTransferPaid(ctx, request.(UnmarkReportTransferPaidRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UnmarkReportTransferPaid")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UnmarkReportTransferPaidResponseObject); ok {
+		if err := validResponse.VisitUnmarkReportTransferPaidResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
