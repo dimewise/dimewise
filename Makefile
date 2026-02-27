@@ -6,6 +6,7 @@ include makefiles/utility.mk
 include makefiles/generator.mk
 include makefiles/migration.mk
 include makefiles/docker.mk
+include makefiles/deploy.mk
 include makefiles/init.mk
 
 .PHONY: help
