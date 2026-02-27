@@ -80,8 +80,8 @@
 	--danger: oklch(0.577 0.245 27.325);
 	--danger-light: oklch(0.96 0.05 27.325);
 
-	--sidebar: oklch(0.21 0.034 277.117);
-	--sidebar-foreground: oklch(0.93 0.01 277.117);
+	--sidebar: oklch(1 0 0);
+	--sidebar-foreground: oklch(0.3 0.03 277.117);
 	--sidebar-active: oklch(0.585 0.233 277.117);
 }
 
