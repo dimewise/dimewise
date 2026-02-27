@@ -45,7 +45,11 @@ const MONTH_NAMES = [
 
 export const DashboardPage = () => {
 	const navigate = useNavigate();
-	const { data: household, isLoading, error } = useGetMyHouseholdQuery();
+	const {
+		data: household,
+		isLoading,
+		error,
+	} = useGetMyHouseholdQuery(undefined);
 	const { data: overview } = useGetBudgetOverviewQuery(undefined, {
 		skip: !household,
 	});

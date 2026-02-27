@@ -34,7 +34,7 @@ export const ReportsPage = () => {
 		data: household,
 		isLoading: isHouseholdLoading,
 		isError: isHouseholdError,
-	} = useGetMyHouseholdQuery();
+	} = useGetMyHouseholdQuery(undefined);
 	const { data: reports, isLoading: isReportsLoading } = useListReportsQuery(
 		undefined,
 		{ skip: !household },

@@ -45,7 +45,7 @@ export const ExpensesPage = () => {
 		data: household,
 		isLoading: isHouseholdLoading,
 		isError: isHouseholdError,
-	} = useGetMyHouseholdQuery();
+	} = useGetMyHouseholdQuery(undefined);
 	const { data: categories } = useListBudgetCategoriesQuery(undefined, {
 		skip: !household,
 	});
