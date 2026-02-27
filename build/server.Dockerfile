@@ -3,8 +3,8 @@ FROM golang:1.25 AS builder
 
 WORKDIR /app
 
-# Install goose for migrations
-RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+# Install goose for migrations (static binary for Alpine)
+RUN CGO_ENABLED=0 go install github.com/pressly/goose/v3/cmd/goose@latest
 
 # Cache dependencies
 COPY server/go.mod server/go.sum ./
