@@ -21,7 +21,7 @@ export const PublicLayout = () => {
 					<button
 						type="button"
 						onClick={() => navigate(RoutesEnum.root)}
-						className="flex items-center"
+						className="flex items-center cursor-pointer"
 					>
 						<img
 							src="/dimewise-logo-cropped.png"

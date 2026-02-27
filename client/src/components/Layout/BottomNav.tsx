@@ -32,7 +32,7 @@ export function BottomNav() {
 							type="button"
 							onClick={() => navigate(item.path)}
 							className={cn(
-								"flex flex-col items-center gap-0.5 py-2 px-3 text-xs font-medium transition-colors min-w-[56px]",
+								"flex flex-col items-center gap-0.5 py-2 px-3 text-xs font-medium transition-colors min-w-[56px] cursor-pointer",
 								isActive
 									? "text-brand"
 									: "text-muted-foreground hover:text-foreground",

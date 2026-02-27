@@ -197,10 +197,34 @@ export const LandingPage = () => {
 
 			{/* Footer */}
 			<footer className="border-t border-border px-4 py-8">
-				<p className="text-center text-sm text-muted-foreground">
-					&copy; {new Date().getFullYear()} Dimewise. Built with love for
-					families who share more than just a roof.
-				</p>
+				<div className="mx-auto max-w-5xl flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+					<p className="text-sm text-muted-foreground">
+						&copy; {new Date().getFullYear()} Dimewise. Built with love for
+						families who share more than just a roof.
+					</p>
+					<div className="flex items-center gap-4 text-sm text-muted-foreground">
+						<a
+							href={RoutesEnum.privacy}
+							className="hover:text-foreground transition-colors"
+						>
+							Privacy Policy
+						</a>
+						<span className="text-border">&middot;</span>
+						<a
+							href={RoutesEnum.terms}
+							className="hover:text-foreground transition-colors"
+						>
+							Terms of Service
+						</a>
+						<span className="text-border">&middot;</span>
+						<a
+							href="mailto:support@dimewise.app"
+							className="hover:text-foreground transition-colors"
+						>
+							Contact
+						</a>
+					</div>
+				</div>
 			</footer>
 		</div>
 	);

@@ -25,13 +25,17 @@ export function Sidebar() {
 		<aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-30">
 			<div className="flex flex-1 flex-col border-r border-border bg-sidebar">
 				{/* Logo */}
-				<div className="flex items-center px-4 py-3">
+				<button
+					type="button"
+					className="flex items-center px-4 py-3 cursor-pointer"
+					onClick={() => navigate(RoutesEnum.dashboard)}
+				>
 					<img
 						src="/dimewise-logo-cropped.png"
 						alt="Dimewise"
 						className="h-full max-h-"
 					/>
-				</div>
+				</button>
 
 				{/* Navigation */}
 				<nav className="flex-1 space-y-1 px-3 py-4">
@@ -43,7 +47,7 @@ export function Sidebar() {
 								type="button"
 								onClick={() => navigate(item.path)}
 								className={cn(
-									"flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+									"flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer",
 									isActive
 										? "bg-brand-light text-brand-dark shadow-sm"
 										: "text-sidebar-foreground/70 hover:bg-muted hover:text-sidebar-foreground",

@@ -10,8 +10,10 @@ import { HouseholdSetupPage } from "@/pages/HouseholdSetupPage";
 import { LandingPage } from "@/pages/LandingPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { PrivacyPolicyPage } from "@/pages/PrivacyPolicyPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ReportsPage } from "@/pages/ReportsPage";
+import { TermsOfServicePage } from "@/pages/TermsOfServicePage";
 import { RoutesEnum } from "./Routes";
 
 export const router = createBrowserRouter([
@@ -22,6 +24,8 @@ export const router = createBrowserRouter([
 			{ index: true, Component: LandingPage },
 			{ path: "login/*", Component: LoginPage },
 			{ path: "register/*", Component: RegisterPage },
+			{ path: "privacy", Component: PrivacyPolicyPage },
+			{ path: "terms", Component: TermsOfServicePage },
 		],
 	},
 	{

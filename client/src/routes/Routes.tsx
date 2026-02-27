@@ -5,6 +5,8 @@ export const RoutesEnum = {
 	root: "/",
 	login: "/login",
 	register: "/register",
+	privacy: "/privacy",
+	terms: "/terms",
 
 	// authenticated
 	dashboard: "/dashboard",
