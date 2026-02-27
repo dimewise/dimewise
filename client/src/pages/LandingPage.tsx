@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/clerk-react";
 import {
 	ArrowRight,
 	CheckCircle2,
@@ -6,7 +7,7 @@ import {
 	PiggyBank,
 	Receipt,
 } from "lucide-react";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { RoutesEnum } from "@/routes/Routes";
 
@@ -46,6 +47,11 @@ const benefits = [
 
 export const LandingPage = () => {
 	const navigate = useNavigate();
+	const { isSignedIn, isLoaded } = useAuth();
+
+	if (isLoaded && isSignedIn) {
+		return <Navigate to={RoutesEnum.dashboard} replace />;
+	}
 
 	return (
 		<div className="flex flex-col">
