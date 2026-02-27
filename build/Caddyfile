@@ -2,6 +2,10 @@
 	reverse_proxy client:80
 }
 
+www.{$DOMAIN:dimewise.app} {
+	redir https://{$DOMAIN:dimewise.app}{uri} permanent
+}
+
 {$API_DOMAIN:api.dimewise.app} {
 	reverse_proxy server:8080
 }
