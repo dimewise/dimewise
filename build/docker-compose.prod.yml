@@ -9,7 +9,7 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./build/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     environment:
@@ -23,7 +23,7 @@ services:
 
   client:
     build:
-      context: .
+      context: ..
       dockerfile: build/client.Dockerfile
       args:
         VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
@@ -35,7 +35,7 @@ services:
 
   server:
     build:
-      context: .
+      context: ..
       dockerfile: build/server.Dockerfile
     container_name: dimewise-server
     restart: unless-stopped
