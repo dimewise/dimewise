@@ -35,7 +35,7 @@ export const BudgetsPage = () => {
 		data: household,
 		isLoading: isHouseholdLoading,
 		isError: isHouseholdError,
-	} = useGetMyHouseholdQuery();
+	} = useGetMyHouseholdQuery(undefined);
 	const { data: categories, isLoading: isCategoriesLoading } =
 		useListBudgetCategoriesQuery(undefined, { skip: !household });
 	const { data: overview } = useGetBudgetOverviewQuery(undefined, {

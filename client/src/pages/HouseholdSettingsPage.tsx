@@ -39,7 +39,7 @@ import {
 export const HouseholdSettingsPage = () => {
 	const { user } = useUser();
 	const navigate = useNavigate();
-	const { data: household, isLoading } = useGetMyHouseholdQuery();
+	const { data: household, isLoading } = useGetMyHouseholdQuery(undefined);
 
 	const [regenerateCode] = useRegenerateInviteCodeMutation();
 	const [removeMember] = useRemoveHouseholdMemberMutation();
@@ -83,7 +83,7 @@ export const HouseholdSettingsPage = () => {
 
 	const handleRegenerateCode = async () => {
 		try {
-			await regenerateCode().unwrap();
+			await regenerateCode(undefined).unwrap();
 			toast.success("New invite code generated!");
 		} catch {
 			toast.error("Failed to regenerate invite code.");
@@ -100,11 +100,11 @@ export const HouseholdSettingsPage = () => {
 				}).unwrap();
 				toast.success(`${getMemberName(confirmAction.member)} removed.`);
 			} else if (confirmAction.type === "leave") {
-				await leaveHousehold().unwrap();
+				await leaveHousehold(undefined).unwrap();
 				toast.success("You left the household.");
 				navigate(RoutesEnum.householdSetup, { replace: true });
 			} else if (confirmAction.type === "delete") {
-				await deleteHousehold().unwrap();
+				await deleteHousehold(undefined).unwrap();
 				toast.success("Household deleted.");
 				navigate(RoutesEnum.householdSetup, { replace: true });
 			}

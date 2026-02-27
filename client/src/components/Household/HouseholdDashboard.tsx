@@ -12,7 +12,7 @@ type Props = {
 };
 
 export const HouseholdDashboard = ({ household }: Props) => {
-	const { data: currentUser } = useGetUsersMeQuery();
+	const { data: currentUser } = useGetUsersMeQuery(undefined);
 	const isOwner = currentUser?.id === household.owner_id;
 
 	const copyInviteCode = () => {
