@@ -15,13 +15,26 @@ export default defineConfig({
 		}),
 		VitePWA({
 			registerType: "autoUpdate",
-			includeAssets: ["favicon.ico", "apple-touch-icon.png"],
+			includeAssets: [
+				"favicon.ico",
+				"apple-touch-icon.png",
+				"dimewise-logo-cropped.png",
+				"dimewise-wave.png",
+				"dimewise-empty.png",
+				"dimewise-empty-budget.png",
+				"dimewise-empty-report.png",
+				"dimewise-error.png",
+				"dimewise-404.png",
+				"dimewise-household-setup.png",
+				"dimewise-celebrate.png",
+				"dimewise-loading.png",
+			],
 			manifest: {
 				name: "Dimewise",
 				short_name: "Dimewise",
 				description:
 					"Family finances, finally simple. Track household spending together.",
-				theme_color: "#6366f1",
+				theme_color: "#7c3aed",
 				background_color: "#fafaf9",
 				display: "standalone",
 				scope: "/",
