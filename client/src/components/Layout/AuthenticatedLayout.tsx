@@ -6,7 +6,7 @@ import { Sidebar } from "./Sidebar";
 
 export const AuthenticatedLayout = () => {
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-background pt-[env(safe-area-inset-top)]">
 			<Toaster
 				position="top-center"
 				toastOptions={{
