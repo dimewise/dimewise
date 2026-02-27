@@ -25,11 +25,12 @@ export function Sidebar() {
 		<aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 z-30">
 			<div className="flex flex-1 flex-col bg-sidebar">
 				{/* Logo */}
-				<div className="flex h-16 items-center gap-2.5 px-6">
-					<img src="/pwa-192x192.png" alt="Dimewise" className="h-8 w-8" />
-					<span className="text-lg font-bold text-sidebar-foreground tracking-tight">
-						Dimewise
-					</span>
+				<div className="flex items-center px-4 py-3">
+					<img
+						src="/dimewise-logo-cropped.png"
+						alt="Dimewise"
+						className="h-full max-h-"
+					/>
 				</div>
 
 				{/* Navigation */}

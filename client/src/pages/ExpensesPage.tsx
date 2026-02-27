@@ -1,12 +1,5 @@
 import { format, parseISO } from "date-fns";
-import {
-	ChevronLeft,
-	ChevronRight,
-	Filter,
-	Plus,
-	Receipt,
-	X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
@@ -350,7 +343,7 @@ export const ExpensesPage = () => {
 				<Card>
 					<CardContent>
 						<EmptyState
-							icon={<Receipt className="h-6 w-6" />}
+							image="/dimewise-empty.png"
 							title="No expenses yet"
 							description="Add your first expense to start tracking spending."
 							action={

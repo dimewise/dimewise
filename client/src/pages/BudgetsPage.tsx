@@ -1,4 +1,4 @@
-import { Edit2, PiggyBank, Plus, Trash2 } from "lucide-react";
+import { Edit2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
@@ -183,7 +183,7 @@ export const BudgetsPage = () => {
 				<Card>
 					<CardContent>
 						<EmptyState
-							icon={<PiggyBank className="h-6 w-6" />}
+							image="/dimewise-empty-budget.png"
 							title="No budget categories yet"
 							description="Create your first category to start tracking spending."
 							action={

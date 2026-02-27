@@ -1,4 +1,4 @@
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -17,9 +17,11 @@ export const ErrorState = ({
 		<div className="flex items-center justify-center min-h-[50vh] animate-fade-in">
 			<Card className="max-w-md w-full">
 				<CardContent className="py-10 text-center space-y-4">
-					<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-danger-light">
-						<AlertTriangle className="h-6 w-6 text-danger" />
-					</div>
+					<img
+						src="/dimewise-error.png"
+						alt="Something went wrong"
+						className="mx-auto h-32 w-32 object-contain"
+					/>
 					<div className="space-y-1.5">
 						<h2 className="text-lg font-semibold">{title}</h2>
 						<p className="text-sm text-muted-foreground">{description}</p>

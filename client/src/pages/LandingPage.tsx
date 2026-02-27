@@ -5,7 +5,6 @@ import {
 	Home,
 	PiggyBank,
 	Receipt,
-	ShieldCheck,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -53,9 +52,9 @@ export const LandingPage = () => {
 			{/* Hero */}
 			<section className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-16 pb-20 text-center md:pt-24 md:pb-28">
 				<img
-					src="/pwa-192x192.png"
-					alt="Dimewise"
-					className="mb-6 h-24 w-24 drop-shadow-lg md:h-32 md:w-32"
+					src="/dimewise-wave.png"
+					alt="Dimewise mascot waving"
+					className="mb-6 h-32 w-32 drop-shadow-lg md:h-40 md:w-40"
 				/>
 				<h1 className="text-4xl font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
 					Family finances,
@@ -174,7 +173,11 @@ export const LandingPage = () => {
 			{/* CTA */}
 			<section className="border-t border-border px-4 py-16 md:py-20">
 				<div className="mx-auto flex max-w-xl flex-col items-center text-center">
-					<ShieldCheck className="mb-4 h-10 w-10 text-brand" />
+					<img
+						src="/dimewise-celebrate.png"
+						alt="Dimewise mascot celebrating"
+						className="mb-4 h-28 w-28 object-contain"
+					/>
 					<h2 className="text-2xl font-bold tracking-tight md:text-3xl">
 						Take the guesswork out of family finances
 					</h2>

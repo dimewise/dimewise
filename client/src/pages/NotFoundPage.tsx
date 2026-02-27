@@ -1,4 +1,3 @@
-import { MapPin } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,9 +10,11 @@ export const NotFoundPage = () => {
 		<div className="flex items-center justify-center min-h-[80vh] animate-fade-in">
 			<Card className="max-w-md w-full">
 				<CardContent className="py-12 text-center space-y-4">
-					<div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-						<MapPin className="h-7 w-7 text-muted-foreground" />
-					</div>
+					<img
+						src="/dimewise-404.png"
+						alt="Page not found"
+						className="mx-auto h-40 w-40 object-contain"
+					/>
 					<div className="space-y-1.5">
 						<h1 className="text-4xl font-bold tracking-tight">404</h1>
 						<h2 className="text-lg font-semibold">Page Not Found</h2>

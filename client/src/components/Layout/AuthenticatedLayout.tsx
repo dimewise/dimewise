@@ -21,11 +21,12 @@ export const AuthenticatedLayout = () => {
 			<div className="md:pl-64">
 				{/* Top bar */}
 				<header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-surface/95 backdrop-blur-md px-4 md:px-6">
-					<div className="flex items-center gap-2 md:hidden">
-						<div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white font-bold text-xs">
-							D
-						</div>
-						<span className="text-base font-bold tracking-tight">Dimewise</span>
+					<div className="flex items-center md:hidden">
+						<img
+							src="/dimewise-logo-cropped.png"
+							alt="Dimewise"
+							className="h-10"
+						/>
 					</div>
 					<div className="hidden md:block" />
 					<UserButton
