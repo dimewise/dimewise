@@ -1,4 +1,4 @@
-import { ArrowLeft, Home, KeyRound, Plus } from "lucide-react";
+import { ArrowLeft, KeyRound, Plus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -88,9 +88,11 @@ export const HouseholdSetupPage = () => {
 			<div className="flex min-h-[60vh] items-center justify-center px-4">
 				<Card className="w-full max-w-md animate-fade-in">
 					<CardHeader className="items-center text-center pb-2">
-						<div className="mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-brand-light">
-							<Home className="h-7 w-7 text-brand" />
-						</div>
+						<img
+							src="/dimewise-household-setup.png"
+							alt="Set up your household"
+							className="mb-2 h-28 w-28 object-contain"
+						/>
 						<CardTitle className="text-xl">Welcome to Dimewise!</CardTitle>
 						<CardDescription>
 							Get started by creating a new household or joining an existing one

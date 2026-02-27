@@ -176,7 +176,7 @@ export const ReportsPage = () => {
 				<Card>
 					<CardContent>
 						<EmptyState
-							icon={<FileBarChart className="h-6 w-6" />}
+							image="/dimewise-empty-report.png"
 							title="No reports yet"
 							description="Generate a monthly report to see a full breakdown of your household's expenses."
 							action={

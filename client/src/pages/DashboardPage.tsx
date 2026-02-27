@@ -181,7 +181,7 @@ export const DashboardPage = () => {
 						</div>
 					) : (
 						<EmptyState
-							icon={<Receipt className="h-6 w-6" />}
+							image="/dimewise-empty.png"
 							title="No expenses yet"
 							description="Start by adding your first expense."
 							className="py-6"
@@ -232,7 +232,7 @@ export const DashboardPage = () => {
 						</div>
 					) : (
 						<EmptyState
-							icon={<FileBarChart className="h-6 w-6" />}
+							image="/dimewise-empty-report.png"
 							title="No reports yet"
 							description="Generate one for a completed month."
 							className="py-6"

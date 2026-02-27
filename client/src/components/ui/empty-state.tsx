@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 type EmptyStateProps = {
 	icon?: ReactNode;
+	image?: string;
+	imageAlt?: string;
 	title: string;
 	description?: string;
 	action?: ReactNode;
@@ -11,6 +13,8 @@ type EmptyStateProps = {
 
 function EmptyState({
 	icon,
+	image,
+	imageAlt,
 	title,
 	description,
 	action,
@@ -23,10 +27,18 @@ function EmptyState({
 				className,
 			)}
 		>
-			{icon && (
-				<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-					{icon}
-				</div>
+			{image ? (
+				<img
+					src={image}
+					alt={imageAlt ?? title}
+					className="mb-4 h-32 w-32 object-contain"
+				/>
+			) : (
+				icon && (
+					<div className="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+						{icon}
+					</div>
+				)
 			)}
 			<h3 className="text-base font-semibold text-foreground">{title}</h3>
 			{description && (

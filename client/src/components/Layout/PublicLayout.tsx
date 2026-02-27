@@ -21,10 +21,13 @@ export const PublicLayout = () => {
 					<button
 						type="button"
 						onClick={() => navigate(RoutesEnum.root)}
-						className="flex items-center gap-2"
+						className="flex items-center"
 					>
-						<img src="/pwa-192x192.png" alt="Dimewise" className="h-7 w-7" />
-						<span className="text-base font-bold tracking-tight">Dimewise</span>
+						<img
+							src="/dimewise-logo-cropped.png"
+							alt="Dimewise"
+							className="h-12"
+						/>
 					</button>
 					<div className="flex items-center gap-2">
 						<Button
