@@ -1,0 +1,13 @@
+# Domain — replace with your actual domain
+{$DOMAIN:=dimewise.app}
+{$API_DOMAIN:=api.dimewise.app}
+
+# Client — serves the frontend
+{$DOMAIN} {
+	reverse_proxy client:80
+}
+
+# Server — proxies API requests
+{$API_DOMAIN} {
+	reverse_proxy server:8080
+}

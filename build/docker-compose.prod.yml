@@ -1,0 +1,75 @@
+---
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: dimewise-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./build/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN:-dimewise.app}
+      API_DOMAIN: ${API_DOMAIN:-api.dimewise.app}
+    depends_on:
+      client:
+        condition: service_started
+      server:
+        condition: service_started
+
+  client:
+    build:
+      context: .
+      dockerfile: build/client.Dockerfile
+      args:
+        VITE_CLERK_PUBLISHABLE_KEY: ${VITE_CLERK_PUBLISHABLE_KEY}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    container_name: dimewise-client
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  server:
+    build:
+      context: .
+      dockerfile: build/server.Dockerfile
+    container_name: dimewise-server
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      APP_ENV: production
+      SERVER_PORT: "8080"
+      CLIENT_URL: https://${DOMAIN:-dimewise.app}
+      DATABASE_URL: postgres://${POSTGRES_USER:-dimewise}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dimewise}?sslmode=disable
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: dimewise-postgres
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dimewise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-dimewise}
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER:-dimewise}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
