@@ -6,6 +6,7 @@ import {
 	Home,
 	PiggyBank,
 	Receipt,
+	Smartphone,
 } from "lucide-react";
 import { Navigate, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,8 @@ const benefits = [
 	"See every expense in real time",
 	"Fair splits — down to the cent",
 	"Monthly reports settle it all",
+	"Installable as an app on any device",
+	"Works on any phone, tablet, or desktop",
 ];
 
 export const LandingPage = () => {
@@ -190,6 +193,10 @@ export const LandingPage = () => {
 					<p className="mt-3 text-muted-foreground">
 						Free to use. Set up your household in under a minute.
 					</p>
+					<div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+						<Smartphone className="h-4 w-4" />
+						<span>Works on any device — install it like a native app from your browser</span>
+					</div>
 					<Button
 						size="lg"
 						className="mt-8 gap-2"
