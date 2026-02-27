@@ -1,0 +1,15 @@
+.git
+.github
+.archive
+.vscode
+.idea
+node_modules
+dist
+tmp
+docs
+web
+*.md
+*.env*
+!.env.example
+bun.lock
+bun.lockb
