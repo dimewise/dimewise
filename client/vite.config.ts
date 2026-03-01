@@ -34,7 +34,7 @@ export default defineConfig({
 				short_name: "Dimewise",
 				description:
 					"Family finances, finally simple. Track household spending together.",
-				theme_color: "#7c3aed",
+				theme_color: "#ffffff",
 				background_color: "#fafaf9",
 				display: "standalone",
 				scope: "/",

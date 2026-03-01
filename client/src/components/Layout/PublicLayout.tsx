@@ -8,6 +8,9 @@ export const PublicLayout = () => {
 
 	return (
 		<div className="min-h-screen bg-background pt-[env(safe-area-inset-top)]">
+			{/* Fixed safe area background — always white behind the status bar on mobile */}
+			<div className="fixed top-0 left-0 right-0 h-[env(safe-area-inset-top)] bg-surface z-50 md:hidden" />
+
 			<Toaster
 				position="top-center"
 				toastOptions={{
@@ -16,7 +19,7 @@ export const PublicLayout = () => {
 			/>
 
 			{/* Header */}
-			<header className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md">
+			<header className="sticky top-[env(safe-area-inset-top)] md:top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md">
 				<div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
 					<button
 						type="button"

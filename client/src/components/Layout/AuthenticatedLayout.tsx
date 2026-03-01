@@ -7,6 +7,9 @@ import { Sidebar } from "./Sidebar";
 export const AuthenticatedLayout = () => {
 	return (
 		<div className="min-h-screen bg-background pt-[env(safe-area-inset-top)]">
+			{/* Fixed safe area background — always white behind the status bar on mobile */}
+			<div className="fixed top-0 left-0 right-0 h-[env(safe-area-inset-top)] bg-surface z-50 md:hidden" />
+
 			<Toaster
 				position="top-center"
 				toastOptions={{
@@ -19,8 +22,8 @@ export const AuthenticatedLayout = () => {
 
 			{/* Main content area */}
 			<div className="md:pl-64">
-				{/* Top bar */}
-				<header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-surface/95 backdrop-blur-md px-4 md:px-6">
+				{/* Top bar — sticks below the safe area so it never hides behind the notch */}
+				<header className="sticky top-[env(safe-area-inset-top)] md:top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-surface/95 backdrop-blur-md px-4 md:px-6">
 					<div className="flex items-center md:hidden">
 						<img
 							src="/dimewise-logo-cropped.png"
