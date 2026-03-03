@@ -2,6 +2,7 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import "./i18n/i18n";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
 
