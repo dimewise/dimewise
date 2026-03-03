@@ -78,43 +78,43 @@ func (s *BalanceService) GetMyBalances(
 	monthStart := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	monthEnd := monthStart.AddDate(0, 1, 0)
 
-	// Get per-user paid and owed amounts for the month
-	paid, err := s.expenses.GetUserSpending(ctx, household.ID, monthStart, monthEnd)
+	// Get pairwise splits: (payer, beneficiary) → total split amount (cross-user only)
+	pairwise, err := s.expenses.GetPairwiseSplits(ctx, household.ID, monthStart, monthEnd)
 	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to get user spending", err)
+		return nil, WrapError(ErrInternal, "failed to get pairwise splits", err)
 	}
 
-	owed, err := s.expenses.GetUserSplits(ctx, household.ID, monthStart, monthEnd)
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to get user splits", err)
+	// Build per-member balance for the current user
+	// positive = they owe me, negative = I owe them
+	perMember := make(map[uuid.UUID]int64)
+
+	for _, ps := range pairwise {
+		if ps.PaidBy == userID {
+			// I paid, they owe me their split
+			perMember[ps.UserID] += ps.Total
+		} else if ps.UserID == userID {
+			// They paid, I owe them my split
+			perMember[ps.PaidBy] -= ps.Total
+		}
 	}
 
-	// Calculate net balance per user: positive = owed money, negative = owes money
-	netBalances := make(map[uuid.UUID]int64)
-
-	for uid := range paid {
-		netBalances[uid] = paid[uid]
-	}
-
-	for uid, amount := range owed {
-		netBalances[uid] -= amount
-	}
-
-	// Adjust for paid report transfers: settled debts reduce outstanding balances
+	// Adjust for paid report transfers
 	paidTransfers, err := s.reports.GetPaidTransfersForMonth(ctx, household.ID, month, year)
 	if err != nil {
 		return nil, WrapError(ErrInternal, "failed to get paid transfers", err)
 	}
 
 	for _, t := range paidTransfers {
-		// from_user paid to_user: from_user's debt decreases, to_user's credit decreases
-		netBalances[t.FromUserID] += t.Amount
-		netBalances[t.ToUserID] -= t.Amount
+		if t.FromUserID == userID {
+			// I paid them → my debt decreases (balance goes up)
+			perMember[t.ToUserID] += t.Amount
+		} else if t.ToUserID == userID {
+			// They paid me → their debt decreases (balance goes down)
+			perMember[t.FromUserID] -= t.Amount
+		}
 	}
 
-	// Run debt simplification and extract current user's balances
-	transfers := simplifyDebts(netBalances)
-	balances, netBalance := extractUserBalances(transfers, userID, memberNameMap)
+	balances, netBalance := buildMemberBalances(perMember, memberNameMap)
 
 	return &BalanceSummary{
 		Month:      month,
@@ -124,32 +124,26 @@ func (s *BalanceService) GetMyBalances(
 	}, nil
 }
 
-// extractUserBalances filters debt transfers for the given user and returns per-member balances.
-func extractUserBalances(
-	transfers []debtTransfer,
-	userID uuid.UUID,
+// buildMemberBalances converts the per-member balance map into a sorted slice.
+func buildMemberBalances(
+	perMember map[uuid.UUID]int64,
 	nameMap map[uuid.UUID]string,
 ) ([]MemberBalance, int64) {
 	var balances []MemberBalance
 
 	var netBalance int64
 
-	for _, t := range transfers {
-		if t.fromUserID == userID {
-			balances = append(balances, MemberBalance{
-				UserID:     t.toUserID,
-				MemberName: nameMap[t.toUserID],
-				Amount:     -t.amount,
-			})
-			netBalance -= t.amount
-		} else if t.toUserID == userID {
-			balances = append(balances, MemberBalance{
-				UserID:     t.fromUserID,
-				MemberName: nameMap[t.fromUserID],
-				Amount:     t.amount,
-			})
-			netBalance += t.amount
+	for uid, amount := range perMember {
+		if amount == 0 {
+			continue
 		}
+
+		balances = append(balances, MemberBalance{
+			UserID:     uid,
+			MemberName: nameMap[uid],
+			Amount:     amount,
+		})
+		netBalance += amount
 	}
 
 	// Sort by absolute amount descending
@@ -172,62 +166,4 @@ func extractUserBalances(
 	}
 
 	return balances, netBalance
-}
-
-// debtTransfer is a simplified debt transfer (not persisted, just for calculation).
-type debtTransfer struct {
-	fromUserID uuid.UUID
-	toUserID   uuid.UUID
-	amount     int64
-}
-
-// simplifyDebts uses the two-pointer technique to minimize transfer count.
-func simplifyDebts(netBalances map[uuid.UUID]int64) []debtTransfer {
-	type balance struct {
-		userID uuid.UUID
-		net    int64
-	}
-
-	var balances []balance
-	for uid, net := range netBalances {
-		if net != 0 {
-			balances = append(balances, balance{userID: uid, net: net})
-		}
-	}
-
-	sort.Slice(balances, func(i, j int) bool {
-		return balances[i].net < balances[j].net
-	})
-
-	var transfers []debtTransfer
-
-	i := 0
-	j := len(balances) - 1
-
-	for i < j {
-		debtor := balances[i]
-		creditor := balances[j]
-
-		amount := min(-debtor.net, creditor.net)
-		if amount > 0 {
-			transfers = append(transfers, debtTransfer{
-				fromUserID: debtor.userID,
-				toUserID:   creditor.userID,
-				amount:     amount,
-			})
-		}
-
-		balances[i].net += amount
-		balances[j].net -= amount
-
-		if balances[i].net == 0 {
-			i++
-		}
-
-		if balances[j].net == 0 {
-			j--
-		}
-	}
-
-	return transfers
 }

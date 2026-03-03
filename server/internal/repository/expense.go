@@ -29,6 +29,13 @@ type ExpenseFilter struct {
 	Offset     int
 }
 
+// PairwiseSplit holds the total split amount for a (payer, beneficiary) pair.
+type PairwiseSplit struct {
+	PaidBy uuid.UUID `sql:"primary_key" alias:"expenses.paid_by"`
+	UserID uuid.UUID `                  alias:"expense_splits.user_id"`
+	Total  int64     `                  alias:"pairwise.total"`
+}
+
 // ExpenseReader defines read operations for expenses.
 type ExpenseReader interface {
 	List(
@@ -55,6 +62,12 @@ type ExpenseReader interface {
 		from time.Time,
 		to time.Time,
 	) (map[uuid.UUID]int64, error)
+	GetPairwiseSplits(
+		ctx context.Context,
+		householdID uuid.UUID,
+		from time.Time,
+		to time.Time,
+	) ([]PairwiseSplit, error)
 }
 
 // ExpenseWriter defines write operations for expenses.
@@ -331,6 +344,39 @@ func (r *ExpenseRepository) GetUserSplits(
 	}
 
 	return m, nil
+}
+
+func (r *ExpenseRepository) GetPairwiseSplits(
+	ctx context.Context,
+	householdID uuid.UUID,
+	from time.Time,
+	to time.Time,
+) ([]PairwiseSplit, error) {
+	var results []PairwiseSplit
+
+	stmt := postgres.SELECT(
+		table.Expenses.PaidBy,
+		table.ExpenseSplits.UserID,
+		postgres.SUMi(table.ExpenseSplits.Amount).AS("pairwise.total"),
+	).
+		FROM(
+			table.ExpenseSplits.
+				INNER_JOIN(table.Expenses, table.Expenses.ID.EQ(table.ExpenseSplits.ExpenseID)),
+		).
+		WHERE(
+			table.Expenses.HouseholdID.EQ(postgres.UUID(householdID)).
+				AND(table.Expenses.IncurredAt.GT_EQ(postgres.TimestampzT(from))).
+				AND(table.Expenses.IncurredAt.LT(postgres.TimestampzT(to))).
+				AND(table.Expenses.PaidBy.NOT_EQ(table.ExpenseSplits.UserID)),
+		).
+		GROUP_BY(table.Expenses.PaidBy, table.ExpenseSplits.UserID)
+
+	err := stmt.QueryContext(ctx, r.db, &results)
+	if err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
 
 func (r *ExpenseRepository) Create(
