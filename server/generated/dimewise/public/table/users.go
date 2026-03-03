@@ -26,6 +26,7 @@ type usersTable struct {
 	LastLoginAt postgres.ColumnTimestampz
 	CreatedAt   postgres.ColumnTimestampz
 	UpdatedAt   postgres.ColumnTimestampz
+	Language    postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -76,9 +77,10 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		LastLoginAtColumn = postgres.TimestampzColumn("last_login_at")
 		CreatedAtColumn   = postgres.TimestampzColumn("created_at")
 		UpdatedAtColumn   = postgres.TimestampzColumn("updated_at")
-		allColumns        = postgres.ColumnList{IDColumn, ClerkIDColumn, EmailColumn, FirstNameColumn, LastNameColumn, AvatarURLColumn, LastLoginAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns    = postgres.ColumnList{ClerkIDColumn, EmailColumn, FirstNameColumn, LastNameColumn, AvatarURLColumn, LastLoginAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns    = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn}
+		LanguageColumn    = postgres.StringColumn("language")
+		allColumns        = postgres.ColumnList{IDColumn, ClerkIDColumn, EmailColumn, FirstNameColumn, LastNameColumn, AvatarURLColumn, LastLoginAtColumn, CreatedAtColumn, UpdatedAtColumn, LanguageColumn}
+		mutableColumns    = postgres.ColumnList{ClerkIDColumn, EmailColumn, FirstNameColumn, LastNameColumn, AvatarURLColumn, LastLoginAtColumn, CreatedAtColumn, UpdatedAtColumn, LanguageColumn}
+		defaultColumns    = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LanguageColumn}
 	)
 
 	return usersTable{
@@ -94,6 +96,7 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		LastLoginAt: LastLoginAtColumn,
 		CreatedAt:   CreatedAtColumn,
 		UpdatedAt:   UpdatedAtColumn,
+		Language:    LanguageColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

@@ -21,6 +21,28 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Update current user preferences
+      operationId: patchUsersMe
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
   /households:
     post:
@@ -624,12 +646,21 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseEntity'
         - type: object
-          required: [email]
+          required: [email, language]
           properties:
             email: { type: string, format: email }
             first_name: { type: string }
             last_name: { type: string }
             avatar_url: { type: string }
+            language: { type: string, description: 'Preferred language code (e.g. en, ja)', default: 'en' }
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        language:
+          type: string
+          description: 'Preferred language code (e.g. en, ja)'
+          enum: [en, ja]
 
     Household:
       allOf:

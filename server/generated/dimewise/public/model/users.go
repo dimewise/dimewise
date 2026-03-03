@@ -20,6 +20,7 @@ type Users struct {
 	FirstName   *string
 	LastName    *string
 	AvatarURL   *string
+	Language    string
 	LastLoginAt *time.Time
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

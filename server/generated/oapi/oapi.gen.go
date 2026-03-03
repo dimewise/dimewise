@@ -35,6 +35,12 @@ const (
 	USD CreateHouseholdRequestCurrency = "USD"
 )
 
+// Defines values for UpdateUserRequestLanguage.
+const (
+	En UpdateUserRequestLanguage = "en"
+	Ja UpdateUserRequestLanguage = "ja"
+)
+
 // BaseEntity defines model for BaseEntity.
 type BaseEntity struct {
 	CreatedAt time.Time          `json:"created_at"`
@@ -364,6 +370,15 @@ type UpdateExpenseRequest struct {
 	Title            *string              `json:"title,omitempty"`
 }
 
+// UpdateUserRequest defines model for UpdateUserRequest.
+type UpdateUserRequest struct {
+	// Language Preferred language code (e.g. en, ja)
+	Language *UpdateUserRequestLanguage `json:"language,omitempty"`
+}
+
+// UpdateUserRequestLanguage Preferred language code (e.g. en, ja)
+type UpdateUserRequestLanguage string
+
 // User defines model for User.
 type User struct {
 	AvatarUrl *string             `json:"avatar_url,omitempty"`
@@ -371,8 +386,11 @@ type User struct {
 	Email     openapi_types.Email `json:"email"`
 	FirstName *string             `json:"first_name,omitempty"`
 	Id        openapi_types.UUID  `json:"id"`
-	LastName  *string             `json:"last_name,omitempty"`
-	UpdatedAt time.Time           `json:"updated_at"`
+
+	// Language Preferred language code (e.g. en, ja)
+	Language  string    `json:"language"`
+	LastName  *string   `json:"last_name,omitempty"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // ValidationError defines model for ValidationError.
@@ -429,6 +447,9 @@ type JoinHouseholdJSONRequestBody = JoinHouseholdRequest
 
 // GenerateReportJSONRequestBody defines body for GenerateReport for application/json ContentType.
 type GenerateReportJSONRequestBody = GenerateReportRequest
+
+// PatchUsersMeJSONRequestBody defines body for PatchUsersMe for application/json ContentType.
+type PatchUsersMeJSONRequestBody = UpdateUserRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -585,6 +606,11 @@ type ClientInterface interface {
 
 	// GetUsersMe request
 	GetUsersMe(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PatchUsersMeWithBody request with any body
+	PatchUsersMeWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PatchUsersMe(ctx context.Context, body PatchUsersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) ListBudgetCategories(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -937,6 +963,30 @@ func (c *Client) GetReport(ctx context.Context, reportId openapi_types.UUID, req
 
 func (c *Client) GetUsersMe(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetUsersMeRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchUsersMeWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchUsersMeRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PatchUsersMe(ctx context.Context, body PatchUsersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPatchUsersMeRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1824,6 +1874,46 @@ func NewGetUsersMeRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
+// NewPatchUsersMeRequest calls the generic PatchUsersMe builder with application/json body
+func NewPatchUsersMeRequest(server string, body PatchUsersMeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPatchUsersMeRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPatchUsersMeRequestWithBody generates requests for PatchUsersMe with any type of body
+func NewPatchUsersMeRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/users/me")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -1949,6 +2039,11 @@ type ClientWithResponsesInterface interface {
 
 	// GetUsersMeWithResponse request
 	GetUsersMeWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetUsersMeResponse, error)
+
+	// PatchUsersMeWithBodyWithResponse request with any body
+	PatchUsersMeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchUsersMeResponse, error)
+
+	PatchUsersMeWithResponse(ctx context.Context, body PatchUsersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchUsersMeResponse, error)
 }
 
 type ListBudgetCategoriesResponse struct {
@@ -2517,6 +2612,30 @@ func (r GetUsersMeResponse) StatusCode() int {
 	return 0
 }
 
+type PatchUsersMeResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *User
+	ApplicationproblemJSON400 *BadRequest
+	ApplicationproblemJSON401 *Unauthorized
+}
+
+// Status returns HTTPResponse.Status
+func (r PatchUsersMeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PatchUsersMeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 // ListBudgetCategoriesWithResponse request returning *ListBudgetCategoriesResponse
 func (c *ClientWithResponses) ListBudgetCategoriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListBudgetCategoriesResponse, error) {
 	rsp, err := c.ListBudgetCategories(ctx, reqEditors...)
@@ -2778,6 +2897,23 @@ func (c *ClientWithResponses) GetUsersMeWithResponse(ctx context.Context, reqEdi
 		return nil, err
 	}
 	return ParseGetUsersMeResponse(rsp)
+}
+
+// PatchUsersMeWithBodyWithResponse request with arbitrary body returning *PatchUsersMeResponse
+func (c *ClientWithResponses) PatchUsersMeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchUsersMeResponse, error) {
+	rsp, err := c.PatchUsersMeWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchUsersMeResponse(rsp)
+}
+
+func (c *ClientWithResponses) PatchUsersMeWithResponse(ctx context.Context, body PatchUsersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchUsersMeResponse, error) {
+	rsp, err := c.PatchUsersMe(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePatchUsersMeResponse(rsp)
 }
 
 // ParseListBudgetCategoriesResponse parses an HTTP response from a ListBudgetCategoriesWithResponse call
@@ -3798,6 +3934,46 @@ func ParseGetUsersMeResponse(rsp *http.Response) (*GetUsersMeResponse, error) {
 	return response, nil
 }
 
+// ParsePatchUsersMeResponse parses an HTTP response from a PatchUsersMeWithResponse call
+func ParsePatchUsersMeResponse(rsp *http.Response) (*PatchUsersMeResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PatchUsersMeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequest
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// List budget categories for the current household
@@ -3869,6 +4045,9 @@ type ServerInterface interface {
 	// Get current user profile
 	// (GET /users/me)
 	GetUsersMe(w http.ResponseWriter, r *http.Request)
+	// Update current user preferences
+	// (PATCH /users/me)
+	PatchUsersMe(w http.ResponseWriter, r *http.Request)
 }
 
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
@@ -4010,6 +4189,12 @@ func (_ Unimplemented) GetReport(w http.ResponseWriter, r *http.Request, reportI
 // Get current user profile
 // (GET /users/me)
 func (_ Unimplemented) GetUsersMe(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Update current user preferences
+// (PATCH /users/me)
+func (_ Unimplemented) PatchUsersMe(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4496,6 +4681,20 @@ func (siw *ServerInterfaceWrapper) GetUsersMe(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
+// PatchUsersMe operation middleware
+func (siw *ServerInterfaceWrapper) PatchUsersMe(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchUsersMe(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -4677,6 +4876,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/users/me", wrapper.GetUsersMe)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/users/me", wrapper.PatchUsersMe)
 	})
 
 	return r
@@ -5787,6 +5989,45 @@ func (response GetUsersMe404ApplicationProblemPlusJSONResponse) VisitGetUsersMeR
 	return json.NewEncoder(w).Encode(response)
 }
 
+type PatchUsersMeRequestObject struct {
+	Body *PatchUsersMeJSONRequestBody
+}
+
+type PatchUsersMeResponseObject interface {
+	VisitPatchUsersMeResponse(w http.ResponseWriter) error
+}
+
+type PatchUsersMe200JSONResponse User
+
+func (response PatchUsersMe200JSONResponse) VisitPatchUsersMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchUsersMe400ApplicationProblemPlusJSONResponse struct {
+	BadRequestApplicationProblemPlusJSONResponse
+}
+
+func (response PatchUsersMe400ApplicationProblemPlusJSONResponse) VisitPatchUsersMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PatchUsersMe401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response PatchUsersMe401ApplicationProblemPlusJSONResponse) VisitPatchUsersMeResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// List budget categories for the current household
@@ -5858,6 +6099,9 @@ type StrictServerInterface interface {
 	// Get current user profile
 	// (GET /users/me)
 	GetUsersMe(ctx context.Context, request GetUsersMeRequestObject) (GetUsersMeResponseObject, error)
+	// Update current user preferences
+	// (PATCH /users/me)
+	PatchUsersMe(ctx context.Context, request PatchUsersMeRequestObject) (PatchUsersMeResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -6503,6 +6747,37 @@ func (sh *strictHandler) GetUsersMe(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetUsersMeResponseObject); ok {
 		if err := validResponse.VisitGetUsersMeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PatchUsersMe operation middleware
+func (sh *strictHandler) PatchUsersMe(w http.ResponseWriter, r *http.Request) {
+	var request PatchUsersMeRequestObject
+
+	var body PatchUsersMeJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PatchUsersMe(ctx, request.(PatchUsersMeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PatchUsersMe")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PatchUsersMeResponseObject); ok {
+		if err := validResponse.VisitPatchUsersMeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

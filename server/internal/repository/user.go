@@ -21,6 +21,7 @@ type UserReader interface {
 // UserWriter defines write operations for users.
 type UserWriter interface {
 	Upsert(ctx context.Context, user *model.Users) (*model.Users, error)
+	UpdateLanguage(ctx context.Context, id uuid.UUID, language string) (*model.Users, error)
 }
 
 // UserRepository implements UserReader and UserWriter.
@@ -87,6 +88,31 @@ func (r *UserRepository) Upsert(ctx context.Context, user *model.Users) (*model.
 	err := stmt.QueryContext(ctx, r.db, &result)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upsert user: %w", err)
+	}
+
+	return &result, nil
+}
+
+func (r *UserRepository) UpdateLanguage(
+	ctx context.Context,
+	id uuid.UUID,
+	language string,
+) (*model.Users, error) {
+	var result model.Users
+
+	stmt := table.Users.UPDATE(
+		table.Users.Language,
+		table.Users.UpdatedAt,
+	).SET(
+		language,
+		postgres.TimestampzExp(postgres.Raw("NOW()")),
+	).WHERE(
+		table.Users.ID.EQ(postgres.UUID(id)),
+	).RETURNING(table.Users.AllColumns)
+
+	err := stmt.QueryContext(ctx, r.db, &result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update user language: %w", err)
 	}
 
 	return &result, nil
