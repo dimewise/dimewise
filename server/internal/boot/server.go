@@ -1,10 +1,14 @@
 package boot
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -19,9 +23,16 @@ import (
 	"dimewise/internal/web"
 )
 
+const (
+	corsMaxAge         = 300
+	readHeaderTimeout  = 10 * time.Second
+	gracefulShutdownTO = 10 * time.Second
+)
+
 type Server struct {
-	router   *chi.Mux
-	portAddr string
+	router     *chi.Mux
+	httpServer *http.Server
+	portAddr   string
 }
 
 func NewServer(config *config.Config) *Server {
@@ -57,7 +68,7 @@ func NewServer(config *config.Config) *Server {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
-		MaxAge:           300,
+		MaxAge:           corsMaxAge,
 	}))
 
 	r.Get("/health", h.GetHealth)
@@ -72,10 +83,9 @@ func NewServer(config *config.Config) *Server {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 			},
 			ResponseErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
-				errMsg := "Internal server error occurred"
-				slog.Default().ErrorContext(r.Context(), errMsg, slog.Any("err", err))
-
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				slog.Default().
+					ErrorContext(r.Context(), "Internal server error occurred", slog.Any("err", err))
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
 			},
 		}
 		strictHandler := oapi.NewStrictHandlerWithOptions(
@@ -87,24 +97,40 @@ func NewServer(config *config.Config) *Server {
 		oapi.HandlerFromMuxWithBaseURL(strictHandler, r, baseURL)
 	})
 
+	httpServer := &http.Server{
+		Handler:           r,
+		Addr:              portAddr,
+		ReadHeaderTimeout: readHeaderTimeout,
+	}
+
 	return &Server{
-		router:   r,
-		portAddr: portAddr,
+		router:     r,
+		httpServer: httpServer,
+		portAddr:   portAddr,
 	}
 }
 
 func (s *Server) Start() {
 	slog.Default().Info("Server listening on " + s.portAddr)
 
-	headerTimeout := 1000
-	httpServer := &http.Server{
-		Handler:           s.router,
-		Addr:              s.portAddr,
-		ReadHeaderTimeout: time.Duration(headerTimeout) * time.Second,
-	}
+	// Graceful shutdown on SIGINT/SIGTERM.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	err := httpServer.ListenAndServe()
-	if err != nil {
+	go func() {
+		<-quit
+		slog.Default().Info("Shutting down server...")
+
+		ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTO)
+		defer cancel()
+
+		if err := s.httpServer.Shutdown(ctx); err != nil {
+			slog.Default().Error("Server forced to shutdown", slog.Any("err", err))
+		}
+	}()
+
+	err := s.httpServer.ListenAndServe()
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Default().
 			Error("Error starting server on "+s.portAddr, slog.Any("err", err))
 		os.Exit(1)
