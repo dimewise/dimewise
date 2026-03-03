@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
-import { SkeletonDashboard } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonDashboard } from "@/components/ui/skeleton";
 import { RoutesEnum } from "@/routes/Routes";
 import type { ExpenseWithSplits, HouseholdMember } from "@/store/api/api";
 import {
@@ -39,13 +39,16 @@ export const DashboardPage = () => {
 	const { data: overview } = useGetBudgetOverviewQuery(undefined, {
 		skip: !household,
 	});
-	const { data: expenseData } = useListExpensesQuery(
-		{ limit: 5, offset: 0 },
-		{ skip: !household },
-	);
-	const { data: reports } = useListReportsQuery(undefined, {
-		skip: !household,
-	});
+	const {
+		data: expenseData,
+		isLoading: isExpensesLoading,
+		isUninitialized: isExpensesUninitialized,
+	} = useListExpensesQuery({ limit: 5, offset: 0 }, { skip: !household });
+	const {
+		data: reports,
+		isLoading: isReportsLoading,
+		isUninitialized: isReportsUninitialized,
+	} = useListReportsQuery(undefined, { skip: !household });
 	const { data: categories } = useListBudgetCategoriesQuery(undefined, {
 		skip: !household,
 	});
@@ -153,7 +156,20 @@ export const DashboardPage = () => {
 					</Button>
 				</CardHeader>
 				<CardContent>
-					{expenseData && expenseData.expenses.length > 0 ? (
+					{isExpensesLoading || isExpensesUninitialized ? (
+						<div className="space-y-3 py-1">
+							{Array.from({ length: 3 }).map((_, i) => (
+								// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder
+								<div key={i} className="flex items-center justify-between">
+									<div className="space-y-1.5 flex-1">
+										<Skeleton className="h-4 w-2/3" />
+										<Skeleton className="h-3 w-1/3" />
+									</div>
+									<Skeleton className="h-4 w-16" />
+								</div>
+							))}
+						</div>
+					) : expenseData && expenseData.expenses.length > 0 ? (
 						<div className="divide-y divide-border">
 							{expenseData.expenses.map((expense) => (
 								<button
@@ -206,7 +222,20 @@ export const DashboardPage = () => {
 					</Button>
 				</CardHeader>
 				<CardContent>
-					{reports && reports.length > 0 ? (
+					{isReportsLoading || isReportsUninitialized ? (
+						<div className="space-y-3 py-1">
+							{Array.from({ length: 3 }).map((_, i) => (
+								// biome-ignore lint/suspicious/noArrayIndexKey: skeleton placeholder
+								<div key={i} className="flex items-center gap-3">
+									<Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+									<div className="space-y-1.5 flex-1">
+										<Skeleton className="h-4 w-1/2" />
+										<Skeleton className="h-3 w-1/3" />
+									</div>
+								</div>
+							))}
+						</div>
+					) : reports && reports.length > 0 ? (
 						<div className="divide-y divide-border">
 							{reports.slice(0, 3).map((r) => (
 								<div

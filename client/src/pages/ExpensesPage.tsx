@@ -68,15 +68,18 @@ export const ExpensesPage = () => {
 	const [viewingExpense, setViewingExpense] =
 		useState<ExpenseWithSplits | null>(null);
 
-	const { data: expenseData, isLoading: isExpensesLoading } =
-		useListExpensesQuery(
-			{
-				...filters,
-				limit: PAGE_SIZE,
-				offset: (page - 1) * PAGE_SIZE,
-			},
-			{ skip: !household },
-		);
+	const {
+		data: expenseData,
+		isLoading: isExpensesLoading,
+		isUninitialized: isExpensesUninitialized,
+	} = useListExpensesQuery(
+		{
+			...filters,
+			limit: PAGE_SIZE,
+			offset: (page - 1) * PAGE_SIZE,
+		},
+		{ skip: !household },
+	);
 	const [deleteExpense] = useDeleteExpenseMutation();
 
 	if (isHouseholdLoading) {
@@ -275,7 +278,7 @@ export const ExpensesPage = () => {
 			)}
 
 			{/* Expense list */}
-			{isExpensesLoading ? (
+			{isExpensesLoading || isExpensesUninitialized ? (
 				<SkeletonList count={5} />
 			) : expenseData && expenseData.expenses.length > 0 ? (
 				<>

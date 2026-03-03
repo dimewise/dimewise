@@ -37,10 +37,11 @@ export const ReportsPage = () => {
 		isLoading: isHouseholdLoading,
 		isError: isHouseholdError,
 	} = useGetMyHouseholdQuery(undefined);
-	const { data: reports, isLoading: isReportsLoading } = useListReportsQuery(
-		undefined,
-		{ skip: !household },
-	);
+	const {
+		data: reports,
+		isLoading: isReportsLoading,
+		isUninitialized: isReportsUninitialized,
+	} = useListReportsQuery(undefined, { skip: !household });
 	const [generateReport, { isLoading: isGenerating }] =
 		useGenerateReportMutation();
 
@@ -111,7 +112,7 @@ export const ReportsPage = () => {
 			</div>
 
 			{/* List */}
-			{isReportsLoading ? (
+			{isReportsLoading || isReportsUninitialized ? (
 				<SkeletonList count={3} />
 			) : reports && reports.length > 0 ? (
 				<div className="space-y-2">
