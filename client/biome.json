@@ -8,6 +8,17 @@
 	"files": {
 		"ignoreUnknown": false
 	},
+	"overrides": [
+		{
+			"includes": ["src/store/api/api.ts"],
+			"linter": {
+				"enabled": false
+			},
+			"formatter": {
+				"enabled": false
+			}
+		}
+	],
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
