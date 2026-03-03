@@ -38,8 +38,11 @@ export const BudgetsPage = () => {
 		isLoading: isHouseholdLoading,
 		isError: isHouseholdError,
 	} = useGetMyHouseholdQuery(undefined);
-	const { data: categories, isLoading: isCategoriesLoading } =
-		useListBudgetCategoriesQuery(undefined, { skip: !household });
+	const {
+		data: categories,
+		isLoading: isCategoriesLoading,
+		isUninitialized: isCategoriesUninitialized,
+	} = useListBudgetCategoriesQuery(undefined, { skip: !household });
 	const { data: overview } = useGetBudgetOverviewQuery(undefined, {
 		skip: !household,
 	});
@@ -119,7 +122,7 @@ export const BudgetsPage = () => {
 			)}
 
 			{/* Category list */}
-			{isCategoriesLoading ? (
+			{isCategoriesLoading || isCategoriesUninitialized ? (
 				<SkeletonList count={3} />
 			) : categories && categories.length > 0 ? (
 				<div className="space-y-3">
