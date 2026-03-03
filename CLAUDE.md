@@ -25,7 +25,8 @@ make mdown             # Roll back one migration
 # Code generation (run after editing openapi/openapi.yml)
 make gen-openapi       # Regenerate server (oapi-codegen) + client (RTK Query)
 
-# Lint & format
+# Build, lint & format
+make build             # Compile server + type-check client
 make lint              # Biome (client) + golangci-lint (server)
 make format            # Format entire codebase
 bun run check          # Client-only: Biome lint + format with auto-fix (run from client/)
@@ -109,7 +110,7 @@ All amounts are integers in the smallest currency unit (cents for USD, yen for J
 
 ### Git
 - Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`
-- Run `make lint` before pushing
+- **Before pushing, always run: `make format`, `make lint`, `make build`** (in that order — format first so lint sees clean code)
 - Commit generated files after `make gen-openapi`
 
 ## Reference Documentation
