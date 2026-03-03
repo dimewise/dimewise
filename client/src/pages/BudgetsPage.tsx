@@ -1,5 +1,6 @@
 import { Edit2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
 import { BudgetCategoryModal } from "@/components/Budget/BudgetCategoryModal";
@@ -31,6 +32,7 @@ import {
 import { formatCurrency } from "@/utils/currency";
 
 export const BudgetsPage = () => {
+	const { t } = useTranslation();
 	const {
 		data: household,
 		isLoading: isHouseholdLoading,
@@ -80,10 +82,12 @@ export const BudgetsPage = () => {
 		if (!deletingCategory) return;
 		try {
 			await deleteCategory({ budgetId: deletingCategory.id }).unwrap();
-			toast.success(`"${deletingCategory.name}" deleted.`);
+			toast.success(
+				t("budgets.categoryDeleted", { name: deletingCategory.name }),
+			);
 			setDeletingCategory(null);
 		} catch {
-			toast.error("Failed to delete category.");
+			toast.error(t("budgets.deleteFailed"));
 		}
 	};
 
@@ -96,14 +100,16 @@ export const BudgetsPage = () => {
 		<div className="space-y-5 animate-fade-in">
 			{/* Header */}
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold tracking-tight">Budgets</h1>
+				<h1 className="text-2xl font-bold tracking-tight">
+					{t("budgets.title")}
+				</h1>
 				<Button
 					size="sm"
 					className="gap-1.5"
 					onClick={() => setModalOpen(true)}
 				>
 					<Plus className="h-4 w-4" />
-					Add Category
+					{t("budgets.addCategory")}
 				</Button>
 			</div>
 
@@ -145,7 +151,7 @@ export const BudgetsPage = () => {
 												)}
 											</div>
 											<p className="text-xs text-muted-foreground mt-0.5">
-												{formatCurrency(spent, currency)} of{" "}
+												{formatCurrency(spent, currency)} {t("common.of")}{" "}
 												{formatCurrency(cat.amount, currency)}
 											</p>
 										</div>
@@ -184,8 +190,8 @@ export const BudgetsPage = () => {
 					<CardContent>
 						<EmptyState
 							image="/dimewise-empty-budget.png"
-							title="No budget categories yet"
-							description="Create your first category to start tracking spending."
+							title={t("budgets.noBudgets")}
+							description={t("budgets.noBudgetsDescription")}
 							action={
 								<Button
 									size="sm"
@@ -193,7 +199,7 @@ export const BudgetsPage = () => {
 									onClick={() => setModalOpen(true)}
 								>
 									<Plus className="h-4 w-4" />
-									Add Category
+									{t("budgets.addCategory")}
 								</Button>
 							}
 						/>
@@ -216,18 +222,19 @@ export const BudgetsPage = () => {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Delete Category</DialogTitle>
+						<DialogTitle>{t("budgets.deleteCategory")}</DialogTitle>
 						<DialogDescription>
-							Are you sure you want to delete &ldquo;{deletingCategory?.name}
-							&rdquo;? This action cannot be undone.
+							{t("budgets.deleteCategoryConfirm", {
+								name: deletingCategory?.name,
+							})}
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setDeletingCategory(null)}>
-							Cancel
+							{t("common.cancel")}
 						</Button>
 						<Button variant="danger" onClick={handleDelete}>
-							Delete
+							{t("common.delete")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

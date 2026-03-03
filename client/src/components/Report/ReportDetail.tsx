@@ -1,4 +1,3 @@
-import { format, parseISO } from "date-fns";
 import {
 	ArrowRight,
 	Check,
@@ -11,6 +10,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import {
 	useUnmarkReportTransferPaidMutation,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
+import { formatDate } from "@/utils/date";
 
 type Props = {
 	reportId: string;
@@ -39,6 +40,7 @@ export const ReportDetail = ({
 	isOwner,
 	onBack,
 }: Props) => {
+	const { t } = useTranslation();
 	const { data: report, isLoading } = useGetReportQuery({ reportId });
 	const [markPaid] = useMarkReportTransferPaidMutation();
 	const [unmarkPaid] = useUnmarkReportTransferPaidMutation();
@@ -47,18 +49,18 @@ export const ReportDetail = ({
 	const handleMarkPaid = async (transferId: string) => {
 		try {
 			await markPaid({ transferId }).unwrap();
-			toast.success("Transfer marked as paid!");
+			toast.success(t("reportDetail.transferPaid"));
 		} catch {
-			toast.error("Failed to mark transfer as paid.");
+			toast.error(t("reportDetail.transferPaidFailed"));
 		}
 	};
 
 	const handleUnmarkPaid = async (transferId: string) => {
 		try {
 			await unmarkPaid({ transferId }).unwrap();
-			toast.success("Transfer marked as unpaid.");
+			toast.success(t("reportDetail.transferUnpaid"));
 		} catch {
-			toast.error("Failed to undo payment status.");
+			toast.error(t("reportDetail.transferUnpaidFailed"));
 		}
 	};
 
@@ -82,22 +84,23 @@ export const ReportDetail = ({
 					onClick={onBack}
 					className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-2 flex items-center gap-1"
 				>
-					&larr; Back to reports
+					{t("reportDetail.backToReports")}
 				</button>
 				<div className="flex items-center justify-between">
 					<h2 className="text-xl font-bold">{monthName}</h2>
 					{report.transfers.length > 0 &&
 						(allSettled ? (
-							<Badge variant="success">All Settled</Badge>
+							<Badge variant="success">{t("reportDetail.allSettled")}</Badge>
 						) : (
-							<Badge variant="warning">Pending</Badge>
+							<Badge variant="warning">{t("reportDetail.pending")}</Badge>
 						))}
 				</div>
 				<p className="text-sm text-muted-foreground mt-1">
-					{report.total_expenses} expense
-					{report.total_expenses !== 1 && "s"} &middot; Total:{" "}
-					{formatCurrency(report.total_amount, currency)} &middot; Generated{" "}
-					{format(new Date(report.generated_at), "MMM d, yyyy")}
+					{t("reportDetail.expense", { count: report.total_expenses })} &middot;{" "}
+					{t("reportDetail.total")}{" "}
+					{formatCurrency(report.total_amount, currency)} &middot;{" "}
+					{t("reportDetail.generated")}{" "}
+					{formatDate(report.generated_at, "MMM d, yyyy")}
 				</p>
 			</div>
 
@@ -107,7 +110,7 @@ export const ReportDetail = ({
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 text-base">
 							<Users className="h-4 w-4 text-muted-foreground" />
-							Member Breakdown
+							{t("reportDetail.memberBreakdown")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
@@ -132,8 +135,14 @@ export const ReportDetail = ({
 										</span>
 									</div>
 									<div className="flex items-center gap-4 text-xs text-muted-foreground">
-										<span>Paid: {formatCurrency(ms.total_paid, currency)}</span>
-										<span>Owed: {formatCurrency(ms.total_owed, currency)}</span>
+										<span>
+											{t("reportDetail.paid")}{" "}
+											{formatCurrency(ms.total_paid, currency)}
+										</span>
+										<span>
+											{t("reportDetail.owed")}{" "}
+											{formatCurrency(ms.total_owed, currency)}
+										</span>
 									</div>
 									<Separator />
 								</div>
@@ -149,7 +158,7 @@ export const ReportDetail = ({
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 text-base">
 							<PiggyBank className="h-4 w-4 text-muted-foreground" />
-							Category Breakdown
+							{t("reportDetail.categoryBreakdown")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
@@ -197,7 +206,9 @@ export const ReportDetail = ({
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 text-base">
 							<Receipt className="h-4 w-4 text-muted-foreground" />
-							Expense Log ({report.line_items.length})
+							{t("reportDetail.expenseLog", {
+								count: report.line_items.length,
+							})}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-0 divide-y divide-border">
@@ -222,7 +233,7 @@ export const ReportDetail = ({
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 text-base">
 							<ArrowRight className="h-4 w-4 text-muted-foreground" />
-							Transfers
+							{t("reportDetail.transfers")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
@@ -250,8 +261,9 @@ export const ReportDetail = ({
 											{isPaid && transfer.paid_at && (
 												<p className="text-xs text-success mt-0.5 flex items-center gap-1">
 													<Check className="h-3 w-3" />
-													Paid on{" "}
-													{format(parseISO(transfer.paid_at), "MMM d, yyyy")}
+													{t("reportDetail.paidOn", {
+														date: formatDate(transfer.paid_at, "MMM d, yyyy"),
+													})}
 												</p>
 											)}
 										</div>
@@ -264,7 +276,7 @@ export const ReportDetail = ({
 												onClick={() => handleMarkPaid(transfer.id)}
 											>
 												<Check className="h-3.5 w-3.5" />
-												Mark Paid
+												{t("reportDetail.markPaid")}
 											</Button>
 										)}
 										{isOwner && isPaid && (
@@ -275,7 +287,7 @@ export const ReportDetail = ({
 												onClick={() => handleUnmarkPaid(transfer.id)}
 											>
 												<Undo2 className="h-3.5 w-3.5" />
-												Undo
+												{t("reportDetail.undo")}
 											</Button>
 										)}
 										{!isOwner && isPaid && (
@@ -296,7 +308,7 @@ export const ReportDetail = ({
 			{report.transfers.length === 0 && (
 				<Card>
 					<CardContent className="py-8 text-center text-muted-foreground">
-						No transfers needed — everything is balanced!
+						{t("reportDetail.noTransfers")}
 					</CardContent>
 				</Card>
 			)}
@@ -316,6 +328,7 @@ function LineItemRow({
 	expanded: boolean;
 	onToggle: () => void;
 }) {
+	const { t } = useTranslation();
 	return (
 		<div className="py-3 first:pt-0 last:pb-0">
 			<button
@@ -334,7 +347,7 @@ function LineItemRow({
 					</div>
 					<p className="text-xs text-muted-foreground mt-0.5">
 						{item.paid_by_name} &middot;{" "}
-						{format(parseISO(item.incurred_at), "MMM d, yyyy")}
+						{formatDate(item.incurred_at, "MMM d, yyyy")}
 					</p>
 				</div>
 				<div className="flex items-center gap-2 shrink-0 ml-3">
@@ -362,7 +375,7 @@ function LineItemRow({
 					{/* Splits */}
 					<div className="space-y-1">
 						<p className="text-xs font-medium text-muted-foreground">
-							Split breakdown
+							{t("reportDetail.splitBreakdown")}
 						</p>
 						{item.splits.map((split) => (
 							<div

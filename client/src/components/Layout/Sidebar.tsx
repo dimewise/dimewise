@@ -5,19 +5,29 @@ import {
 	Receipt,
 	Settings,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { RoutesEnum } from "@/routes/Routes";
 
 const navItems = [
-	{ path: RoutesEnum.dashboard, icon: LayoutDashboard, label: "Dashboard" },
-	{ path: RoutesEnum.expenses, icon: Receipt, label: "Expenses" },
-	{ path: RoutesEnum.budgets, icon: PiggyBank, label: "Budgets" },
-	{ path: RoutesEnum.reports, icon: FileBarChart, label: "Reports" },
-	{ path: RoutesEnum.householdSettings, icon: Settings, label: "Settings" },
+	{
+		path: RoutesEnum.dashboard,
+		icon: LayoutDashboard,
+		labelKey: "nav.dashboard",
+	},
+	{ path: RoutesEnum.expenses, icon: Receipt, labelKey: "nav.expenses" },
+	{ path: RoutesEnum.budgets, icon: PiggyBank, labelKey: "nav.budgets" },
+	{ path: RoutesEnum.reports, icon: FileBarChart, labelKey: "nav.reports" },
+	{
+		path: RoutesEnum.householdSettings,
+		icon: Settings,
+		labelKey: "nav.settings",
+	},
 ];
 
 export function Sidebar() {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -40,7 +50,10 @@ export function Sidebar() {
 				{/* Navigation */}
 				<nav className="flex-1 space-y-1 px-3 py-4">
 					{navItems.map((item) => {
-						const isActive = location.pathname === item.path;
+						const isActive =
+						location.pathname === item.path ||
+						(item.path === RoutesEnum.householdSettings &&
+							location.pathname === RoutesEnum.accountSettings);
 						return (
 							<button
 								key={item.path}
@@ -57,7 +70,7 @@ export function Sidebar() {
 									className="h-5 w-5"
 									strokeWidth={isActive ? 2.5 : 2}
 								/>
-								{item.label}
+								{t(item.labelKey)}
 							</button>
 						);
 					})}
@@ -65,7 +78,7 @@ export function Sidebar() {
 
 				{/* Footer */}
 				<div className="px-4 py-4 text-xs text-sidebar-foreground/40">
-					Dimewise v1.0
+					{t("sidebar.version")}
 				</div>
 			</div>
 		</aside>

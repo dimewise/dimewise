@@ -8,47 +8,29 @@ import {
 	Receipt,
 	Smartphone,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { RoutesEnum } from "@/routes/Routes";
 
-const features = [
-	{
-		icon: Home,
-		title: "One Household, One Source of Truth",
-		description:
-			"Create your family household, invite everyone, and keep all shared spending in a single place.",
-	},
-	{
-		icon: Receipt,
-		title: "Log & Split Expenses Fairly",
-		description:
-			"Groceries, rent, utilities, subscriptions — log any expense and split it evenly or by custom amounts.",
-	},
-	{
-		icon: PiggyBank,
-		title: "Set Budgets That Stick",
-		description:
-			"Create monthly budget categories so your household knows exactly where the money goes.",
-	},
-	{
-		icon: FileBarChart,
-		title: "Monthly Settlement Reports",
-		description:
-			"At month's end, see who owes whom. Mark transfers as paid and keep everyone accountable.",
-	},
+const featureKeys = [
+	{ icon: Home, key: "household" },
+	{ icon: Receipt, key: "expenses" },
+	{ icon: PiggyBank, key: "budgets" },
+	{ icon: FileBarChart, key: "reports" },
 ];
 
-const benefits = [
-	"No more awkward money conversations",
-	"See every expense in real time",
-	"Fair splits — down to the cent",
-	"Monthly reports settle it all",
-	"Installable as an app on any device",
-	"Works on any phone, tablet, or desktop",
+const benefitKeys = [
+	"noAwkward",
+	"realTime",
+	"fairSplits",
+	"monthlyReports",
+	"installable",
+	"anyDevice",
 ];
 
 export const LandingPage = () => {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { isSignedIn, isLoaded } = useAuth();
 
@@ -66,14 +48,12 @@ export const LandingPage = () => {
 					className="mb-6 h-32 w-32 drop-shadow-lg md:h-40 md:w-40"
 				/>
 				<h1 className="text-4xl font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
-					Family finances,
+					{t("landing.heroTitle1")}
 					<br />
-					<span className="text-brand">finally simple.</span>
+					<span className="text-brand">{t("landing.heroTitle2")}</span>
 				</h1>
 				<p className="mt-5 max-w-lg text-lg text-muted-foreground">
-					Dimewise helps families manage shared household expenses without the
-					spreadsheets, guesswork, or awkward conversations. Track spending, set
-					budgets, and settle up — together.
+					{t("landing.heroDescription")}
 				</p>
 				<div className="mt-8 flex flex-col gap-3 sm:flex-row">
 					<Button
@@ -81,7 +61,7 @@ export const LandingPage = () => {
 						onClick={() => navigate(RoutesEnum.register)}
 						className="gap-2"
 					>
-						Start Your Household
+						{t("landing.startHousehold")}
 						<ArrowRight className="h-4 w-4" />
 					</Button>
 					<Button
@@ -89,7 +69,7 @@ export const LandingPage = () => {
 						size="lg"
 						onClick={() => navigate(RoutesEnum.login)}
 					>
-						Sign In
+						{t("landing.signIn")}
 					</Button>
 				</div>
 			</section>
@@ -97,11 +77,11 @@ export const LandingPage = () => {
 			{/* Trust bar */}
 			<section className="border-t border-border bg-muted/40 px-4 py-10">
 				<div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-					{benefits.map((text) => (
-						<div key={text} className="flex items-center gap-2.5">
+					{benefitKeys.map((key) => (
+						<div key={key} className="flex items-center gap-2.5">
 							<CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
 							<span className="text-sm font-medium text-foreground">
-								{text}
+								{t(`landing.benefits.${key}`)}
 							</span>
 						</div>
 					))}
@@ -112,25 +92,25 @@ export const LandingPage = () => {
 			<section className="border-t border-border px-4 py-16 md:py-20">
 				<div className="mx-auto max-w-5xl">
 					<h2 className="mb-4 text-center text-2xl font-bold tracking-tight md:text-3xl">
-						Built for real households
+						{t("landing.features.title")}
 					</h2>
 					<p className="mx-auto mb-12 max-w-xl text-center text-muted-foreground">
-						Whether you're a couple sharing rent, parents managing the family
-						budget, or housemates splitting groceries — Dimewise keeps it
-						transparent and fair.
+						{t("landing.features.description")}
 					</p>
 					<div className="grid gap-6 sm:grid-cols-2">
-						{features.map((feature) => (
+						{featureKeys.map((feature) => (
 							<div
-								key={feature.title}
+								key={feature.key}
 								className="rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-md"
 							>
 								<div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-light text-brand">
 									<feature.icon className="h-5 w-5" />
 								</div>
-								<h3 className="text-base font-semibold">{feature.title}</h3>
+								<h3 className="text-base font-semibold">
+									{t(`landing.features.${feature.key}.title`)}
+								</h3>
 								<p className="mt-1.5 text-sm text-muted-foreground">
-									{feature.description}
+									{t(`landing.features.${feature.key}.description`)}
 								</p>
 							</div>
 						))}
@@ -142,36 +122,19 @@ export const LandingPage = () => {
 			<section className="border-t border-border bg-muted/50 px-4 py-16 md:py-20">
 				<div className="mx-auto max-w-3xl">
 					<h2 className="mb-12 text-center text-2xl font-bold tracking-tight md:text-3xl">
-						How it works
+						{t("landing.howItWorks.title")}
 					</h2>
 					<div className="grid gap-8 sm:grid-cols-3">
-						{[
-							{
-								step: "1",
-								title: "Create your household",
-								description:
-									"Sign up, name your household, and invite family members with a simple code.",
-							},
-							{
-								step: "2",
-								title: "Log expenses as they happen",
-								description:
-									"Anyone in the household can add an expense. Dimewise splits it automatically.",
-							},
-							{
-								step: "3",
-								title: "Settle up each month",
-								description:
-									"Review the monthly report, see who owes whom, and mark transfers as paid.",
-							},
-						].map((item) => (
-							<div key={item.step} className="text-center">
+						{["step1", "step2", "step3"].map((step, index) => (
+							<div key={step} className="text-center">
 								<div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
-									{item.step}
+									{index + 1}
 								</div>
-								<h3 className="text-sm font-semibold">{item.title}</h3>
+								<h3 className="text-sm font-semibold">
+									{t(`landing.howItWorks.${step}.title`)}
+								</h3>
 								<p className="mt-1.5 text-sm text-muted-foreground">
-									{item.description}
+									{t(`landing.howItWorks.${step}.description`)}
 								</p>
 							</div>
 						))}
@@ -188,21 +151,21 @@ export const LandingPage = () => {
 						className="mb-4 h-28 w-28 object-contain"
 					/>
 					<h2 className="text-2xl font-bold tracking-tight md:text-3xl">
-						Take the guesswork out of family finances
+						{t("landing.cta.title")}
 					</h2>
 					<p className="mt-3 text-muted-foreground">
-						Free to use. Set up your household in under a minute.
+						{t("landing.cta.description")}
 					</p>
 					<div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
 						<Smartphone className="h-4 w-4" />
-						<span>Works on any device — install it like a native app from your browser</span>
+						<span>{t("landing.cta.pwa")}</span>
 					</div>
 					<Button
 						size="lg"
 						className="mt-8 gap-2"
 						onClick={() => navigate(RoutesEnum.register)}
 					>
-						Get Started — It's Free
+						{t("landing.cta.button")}
 						<ArrowRight className="h-4 w-4" />
 					</Button>
 				</div>
@@ -212,29 +175,28 @@ export const LandingPage = () => {
 			<footer className="border-t border-border px-4 py-8">
 				<div className="mx-auto max-w-5xl flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
 					<p className="text-sm text-muted-foreground">
-						&copy; {new Date().getFullYear()} Dimewise. Built with love for
-						families who share more than just a roof.
+						{t("landing.footer.copyright", { year: new Date().getFullYear() })}
 					</p>
 					<div className="flex items-center gap-4 text-sm text-muted-foreground">
 						<a
 							href={RoutesEnum.privacy}
 							className="hover:text-foreground transition-colors"
 						>
-							Privacy Policy
+							{t("landing.footer.privacy")}
 						</a>
 						<span className="text-border">&middot;</span>
 						<a
 							href={RoutesEnum.terms}
 							className="hover:text-foreground transition-colors"
 						>
-							Terms of Service
+							{t("landing.footer.terms")}
 						</a>
 						<span className="text-border">&middot;</span>
 						<a
 							href="mailto:support@dimewise.app"
 							className="hover:text-foreground transition-colors"
 						>
-							Contact
+							{t("landing.footer.contact")}
 						</a>
 					</div>
 				</div>

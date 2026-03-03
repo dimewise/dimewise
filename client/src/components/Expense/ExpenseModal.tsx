@@ -1,5 +1,6 @@
 import { AlertCircle, Minus, Plus, Split } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +56,7 @@ export const ExpenseModal = ({
 }: Props) => {
 	const [createExpense, { isLoading: isCreating }] = useCreateExpenseMutation();
 	const [updateExpense, { isLoading: isUpdating }] = useUpdateExpenseMutation();
+	const { t } = useTranslation();
 
 	const isEditing = !!expense;
 	const isZeroDecimal = ["JPY", "KRW"].includes(currency.toUpperCase());
@@ -113,15 +115,15 @@ export const ExpenseModal = ({
 
 	const validate = useCallback((): Record<string, string> => {
 		const errs: Record<string, string> = {};
-		if (!title.trim()) errs.title = "Title is required.";
+		if (!title.trim()) errs.title = t("expenseModal.titleRequired");
 		const parsedAmount = Number.parseFloat(amount);
 		if (!amount || Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-			errs.amount = "Enter a valid amount greater than 0.";
+			errs.amount = t("expenseModal.amountRequired");
 		}
-		if (!date) errs.date = "Date is required.";
-		if (!paidBy) errs.paidBy = "Select who paid.";
+		if (!date) errs.date = t("expenseModal.dateRequired");
+		if (!paidBy) errs.paidBy = t("expenseModal.paidByRequired");
 		if (hasCategories && categoryId === "none") {
-			errs.category = "Select a category.";
+			errs.category = t("expenseModal.categoryRequired");
 		}
 		if (!errs.amount && amount) {
 			const amtSmall = toSmallestUnit(parsedAmount, currency);
@@ -131,7 +133,10 @@ export const ExpenseModal = ({
 				0,
 			);
 			if (splitSum !== amtSmall) {
-				errs.splits = `Splits total ${fromSmallestUnit(splitSum, currency)} but expense is ${parsedAmount}. They must match.`;
+				errs.splits = t("expenseModal.splitsMismatch", {
+					splitTotal: fromSmallestUnit(splitSum, currency),
+					expenseTotal: parsedAmount,
+				});
 			}
 		}
 		return errs;
@@ -144,6 +149,7 @@ export const ExpenseModal = ({
 		categoryId,
 		splits,
 		currency,
+		t,
 	]);
 
 	// Re-validate on field changes after first submission attempt
@@ -224,7 +230,7 @@ export const ExpenseModal = ({
 						splits: splitsSmallest,
 					},
 				}).unwrap();
-				toast.success("Expense updated!");
+				toast.success(t("expenseModal.expenseUpdated"));
 			} else {
 				await createExpense({
 					createExpenseRequest: {
@@ -237,12 +243,14 @@ export const ExpenseModal = ({
 						splits: splitsSmallest,
 					},
 				}).unwrap();
-				toast.success("Expense created!");
+				toast.success(t("expenseModal.expenseCreated"));
 			}
 			onClose();
 		} catch {
 			toast.error(
-				isEditing ? "Failed to update expense." : "Failed to create expense.",
+				isEditing
+					? t("expenseModal.updateFailed")
+					: t("expenseModal.createFailed"),
 			);
 		}
 	};
@@ -254,7 +262,9 @@ export const ExpenseModal = ({
 			<DialogContent className="max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
-						{isEditing ? "Edit Expense" : "New Expense"}
+						{isEditing
+							? t("expenseModal.editTitle")
+							: t("expenseModal.newTitle")}
 					</DialogTitle>
 				</DialogHeader>
 
@@ -262,11 +272,12 @@ export const ExpenseModal = ({
 					{/* Title */}
 					<div className="space-y-2">
 						<Label htmlFor="exp-title">
-							Title <span className="text-danger">*</span>
+							{t("expenseModal.titleLabel")}{" "}
+							<span className="text-danger">*</span>
 						</Label>
 						<Input
 							id="exp-title"
-							placeholder="e.g. Groceries at Trader Joe's"
+							placeholder={t("expenseModal.titlePlaceholder")}
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
 							className={cn(errors.title && errCls)}
@@ -283,7 +294,8 @@ export const ExpenseModal = ({
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-2">
 							<Label htmlFor="exp-amount">
-								Amount ({currency}) <span className="text-danger">*</span>
+								{t("expenseModal.amount", { currency })}{" "}
+								<span className="text-danger">*</span>
 							</Label>
 							<Input
 								id="exp-amount"
@@ -304,7 +316,7 @@ export const ExpenseModal = ({
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="exp-date">
-								Date <span className="text-danger">*</span>
+								{t("expenseModal.date")} <span className="text-danger">*</span>
 							</Label>
 							<Input
 								id="exp-date"
@@ -326,11 +338,12 @@ export const ExpenseModal = ({
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-2">
 							<Label>
-								Paid By <span className="text-danger">*</span>
+								{t("expenseModal.paidBy")}{" "}
+								<span className="text-danger">*</span>
 							</Label>
 							<Select value={paidBy} onValueChange={setPaidBy}>
 								<SelectTrigger className={cn(errors.paidBy && errCls)}>
-									<SelectValue placeholder="Select member" />
+									<SelectValue placeholder={t("expenseModal.selectMember")} />
 								</SelectTrigger>
 								<SelectContent>
 									{members.map((m) => (
@@ -349,17 +362,20 @@ export const ExpenseModal = ({
 						</div>
 						<div className="space-y-2">
 							<Label>
-								Category <span className="text-danger">*</span>
+								{t("expenseModal.category")}{" "}
+								<span className="text-danger">*</span>
 							</Label>
 							{hasCategories ? (
 								<>
 									<Select value={categoryId} onValueChange={setCategoryId}>
 										<SelectTrigger className={cn(errors.category && errCls)}>
-											<SelectValue placeholder="Select category" />
+											<SelectValue
+												placeholder={t("expenseModal.selectCategory")}
+											/>
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="none" disabled>
-												Select a category
+												{t("expenseModal.selectACategory")}
 											</SelectItem>
 											{categories.map((c) => (
 												<SelectItem key={c.id} value={c.id}>
@@ -378,8 +394,7 @@ export const ExpenseModal = ({
 							) : (
 								<div className="rounded-lg border border-warning/50 bg-warning-light p-2.5">
 									<p className="text-xs text-warning font-medium">
-										No categories yet. Please create a budget category first on
-										the Budgets page.
+										{t("expenseModal.noCategoriesWarning")}
 									</p>
 								</div>
 							)}
@@ -388,10 +403,10 @@ export const ExpenseModal = ({
 
 					{/* Notes */}
 					<div className="space-y-2">
-						<Label htmlFor="exp-notes">Notes (optional)</Label>
+						<Label htmlFor="exp-notes">{t("expenseModal.notesLabel")}</Label>
 						<Textarea
 							id="exp-notes"
-							placeholder="Optional notes..."
+							placeholder={t("expenseModal.notesPlaceholder")}
 							value={notes}
 							onChange={(e) => setNotes(e.target.value)}
 							rows={2}
@@ -403,7 +418,8 @@ export const ExpenseModal = ({
 						<div className="flex items-center justify-between">
 							<Label className="flex items-center gap-1.5">
 								<Split className="h-3.5 w-3.5" />
-								Splits <span className="text-danger">*</span>
+								{t("expenseModal.splits")}{" "}
+								<span className="text-danger">*</span>
 							</Label>
 							<Button
 								type="button"
@@ -411,11 +427,11 @@ export const ExpenseModal = ({
 								size="sm"
 								onClick={splitEvenly}
 							>
-								Split Evenly
+								{t("expenseModal.splitEvenly")}
 							</Button>
 						</div>
 						<p className="text-xs text-muted-foreground">
-							Splits must add up to the total amount.
+							{t("expenseModal.splitsMustMatch")}
 						</p>
 
 						{errors.splits && (
@@ -486,24 +502,24 @@ export const ExpenseModal = ({
 								onClick={addSplit}
 							>
 								<Plus className="h-3.5 w-3.5" />
-								Add Split
+								{t("expenseModal.addSplit")}
 							</Button>
 						)}
 					</div>
 
 					<DialogFooter>
 						<Button type="button" variant="outline" onClick={onClose}>
-							Cancel
+							{t("common.cancel")}
 						</Button>
 						<Button
 							type="submit"
 							disabled={isCreating || isUpdating || !hasCategories}
 						>
 							{isCreating || isUpdating
-								? "Saving..."
+								? t("common.saving")
 								: isEditing
-									? "Save"
-									: "Create"}
+									? t("common.save")
+									: t("common.create")}
 						</Button>
 					</DialogFooter>
 				</form>

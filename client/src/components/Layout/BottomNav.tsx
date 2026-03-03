@@ -5,19 +5,25 @@ import {
 	Receipt,
 	Settings,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 import { RoutesEnum } from "@/routes/Routes";
 
 const navItems = [
-	{ path: RoutesEnum.dashboard, icon: LayoutDashboard, label: "Home" },
-	{ path: RoutesEnum.expenses, icon: Receipt, label: "Expenses" },
-	{ path: RoutesEnum.budgets, icon: PiggyBank, label: "Budgets" },
-	{ path: RoutesEnum.reports, icon: FileBarChart, label: "Reports" },
-	{ path: RoutesEnum.householdSettings, icon: Settings, label: "Settings" },
+	{ path: RoutesEnum.dashboard, icon: LayoutDashboard, labelKey: "nav.home" },
+	{ path: RoutesEnum.expenses, icon: Receipt, labelKey: "nav.expenses" },
+	{ path: RoutesEnum.budgets, icon: PiggyBank, labelKey: "nav.budgets" },
+	{ path: RoutesEnum.reports, icon: FileBarChart, labelKey: "nav.reports" },
+	{
+		path: RoutesEnum.householdSettings,
+		icon: Settings,
+		labelKey: "nav.settings",
+	},
 ];
 
 export function BottomNav() {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -25,7 +31,10 @@ export function BottomNav() {
 		<nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-surface/95 backdrop-blur-md md:hidden">
 			<div className="mx-auto flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
 				{navItems.map((item) => {
-					const isActive = location.pathname === item.path;
+					const isActive =
+						location.pathname === item.path ||
+						(item.path === RoutesEnum.householdSettings &&
+							location.pathname === RoutesEnum.accountSettings);
 					return (
 						<button
 							key={item.path}
@@ -45,7 +54,7 @@ export function BottomNav() {
 								)}
 								strokeWidth={isActive ? 2.5 : 2}
 							/>
-							<span>{item.label}</span>
+							<span>{t(item.labelKey)}</span>
 						</button>
 					);
 				})}

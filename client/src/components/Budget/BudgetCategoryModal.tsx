@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +31,7 @@ export const BudgetCategoryModal = ({
 	currency,
 	category,
 }: Props) => {
+	const { t } = useTranslation();
 	const [name, setName] = useState("");
 	const [amount, setAmount] = useState("");
 	const [createCategory, { isLoading: isCreating }] =
@@ -68,7 +70,7 @@ export const BudgetCategoryModal = ({
 						amount: amountInSmallestUnit,
 					},
 				}).unwrap();
-				toast.success("Category updated!");
+				toast.success(t("budgetModal.categoryUpdated"));
 			} else {
 				await createCategory({
 					createBudgetCategoryRequest: {
@@ -76,12 +78,14 @@ export const BudgetCategoryModal = ({
 						amount: amountInSmallestUnit,
 					},
 				}).unwrap();
-				toast.success("Category created!");
+				toast.success(t("budgetModal.categoryCreated"));
 			}
 			onClose();
 		} catch {
 			toast.error(
-				isEditing ? "Failed to update category." : "Failed to create category.",
+				isEditing
+					? t("budgetModal.updateFailed")
+					: t("budgetModal.createFailed"),
 			);
 		}
 	};
@@ -91,22 +95,24 @@ export const BudgetCategoryModal = ({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						{isEditing ? "Edit Budget Category" : "New Budget Category"}
+						{isEditing ? t("budgetModal.editTitle") : t("budgetModal.newTitle")}
 					</DialogTitle>
 				</DialogHeader>
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="cat-name">Category Name</Label>
+						<Label htmlFor="cat-name">{t("budgetModal.categoryName")}</Label>
 						<Input
 							id="cat-name"
-							placeholder="e.g. Groceries, Rent, Utilities"
+							placeholder={t("budgetModal.categoryNamePlaceholder")}
 							value={name}
 							onChange={(e) => setName(e.target.value)}
 							required
 						/>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="cat-amount">Monthly Budget ({currency})</Label>
+						<Label htmlFor="cat-amount">
+							{t("budgetModal.monthlyBudget", { currency })}
+						</Label>
 						<Input
 							id="cat-amount"
 							type="number"
@@ -120,14 +126,14 @@ export const BudgetCategoryModal = ({
 					</div>
 					<DialogFooter>
 						<Button type="button" variant="outline" onClick={onClose}>
-							Cancel
+							{t("common.cancel")}
 						</Button>
 						<Button type="submit" disabled={isCreating || isUpdating}>
 							{isCreating || isUpdating
-								? "Saving..."
+								? t("common.saving")
 								: isEditing
-									? "Save"
-									: "Create"}
+									? t("common.save")
+									: t("common.create")}
 						</Button>
 					</DialogFooter>
 				</form>

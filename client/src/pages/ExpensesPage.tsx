@@ -1,6 +1,6 @@
-import { format, parseISO } from "date-fns";
 import { ChevronLeft, ChevronRight, Filter, Plus, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
 import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
@@ -37,10 +37,12 @@ import {
 	useListExpensesQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
+import { formatDate } from "@/utils/date";
 
 const PAGE_SIZE = 20;
 
 export const ExpensesPage = () => {
+	const { t } = useTranslation();
 	const {
 		data: household,
 		isLoading: isHouseholdLoading,
@@ -114,10 +116,10 @@ export const ExpensesPage = () => {
 		if (!deletingExpense) return;
 		try {
 			await deleteExpense({ expenseId: deletingExpense.id }).unwrap();
-			toast.success("Expense deleted.");
+			toast.success(t("expenses.expenseDeleted"));
 			setDeletingExpense(null);
 		} catch {
-			toast.error("Failed to delete expense.");
+			toast.error(t("expenses.deleteFailed"));
 		}
 	};
 
@@ -133,7 +135,9 @@ export const ExpensesPage = () => {
 		<div className="space-y-5 animate-fade-in">
 			{/* Header */}
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold tracking-tight">Expenses</h1>
+				<h1 className="text-2xl font-bold tracking-tight">
+					{t("expenses.title")}
+				</h1>
 				<div className="flex items-center gap-2">
 					<Button
 						variant={showFilters ? "secondary" : "outline"}
@@ -142,7 +146,7 @@ export const ExpensesPage = () => {
 						onClick={() => setShowFilters(!showFilters)}
 					>
 						<Filter className="h-3.5 w-3.5" />
-						Filters
+						{t("expenses.filters")}
 						{hasActiveFilters && (
 							<span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[10px] text-white">
 								!
@@ -155,7 +159,7 @@ export const ExpensesPage = () => {
 						onClick={() => setModalOpen(true)}
 					>
 						<Plus className="h-4 w-4" />
-						Add
+						{t("expenses.add")}
 					</Button>
 				</div>
 			</div>
@@ -166,7 +170,7 @@ export const ExpensesPage = () => {
 					<CardContent className="p-4 space-y-3">
 						<div className="grid grid-cols-2 gap-3">
 							<div className="space-y-1.5">
-								<Label className="text-xs">Category</Label>
+								<Label className="text-xs">{t("expenses.category")}</Label>
 								<Select
 									value={filters.categoryId ?? "all"}
 									onValueChange={(v) =>
@@ -177,10 +181,12 @@ export const ExpensesPage = () => {
 									}
 								>
 									<SelectTrigger className="h-9 text-sm">
-										<SelectValue placeholder="All categories" />
+										<SelectValue placeholder={t("expenses.allCategories")} />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="all">All categories</SelectItem>
+										<SelectItem value="all">
+											{t("expenses.allCategories")}
+										</SelectItem>
 										{categories?.map((c) => (
 											<SelectItem key={c.id} value={c.id}>
 												{c.name}
@@ -190,7 +196,7 @@ export const ExpensesPage = () => {
 								</Select>
 							</div>
 							<div className="space-y-1.5">
-								<Label className="text-xs">Paid By</Label>
+								<Label className="text-xs">{t("expenses.paidBy")}</Label>
 								<Select
 									value={filters.paidBy ?? "all"}
 									onValueChange={(v) =>
@@ -201,10 +207,12 @@ export const ExpensesPage = () => {
 									}
 								>
 									<SelectTrigger className="h-9 text-sm">
-										<SelectValue placeholder="Everyone" />
+										<SelectValue placeholder={t("expenses.everyone")} />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="all">Everyone</SelectItem>
+										<SelectItem value="all">
+											{t("expenses.everyone")}
+										</SelectItem>
 										{household.members.map((m) => (
 											<SelectItem key={m.user_id} value={m.user_id}>
 												{getMemberName(m.user_id)}
@@ -216,7 +224,7 @@ export const ExpensesPage = () => {
 						</div>
 						<div className="grid grid-cols-2 gap-3">
 							<div className="space-y-1.5">
-								<Label className="text-xs">From</Label>
+								<Label className="text-xs">{t("expenses.from")}</Label>
 								<Input
 									type="date"
 									className="h-9 text-sm"
@@ -232,7 +240,7 @@ export const ExpensesPage = () => {
 								/>
 							</div>
 							<div className="space-y-1.5">
-								<Label className="text-xs">To</Label>
+								<Label className="text-xs">{t("expenses.to")}</Label>
 								<Input
 									type="date"
 									className="h-9 text-sm"
@@ -259,7 +267,7 @@ export const ExpensesPage = () => {
 								}}
 							>
 								<X className="h-3.5 w-3.5" />
-								Clear filters
+								{t("expenses.clearFilters")}
 							</Button>
 						)}
 					</CardContent>
@@ -288,14 +296,17 @@ export const ExpensesPage = () => {
 												{expense.budget_category_id && (
 													<Badge variant="default" className="text-[10px]">
 														{categoryMap.get(expense.budget_category_id) ??
-															"Unknown"}
+															t("expenses.unknown")}
 													</Badge>
 												)}
 											</div>
 											<p className="text-xs text-muted-foreground mt-1">
 												{getMemberName(expense.paid_by)} &middot;{" "}
-												{format(parseISO(expense.incurred_at), "MMM d, yyyy")}{" "}
-												&middot; {expense.splits.length}-way split
+												{formatDate(expense.incurred_at, "MMM d, yyyy")}{" "}
+												&middot;{" "}
+												{t("expenses.waySplit", {
+													count: expense.splits.length,
+												})}
 											</p>
 										</div>
 										<p className="text-lg font-bold shrink-0 ml-4">
@@ -311,7 +322,7 @@ export const ExpensesPage = () => {
 					{totalPages > 1 && (
 						<div className="flex items-center justify-between">
 							<p className="text-xs text-muted-foreground">
-								{expenseData.total} expense{expenseData.total !== 1 && "s"}
+								{t("expenses.expense", { count: expenseData.total })}
 							</p>
 							<div className="flex items-center gap-1">
 								<Button
@@ -344,8 +355,8 @@ export const ExpensesPage = () => {
 					<CardContent>
 						<EmptyState
 							image="/dimewise-empty.png"
-							title="No expenses yet"
-							description="Add your first expense to start tracking spending."
+							title={t("expenses.noExpenses")}
+							description={t("expenses.noExpensesDescription")}
 							action={
 								<Button
 									size="sm"
@@ -353,7 +364,7 @@ export const ExpensesPage = () => {
 									onClick={() => setModalOpen(true)}
 								>
 									<Plus className="h-4 w-4" />
-									Add Expense
+									{t("expenses.addExpense")}
 								</Button>
 							}
 						/>
@@ -399,18 +410,19 @@ export const ExpensesPage = () => {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Delete Expense</DialogTitle>
+						<DialogTitle>{t("expenses.deleteExpense")}</DialogTitle>
 						<DialogDescription>
-							Are you sure you want to delete &ldquo;{deletingExpense?.title}
-							&rdquo;?
+							{t("expenses.deleteExpenseConfirm", {
+								title: deletingExpense?.title,
+							})}
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setDeletingExpense(null)}>
-							Cancel
+							{t("common.cancel")}
 						</Button>
 						<Button variant="danger" onClick={handleDelete}>
-							Delete
+							{t("common.delete")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

@@ -1,4 +1,5 @@
 import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { BudgetOverview } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export const BudgetOverviewCard = ({ overview, currency }: Props) => {
+	const { t } = useTranslation();
 	const usedPercent =
 		overview.total_budget > 0
 			? Math.round((overview.total_spent / overview.total_budget) * 100)
@@ -30,20 +32,22 @@ export const BudgetOverviewCard = ({ overview, currency }: Props) => {
 					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light">
 						<Wallet className="h-4 w-4 text-brand" />
 					</div>
-					<h3 className="font-semibold">Monthly Overview</h3>
+					<h3 className="font-semibold">{t("budgets.monthlyOverview")}</h3>
 				</div>
 
 				{/* Stats row */}
 				<div className="grid grid-cols-3 gap-3">
 					<div className="rounded-lg bg-muted p-3">
-						<p className="text-xs text-muted-foreground mb-1">Budget</p>
+						<p className="text-xs text-muted-foreground mb-1">
+							{t("budgets.budget")}
+						</p>
 						<p className="text-sm font-bold truncate">
 							{formatCurrency(overview.total_budget, currency)}
 						</p>
 					</div>
 					<div className="rounded-lg bg-muted p-3">
 						<p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-							Spent
+							{t("budgets.spent")}
 							<TrendingDown className="h-3 w-3" />
 						</p>
 						<p
@@ -57,7 +61,7 @@ export const BudgetOverviewCard = ({ overview, currency }: Props) => {
 					</div>
 					<div className="rounded-lg bg-muted p-3">
 						<p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-							Left
+							{t("budgets.left")}
 							<TrendingUp className="h-3 w-3" />
 						</p>
 						<p
@@ -74,7 +78,7 @@ export const BudgetOverviewCard = ({ overview, currency }: Props) => {
 				{/* Progress bar */}
 				<div className="space-y-1.5">
 					<div className="flex items-center justify-between text-xs text-muted-foreground">
-						<span>Usage</span>
+						<span>{t("budgets.usage")}</span>
 						<span className="font-medium">{usedPercent}%</span>
 					</div>
 					<Progress value={usedPercent} indicatorClassName={progressColor} />
@@ -84,7 +88,7 @@ export const BudgetOverviewCard = ({ overview, currency }: Props) => {
 				{overview.categories.length > 0 && (
 					<div className="space-y-2.5 pt-1">
 						<p className="text-xs font-medium text-muted-foreground">
-							By Category
+							{t("budgets.byCategory")}
 						</p>
 						{overview.categories.map((cat) => {
 							const catPercent =

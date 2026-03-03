@@ -1,5 +1,6 @@
 import { ArrowLeft, KeyRound, Plus } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -26,22 +27,23 @@ import {
 } from "@/store/api/api";
 
 const currencyOptions = [
-	{ value: "USD", label: "USD — US Dollar" },
-	{ value: "EUR", label: "EUR — Euro" },
-	{ value: "GBP", label: "GBP — British Pound" },
-	{ value: "CAD", label: "CAD — Canadian Dollar" },
-	{ value: "AUD", label: "AUD — Australian Dollar" },
-	{ value: "SGD", label: "SGD — Singapore Dollar" },
-	{ value: "HKD", label: "HKD — Hong Kong Dollar" },
-	{ value: "NZD", label: "NZD — New Zealand Dollar" },
-	{ value: "CHF", label: "CHF — Swiss Franc" },
-	{ value: "JPY", label: "JPY — Japanese Yen" },
-	{ value: "KRW", label: "KRW — South Korean Won" },
+	"USD",
+	"EUR",
+	"GBP",
+	"CAD",
+	"AUD",
+	"SGD",
+	"HKD",
+	"NZD",
+	"CHF",
+	"JPY",
+	"KRW",
 ];
 
 type Mode = "choose" | "create" | "join";
 
 export const HouseholdSetupPage = () => {
+	const { t } = useTranslation();
 	const [mode, setMode] = useState<Mode>("choose");
 	const navigate = useNavigate();
 	const [createHousehold, { isLoading: isCreating }] =
@@ -62,10 +64,10 @@ export const HouseholdSetupPage = () => {
 					currency: currency as "USD",
 				},
 			}).unwrap();
-			toast.success("Household created!");
+			toast.success(t("householdSetup.householdCreated"));
 			navigate(RoutesEnum.dashboard);
 		} catch {
-			toast.error("Failed to create household. Please try again.");
+			toast.error(t("householdSetup.createFailed"));
 		}
 	};
 
@@ -76,10 +78,10 @@ export const HouseholdSetupPage = () => {
 			await joinHousehold({
 				joinHouseholdRequest: { invite_code: inviteCode.trim() },
 			}).unwrap();
-			toast.success("Joined household!");
+			toast.success(t("householdSetup.householdJoined"));
 			navigate(RoutesEnum.dashboard);
 		} catch {
-			toast.error("Invalid invite code or you already belong to a household.");
+			toast.error(t("householdSetup.joinFailed"));
 		}
 	};
 
@@ -93,11 +95,10 @@ export const HouseholdSetupPage = () => {
 							alt="Set up your household"
 							className="mb-2 h-28 w-28 object-contain"
 						/>
-						<CardTitle className="text-xl">Welcome to Dimewise!</CardTitle>
-						<CardDescription>
-							Get started by creating a new household or joining an existing one
-							with an invite code.
-						</CardDescription>
+						<CardTitle className="text-xl">
+							{t("householdSetup.welcome")}
+						</CardTitle>
+						<CardDescription>{t("householdSetup.description")}</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-3">
 						<Button
@@ -106,7 +107,7 @@ export const HouseholdSetupPage = () => {
 							onClick={() => setMode("create")}
 						>
 							<Plus className="h-4 w-4" />
-							Create a Household
+							{t("householdSetup.createHousehold")}
 						</Button>
 						<Button
 							variant="outline"
@@ -115,7 +116,7 @@ export const HouseholdSetupPage = () => {
 							onClick={() => setMode("join")}
 						>
 							<KeyRound className="h-4 w-4" />
-							Join with Invite Code
+							{t("householdSetup.joinWithCode")}
 						</Button>
 					</CardContent>
 				</Card>
@@ -136,16 +137,18 @@ export const HouseholdSetupPage = () => {
 							>
 								<ArrowLeft className="h-4 w-4" />
 							</button>
-							<CardTitle>Create a Household</CardTitle>
+							<CardTitle>{t("householdSetup.createHousehold")}</CardTitle>
 						</div>
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={handleCreate} className="flex flex-col gap-4">
 							<div className="space-y-2">
-								<Label htmlFor="name">Household Name</Label>
+								<Label htmlFor="name">
+									{t("householdSetup.householdName")}
+								</Label>
 								<Input
 									id="name"
-									placeholder="e.g. The Smith Family"
+									placeholder={t("householdSetup.householdNamePlaceholder")}
 									value={name}
 									onChange={(e) => setName(e.target.value)}
 									required
@@ -153,15 +156,17 @@ export const HouseholdSetupPage = () => {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label>Currency</Label>
+								<Label>{t("householdSetup.currency")}</Label>
 								<Select value={currency} onValueChange={setCurrency}>
 									<SelectTrigger>
-										<SelectValue placeholder="Select currency" />
+										<SelectValue
+											placeholder={t("householdSetup.selectCurrency")}
+										/>
 									</SelectTrigger>
 									<SelectContent>
-										{currencyOptions.map((opt) => (
-											<SelectItem key={opt.value} value={opt.value}>
-												{opt.label}
+										{currencyOptions.map((code) => (
+											<SelectItem key={code} value={code}>
+												{t(`currencies.${code}`)}
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -173,7 +178,7 @@ export const HouseholdSetupPage = () => {
 								className="w-full mt-2"
 								disabled={isCreating || !name.trim() || !currency}
 							>
-								{isCreating ? "Creating..." : "Create"}
+								{isCreating ? t("householdSetup.creating") : t("common.create")}
 							</Button>
 						</form>
 					</CardContent>
@@ -194,23 +199,25 @@ export const HouseholdSetupPage = () => {
 						>
 							<ArrowLeft className="h-4 w-4" />
 						</button>
-						<CardTitle>Join a Household</CardTitle>
+						<CardTitle>{t("householdSetup.joinHousehold")}</CardTitle>
 					</div>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleJoin} className="flex flex-col gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="invite-code">Invite Code</Label>
+							<Label htmlFor="invite-code">
+								{t("householdSetup.inviteCode")}
+							</Label>
 							<Input
 								id="invite-code"
-								placeholder="e.g. A1B2C3D4"
+								placeholder={t("householdSetup.inviteCodePlaceholder")}
 								value={inviteCode}
 								onChange={(e) => setInviteCode(e.target.value)}
 								required
 								className="font-mono tracking-wider text-center text-lg"
 							/>
 							<p className="text-xs text-muted-foreground">
-								Ask your household owner for the invite code.
+								{t("householdSetup.inviteCodeHelp")}
 							</p>
 						</div>
 						<Button
@@ -219,7 +226,9 @@ export const HouseholdSetupPage = () => {
 							className="w-full mt-2"
 							disabled={isJoining || !inviteCode.trim()}
 						>
-							{isJoining ? "Joining..." : "Join"}
+							{isJoining
+								? t("householdSetup.joining")
+								: t("householdSetup.join")}
 						</Button>
 					</form>
 				</CardContent>
