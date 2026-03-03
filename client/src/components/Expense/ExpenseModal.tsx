@@ -1,6 +1,14 @@
-import { AlertCircle, Minus, Plus, Split } from "lucide-react";
+import {
+	AlertCircle,
+	ArrowRight,
+	CheckCircle,
+	Minus,
+	Plus,
+	Split,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { RoutesEnum } from "@/routes/Routes";
 import type {
 	BudgetCategory,
 	ExpenseWithSplits,
@@ -30,7 +39,11 @@ import {
 	useCreateExpenseMutation,
 	useUpdateExpenseMutation,
 } from "@/store/api/api";
-import { fromSmallestUnit, toSmallestUnit } from "@/utils/currency";
+import {
+	formatCurrency,
+	fromSmallestUnit,
+	toSmallestUnit,
+} from "@/utils/currency";
 
 type Props = {
 	open: boolean;
@@ -57,6 +70,7 @@ export const ExpenseModal = ({
 	const [createExpense, { isLoading: isCreating }] = useCreateExpenseMutation();
 	const [updateExpense, { isLoading: isUpdating }] = useUpdateExpenseMutation();
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 
 	const isEditing = !!expense;
 	const isZeroDecimal = ["JPY", "KRW"].includes(currency.toUpperCase());
@@ -71,6 +85,7 @@ export const ExpenseModal = ({
 	const [splits, setSplits] = useState<SplitEntry[]>([]);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [submitted, setSubmitted] = useState(false);
+	const [isCustomSplit, setIsCustomSplit] = useState(false);
 
 	const getMemberName = (userId: string) => {
 		const m = members.find((m) => m.user_id === userId);
@@ -96,6 +111,7 @@ export const ExpenseModal = ({
 						amount: String(fromSmallestUnit(s.amount, currency)),
 					})),
 				);
+				setIsCustomSplit(true);
 			} else {
 				setTitle("");
 				setAmount("");
@@ -109,9 +125,30 @@ export const ExpenseModal = ({
 						amount: "0",
 					})),
 				);
+				setIsCustomSplit(false);
 			}
 		}
 	}, [open, expense, currency, members]);
+
+	// Auto-split evenly when amount changes and user hasn't customized splits
+	useEffect(() => {
+		if (isCustomSplit) return;
+		const total = Number.parseFloat(amount);
+		if (Number.isNaN(total) || total <= 0 || splits.length === 0) return;
+
+		const totalSmallest = toSmallestUnit(total, currency);
+		const perPerson = Math.floor(totalSmallest / splits.length);
+		const remainder = totalSmallest - perPerson * splits.length;
+
+		setSplits((prev) =>
+			prev.map((s, i) => ({
+				...s,
+				amount: String(
+					fromSmallestUnit(perPerson + (i < remainder ? 1 : 0), currency),
+				),
+			})),
+		);
+	}, [amount, isCustomSplit, splits.length, currency]);
 
 	const validate = useCallback((): Record<string, string> => {
 		const errs: Record<string, string> = {};
@@ -173,6 +210,7 @@ export const ExpenseModal = ({
 				),
 			})),
 		);
+		setIsCustomSplit(false);
 	};
 
 	const addSplit = () => {
@@ -193,6 +231,7 @@ export const ExpenseModal = ({
 		field: keyof SplitEntry,
 		value: string,
 	) => {
+		if (field === "amount") setIsCustomSplit(true);
 		setSplits(
 			splits.map((s, i) => (i === index ? { ...s, [field]: value } : s)),
 		);
@@ -254,6 +293,20 @@ export const ExpenseModal = ({
 			);
 		}
 	};
+
+	// Live split total calculation
+	const splitSum = splits.reduce(
+		(sum, s) =>
+			sum + toSmallestUnit(Number.parseFloat(s.amount) || 0, currency),
+		0,
+	);
+	const parsedTotal = Number.parseFloat(amount);
+	const totalSmallest =
+		!Number.isNaN(parsedTotal) && parsedTotal > 0
+			? toSmallestUnit(parsedTotal, currency)
+			: 0;
+	const splitRemaining = totalSmallest - splitSum;
+	const isSplitBalanced = splitRemaining === 0 && totalSmallest > 0;
 
 	const errCls = "border-danger focus-visible:ring-danger";
 
@@ -392,10 +445,21 @@ export const ExpenseModal = ({
 									)}
 								</>
 							) : (
-								<div className="rounded-lg border border-warning/50 bg-warning-light p-2.5">
+								<div className="rounded-lg border border-warning/50 bg-warning-light p-2.5 space-y-2">
 									<p className="text-xs text-warning font-medium">
 										{t("expenseModal.noCategoriesWarning")}
 									</p>
+									<button
+										type="button"
+										className="flex items-center gap-1 text-xs font-medium text-brand hover:text-brand-dark transition-colors"
+										onClick={() => {
+											onClose();
+											navigate(RoutesEnum.budgets);
+										}}
+									>
+										{t("expenseModal.goToBudgets")}
+										<ArrowRight className="h-3 w-3" />
+									</button>
 								</div>
 							)}
 						</div>
@@ -430,9 +494,37 @@ export const ExpenseModal = ({
 								{t("expenseModal.splitEvenly")}
 							</Button>
 						</div>
-						<p className="text-xs text-muted-foreground">
-							{t("expenseModal.splitsMustMatch")}
-						</p>
+
+						{/* Live split total indicator */}
+						{totalSmallest > 0 && (
+							<div
+								className={cn(
+									"flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium",
+									isSplitBalanced
+										? "bg-success-light text-success"
+										: "bg-muted text-muted-foreground",
+								)}
+							>
+								{isSplitBalanced ? (
+									<>
+										<CheckCircle className="h-3.5 w-3.5 shrink-0" />
+										{t("expenseModal.splitsBalanced")}
+									</>
+								) : (
+									<>
+										<Split className="h-3.5 w-3.5 shrink-0" />
+										{t("expenseModal.splitTotal", {
+											splitTotal: formatCurrency(splitSum, currency),
+											expenseTotal: formatCurrency(totalSmallest, currency),
+											remaining: formatCurrency(
+												Math.abs(splitRemaining),
+												currency,
+											),
+										})}
+									</>
+								)}
+							</div>
+						)}
 
 						{errors.splits && (
 							<div className="rounded-lg border border-danger/30 bg-danger-light p-2.5">
