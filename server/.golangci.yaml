@@ -19,7 +19,7 @@ formatters:
       # with the given prefixes are grouped after 3rd-party packages.
       # Default: []
       local-prefixes:
-        - github.com/my/project
+        - dimewise
 
     golines:
       # Target maximum line length.
@@ -172,6 +172,9 @@ linters:
       check:
         - switch
         - map
+      # Presence of `default` case in switch statements satisfies exhaustiveness.
+      # All error code switches use default to propagate as 500s.
+      default-signifies-exhaustive: true
 
     exhaustruct:
       # List of regular expressions to match type names that should be excluded from processing.

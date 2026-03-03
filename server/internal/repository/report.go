@@ -14,6 +14,7 @@ import (
 // ReportListItem is a report row with transfer settlement counts for list views.
 type ReportListItem struct {
 	model.Reports
+
 	TransfersTotal   int
 	TransfersSettled int
 }
@@ -21,6 +22,7 @@ type ReportListItem struct {
 // ReportWithDetails is a fully joined result of a report with all child data.
 type ReportWithDetails struct {
 	model.Reports
+
 	MemberSummaries    []model.ReportMemberSummaries
 	CategoryBreakdowns []model.ReportCategoryBreakdowns
 	LineItems          []ReportLineItemWithSplits
@@ -30,6 +32,7 @@ type ReportWithDetails struct {
 // ReportLineItemWithSplits joins a line item with its splits.
 type ReportLineItemWithSplits struct {
 	model.ReportLineItems
+
 	Splits []model.ReportLineItemSplits
 }
 
@@ -108,6 +111,7 @@ func (r *ReportRepository) ListByHousehold(
 	return reports, nil
 }
 
+//nolint:funlen // sequential DB operations that are clearer as a single function
 func (r *ReportRepository) GetByID(
 	ctx context.Context,
 	id uuid.UUID,
@@ -239,12 +243,15 @@ func (r *ReportRepository) GetByMonthYear(
 ) (*model.Reports, error) {
 	var report model.Reports
 
+	monthInt := int32(month) //nolint:gosec // month is 1-12
+	yearInt := int32(year)   //nolint:gosec // year is validated >= 2020
+
 	stmt := postgres.SELECT(table.Reports.AllColumns).
 		FROM(table.Reports).
 		WHERE(
 			table.Reports.HouseholdID.EQ(postgres.UUID(householdID)).
-				AND(table.Reports.Month.EQ(postgres.Int32(int32(month)))).
-				AND(table.Reports.Year.EQ(postgres.Int32(int32(year)))),
+				AND(table.Reports.Month.EQ(postgres.Int32(monthInt))).
+				AND(table.Reports.Year.EQ(postgres.Int32(yearInt))),
 		)
 
 	err := stmt.QueryContext(ctx, r.db, &report)
@@ -278,12 +285,15 @@ func (r *ReportRepository) DeleteByMonthYear(
 	householdID uuid.UUID,
 	month, year int,
 ) error {
+	monthInt := int32(month) //nolint:gosec // month is 1-12
+	yearInt := int32(year)   //nolint:gosec // year is validated >= 2020
+
 	stmt := table.Reports.
 		DELETE().
 		WHERE(
 			table.Reports.HouseholdID.EQ(postgres.UUID(householdID)).
-				AND(table.Reports.Month.EQ(postgres.Int32(int32(month)))).
-				AND(table.Reports.Year.EQ(postgres.Int32(int32(year)))),
+				AND(table.Reports.Month.EQ(postgres.Int32(monthInt))).
+				AND(table.Reports.Year.EQ(postgres.Int32(yearInt))),
 		)
 
 	_, err := stmt.ExecContext(ctx, r.db)
@@ -291,6 +301,7 @@ func (r *ReportRepository) DeleteByMonthYear(
 	return err
 }
 
+//nolint:funlen // sequential DB operations that are clearer as a single function
 func (r *ReportRepository) Create(
 	ctx context.Context,
 	data *ReportCreateInput,

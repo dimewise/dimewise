@@ -141,7 +141,7 @@ func (s *BudgetService) Update(
 	}
 
 	if sortOrder != nil {
-		category.SortOrder = int32(*sortOrder)
+		category.SortOrder = int32(*sortOrder) //nolint:gosec // sort order is a small UI index
 	}
 
 	updated, err := s.budgets.Update(ctx, category)

@@ -3,18 +3,18 @@ package web
 import (
 	"context"
 	"errors"
+	"net/http"
+
+	openapi_types "github.com/oapi-codegen/runtime/types"
 
 	"dimewise/generated/dimewise/public/model"
 	"dimewise/generated/oapi"
 	"dimewise/internal/middleware"
 	"dimewise/internal/repository"
 	"dimewise/internal/service"
-
-	"github.com/google/uuid"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-// CreateHousehold handles POST /households
+// CreateHousehold handles POST /households.
 func (h *Handler) CreateHousehold(
 	ctx context.Context,
 	request oapi.CreateHouseholdRequestObject,
@@ -23,7 +23,7 @@ func (h *Handler) CreateHousehold(
 	if !ok {
 		return oapi.CreateHousehold401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -41,7 +41,7 @@ func (h *Handler) CreateHousehold(
 	return oapi.CreateHousehold201JSONResponse(householdToAPI(household)), nil
 }
 
-// GetMyHousehold handles GET /households/me
+// GetMyHousehold handles GET /households/me.
 func (h *Handler) GetMyHousehold(
 	ctx context.Context,
 	_ oapi.GetMyHouseholdRequestObject,
@@ -50,7 +50,7 @@ func (h *Handler) GetMyHousehold(
 	if !ok {
 		return oapi.GetMyHousehold401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -63,7 +63,7 @@ func (h *Handler) GetMyHousehold(
 	return oapi.GetMyHousehold200JSONResponse(householdWithMembersToAPI(household, members)), nil
 }
 
-// JoinHousehold handles POST /households/join
+// JoinHousehold handles POST /households/join.
 func (h *Handler) JoinHousehold(
 	ctx context.Context,
 	request oapi.JoinHouseholdRequestObject,
@@ -72,7 +72,7 @@ func (h *Handler) JoinHousehold(
 	if !ok {
 		return oapi.JoinHousehold401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -85,7 +85,7 @@ func (h *Handler) JoinHousehold(
 	return oapi.JoinHousehold200JSONResponse(householdWithMembersToAPI(household, members)), nil
 }
 
-// LeaveHousehold handles POST /households/leave
+// LeaveHousehold handles POST /households/leave.
 func (h *Handler) LeaveHousehold(
 	ctx context.Context,
 	_ oapi.LeaveHouseholdRequestObject,
@@ -94,7 +94,7 @@ func (h *Handler) LeaveHousehold(
 	if !ok {
 		return oapi.LeaveHousehold401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -107,7 +107,7 @@ func (h *Handler) LeaveHousehold(
 	return oapi.LeaveHousehold204Response{}, nil
 }
 
-// RegenerateInviteCode handles POST /households/invite-code/regenerate
+// RegenerateInviteCode handles POST /households/invite-code/regenerate.
 func (h *Handler) RegenerateInviteCode(
 	ctx context.Context,
 	_ oapi.RegenerateInviteCodeRequestObject,
@@ -116,7 +116,7 @@ func (h *Handler) RegenerateInviteCode(
 	if !ok {
 		return oapi.RegenerateInviteCode401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -129,7 +129,7 @@ func (h *Handler) RegenerateInviteCode(
 	return oapi.RegenerateInviteCode200JSONResponse(householdToAPI(household)), nil
 }
 
-// RemoveHouseholdMember handles DELETE /households/members/{userId}
+// RemoveHouseholdMember handles DELETE /households/members/{userId}.
 func (h *Handler) RemoveHouseholdMember(
 	ctx context.Context,
 	request oapi.RemoveHouseholdMemberRequestObject,
@@ -138,21 +138,12 @@ func (h *Handler) RemoveHouseholdMember(
 	if !ok {
 		return oapi.RemoveHouseholdMember401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
 
-	targetID, err := uuid.Parse(request.UserId.String())
-	if err != nil {
-		return oapi.RemoveHouseholdMember400ApplicationProblemPlusJSONResponse{
-			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", "invalid user ID"),
-			),
-		}, nil
-	}
-
-	err = h.householdService.RemoveMember(ctx, user.ID, targetID)
+	err := h.householdService.RemoveMember(ctx, user.ID, request.UserId)
 	if err != nil {
 		return mapHouseholdRemoveMemberError(err)
 	}
@@ -160,7 +151,7 @@ func (h *Handler) RemoveHouseholdMember(
 	return oapi.RemoveHouseholdMember204Response{}, nil
 }
 
-// DeleteHousehold handles DELETE /households
+// DeleteHousehold handles DELETE /households.
 func (h *Handler) DeleteHousehold(
 	ctx context.Context,
 	_ oapi.DeleteHouseholdRequestObject,
@@ -169,7 +160,7 @@ func (h *Handler) DeleteHousehold(
 	if !ok {
 		return oapi.DeleteHousehold401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -237,13 +228,13 @@ func mapHouseholdCreateError(err error) (oapi.CreateHouseholdResponseObject, err
 	case service.ErrBadRequest:
 		return oapi.CreateHousehold400ApplicationProblemPlusJSONResponse{
 			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", svcErr.Message),
+				newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 			),
 		}, nil
 	case service.ErrConflict:
 		return oapi.CreateHousehold409ApplicationProblemPlusJSONResponse{
 			ConflictApplicationProblemPlusJSONResponse: oapi.ConflictApplicationProblemPlusJSONResponse(
-				newProblem(409, "Conflict", svcErr.Message),
+				newProblem(http.StatusConflict, "Conflict", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -260,7 +251,7 @@ func mapHouseholdGetError(err error) (oapi.GetMyHouseholdResponseObject, error) 
 	if svcErr.Code == service.ErrNotFound {
 		return oapi.GetMyHousehold404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	}
@@ -278,19 +269,19 @@ func mapHouseholdJoinError(err error) (oapi.JoinHouseholdResponseObject, error) 
 	case service.ErrNotFound:
 		return oapi.JoinHousehold404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	case service.ErrConflict:
 		return oapi.JoinHousehold409ApplicationProblemPlusJSONResponse{
 			ConflictApplicationProblemPlusJSONResponse: oapi.ConflictApplicationProblemPlusJSONResponse(
-				newProblem(409, "Conflict", svcErr.Message),
+				newProblem(http.StatusConflict, "Conflict", svcErr.Message),
 			),
 		}, nil
 	case service.ErrBadRequest:
 		return oapi.JoinHousehold400ApplicationProblemPlusJSONResponse{
 			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", svcErr.Message),
+				newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -308,13 +299,13 @@ func mapHouseholdLeaveError(err error) (oapi.LeaveHouseholdResponseObject, error
 	case service.ErrNotFound:
 		return oapi.LeaveHousehold404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	case service.ErrForbidden:
 		return oapi.LeaveHousehold403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -332,13 +323,13 @@ func mapHouseholdRegenerateError(err error) (oapi.RegenerateInviteCodeResponseOb
 	case service.ErrNotFound:
 		return oapi.RegenerateInviteCode404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	case service.ErrForbidden:
 		return oapi.RegenerateInviteCode403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -356,19 +347,19 @@ func mapHouseholdRemoveMemberError(err error) (oapi.RemoveHouseholdMemberRespons
 	case service.ErrBadRequest:
 		return oapi.RemoveHouseholdMember400ApplicationProblemPlusJSONResponse{
 			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", svcErr.Message),
+				newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 			),
 		}, nil
 	case service.ErrForbidden:
 		return oapi.RemoveHouseholdMember403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	case service.ErrNotFound:
 		return oapi.RemoveHouseholdMember404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -386,13 +377,13 @@ func mapHouseholdDeleteError(err error) (oapi.DeleteHouseholdResponseObject, err
 	case service.ErrNotFound:
 		return oapi.DeleteHousehold404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	case service.ErrForbidden:
 		return oapi.DeleteHousehold403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	default:

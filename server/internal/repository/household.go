@@ -15,6 +15,7 @@ import (
 // HouseholdMemberWithUser is a joined result of household_members + users.
 type HouseholdMemberWithUser struct {
 	model.HouseholdMembers
+
 	User model.Users
 }
 
