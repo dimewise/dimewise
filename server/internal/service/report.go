@@ -13,6 +13,11 @@ import (
 	"dimewise/internal/repository"
 )
 
+const (
+	minReportYear     = 2020
+	maxReportExpenses = 10000 // TODO: implement proper pagination for large households.
+)
+
 // ReportRepository is the interface the service depends on.
 type ReportRepository interface {
 	repository.ReportReader
@@ -110,7 +115,7 @@ func (s *ReportService) Generate(
 		return nil, NewError(ErrBadRequest, "month must be between 1 and 12")
 	}
 
-	if year < 2020 {
+	if year < minReportYear {
 		return nil, NewError(ErrBadRequest, "year must be 2020 or later")
 	}
 
@@ -130,7 +135,111 @@ func (s *ReportService) Generate(
 		return nil, WrapError(ErrInternal, "failed to get household members", err)
 	}
 
-	memberNameMap := make(map[uuid.UUID]string, len(members))
+	memberNameMap := buildMemberNameMap(members)
+
+	// Get all expenses for the month with splits
+	expenseList, _, err := s.expenses.List(ctx, household.ID, repository.ExpenseFilter{
+		From:  &monthStart,
+		To:    &monthEnd,
+		Limit: maxReportExpenses,
+	})
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to list expenses", err)
+	}
+
+	// Get budget categories for category breakdown
+	categories, err := s.budgets.ListByHousehold(ctx, household.ID)
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to list budget categories", err)
+	}
+
+	categoryNameMap := buildCategoryNameMap(categories)
+
+	// Get spending by category
+	catSpending, err := s.expenses.GetSpendingByCategory(ctx, household.ID, monthStart, monthEnd)
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to get category spending", err)
+	}
+
+	catSpendingMap := buildSpendingMap(catSpending)
+
+	// Get per-user paid and owed
+	paid, err := s.expenses.GetUserSpending(ctx, household.ID, monthStart, monthEnd)
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to get user spending", err)
+	}
+
+	owed, err := s.expenses.GetUserSplits(ctx, household.ID, monthStart, monthEnd)
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to get user splits", err)
+	}
+
+	// Build report data
+	totalAmount := sumExpenseAmounts(expenseList)
+
+	memberSummaries := buildMemberSummaries(members, paid, owed, memberNameMap)
+	categoryBreakdowns := buildCategoryBreakdowns(categories, catSpendingMap)
+	lineItems, lineItemSplits := buildLineItems(expenseList, categoryNameMap, memberNameMap)
+	transfers := calculateTransfers(paid, owed, memberNameMap)
+
+	// Create the report
+	reportMonth := int32(month)
+	reportYear := int32(year)                //nolint:gosec // year is validated >= 2020
+	totalExpenses := int32(len(expenseList)) //nolint:gosec // bounded by maxReportExpenses
+
+	input := &repository.ReportCreateInput{
+		Report: model.Reports{
+			HouseholdID:   household.ID,
+			Month:         reportMonth,
+			Year:          reportYear,
+			TotalExpenses: totalExpenses,
+			TotalAmount:   totalAmount,
+		},
+		MemberSummaries:    memberSummaries,
+		CategoryBreakdowns: categoryBreakdowns,
+		LineItems:          lineItems,
+		LineItemSplits:     lineItemSplits,
+		Transfers:          transfers,
+	}
+
+	created, err := s.reports.Create(ctx, input)
+	if err != nil {
+		return nil, WrapError(ErrInternal, "failed to create report", err)
+	}
+
+	return created, nil
+}
+
+func buildCategoryNameMap(categories []model.BudgetCategories) map[uuid.UUID]string {
+	nameMap := make(map[uuid.UUID]string, len(categories))
+	for _, c := range categories {
+		nameMap[c.ID] = c.Name
+	}
+
+	return nameMap
+}
+
+func buildSpendingMap(spending []repository.BudgetCategorySpending) map[uuid.UUID]int64 {
+	m := make(map[uuid.UUID]int64, len(spending))
+	for _, cs := range spending {
+		m[cs.BudgetCategoryID] = cs.Spent
+	}
+
+	return m
+}
+
+func sumExpenseAmounts(expenses []repository.ExpenseWithSplits) int64 {
+	var total int64
+	for _, exp := range expenses {
+		total += exp.Amount
+	}
+
+	return total
+}
+
+func buildMemberNameMap(members []repository.HouseholdMemberWithUser) map[uuid.UUID]string {
+	nameMap := make(map[uuid.UUID]string, len(members))
+
 	for _, m := range members {
 		name := ""
 		if m.User.FirstName != nil {
@@ -149,91 +258,57 @@ func (s *ReportService) Generate(
 			name = m.User.Email
 		}
 
-		memberNameMap[m.UserID] = name
+		nameMap[m.UserID] = name
 	}
 
-	// Get all expenses for the month with splits
-	expenseList, _, err := s.expenses.List(ctx, household.ID, repository.ExpenseFilter{
-		From:  &monthStart,
-		To:    &monthEnd,
-		Limit: 10000,
-	})
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to list expenses", err)
-	}
+	return nameMap
+}
 
-	// Get budget categories for category breakdown
-	categories, err := s.budgets.ListByHousehold(ctx, household.ID)
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to list budget categories", err)
-	}
+func buildMemberSummaries(
+	members []repository.HouseholdMemberWithUser,
+	paid, owed map[uuid.UUID]int64,
+	nameMap map[uuid.UUID]string,
+) []model.ReportMemberSummaries {
+	summaries := make([]model.ReportMemberSummaries, 0, len(members))
 
-	categoryNameMap := make(map[uuid.UUID]string, len(categories))
-	categoryBudgetMap := make(map[uuid.UUID]int64, len(categories))
-
-	for _, c := range categories {
-		categoryNameMap[c.ID] = c.Name
-		categoryBudgetMap[c.ID] = c.Amount
-	}
-
-	// Get spending by category
-	catSpending, err := s.expenses.GetSpendingByCategory(ctx, household.ID, monthStart, monthEnd)
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to get category spending", err)
-	}
-
-	catSpendingMap := make(map[uuid.UUID]int64, len(catSpending))
-	for _, cs := range catSpending {
-		catSpendingMap[cs.BudgetCategoryID] = cs.Spent
-	}
-
-	// Get per-user paid and owed
-	paid, err := s.expenses.GetUserSpending(ctx, household.ID, monthStart, monthEnd)
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to get user spending", err)
-	}
-
-	owed, err := s.expenses.GetUserSplits(ctx, household.ID, monthStart, monthEnd)
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to get user splits", err)
-	}
-
-	// Build report data
-	var totalAmount int64
-	for _, exp := range expenseList {
-		totalAmount += exp.Amount
-	}
-
-	// Build member summaries (all members, even zero-activity)
-	memberSummaries := make([]model.ReportMemberSummaries, 0, len(members))
 	for _, m := range members {
-		ms := model.ReportMemberSummaries{
+		summaries = append(summaries, model.ReportMemberSummaries{
 			UserID:     m.UserID,
-			MemberName: memberNameMap[m.UserID],
+			MemberName: nameMap[m.UserID],
 			TotalPaid:  paid[m.UserID],
 			TotalOwed:  owed[m.UserID],
 			NetBalance: paid[m.UserID] - owed[m.UserID],
-		}
-		memberSummaries = append(memberSummaries, ms)
+		})
 	}
 
-	// Build category breakdowns
-	categoryBreakdowns := make([]model.ReportCategoryBreakdowns, 0, len(categories))
+	return summaries
+}
+
+func buildCategoryBreakdowns(
+	categories []model.BudgetCategories,
+	spendingMap map[uuid.UUID]int64,
+) []model.ReportCategoryBreakdowns {
+	breakdowns := make([]model.ReportCategoryBreakdowns, 0, len(categories))
 
 	for _, c := range categories {
-		cb := model.ReportCategoryBreakdowns{
+		breakdowns = append(breakdowns, model.ReportCategoryBreakdowns{
 			CategoryName: c.Name,
 			BudgetAmount: c.Amount,
-			TotalSpent:   catSpendingMap[c.ID],
-		}
-		categoryBreakdowns = append(categoryBreakdowns, cb)
+			TotalSpent:   spendingMap[c.ID],
+		})
 	}
 
-	// Build line items with splits
-	lineItems := make([]model.ReportLineItems, 0, len(expenseList))
-	lineItemSplits := make(map[int][]model.ReportLineItemSplits, len(expenseList))
+	return breakdowns
+}
 
-	for i, exp := range expenseList {
+func buildLineItems(
+	expenses []repository.ExpenseWithSplits,
+	categoryNameMap, memberNameMap map[uuid.UUID]string,
+) ([]model.ReportLineItems, map[int][]model.ReportLineItemSplits) {
+	lineItems := make([]model.ReportLineItems, 0, len(expenses))
+	lineItemSplits := make(map[int][]model.ReportLineItemSplits, len(expenses))
+
+	for i, exp := range expenses {
 		var catName *string
 		if exp.BudgetCategoryID != nil {
 			if name, ok := categoryNameMap[*exp.BudgetCategoryID]; ok {
@@ -241,7 +316,7 @@ func (s *ReportService) Generate(
 			}
 		}
 
-		li := model.ReportLineItems{
+		lineItems = append(lineItems, model.ReportLineItems{
 			ExpenseID:    &exp.ID,
 			ExpenseTitle: exp.Title,
 			CategoryName: catName,
@@ -250,8 +325,7 @@ func (s *ReportService) Generate(
 			Amount:       exp.Amount,
 			IncurredAt:   exp.IncurredAt,
 			Notes:        exp.Notes,
-		}
-		lineItems = append(lineItems, li)
+		})
 
 		splits := make([]model.ReportLineItemSplits, 0, len(exp.Splits))
 		for _, split := range exp.Splits {
@@ -265,31 +339,7 @@ func (s *ReportService) Generate(
 		lineItemSplits[i] = splits
 	}
 
-	// Calculate transfers (debt simplification)
-	transfers := calculateTransfers(paid, owed, memberNameMap)
-
-	// Create the report
-	input := &repository.ReportCreateInput{
-		Report: model.Reports{
-			HouseholdID:   household.ID,
-			Month:         int32(month),
-			Year:          int32(year),
-			TotalExpenses: int32(len(expenseList)),
-			TotalAmount:   totalAmount,
-		},
-		MemberSummaries:    memberSummaries,
-		CategoryBreakdowns: categoryBreakdowns,
-		LineItems:          lineItems,
-		LineItemSplits:     lineItemSplits,
-		Transfers:          transfers,
-	}
-
-	created, err := s.reports.Create(ctx, input)
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to create report", err)
-	}
-
-	return created, nil
+	return lineItems, lineItemSplits
 }
 
 func (s *ReportService) MarkTransferPaid(

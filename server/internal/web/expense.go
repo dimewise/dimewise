@@ -3,10 +3,8 @@ package web
 import (
 	"context"
 	"errors"
+	"net/http"
 	"time"
-
-	"github.com/google/uuid"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 
 	"dimewise/generated/oapi"
 	"dimewise/internal/middleware"
@@ -14,7 +12,7 @@ import (
 	"dimewise/internal/service"
 )
 
-// ListExpenses handles GET /expenses
+// ListExpenses handles GET /expenses.
 func (h *Handler) ListExpenses(
 	ctx context.Context,
 	request oapi.ListExpensesRequestObject,
@@ -23,7 +21,7 @@ func (h *Handler) ListExpenses(
 	if !ok {
 		return oapi.ListExpenses401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -31,22 +29,22 @@ func (h *Handler) ListExpenses(
 	filter := repository.ExpenseFilter{}
 
 	if request.Params.CategoryId != nil {
-		id := uuid.UUID(*request.Params.CategoryId)
+		id := *request.Params.CategoryId
 		filter.CategoryID = &id
 	}
 
 	if request.Params.PaidBy != nil {
-		id := uuid.UUID(*request.Params.PaidBy)
+		id := *request.Params.PaidBy
 		filter.PaidBy = &id
 	}
 
 	if request.Params.From != nil {
-		t := time.Time(request.Params.From.Time)
+		t := request.Params.From.Time
 		filter.From = &t
 	}
 
 	if request.Params.To != nil {
-		t := time.Time(request.Params.To.Time)
+		t := request.Params.To.Time
 		// Set to end of day
 		t = t.Add(24*time.Hour - time.Nanosecond)
 		filter.To = &t
@@ -76,7 +74,7 @@ func (h *Handler) ListExpenses(
 	}), nil
 }
 
-// CreateExpense handles POST /expenses
+// CreateExpense handles POST /expenses.
 func (h *Handler) CreateExpense(
 	ctx context.Context,
 	request oapi.CreateExpenseRequestObject,
@@ -85,23 +83,15 @@ func (h *Handler) CreateExpense(
 	if !ok {
 		return oapi.CreateExpense401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
-	}
-
-	paidBy := uuid.UUID(request.Body.PaidBy)
-
-	var categoryID *uuid.UUID
-	if request.Body.BudgetCategoryId != nil {
-		id := uuid.UUID(*request.Body.BudgetCategoryId)
-		categoryID = &id
 	}
 
 	splitInputs := make([]service.SplitInput, len(request.Body.Splits))
 	for i, s := range request.Body.Splits {
 		splitInputs[i] = service.SplitInput{
-			UserID: uuid.UUID(s.UserId),
+			UserID: s.UserId,
 			Amount: s.Amount,
 		}
 	}
@@ -109,8 +99,8 @@ func (h *Handler) CreateExpense(
 	created, err := h.expenseService.Create(
 		ctx,
 		user.ID,
-		paidBy,
-		categoryID,
+		request.Body.PaidBy,
+		request.Body.BudgetCategoryId,
 		request.Body.Title,
 		request.Body.Amount,
 		request.Body.Notes,
@@ -124,7 +114,7 @@ func (h *Handler) CreateExpense(
 	return oapi.CreateExpense201JSONResponse(expenseWithSplitsToAPI(created)), nil
 }
 
-// GetExpense handles GET /expenses/{expenseId}
+// GetExpense handles GET /expenses/{expenseId}.
 func (h *Handler) GetExpense(
 	ctx context.Context,
 	request oapi.GetExpenseRequestObject,
@@ -133,21 +123,12 @@ func (h *Handler) GetExpense(
 	if !ok {
 		return oapi.GetExpense401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
 
-	expenseID, err := uuid.Parse(request.ExpenseId.String())
-	if err != nil {
-		return oapi.GetExpense404ApplicationProblemPlusJSONResponse{
-			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", "invalid expense ID"),
-			),
-		}, nil
-	}
-
-	expense, err := h.expenseService.GetByID(ctx, user.ID, expenseID)
+	expense, err := h.expenseService.GetByID(ctx, user.ID, request.ExpenseId)
 	if err != nil {
 		return mapExpenseGetError(err)
 	}
@@ -155,7 +136,7 @@ func (h *Handler) GetExpense(
 	return oapi.GetExpense200JSONResponse(expenseWithSplitsToAPI(expense)), nil
 }
 
-// UpdateExpense handles PATCH /expenses/{expenseId}
+// UpdateExpense handles PATCH /expenses/{expenseId}.
 func (h *Handler) UpdateExpense(
 	ctx context.Context,
 	request oapi.UpdateExpenseRequestObject,
@@ -164,30 +145,9 @@ func (h *Handler) UpdateExpense(
 	if !ok {
 		return oapi.UpdateExpense401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
-	}
-
-	expenseID, err := uuid.Parse(request.ExpenseId.String())
-	if err != nil {
-		return oapi.UpdateExpense400ApplicationProblemPlusJSONResponse{
-			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", "invalid expense ID"),
-			),
-		}, nil
-	}
-
-	var paidBy *uuid.UUID
-	if request.Body.PaidBy != nil {
-		id := uuid.UUID(*request.Body.PaidBy)
-		paidBy = &id
-	}
-
-	var categoryID *uuid.UUID
-	if request.Body.BudgetCategoryId != nil {
-		id := uuid.UUID(*request.Body.BudgetCategoryId)
-		categoryID = &id
 	}
 
 	var splitInputs []service.SplitInput
@@ -195,7 +155,7 @@ func (h *Handler) UpdateExpense(
 		splitInputs = make([]service.SplitInput, len(*request.Body.Splits))
 		for i, s := range *request.Body.Splits {
 			splitInputs[i] = service.SplitInput{
-				UserID: uuid.UUID(s.UserId),
+				UserID: s.UserId,
 				Amount: s.Amount,
 			}
 		}
@@ -204,9 +164,9 @@ func (h *Handler) UpdateExpense(
 	updated, err := h.expenseService.Update(
 		ctx,
 		user.ID,
-		expenseID,
-		paidBy,
-		categoryID,
+		request.ExpenseId,
+		request.Body.PaidBy,
+		request.Body.BudgetCategoryId,
 		request.Body.Title,
 		request.Body.Amount,
 		request.Body.Notes,
@@ -220,7 +180,7 @@ func (h *Handler) UpdateExpense(
 	return oapi.UpdateExpense200JSONResponse(expenseWithSplitsToAPI(updated)), nil
 }
 
-// DeleteExpense handles DELETE /expenses/{expenseId}
+// DeleteExpense handles DELETE /expenses/{expenseId}.
 func (h *Handler) DeleteExpense(
 	ctx context.Context,
 	request oapi.DeleteExpenseRequestObject,
@@ -229,21 +189,12 @@ func (h *Handler) DeleteExpense(
 	if !ok {
 		return oapi.DeleteExpense401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
 
-	expenseID, err := uuid.Parse(request.ExpenseId.String())
-	if err != nil {
-		return oapi.DeleteExpense404ApplicationProblemPlusJSONResponse{
-			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", "invalid expense ID"),
-			),
-		}, nil
-	}
-
-	err = h.expenseService.Delete(ctx, user.ID, expenseID)
+	err := h.expenseService.Delete(ctx, user.ID, request.ExpenseId)
 	if err != nil {
 		return mapExpenseDeleteError(err)
 	}
@@ -254,12 +205,6 @@ func (h *Handler) DeleteExpense(
 // --- Type mappers ---
 
 func expenseWithSplitsToAPI(e *repository.ExpenseWithSplits) oapi.ExpenseWithSplits {
-	var catID *openapi_types.UUID
-	if e.BudgetCategoryID != nil {
-		id := openapi_types.UUID(*e.BudgetCategoryID)
-		catID = &id
-	}
-
 	splits := make([]oapi.ExpenseSplit, 0, len(e.Splits))
 	for _, s := range e.Splits {
 		splits = append(splits, oapi.ExpenseSplit{
@@ -275,7 +220,7 @@ func expenseWithSplitsToAPI(e *repository.ExpenseWithSplits) oapi.ExpenseWithSpl
 		CreatedAt:        e.CreatedAt,
 		UpdatedAt:        e.UpdatedAt,
 		HouseholdId:      e.HouseholdID,
-		BudgetCategoryId: catID,
+		BudgetCategoryId: e.BudgetCategoryID,
 		PaidBy:           e.PaidBy,
 		LoggedBy:         e.LoggedBy,
 		Title:            e.Title,
@@ -300,7 +245,7 @@ func mapExpenseListError(
 	case service.ErrNotFound:
 		return oapi.ListExpenses404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -320,13 +265,13 @@ func mapExpenseCreateError(
 	case service.ErrBadRequest:
 		return oapi.CreateExpense400ApplicationProblemPlusJSONResponse{
 			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", svcErr.Message),
+				newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 			),
 		}, nil
 	case service.ErrNotFound:
 		return oapi.CreateExpense404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -343,10 +288,17 @@ func mapExpenseGetError(
 	}
 
 	switch svcErr.Code {
+	// Intentionally maps Forbidden to 404 to avoid leaking resource existence.
+	case service.ErrForbidden:
+		return oapi.GetExpense404ApplicationProblemPlusJSONResponse{
+			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
+				newProblem(http.StatusNotFound, "Not Found", "expense not found"),
+			),
+		}, nil
 	case service.ErrNotFound:
 		return oapi.GetExpense404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -366,19 +318,19 @@ func mapExpenseUpdateError(
 	case service.ErrBadRequest:
 		return oapi.UpdateExpense400ApplicationProblemPlusJSONResponse{
 			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", svcErr.Message),
+				newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 			),
 		}, nil
 	case service.ErrForbidden:
 		return oapi.UpdateExpense403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	case service.ErrNotFound:
 		return oapi.UpdateExpense404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -398,13 +350,13 @@ func mapExpenseDeleteError(
 	case service.ErrForbidden:
 		return oapi.DeleteExpense403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	case service.ErrNotFound:
 		return oapi.DeleteExpense404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:

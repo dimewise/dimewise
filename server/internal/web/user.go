@@ -3,13 +3,14 @@ package web
 import (
 	"context"
 	"errors"
+	"net/http"
+
+	openapi_types "github.com/oapi-codegen/runtime/types"
 
 	"dimewise/generated/dimewise/public/model"
 	"dimewise/generated/oapi"
 	"dimewise/internal/middleware"
 	"dimewise/internal/service"
-
-	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
 func toUserResponse(user *model.Users) oapi.User {
@@ -33,7 +34,7 @@ func (h *Handler) GetUsersMe(
 	if !ok {
 		return oapi.GetUsersMe401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -49,7 +50,7 @@ func (h *Handler) PatchUsersMe(
 	if !ok {
 		return oapi.PatchUsersMe401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -61,7 +62,7 @@ func (h *Handler) PatchUsersMe(
 			if errors.As(err, &svcErr) && svcErr.Code == service.ErrBadRequest {
 				return oapi.PatchUsersMe400ApplicationProblemPlusJSONResponse{
 					BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-						newProblem(400, "Bad Request", svcErr.Message),
+						newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 					),
 				}, nil
 			}

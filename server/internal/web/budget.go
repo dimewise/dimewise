@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/google/uuid"
 
@@ -12,7 +13,7 @@ import (
 	"dimewise/internal/service"
 )
 
-// ListBudgetCategories handles GET /budgets
+// ListBudgetCategories handles GET /budgets.
 func (h *Handler) ListBudgetCategories(
 	ctx context.Context,
 	_ oapi.ListBudgetCategoriesRequestObject,
@@ -21,7 +22,7 @@ func (h *Handler) ListBudgetCategories(
 	if !ok {
 		return oapi.ListBudgetCategories401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -39,7 +40,7 @@ func (h *Handler) ListBudgetCategories(
 	return result, nil
 }
 
-// CreateBudgetCategory handles POST /budgets
+// CreateBudgetCategory handles POST /budgets.
 func (h *Handler) CreateBudgetCategory(
 	ctx context.Context,
 	request oapi.CreateBudgetCategoryRequestObject,
@@ -48,7 +49,7 @@ func (h *Handler) CreateBudgetCategory(
 	if !ok {
 		return oapi.CreateBudgetCategory401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -66,7 +67,7 @@ func (h *Handler) CreateBudgetCategory(
 	return oapi.CreateBudgetCategory201JSONResponse(budgetCategoryToAPI(created)), nil
 }
 
-// UpdateBudgetCategory handles PATCH /budgets/{budgetId}
+// UpdateBudgetCategory handles PATCH /budgets/{budgetId}.
 func (h *Handler) UpdateBudgetCategory(
 	ctx context.Context,
 	request oapi.UpdateBudgetCategoryRequestObject,
@@ -75,16 +76,7 @@ func (h *Handler) UpdateBudgetCategory(
 	if !ok {
 		return oapi.UpdateBudgetCategory401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
-			),
-		}, nil
-	}
-
-	budgetID, err := uuid.Parse(request.BudgetId.String())
-	if err != nil {
-		return oapi.UpdateBudgetCategory400ApplicationProblemPlusJSONResponse{
-			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", "invalid budget ID"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -98,7 +90,7 @@ func (h *Handler) UpdateBudgetCategory(
 	updated, err := h.budgetService.Update(
 		ctx,
 		user.ID,
-		budgetID,
+		request.BudgetId,
 		request.Body.Name,
 		request.Body.Amount,
 		sortOrder,
@@ -110,7 +102,7 @@ func (h *Handler) UpdateBudgetCategory(
 	return oapi.UpdateBudgetCategory200JSONResponse(budgetCategoryToAPI(updated)), nil
 }
 
-// DeleteBudgetCategory handles DELETE /budgets/{budgetId}
+// DeleteBudgetCategory handles DELETE /budgets/{budgetId}.
 func (h *Handler) DeleteBudgetCategory(
 	ctx context.Context,
 	request oapi.DeleteBudgetCategoryRequestObject,
@@ -119,21 +111,12 @@ func (h *Handler) DeleteBudgetCategory(
 	if !ok {
 		return oapi.DeleteBudgetCategory401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
 
-	budgetID, err := uuid.Parse(request.BudgetId.String())
-	if err != nil {
-		return oapi.DeleteBudgetCategory404ApplicationProblemPlusJSONResponse{
-			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", "invalid budget ID"),
-			),
-		}, nil
-	}
-
-	err = h.budgetService.Delete(ctx, user.ID, budgetID)
+	err := h.budgetService.Delete(ctx, user.ID, request.BudgetId)
 	if err != nil {
 		return mapBudgetDeleteError(err)
 	}
@@ -141,7 +124,7 @@ func (h *Handler) DeleteBudgetCategory(
 	return oapi.DeleteBudgetCategory204Response{}, nil
 }
 
-// GetBudgetOverview handles GET /budgets/overview
+// GetBudgetOverview handles GET /budgets/overview.
 func (h *Handler) GetBudgetOverview(
 	ctx context.Context,
 	_ oapi.GetBudgetOverviewRequestObject,
@@ -150,7 +133,7 @@ func (h *Handler) GetBudgetOverview(
 	if !ok {
 		return oapi.GetBudgetOverview401ApplicationProblemPlusJSONResponse{
 			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
-				newProblem(401, "Unauthorized", "user not found in context"),
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
 			),
 		}, nil
 	}
@@ -216,7 +199,7 @@ func mapBudgetListError(
 	case service.ErrNotFound:
 		return oapi.ListBudgetCategories404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -236,13 +219,13 @@ func mapBudgetCreateError(
 	case service.ErrBadRequest:
 		return oapi.CreateBudgetCategory400ApplicationProblemPlusJSONResponse{
 			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", svcErr.Message),
+				newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 			),
 		}, nil
 	case service.ErrNotFound:
 		return oapi.CreateBudgetCategory404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -262,19 +245,19 @@ func mapBudgetUpdateError(
 	case service.ErrBadRequest:
 		return oapi.UpdateBudgetCategory400ApplicationProblemPlusJSONResponse{
 			BadRequestApplicationProblemPlusJSONResponse: oapi.BadRequestApplicationProblemPlusJSONResponse(
-				newProblem(400, "Bad Request", svcErr.Message),
+				newProblem(http.StatusBadRequest, "Bad Request", svcErr.Message),
 			),
 		}, nil
 	case service.ErrForbidden:
 		return oapi.UpdateBudgetCategory403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	case service.ErrNotFound:
 		return oapi.UpdateBudgetCategory404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -294,13 +277,13 @@ func mapBudgetDeleteError(
 	case service.ErrForbidden:
 		return oapi.DeleteBudgetCategory403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
-				newProblem(403, "Forbidden", svcErr.Message),
+				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
 			),
 		}, nil
 	case service.ErrNotFound:
 		return oapi.DeleteBudgetCategory404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:
@@ -320,7 +303,7 @@ func mapBudgetOverviewError(
 	case service.ErrNotFound:
 		return oapi.GetBudgetOverview404ApplicationProblemPlusJSONResponse{
 			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
-				newProblem(404, "Not Found", svcErr.Message),
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:

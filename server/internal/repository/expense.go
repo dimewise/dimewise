@@ -15,6 +15,7 @@ import (
 // ExpenseWithSplits is a joined result of expense + its splits.
 type ExpenseWithSplits struct {
 	model.Expenses
+
 	Splits []model.ExpenseSplits
 }
 
@@ -80,6 +81,7 @@ func NewExpenseRepository(db *sql.DB) *ExpenseRepository {
 	return &ExpenseRepository{db: db}
 }
 
+//nolint:funlen // sequential query-and-assemble pattern that is clearer as a single function
 func (r *ExpenseRepository) List(
 	ctx context.Context,
 	householdID uuid.UUID,
