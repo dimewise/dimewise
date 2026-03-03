@@ -15,4 +15,5 @@ export const RoutesEnum = {
 	reports: "/reports",
 	householdSetup: "/household/setup",
 	householdSettings: "/household/settings",
+	accountSettings: "/account/settings",
 };

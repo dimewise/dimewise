@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 import { AuthGuard } from "@/components/Auth/AuthGuard";
 import { AuthenticatedLayout } from "@/components/Layout/AuthenticatedLayout";
 import { PublicLayout } from "@/components/Layout/PublicLayout";
+import { AccountSettingsPage } from "@/pages/AccountSettingsPage";
 import { BudgetsPage } from "@/pages/BudgetsPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { ExpensesPage } from "@/pages/ExpensesPage";
@@ -57,6 +58,10 @@ export const router = createBrowserRouter([
 					{
 						path: RoutesEnum.householdSettings,
 						Component: HouseholdSettingsPage,
+					},
+					{
+						path: RoutesEnum.accountSettings,
+						Component: AccountSettingsPage,
 					},
 				],
 			},
