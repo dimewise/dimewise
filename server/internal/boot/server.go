@@ -49,6 +49,7 @@ func NewServer(config *config.Config) *Server {
 	budgetService := service.NewBudgetService(budgetRepo, householdRepo)
 	expenseService := service.NewExpenseService(expenseRepo, householdRepo)
 	reportService := service.NewReportService(reportRepo, expenseRepo, householdRepo, budgetRepo)
+	balanceService := service.NewBalanceService(expenseRepo, householdRepo, reportRepo)
 
 	// Handler
 	h := web.NewHandler(
@@ -57,6 +58,7 @@ func NewServer(config *config.Config) *Server {
 		expenseService,
 		reportService,
 		userService,
+		balanceService,
 	)
 	portAddr := fmt.Sprintf(":%s", config.Env().ServerPort())
 

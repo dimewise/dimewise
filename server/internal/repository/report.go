@@ -46,6 +46,11 @@ type ReportReader interface {
 		month, year int,
 	) (*model.Reports, error)
 	GetTransferByID(ctx context.Context, id uuid.UUID) (*model.ReportTransfers, error)
+	GetPaidTransfersForMonth(
+		ctx context.Context,
+		householdID uuid.UUID,
+		month, year int,
+	) ([]model.ReportTransfers, error)
 }
 
 // ReportWriter defines write operations for reports.
@@ -545,4 +550,38 @@ func (r *ReportRepository) UnmarkTransferPaid(
 	}
 
 	return &updated, nil
+}
+
+func (r *ReportRepository) GetPaidTransfersForMonth(
+	ctx context.Context,
+	householdID uuid.UUID,
+	month, year int,
+) ([]model.ReportTransfers, error) {
+	monthInt := int32(month) //nolint:gosec // month is 1-12
+	yearInt := int32(year)   //nolint:gosec // year is validated >= 2020
+
+	var transfers []model.ReportTransfers
+
+	stmt := postgres.SELECT(table.ReportTransfers.AllColumns).
+		FROM(
+			table.ReportTransfers.
+				INNER_JOIN(table.Reports, table.Reports.ID.EQ(table.ReportTransfers.ReportID)),
+		).
+		WHERE(
+			table.Reports.HouseholdID.EQ(postgres.UUID(householdID)).
+				AND(table.Reports.Month.EQ(postgres.Int32(monthInt))).
+				AND(table.Reports.Year.EQ(postgres.Int32(yearInt))).
+				AND(table.ReportTransfers.PaidAt.IS_NOT_NULL()),
+		)
+
+	err := stmt.QueryContext(ctx, r.db, &transfers)
+	if err != nil {
+		return nil, err
+	}
+
+	if transfers == nil {
+		transfers = []model.ReportTransfers{}
+	}
+
+	return transfers, nil
 }

@@ -10,6 +10,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { BudgetOverviewCard } from "@/components/Budget/BudgetOverviewCard";
+import { BalanceWidget } from "@/components/Dashboard/BalanceWidget";
 import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -132,6 +133,9 @@ export const DashboardPage = () => {
 					</CardContent>
 				</Card>
 			</div>
+
+			{/* Balance widget */}
+			<BalanceWidget currency={currency} />
 
 			{/* Budget overview */}
 			{overview && (
