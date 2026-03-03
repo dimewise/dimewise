@@ -16,6 +16,16 @@ const injectedRtkApi = api
 				query: () => ({ url: `/users/me` }),
 				providesTags: ["Users"],
 			}),
+			patchUsersMe: build.mutation<PatchUsersMeApiResponse, PatchUsersMeApiArg>(
+				{
+					query: (queryArg) => ({
+						url: `/users/me`,
+						method: "PATCH",
+						body: queryArg.updateUserRequest,
+					}),
+					invalidatesTags: ["Users"],
+				},
+			),
 			createHousehold: build.mutation<
 				CreateHouseholdApiResponse,
 				CreateHouseholdApiArg
@@ -131,7 +141,7 @@ const injectedRtkApi = api
 					params: {
 						category_id: queryArg.categoryId,
 						paid_by: queryArg.paidBy,
-						from: queryArg.from,
+						from: queryArg["from"],
 						to: queryArg.to,
 						limit: queryArg.limit,
 						offset: queryArg.offset,
@@ -219,17 +229,22 @@ const injectedRtkApi = api
 	});
 export { injectedRtkApi as api };
 export type GetUsersMeApiResponse = /** status 200 OK */ User;
-export type GetUsersMeApiArg = undefined;
+export type GetUsersMeApiArg = void;
+export type PatchUsersMeApiResponse =
+	/** status 200 Updated user profile */ User;
+export type PatchUsersMeApiArg = {
+	updateUserRequest: UpdateUserRequest;
+};
 export type CreateHouseholdApiResponse =
 	/** status 201 Household created */ Household;
 export type CreateHouseholdApiArg = {
 	createHouseholdRequest: CreateHouseholdRequest;
 };
 export type DeleteHouseholdApiResponse = unknown;
-export type DeleteHouseholdApiArg = undefined;
+export type DeleteHouseholdApiArg = void;
 export type GetMyHouseholdApiResponse =
 	/** status 200 OK */ HouseholdWithMembers;
-export type GetMyHouseholdApiArg = undefined;
+export type GetMyHouseholdApiArg = void;
 export type JoinHouseholdApiResponse =
 	/** status 200 Joined household */ HouseholdWithMembers;
 export type JoinHouseholdApiArg = {
@@ -237,16 +252,16 @@ export type JoinHouseholdApiArg = {
 };
 export type RegenerateInviteCodeApiResponse =
 	/** status 200 New invite code generated */ Household;
-export type RegenerateInviteCodeApiArg = undefined;
+export type RegenerateInviteCodeApiArg = void;
 export type RemoveHouseholdMemberApiResponse = unknown;
 export type RemoveHouseholdMemberApiArg = {
 	userId: string;
 };
 export type LeaveHouseholdApiResponse = unknown;
-export type LeaveHouseholdApiArg = undefined;
+export type LeaveHouseholdApiArg = void;
 export type ListBudgetCategoriesApiResponse =
 	/** status 200 OK */ BudgetCategory[];
-export type ListBudgetCategoriesApiArg = undefined;
+export type ListBudgetCategoriesApiArg = void;
 export type CreateBudgetCategoryApiResponse =
 	/** status 201 Budget category created */ BudgetCategory;
 export type CreateBudgetCategoryApiArg = {
@@ -263,7 +278,7 @@ export type DeleteBudgetCategoryApiArg = {
 	budgetId: string;
 };
 export type GetBudgetOverviewApiResponse = /** status 200 OK */ BudgetOverview;
-export type GetBudgetOverviewApiArg = undefined;
+export type GetBudgetOverviewApiArg = void;
 export type ListExpensesApiResponse = /** status 200 OK */ ExpenseListResponse;
 export type ListExpensesApiArg = {
 	categoryId?: string;
@@ -293,7 +308,7 @@ export type DeleteExpenseApiArg = {
 	expenseId: string;
 };
 export type ListReportsApiResponse = /** status 200 OK */ Report[];
-export type ListReportsApiArg = undefined;
+export type ListReportsApiArg = void;
 export type GenerateReportApiResponse =
 	/** status 201 Report generated */ ReportWithDetails;
 export type GenerateReportApiArg = {
@@ -323,6 +338,8 @@ export type User = BaseEntity & {
 	first_name?: string;
 	last_name?: string;
 	avatar_url?: string;
+	/** Preferred language code (e.g. en, ja) */
+	language: string;
 };
 export type ValidationError = {
 	/** The JSON path to the field that failed (e.g., "email"). */
@@ -343,6 +360,10 @@ export type ProblemDetails = {
 	instance?: string;
 	/** Optional list of individual field errors (common for 400 errors). */
 	errors?: ValidationError[];
+};
+export type UpdateUserRequest = {
+	/** Preferred language code (e.g. en, ja) */
+	language?: "en" | "ja";
 };
 export type Household = BaseEntity & {
 	name: string;
@@ -541,6 +562,7 @@ export type GenerateReportRequest = {
 export const {
 	useGetUsersMeQuery,
 	useLazyGetUsersMeQuery,
+	usePatchUsersMeMutation,
 	useCreateHouseholdMutation,
 	useDeleteHouseholdMutation,
 	useGetMyHouseholdQuery,

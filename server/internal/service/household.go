@@ -30,12 +30,6 @@ type HouseholdRepository interface {
 	repository.HouseholdWriter
 }
 
-// UserRepository is the interface the service depends on.
-type UserRepository interface {
-	repository.UserReader
-	repository.UserWriter
-}
-
 func NewHouseholdService(households HouseholdRepository, users UserRepository) *HouseholdService {
 	return &HouseholdService{
 		households: households,
