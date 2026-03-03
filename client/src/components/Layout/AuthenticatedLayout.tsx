@@ -25,7 +25,7 @@ export const AuthenticatedLayout = () => {
 			{/* Main content area */}
 			<div className="md:pl-64">
 				{/* Top bar — sticks below the safe area so it never hides behind the notch */}
-				<header className="sticky top-[env(safe-area-inset-top)] md:top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-surface/95 backdrop-blur-md px-4 md:px-6">
+				<header className="sticky top-[env(safe-area-inset-top)] md:top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-surface/95 backdrop-blur-md pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] md:px-6">
 					<div className="flex items-center md:hidden">
 						<img
 							src="/dimewise-logo-cropped.png"
@@ -44,7 +44,7 @@ export const AuthenticatedLayout = () => {
 				</header>
 
 				{/* Page content */}
-				<main className="px-4 py-5 pb-24 md:px-6 md:py-6 md:pb-6 max-w-6xl mx-auto">
+				<main className="pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] py-5 pb-24 md:px-6 md:py-6 md:pb-6 max-w-6xl mx-auto">
 					<Outlet />
 				</main>
 			</div>

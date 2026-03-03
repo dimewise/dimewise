@@ -34,7 +34,7 @@ export const PublicLayout = () => {
 
 			{/* Header */}
 			<header className="sticky top-[env(safe-area-inset-top)] md:top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md">
-				<div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+				<div className="mx-auto flex h-14 max-w-5xl items-center justify-between pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))]">
 					<button
 						type="button"
 						onClick={() => navigate(RoutesEnum.root)}
@@ -71,7 +71,7 @@ export const PublicLayout = () => {
 			</header>
 
 			{/* Content */}
-			<main>
+			<main className="pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
 				<Outlet />
 			</main>
 		</div>

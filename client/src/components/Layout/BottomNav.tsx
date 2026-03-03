@@ -29,7 +29,7 @@ export function BottomNav() {
 
 	return (
 		<nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-surface/95 backdrop-blur-md md:hidden">
-			<div className="mx-auto flex items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
+			<div className="mx-auto flex items-center justify-around pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] pb-[env(safe-area-inset-bottom)]">
 				{navItems.map((item) => {
 					const isActive =
 						location.pathname === item.path ||
