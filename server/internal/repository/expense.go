@@ -31,9 +31,9 @@ type ExpenseFilter struct {
 
 // PairwiseSplit holds the total split amount for a (payer, beneficiary) pair.
 type PairwiseSplit struct {
-	PaidBy uuid.UUID `sql:"primary_key" alias:"expenses.paid_by"`
-	UserID uuid.UUID `                  alias:"expense_splits.user_id"`
-	Total  int64     `                  alias:"expense_splits.total"`
+	PaidBy uuid.UUID `alias:"expenses.paid_by"`
+	UserID uuid.UUID `alias:"expense_splits.user_id"`
+	Total  int64     `alias:"expense_splits.total"`
 }
 
 // ExpenseReader defines read operations for expenses.
