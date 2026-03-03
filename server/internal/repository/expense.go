@@ -33,7 +33,7 @@ type ExpenseFilter struct {
 type PairwiseSplit struct {
 	PaidBy uuid.UUID `sql:"primary_key" alias:"expenses.paid_by"`
 	UserID uuid.UUID `                  alias:"expense_splits.user_id"`
-	Total  int64     `                  alias:"pairwise.total"`
+	Total  int64     `                  alias:"expense_splits.total"`
 }
 
 // ExpenseReader defines read operations for expenses.
@@ -357,7 +357,7 @@ func (r *ExpenseRepository) GetPairwiseSplits(
 	stmt := postgres.SELECT(
 		table.Expenses.PaidBy,
 		table.ExpenseSplits.UserID,
-		postgres.SUMi(table.ExpenseSplits.Amount).AS("pairwise.total"),
+		postgres.SUMi(table.ExpenseSplits.Amount).AS("expense_splits.total"),
 	).
 		FROM(
 			table.ExpenseSplits.
