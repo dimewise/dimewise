@@ -374,6 +374,7 @@ paths:
       tags:
         - Expenses
         - Budgets
+        - Balances
       requestBody:
         required: true
         content:
@@ -424,6 +425,7 @@ paths:
       tags:
         - Expenses
         - Budgets
+        - Balances
       parameters:
         - name: expenseId
           in: path
@@ -458,6 +460,7 @@ paths:
       tags:
         - Expenses
         - Budgets
+        - Balances
       parameters:
         - name: expenseId
           in: path
@@ -586,6 +589,7 @@ paths:
       operationId: markReportTransferPaid
       tags:
         - Reports
+        - Balances
       parameters:
         - name: transferId
           in: path
@@ -613,6 +617,7 @@ paths:
       operationId: unmarkReportTransferPaid
       tags:
         - Reports
+        - Balances
       parameters:
         - name: transferId
           in: path

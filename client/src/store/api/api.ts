@@ -159,7 +159,7 @@ const injectedRtkApi = api
           method: "POST",
           body: queryArg.createExpenseRequest,
         }),
-        invalidatesTags: ["Expenses", "Budgets"],
+        invalidatesTags: ["Expenses", "Budgets", "Balances"],
       }),
       getExpense: build.query<GetExpenseApiResponse, GetExpenseApiArg>({
         query: (queryArg) => ({ url: `/expenses/${queryArg.expenseId}` }),
@@ -174,7 +174,7 @@ const injectedRtkApi = api
           method: "PATCH",
           body: queryArg.updateExpenseRequest,
         }),
-        invalidatesTags: ["Expenses", "Budgets"],
+        invalidatesTags: ["Expenses", "Budgets", "Balances"],
       }),
       deleteExpense: build.mutation<
         DeleteExpenseApiResponse,
@@ -184,7 +184,7 @@ const injectedRtkApi = api
           url: `/expenses/${queryArg.expenseId}`,
           method: "DELETE",
         }),
-        invalidatesTags: ["Expenses", "Budgets"],
+        invalidatesTags: ["Expenses", "Budgets", "Balances"],
       }),
       getMyBalances: build.query<GetMyBalancesApiResponse, GetMyBalancesApiArg>(
         {
@@ -225,7 +225,7 @@ const injectedRtkApi = api
           url: `/reports/transfers/${queryArg.transferId}/pay`,
           method: "PATCH",
         }),
-        invalidatesTags: ["Reports"],
+        invalidatesTags: ["Reports", "Balances"],
       }),
       unmarkReportTransferPaid: build.mutation<
         UnmarkReportTransferPaidApiResponse,
@@ -235,7 +235,7 @@ const injectedRtkApi = api
           url: `/reports/transfers/${queryArg.transferId}/unpay`,
           method: "PATCH",
         }),
-        invalidatesTags: ["Reports"],
+        invalidatesTags: ["Reports", "Balances"],
       }),
     }),
     overrideExisting: false,
