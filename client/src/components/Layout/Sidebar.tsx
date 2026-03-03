@@ -51,9 +51,9 @@ export function Sidebar() {
 				<nav className="flex-1 space-y-1 px-3 py-4">
 					{navItems.map((item) => {
 						const isActive =
-						location.pathname === item.path ||
-						(item.path === RoutesEnum.householdSettings &&
-							location.pathname === RoutesEnum.accountSettings);
+							location.pathname === item.path ||
+							(item.path === RoutesEnum.householdSettings &&
+								location.pathname === RoutesEnum.accountSettings);
 						return (
 							<button
 								key={item.path}
