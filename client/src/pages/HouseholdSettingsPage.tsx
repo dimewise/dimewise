@@ -1,7 +1,9 @@
 import { useUser } from "@clerk/clerk-react";
 import {
 	AlertTriangle,
+	ChevronRight,
 	Clipboard,
+	Globe,
 	LogOut,
 	RefreshCw,
 	Shield,
@@ -10,6 +12,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +40,7 @@ import {
 } from "@/store/api/api";
 
 export const HouseholdSettingsPage = () => {
+	const { t } = useTranslation();
 	const { user } = useUser();
 	const navigate = useNavigate();
 	const { data: household, isLoading } = useGetMyHouseholdQuery(undefined);
@@ -78,15 +82,15 @@ export const HouseholdSettingsPage = () => {
 
 	const handleCopyInvite = () => {
 		navigator.clipboard.writeText(household.invite_code);
-		toast.success("Invite code copied!");
+		toast.success(t("householdSettings.copyInviteCode"));
 	};
 
 	const handleRegenerateCode = async () => {
 		try {
 			await regenerateCode(undefined).unwrap();
-			toast.success("New invite code generated!");
+			toast.success(t("householdSettings.codeRegenerated"));
 		} catch {
-			toast.error("Failed to regenerate invite code.");
+			toast.error(t("householdSettings.regenerateFailed"));
 		}
 	};
 
@@ -98,18 +102,22 @@ export const HouseholdSettingsPage = () => {
 				await removeMember({
 					userId: confirmAction.member.user_id,
 				}).unwrap();
-				toast.success(`${getMemberName(confirmAction.member)} removed.`);
+				toast.success(
+					t("householdSettings.memberRemoved", {
+						name: getMemberName(confirmAction.member),
+					}),
+				);
 			} else if (confirmAction.type === "leave") {
 				await leaveHousehold(undefined).unwrap();
-				toast.success("You left the household.");
+				toast.success(t("householdSettings.leftHousehold"));
 				navigate(RoutesEnum.householdSetup, { replace: true });
 			} else if (confirmAction.type === "delete") {
 				await deleteHousehold(undefined).unwrap();
-				toast.success("Household deleted.");
+				toast.success(t("householdSettings.householdDeleted"));
 				navigate(RoutesEnum.householdSetup, { replace: true });
 			}
 		} catch {
-			toast.error("Something went wrong.");
+			toast.error(t("householdSettings.actionFailed"));
 		} finally {
 			setConfirmAction(null);
 		}
@@ -120,41 +128,49 @@ export const HouseholdSettingsPage = () => {
 		switch (confirmAction.type) {
 			case "remove":
 				return {
-					title: "Remove Member",
-					description: `Are you sure you want to remove ${getMemberName(confirmAction.member)} from the household?`,
+					title: t("householdSettings.removeMember"),
+					description: t("householdSettings.removeMemberConfirm", {
+						name: getMemberName(confirmAction.member),
+					}),
 				};
 			case "leave":
 				return {
-					title: "Leave Household",
-					description:
-						"Are you sure you want to leave this household? You will need a new invite code to rejoin.",
+					title: t("householdSettings.leaveHousehold"),
+					description: t("householdSettings.leaveConfirm"),
 				};
 			case "delete":
 				return {
-					title: "Delete Household",
-					description:
-						"This will permanently delete the household and all associated data. This action cannot be undone.",
+					title: t("householdSettings.deleteHousehold"),
+					description: t("householdSettings.deleteConfirm"),
 				};
 		}
 	};
 
 	return (
 		<div className="space-y-5 animate-fade-in">
-			<h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+			<h1 className="text-2xl font-bold tracking-tight">
+				{t("householdSettings.title")}
+			</h1>
 
 			{/* Household Info */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-base">Household</CardTitle>
+					<CardTitle className="text-base">
+						{t("householdSettings.household")}
+					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-3">
 					<div className="grid grid-cols-2 gap-4 text-sm">
 						<div>
-							<p className="text-muted-foreground text-xs">Name</p>
+							<p className="text-muted-foreground text-xs">
+								{t("householdSettings.name")}
+							</p>
 							<p className="font-medium">{household.name}</p>
 						</div>
 						<div>
-							<p className="text-muted-foreground text-xs">Currency</p>
+							<p className="text-muted-foreground text-xs">
+								{t("householdSettings.currency")}
+							</p>
 							<p className="font-medium">{currency}</p>
 						</div>
 					</div>
@@ -165,7 +181,7 @@ export const HouseholdSettingsPage = () => {
 			<Card>
 				<CardHeader>
 					<CardTitle className="text-base flex items-center gap-2">
-						Invite Code
+						{t("householdSettings.inviteCode")}
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-3">
@@ -190,11 +206,11 @@ export const HouseholdSettingsPage = () => {
 							onClick={handleRegenerateCode}
 						>
 							<RefreshCw className="h-3.5 w-3.5" />
-							Regenerate Code
+							{t("householdSettings.regenerateCode")}
 						</Button>
 					)}
 					<p className="text-xs text-muted-foreground">
-						Share this code with others so they can join your household.
+						{t("householdSettings.shareCodeHelp")}
 					</p>
 				</CardContent>
 			</Card>
@@ -204,7 +220,7 @@ export const HouseholdSettingsPage = () => {
 				<CardHeader>
 					<CardTitle className="text-base flex items-center gap-2">
 						<Users className="h-4 w-4" />
-						Members ({household.members.length})
+						{t("householdSettings.members")} ({household.members.length})
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
@@ -231,14 +247,14 @@ export const HouseholdSettingsPage = () => {
 												{getMemberName(member)}
 												{isSelf && (
 													<span className="text-muted-foreground ml-1">
-														(you)
+														{t("householdSettings.you")}
 													</span>
 												)}
 											</p>
 											{isMemberOwner && (
 												<Badge variant="default" className="text-[10px] gap-1">
 													<Shield className="h-2.5 w-2.5" />
-													Owner
+													{t("householdSettings.owner")}
 												</Badge>
 											)}
 										</div>
@@ -268,21 +284,44 @@ export const HouseholdSettingsPage = () => {
 				</CardContent>
 			</Card>
 
+			{/* Account Settings link */}
+			<Card
+				className="cursor-pointer transition-colors hover:bg-muted/50"
+				onClick={() => navigate(RoutesEnum.accountSettings)}
+			>
+				<CardContent className="flex items-center justify-between p-4">
+					<div className="flex items-center gap-3">
+						<Globe className="h-4 w-4 text-muted-foreground" />
+						<div>
+							<p className="text-sm font-medium">
+								{t("accountSettings.title")}
+							</p>
+							<p className="text-xs text-muted-foreground">
+								{t("accountSettings.languageDescription")}
+							</p>
+						</div>
+					</div>
+					<ChevronRight className="h-4 w-4 text-muted-foreground" />
+				</CardContent>
+			</Card>
+
 			{/* Danger Zone */}
 			<Card className="border-danger/30">
 				<CardHeader>
 					<CardTitle className="text-base text-danger flex items-center gap-2">
 						<AlertTriangle className="h-4 w-4" />
-						Danger Zone
+						{t("householdSettings.dangerZone")}
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-3">
 					{!isOwner && (
 						<div className="flex items-center justify-between">
 							<div>
-								<p className="text-sm font-medium">Leave Household</p>
+								<p className="text-sm font-medium">
+									{t("householdSettings.leaveHousehold")}
+								</p>
 								<p className="text-xs text-muted-foreground">
-									Remove yourself from this household.
+									{t("householdSettings.leaveDescription")}
 								</p>
 							</div>
 							<Button
@@ -292,7 +331,7 @@ export const HouseholdSettingsPage = () => {
 								onClick={() => setConfirmAction({ type: "leave" })}
 							>
 								<LogOut className="h-3.5 w-3.5" />
-								Leave
+								{t("householdSettings.leave")}
 							</Button>
 						</div>
 					)}
@@ -301,9 +340,11 @@ export const HouseholdSettingsPage = () => {
 							{!isOwner ? null : <Separator />}
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-sm font-medium">Delete Household</p>
+									<p className="text-sm font-medium">
+										{t("householdSettings.deleteHousehold")}
+									</p>
 									<p className="text-xs text-muted-foreground">
-										Permanently delete this household and all its data.
+										{t("householdSettings.deleteDescription")}
 									</p>
 								</div>
 								<Button
@@ -313,7 +354,7 @@ export const HouseholdSettingsPage = () => {
 									onClick={() => setConfirmAction({ type: "delete" })}
 								>
 									<Trash2 className="h-3.5 w-3.5" />
-									Delete
+									{t("common.delete")}
 								</Button>
 							</div>
 						</>
@@ -335,14 +376,14 @@ export const HouseholdSettingsPage = () => {
 					</DialogHeader>
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setConfirmAction(null)}>
-							Cancel
+							{t("common.cancel")}
 						</Button>
 						<Button variant="danger" onClick={handleConfirmAction}>
 							{confirmAction?.type === "delete"
-								? "Delete"
+								? t("common.delete")
 								: confirmAction?.type === "leave"
-									? "Leave"
-									: "Remove"}
+									? t("householdSettings.leave")
+									: t("householdSettings.remove")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

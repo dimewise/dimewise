@@ -1,7 +1,7 @@
 import { useUser } from "@clerk/clerk-react";
-import { format } from "date-fns";
 import { Calendar, CheckCircle, Clock, FileBarChart, Plus } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
 import { ReportDetail } from "@/components/Report/ReportDetail";
@@ -27,8 +27,10 @@ import {
 	useListReportsQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
+import { formatDate } from "@/utils/date";
 
 export const ReportsPage = () => {
+	const { t } = useTranslation();
 	const { user } = useUser();
 	const {
 		data: household,
@@ -83,11 +85,11 @@ export const ReportsPage = () => {
 					year: genYear,
 				},
 			}).unwrap();
-			toast.success("Report generated!");
+			toast.success(t("reports.reportGenerated"));
 			setGenerateOpen(false);
 			setSelectedId(result.id);
 		} catch {
-			toast.error("Failed to generate report.");
+			toast.error(t("reports.generateFailed"));
 		}
 	};
 
@@ -95,14 +97,16 @@ export const ReportsPage = () => {
 		<div className="space-y-5 animate-fade-in">
 			{/* Header */}
 			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold tracking-tight">Reports</h1>
+				<h1 className="text-2xl font-bold tracking-tight">
+					{t("reports.title")}
+				</h1>
 				<Button
 					size="sm"
 					className="gap-1.5"
 					onClick={() => setGenerateOpen(true)}
 				>
 					<Plus className="h-4 w-4" />
-					Generate
+					{t("reports.generate")}
 				</Button>
 			</div>
 
@@ -136,20 +140,23 @@ export const ReportsPage = () => {
 												{allSettled && (
 													<Badge variant="success" className="gap-1">
 														<CheckCircle className="h-3 w-3" />
-														Settled
+														{t("reports.settled")}
 													</Badge>
 												)}
 												{hasPending && (
 													<Badge variant="warning" className="gap-1">
 														<Clock className="h-3 w-3" />
-														{r.transfers_total - r.transfers_settled} Pending
+														{t("reports.pendingCount", {
+															count: r.transfers_total - r.transfers_settled,
+														})}
 													</Badge>
 												)}
 											</div>
 											<div className="flex items-center gap-3 mt-1 ml-6">
 												<p className="text-xs text-muted-foreground">
-													{r.total_expenses} expense
-													{r.total_expenses !== 1 && "s"}
+													{t("reports.expense", {
+														count: r.total_expenses,
+													})}
 												</p>
 												<span className="text-xs text-muted-foreground">
 													&middot;
@@ -161,7 +168,7 @@ export const ReportsPage = () => {
 													&middot;
 												</span>
 												<p className="text-xs text-muted-foreground">
-													{format(new Date(r.generated_at), "MMM d, yyyy")}
+													{formatDate(r.generated_at, "MMM d, yyyy")}
 												</p>
 											</div>
 										</div>
@@ -177,8 +184,8 @@ export const ReportsPage = () => {
 					<CardContent>
 						<EmptyState
 							image="/dimewise-empty-report.png"
-							title="No reports yet"
-							description="Generate a monthly report to see a full breakdown of your household's expenses."
+							title={t("reports.noReports")}
+							description={t("reports.noReportsDescription")}
 							action={
 								<Button
 									size="sm"
@@ -186,7 +193,7 @@ export const ReportsPage = () => {
 									onClick={() => setGenerateOpen(true)}
 								>
 									<Plus className="h-4 w-4" />
-									Generate Report
+									{t("reports.generateReport")}
 								</Button>
 							}
 						/>
@@ -201,16 +208,14 @@ export const ReportsPage = () => {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Generate Report</DialogTitle>
+						<DialogTitle>{t("reports.generateReport")}</DialogTitle>
 					</DialogHeader>
 					<p className="text-sm text-muted-foreground">
-						Choose the month and year to generate a financial report. If a
-						report already exists for that period, it will be regenerated with
-						the latest data.
+						{t("reports.generateDescription")}
 					</p>
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-2">
-							<Label>Month</Label>
+							<Label>{t("reports.month")}</Label>
 							<Input
 								type="number"
 								min={1}
@@ -220,7 +225,7 @@ export const ReportsPage = () => {
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label>Year</Label>
+							<Label>{t("reports.year")}</Label>
 							<Input
 								type="number"
 								min={2020}
@@ -232,10 +237,10 @@ export const ReportsPage = () => {
 					</div>
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setGenerateOpen(false)}>
-							Cancel
+							{t("common.cancel")}
 						</Button>
 						<Button onClick={handleGenerate} disabled={isGenerating}>
-							{isGenerating ? "Generating..." : "Generate"}
+							{isGenerating ? t("reports.generating") : t("reports.generate")}
 						</Button>
 					</DialogFooter>
 				</DialogContent>

@@ -1,4 +1,5 @@
 import { Copy, Crown, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { HouseholdWithMembers } from "@/store/api/api";
@@ -12,12 +13,13 @@ type Props = {
 };
 
 export const HouseholdDashboard = ({ household }: Props) => {
+	const { t } = useTranslation();
 	const { data: currentUser } = useGetUsersMeQuery(undefined);
 	const isOwner = currentUser?.id === household.owner_id;
 
 	const copyInviteCode = () => {
 		navigator.clipboard.writeText(household.invite_code);
-		toast.success("Invite code copied!");
+		toast.success(t("householdSettings.copyInviteCode"));
 	};
 
 	const getInitials = (
@@ -37,20 +39,26 @@ export const HouseholdDashboard = ({ household }: Props) => {
 			<div className="grid grid-cols-2 gap-3 md:grid-cols-3">
 				<Card>
 					<CardContent className="p-4">
-						<p className="text-xs text-muted-foreground mb-1">Currency</p>
+						<p className="text-xs text-muted-foreground mb-1">
+							{t("householdSettings.currency")}
+						</p>
 						<p className="text-2xl font-bold">{household.currency}</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardContent className="p-4">
-						<p className="text-xs text-muted-foreground mb-1">Members</p>
+						<p className="text-xs text-muted-foreground mb-1">
+							{t("dashboard.members")}
+						</p>
 						<p className="text-2xl font-bold">{household.members.length}</p>
 					</CardContent>
 				</Card>
 				{isOwner && (
 					<Card className="col-span-2 md:col-span-1">
 						<CardContent className="p-4">
-							<p className="text-xs text-muted-foreground mb-1">Invite Code</p>
+							<p className="text-xs text-muted-foreground mb-1">
+								{t("householdSettings.inviteCode")}
+							</p>
 							<button
 								type="button"
 								onClick={copyInviteCode}
@@ -71,7 +79,9 @@ export const HouseholdDashboard = ({ household }: Props) => {
 				<CardContent>
 					<div className="flex items-center gap-2 mb-4">
 						<Users className="h-4 w-4 text-muted-foreground" />
-						<h3 className="font-semibold text-sm">Members</h3>
+						<h3 className="font-semibold text-sm">
+							{t("householdSettings.members")}
+						</h3>
 					</div>
 					<div className="space-y-3">
 						{household.members.map((member) => {
@@ -108,7 +118,7 @@ export const HouseholdDashboard = ({ household }: Props) => {
 											{isMemberOwner && (
 												<Badge variant="warning" className="shrink-0">
 													<Crown className="h-3 w-3" />
-													Owner
+													{t("householdSettings.owner")}
 												</Badge>
 											)}
 										</div>

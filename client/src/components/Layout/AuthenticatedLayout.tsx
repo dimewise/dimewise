@@ -1,10 +1,12 @@
 import { UserButton } from "@clerk/clerk-react";
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
+import { useLanguageSync } from "@/i18n/useLanguageSync";
 import { BottomNav } from "./BottomNav";
 import { Sidebar } from "./Sidebar";
 
 export const AuthenticatedLayout = () => {
+	useLanguageSync();
 	return (
 		<div className="min-h-screen bg-background pt-[env(safe-area-inset-top)]">
 			{/* Fixed safe area background — always white behind the status bar on mobile */}

@@ -1,10 +1,24 @@
+import { Globe } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Outlet, useNavigate } from "react-router";
 import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
+import { SUPPORTED_LANGUAGES } from "@/i18n/languages";
 import { RoutesEnum } from "@/routes/Routes";
 
 export const PublicLayout = () => {
+	const { t, i18n } = useTranslation();
 	const navigate = useNavigate();
+
+	const toggleLanguage = () => {
+		const currentIndex = SUPPORTED_LANGUAGES.findIndex(
+			(l) => l.code === i18n.language,
+		);
+		const nextIndex = (currentIndex + 1) % SUPPORTED_LANGUAGES.length;
+		i18n.changeLanguage(SUPPORTED_LANGUAGES[nextIndex].code);
+	};
+
+	const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language);
 
 	return (
 		<div className="min-h-screen bg-background pt-[env(safe-area-inset-top)]">
@@ -36,12 +50,21 @@ export const PublicLayout = () => {
 						<Button
 							variant="ghost"
 							size="sm"
+							className="gap-1.5"
+							onClick={toggleLanguage}
+						>
+							<Globe className="h-4 w-4" />
+							<span className="text-xs">{currentLang?.label}</span>
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
 							onClick={() => navigate(RoutesEnum.login)}
 						>
-							Log in
+							{t("landing.logIn")}
 						</Button>
 						<Button size="sm" onClick={() => navigate(RoutesEnum.register)}>
-							Sign up
+							{t("landing.signUp")}
 						</Button>
 					</div>
 				</div>

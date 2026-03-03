@@ -1,4 +1,3 @@
-import { format, parseISO } from "date-fns";
 import {
 	ArrowRight,
 	Calendar,
@@ -8,6 +7,7 @@ import {
 	Users,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { BudgetOverviewCard } from "@/components/Budget/BudgetOverviewCard";
 import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
@@ -26,24 +26,10 @@ import {
 	useListReportsQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
-
-const MONTH_NAMES = [
-	"",
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December",
-];
+import { formatDate } from "@/utils/date";
 
 export const DashboardPage = () => {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const {
 		data: household,
@@ -107,7 +93,9 @@ export const DashboardPage = () => {
 		<div className="space-y-5 animate-fade-in">
 			{/* Greeting */}
 			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+				<h1 className="text-2xl font-bold tracking-tight">
+					{t("dashboard.title")}
+				</h1>
 				<p className="text-sm text-muted-foreground mt-0.5">{household.name}</p>
 			</div>
 
@@ -117,21 +105,27 @@ export const DashboardPage = () => {
 					<CardContent className="p-3 flex flex-col items-center text-center">
 						<Users className="h-5 w-5 text-brand mb-1.5" />
 						<p className="text-lg font-bold">{household.members.length}</p>
-						<p className="text-xs text-muted-foreground">Members</p>
+						<p className="text-xs text-muted-foreground">
+							{t("dashboard.members")}
+						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardContent className="p-3 flex flex-col items-center text-center">
 						<DollarSign className="h-5 w-5 text-success mb-1.5" />
 						<p className="text-lg font-bold">{household.currency}</p>
-						<p className="text-xs text-muted-foreground">Currency</p>
+						<p className="text-xs text-muted-foreground">
+							{t("dashboard.currency")}
+						</p>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardContent className="p-3 flex flex-col items-center text-center">
 						<FileBarChart className="h-5 w-5 text-warning mb-1.5" />
 						<p className="text-lg font-bold">{reports?.length ?? 0}</p>
-						<p className="text-xs text-muted-foreground">Reports</p>
+						<p className="text-xs text-muted-foreground">
+							{t("dashboard.reports")}
+						</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -146,7 +140,7 @@ export const DashboardPage = () => {
 				<CardHeader className="flex-row items-center justify-between pb-0">
 					<CardTitle className="flex items-center gap-2 text-base">
 						<Receipt className="h-4 w-4 text-muted-foreground" />
-						Recent Expenses
+						{t("dashboard.recentExpenses")}
 					</CardTitle>
 					<Button
 						variant="ghost"
@@ -154,7 +148,7 @@ export const DashboardPage = () => {
 						className="text-brand gap-1"
 						onClick={() => navigate(RoutesEnum.expenses)}
 					>
-						View All
+						{t("dashboard.viewAll")}
 						<ArrowRight className="h-3.5 w-3.5" />
 					</Button>
 				</CardHeader>
@@ -174,7 +168,7 @@ export const DashboardPage = () => {
 										</p>
 										<p className="text-xs text-muted-foreground">
 											{getMemberName(expense.paid_by)} &middot;{" "}
-											{format(parseISO(expense.incurred_at), "MMM d")}
+											{formatDate(expense.incurred_at, "MMM d")}
 										</p>
 									</div>
 									<p className="text-sm font-semibold ml-3 shrink-0">
@@ -186,8 +180,8 @@ export const DashboardPage = () => {
 					) : (
 						<EmptyState
 							image="/dimewise-empty.png"
-							title="No expenses yet"
-							description="Start by adding your first expense."
+							title={t("dashboard.noExpenses")}
+							description={t("dashboard.noExpensesDescription")}
 							className="py-6"
 						/>
 					)}
@@ -199,7 +193,7 @@ export const DashboardPage = () => {
 				<CardHeader className="flex-row items-center justify-between pb-0">
 					<CardTitle className="flex items-center gap-2 text-base">
 						<FileBarChart className="h-4 w-4 text-muted-foreground" />
-						Recent Reports
+						{t("dashboard.recentReports")}
 					</CardTitle>
 					<Button
 						variant="ghost"
@@ -207,7 +201,7 @@ export const DashboardPage = () => {
 						className="text-brand gap-1"
 						onClick={() => navigate(RoutesEnum.reports)}
 					>
-						View All
+						{t("dashboard.viewAll")}
 						<ArrowRight className="h-3.5 w-3.5" />
 					</Button>
 				</CardHeader>
@@ -224,10 +218,12 @@ export const DashboardPage = () => {
 									</div>
 									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium">
-											{MONTH_NAMES[r.month]} {r.year}
+											{t(`months.${r.month}`)} {r.year}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											{r.total_expenses} expense{r.total_expenses !== 1 && "s"}{" "}
+											{t("dashboard.expense", {
+												count: r.total_expenses,
+											})}{" "}
 											&middot; {formatCurrency(r.total_amount, currency)}
 										</p>
 									</div>
@@ -237,8 +233,8 @@ export const DashboardPage = () => {
 					) : (
 						<EmptyState
 							image="/dimewise-empty-report.png"
-							title="No reports yet"
-							description="Generate one for a completed month."
+							title={t("dashboard.noReports")}
+							description={t("dashboard.noReportsDescription")}
 							className="py-6"
 						/>
 					)}
