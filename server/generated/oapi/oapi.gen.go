@@ -41,6 +41,16 @@ const (
 	Ja UpdateUserRequestLanguage = "ja"
 )
 
+// BalanceSummary defines model for BalanceSummary.
+type BalanceSummary struct {
+	Balances []MemberBalance `json:"balances"`
+	Month    int             `json:"month"`
+
+	// NetBalance Current user's net balance (positive = owed money, negative = owes money)
+	NetBalance int64 `json:"net_balance"`
+	Year       int   `json:"year"`
+}
+
 // BaseEntity defines model for BaseEntity.
 type BaseEntity struct {
 	CreatedAt time.Time          `json:"created_at"`
@@ -216,6 +226,14 @@ type HouseholdWithMembers struct {
 // JoinHouseholdRequest defines model for JoinHouseholdRequest.
 type JoinHouseholdRequest struct {
 	InviteCode string `json:"invite_code"`
+}
+
+// MemberBalance defines model for MemberBalance.
+type MemberBalance struct {
+	// Amount Amount relative to current user (positive = they owe you, negative = you owe them)
+	Amount     int64              `json:"amount"`
+	MemberName string             `json:"member_name"`
+	UserId     openapi_types.UUID `json:"user_id"`
 }
 
 // ProblemDetails defines model for ProblemDetails.
@@ -417,6 +435,15 @@ type NotFound = ProblemDetails
 // Unauthorized defines model for Unauthorized.
 type Unauthorized = ProblemDetails
 
+// GetMyBalancesParams defines parameters for GetMyBalances.
+type GetMyBalancesParams struct {
+	// Month Month (1-12). Defaults to current month.
+	Month *int `form:"month,omitempty" json:"month,omitempty"`
+
+	// Year Year. Defaults to current year.
+	Year *int `form:"year,omitempty" json:"year,omitempty"`
+}
+
 // ListExpensesParams defines parameters for ListExpenses.
 type ListExpensesParams struct {
 	CategoryId *openapi_types.UUID `form:"category_id,omitempty" json:"category_id,omitempty"`
@@ -524,6 +551,9 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetMyBalances request
+	GetMyBalances(ctx context.Context, params *GetMyBalancesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListBudgetCategories request
 	ListBudgetCategories(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -611,6 +641,18 @@ type ClientInterface interface {
 	PatchUsersMeWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PatchUsersMe(ctx context.Context, body PatchUsersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetMyBalances(ctx context.Context, params *GetMyBalancesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMyBalancesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) ListBudgetCategories(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -995,6 +1037,71 @@ func (c *Client) PatchUsersMe(ctx context.Context, body PatchUsersMeJSONRequestB
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewGetMyBalancesRequest generates requests for GetMyBalances
+func NewGetMyBalancesRequest(server string, params *GetMyBalancesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/balances/me")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Month != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "month", runtime.ParamLocationQuery, *params.Month); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Year != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "year", runtime.ParamLocationQuery, *params.Year); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewListBudgetCategoriesRequest generates requests for ListBudgetCategories
@@ -1957,6 +2064,9 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetMyBalancesWithResponse request
+	GetMyBalancesWithResponse(ctx context.Context, params *GetMyBalancesParams, reqEditors ...RequestEditorFn) (*GetMyBalancesResponse, error)
+
 	// ListBudgetCategoriesWithResponse request
 	ListBudgetCategoriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListBudgetCategoriesResponse, error)
 
@@ -2044,6 +2154,30 @@ type ClientWithResponsesInterface interface {
 	PatchUsersMeWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PatchUsersMeResponse, error)
 
 	PatchUsersMeWithResponse(ctx context.Context, body PatchUsersMeJSONRequestBody, reqEditors ...RequestEditorFn) (*PatchUsersMeResponse, error)
+}
+
+type GetMyBalancesResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *BalanceSummary
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMyBalancesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMyBalancesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type ListBudgetCategoriesResponse struct {
@@ -2636,6 +2770,15 @@ func (r PatchUsersMeResponse) StatusCode() int {
 	return 0
 }
 
+// GetMyBalancesWithResponse request returning *GetMyBalancesResponse
+func (c *ClientWithResponses) GetMyBalancesWithResponse(ctx context.Context, params *GetMyBalancesParams, reqEditors ...RequestEditorFn) (*GetMyBalancesResponse, error) {
+	rsp, err := c.GetMyBalances(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMyBalancesResponse(rsp)
+}
+
 // ListBudgetCategoriesWithResponse request returning *ListBudgetCategoriesResponse
 func (c *ClientWithResponses) ListBudgetCategoriesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ListBudgetCategoriesResponse, error) {
 	rsp, err := c.ListBudgetCategories(ctx, reqEditors...)
@@ -2914,6 +3057,46 @@ func (c *ClientWithResponses) PatchUsersMeWithResponse(ctx context.Context, body
 		return nil, err
 	}
 	return ParsePatchUsersMeResponse(rsp)
+}
+
+// ParseGetMyBalancesResponse parses an HTTP response from a GetMyBalancesWithResponse call
+func ParseGetMyBalancesResponse(rsp *http.Response) (*GetMyBalancesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMyBalancesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BalanceSummary
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseListBudgetCategoriesResponse parses an HTTP response from a ListBudgetCategoriesWithResponse call
@@ -3976,6 +4159,9 @@ func ParsePatchUsersMeResponse(rsp *http.Response) (*PatchUsersMeResponse, error
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get current user's live balance summary for a given month
+	// (GET /balances/me)
+	GetMyBalances(w http.ResponseWriter, r *http.Request, params GetMyBalancesParams)
 	// List budget categories for the current household
 	// (GET /budgets)
 	ListBudgetCategories(w http.ResponseWriter, r *http.Request)
@@ -4053,6 +4239,12 @@ type ServerInterface interface {
 // Unimplemented server implementation that returns http.StatusNotImplemented for each endpoint.
 
 type Unimplemented struct{}
+
+// Get current user's live balance summary for a given month
+// (GET /balances/me)
+func (_ Unimplemented) GetMyBalances(w http.ResponseWriter, r *http.Request, params GetMyBalancesParams) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
 
 // List budget categories for the current household
 // (GET /budgets)
@@ -4206,6 +4398,41 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetMyBalances operation middleware
+func (siw *ServerInterfaceWrapper) GetMyBalances(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetMyBalancesParams
+
+	// ------------- Optional query parameter "month" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "month", r.URL.Query(), &params.Month)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "month", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year", r.URL.Query(), &params.Year)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetMyBalances(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // ListBudgetCategories operation middleware
 func (siw *ServerInterfaceWrapper) ListBudgetCategories(w http.ResponseWriter, r *http.Request) {
@@ -4809,6 +5036,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/balances/me", wrapper.GetMyBalances)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/budgets", wrapper.ListBudgetCategories)
 	})
 	r.Group(func(r chi.Router) {
@@ -4893,6 +5123,45 @@ type ForbiddenApplicationProblemPlusJSONResponse ProblemDetails
 type NotFoundApplicationProblemPlusJSONResponse ProblemDetails
 
 type UnauthorizedApplicationProblemPlusJSONResponse ProblemDetails
+
+type GetMyBalancesRequestObject struct {
+	Params GetMyBalancesParams
+}
+
+type GetMyBalancesResponseObject interface {
+	VisitGetMyBalancesResponse(w http.ResponseWriter) error
+}
+
+type GetMyBalances200JSONResponse BalanceSummary
+
+func (response GetMyBalances200JSONResponse) VisitGetMyBalancesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMyBalances401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response GetMyBalances401ApplicationProblemPlusJSONResponse) VisitGetMyBalancesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMyBalances404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response GetMyBalances404ApplicationProblemPlusJSONResponse) VisitGetMyBalancesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
 
 type ListBudgetCategoriesRequestObject struct {
 }
@@ -6030,6 +6299,9 @@ func (response PatchUsersMe401ApplicationProblemPlusJSONResponse) VisitPatchUser
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// Get current user's live balance summary for a given month
+	// (GET /balances/me)
+	GetMyBalances(ctx context.Context, request GetMyBalancesRequestObject) (GetMyBalancesResponseObject, error)
 	// List budget categories for the current household
 	// (GET /budgets)
 	ListBudgetCategories(ctx context.Context, request ListBudgetCategoriesRequestObject) (ListBudgetCategoriesResponseObject, error)
@@ -6131,6 +6403,32 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// GetMyBalances operation middleware
+func (sh *strictHandler) GetMyBalances(w http.ResponseWriter, r *http.Request, params GetMyBalancesParams) {
+	var request GetMyBalancesRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMyBalances(ctx, request.(GetMyBalancesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMyBalances")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetMyBalancesResponseObject); ok {
+		if err := validResponse.VisitGetMyBalancesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // ListBudgetCategories operation middleware

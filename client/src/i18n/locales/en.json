@@ -88,6 +88,12 @@
 			"contact": "Contact"
 		}
 	},
+	"balance": {
+		"title": "My Balance",
+		"allSettled": "All settled — no outstanding balances!",
+		"owesYou": "{{name}} owes you",
+		"youOwe": "You owe {{name}}"
+	},
 	"dashboard": {
 		"title": "Dashboard",
 		"members": "Members",

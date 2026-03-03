@@ -13,6 +13,7 @@ type Handler struct {
 	expenseService   *service.ExpenseService
 	reportService    *service.ReportService
 	userService      *service.UserService
+	balanceService   *service.BalanceService
 }
 
 func NewHandler(
@@ -21,6 +22,7 @@ func NewHandler(
 	expenseService *service.ExpenseService,
 	reportService *service.ReportService,
 	userService *service.UserService,
+	balanceService *service.BalanceService,
 ) *Handler {
 	h := Handler{
 		householdService: householdService,
@@ -28,6 +30,7 @@ func NewHandler(
 		expenseService:   expenseService,
 		reportService:    reportService,
 		userService:      userService,
+		balanceService:   balanceService,
 	}
 
 	return &h

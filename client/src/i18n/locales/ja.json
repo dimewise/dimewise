@@ -88,6 +88,12 @@
 			"contact": "お問い合わせ"
 		}
 	},
+	"balance": {
+		"title": "残高",
+		"allSettled": "精算済み — 未精算の残高はありません！",
+		"owesYou": "{{name}}があなたに支払い",
+		"youOwe": "あなたが{{name}}に支払い"
+	},
 	"dashboard": {
 		"title": "ダッシュボード",
 		"members": "メンバー",
