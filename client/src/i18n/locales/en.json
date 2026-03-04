@@ -243,7 +243,8 @@
 		"transferPaid": "Transfer marked as paid!",
 		"transferPaidFailed": "Failed to mark transfer as paid.",
 		"transferUnpaid": "Transfer marked as unpaid.",
-		"transferUnpaidFailed": "Failed to undo payment status."
+		"transferUnpaidFailed": "Failed to undo payment status.",
+		"viewFullReport": "View Full Report"
 	},
 	"householdSetup": {
 		"welcome": "Welcome to Dimewise!",

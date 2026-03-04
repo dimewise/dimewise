@@ -2,17 +2,29 @@ import { ArrowRight, Calendar, FileBarChart, Receipt } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { BudgetOverviewCard } from "@/components/Budget/BudgetOverviewCard";
 import { BalanceWidget } from "@/components/Dashboard/BalanceWidget";
 import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
+import { ExpenseModal } from "@/components/Expense/ExpenseModal";
+import { ReportSummaryModal } from "@/components/Report/ReportSummaryModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton, SkeletonDashboard } from "@/components/ui/skeleton";
 import { RoutesEnum } from "@/routes/Routes";
 import type { ExpenseWithSplits, HouseholdMember } from "@/store/api/api";
 import {
+	useDeleteExpenseMutation,
 	useGetBudgetOverviewQuery,
 	useGetMyHouseholdQuery,
 	useListBudgetCategoriesQuery,
@@ -46,9 +58,16 @@ export const DashboardPage = () => {
 	const { data: categories } = useListBudgetCategoriesQuery(undefined, {
 		skip: !household,
 	});
+	const [deleteExpense] = useDeleteExpenseMutation();
 
 	const [viewingExpense, setViewingExpense] =
 		useState<ExpenseWithSplits | null>(null);
+	const [editingExpense, setEditingExpense] =
+		useState<ExpenseWithSplits | null>(null);
+	const [modalOpen, setModalOpen] = useState(false);
+	const [deletingExpense, setDeletingExpense] =
+		useState<ExpenseWithSplits | null>(null);
+	const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
 	if (isLoading) {
 		return <SkeletonDashboard />;
@@ -86,6 +105,22 @@ export const DashboardPage = () => {
 		return name || m.email;
 	};
 
+	const handleDelete = async () => {
+		if (!deletingExpense) return;
+		try {
+			await deleteExpense({ expenseId: deletingExpense.id }).unwrap();
+			toast.success(t("expenses.expenseDeleted"));
+			setDeletingExpense(null);
+		} catch {
+			toast.error(t("expenses.deleteFailed"));
+		}
+	};
+
+	const handleCloseModal = () => {
+		setModalOpen(false);
+		setEditingExpense(null);
+	};
+
 	return (
 		<div className="space-y-5">
 			{/* Greeting */}
@@ -108,7 +143,9 @@ export const DashboardPage = () => {
 			<Card>
 				<CardHeader className="flex-row items-center justify-between pb-0">
 					<CardTitle className="flex items-center gap-2 text-base">
-						<Receipt className="h-4 w-4 text-muted-foreground" />
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light">
+							<Receipt className="h-4 w-4 text-brand" />
+						</div>
 						{t("dashboard.recentExpenses")}
 					</CardTitle>
 					<Button
@@ -174,7 +211,9 @@ export const DashboardPage = () => {
 			<Card>
 				<CardHeader className="flex-row items-center justify-between pb-0">
 					<CardTitle className="flex items-center gap-2 text-base">
-						<FileBarChart className="h-4 w-4 text-muted-foreground" />
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning-light">
+							<FileBarChart className="h-4 w-4 text-warning" />
+						</div>
 						{t("dashboard.recentReports")}
 					</CardTitle>
 					<Button
@@ -204,9 +243,11 @@ export const DashboardPage = () => {
 					) : reports && reports.length > 0 ? (
 						<div className="divide-y divide-border">
 							{reports.slice(0, 3).map((r) => (
-								<div
+								<button
 									key={r.id}
-									className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+									type="button"
+									className="flex items-center gap-3 py-3 first:pt-0 last:pb-0 w-full text-left"
+									onClick={() => setSelectedReportId(r.id)}
 								>
 									<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
 										<Calendar className="h-4 w-4 text-muted-foreground" />
@@ -222,7 +263,7 @@ export const DashboardPage = () => {
 											&middot; {formatCurrency(r.total_amount, currency)}
 										</p>
 									</div>
-								</div>
+								</button>
 							))}
 						</div>
 					) : (
@@ -235,6 +276,7 @@ export const DashboardPage = () => {
 					)}
 				</CardContent>
 			</Card>
+
 			{/* Expense detail modal */}
 			<ExpenseDetailModal
 				open={!!viewingExpense}
@@ -247,15 +289,61 @@ export const DashboardPage = () => {
 						? categoryMap.get(viewingExpense.budget_category_id)
 						: undefined
 				}
-				onEdit={() => {
+				onEdit={(exp) => {
 					setViewingExpense(null);
-					navigate(RoutesEnum.expenses);
+					setEditingExpense(exp);
+					setModalOpen(true);
 				}}
-				onDelete={() => {
+				onDelete={(exp) => {
 					setViewingExpense(null);
-					navigate(RoutesEnum.expenses);
+					setDeletingExpense(exp);
 				}}
 			/>
+
+			{/* Edit expense modal */}
+			<ExpenseModal
+				open={modalOpen}
+				onClose={handleCloseModal}
+				currency={currency}
+				members={household.members}
+				categories={categories ?? []}
+				expense={editingExpense}
+			/>
+
+			{/* Delete confirmation */}
+			<Dialog
+				open={!!deletingExpense}
+				onOpenChange={(v) => !v && setDeletingExpense(null)}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>{t("expenses.deleteExpense")}</DialogTitle>
+						<DialogDescription>
+							{t("expenses.deleteExpenseConfirm", {
+								title: deletingExpense?.title,
+							})}
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setDeletingExpense(null)}>
+							{t("common.cancel")}
+						</Button>
+						<Button variant="danger" onClick={handleDelete}>
+							{t("common.delete")}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+
+			{/* Report summary modal */}
+			{selectedReportId && (
+				<ReportSummaryModal
+					open={!!selectedReportId}
+					onClose={() => setSelectedReportId(null)}
+					reportId={selectedReportId}
+					currency={currency}
+				/>
+			)}
 		</div>
 	);
 };
