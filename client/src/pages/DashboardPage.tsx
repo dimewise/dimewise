@@ -94,7 +94,7 @@ export const DashboardPage = () => {
 	};
 
 	return (
-		<div className="space-y-5 animate-fade-in">
+		<div className="space-y-5">
 			{/* Greeting */}
 			<div>
 				<h1 className="text-2xl font-bold tracking-tight">

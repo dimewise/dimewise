@@ -112,6 +112,7 @@ All amounts are integers in the smallest currency unit (cents for USD, yen for J
 - Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`
 - **Before pushing, always run: `make format`, `make lint`, `make build`** (in that order — format first so lint sees clean code)
 - Commit generated files after `make gen-openapi`
+- **No AI attribution**: Do not add `Co-Authored-By` lines or any AI/Claude self-references in commit messages or PR descriptions
 
 ## Reference Documentation
 

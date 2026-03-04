@@ -9,7 +9,7 @@ export const NotFoundPage = () => {
 	const navigate = useNavigate();
 
 	return (
-		<div className="flex items-center justify-center min-h-[80vh] animate-fade-in">
+		<div className="flex items-center justify-center min-h-[80vh]">
 			<Card className="max-w-md w-full">
 				<CardContent className="py-12 text-center space-y-4">
 					<img

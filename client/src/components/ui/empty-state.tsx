@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import type { ReactNode } from "react";
+import { fadeIn } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type EmptyStateProps = {
@@ -21,11 +23,14 @@ function EmptyState({
 	className,
 }: EmptyStateProps) {
 	return (
-		<div
+		<motion.div
 			className={cn(
-				"flex flex-col items-center justify-center py-12 px-4 text-center animate-fade-in",
+				"flex flex-col items-center justify-center py-12 px-4 text-center",
 				className,
 			)}
+			variants={fadeIn}
+			initial="initial"
+			animate="animate"
 		>
 			{image ? (
 				<img
@@ -47,7 +52,7 @@ function EmptyState({
 				</p>
 			)}
 			{action && <div className="mt-4">{action}</div>}
-		</div>
+		</motion.div>
 	);
 }
 

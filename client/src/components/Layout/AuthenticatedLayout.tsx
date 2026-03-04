@@ -1,6 +1,6 @@
 import { UserButton } from "@clerk/clerk-react";
-import { Outlet } from "react-router";
 import { Toaster } from "sonner";
+import { AnimatedOutlet } from "@/components/ui/animated-outlet";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { ErrorState } from "@/components/ui/error-state";
 import { useLanguageSync } from "@/i18n/useLanguageSync";
@@ -52,7 +52,7 @@ export const AuthenticatedLayout = () => {
 							<ErrorState onRetry={resetErrorBoundary} />
 						)}
 					>
-						<Outlet />
+						<AnimatedOutlet />
 					</ErrorBoundary>
 				</main>
 			</div>

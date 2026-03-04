@@ -1,6 +1,8 @@
 import * as SelectPrimitive from "@radix-ui/react-select";
+import { motion } from "framer-motion";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import type { ComponentProps } from "react";
+import { scaleIn } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const Select = SelectPrimitive.Root;
@@ -73,25 +75,32 @@ function SelectContent({
 			<SelectPrimitive.Content
 				className={cn(
 					"relative z-50 max-h-[300px] min-w-[8rem] overflow-hidden rounded-lg border border-border bg-surface shadow-lg",
-					"data-[state=open]:animate-scale-in",
 					position === "popper" &&
 						"data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
 					className,
 				)}
 				position={position}
+				asChild
 				{...props}
 			>
-				<SelectScrollUpButton />
-				<SelectPrimitive.Viewport
-					className={cn(
-						"p-1",
-						position === "popper" &&
-							"h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
-					)}
+				<motion.div
+					variants={scaleIn}
+					initial="initial"
+					animate="animate"
+					exit="exit"
 				>
-					{children}
-				</SelectPrimitive.Viewport>
-				<SelectScrollDownButton />
+					<SelectScrollUpButton />
+					<SelectPrimitive.Viewport
+						className={cn(
+							"p-1",
+							position === "popper" &&
+								"h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
+						)}
+					>
+						{children}
+					</SelectPrimitive.Viewport>
+					<SelectScrollDownButton />
+				</motion.div>
 			</SelectPrimitive.Content>
 		</SelectPrimitive.Portal>
 	);

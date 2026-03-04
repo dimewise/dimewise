@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+import { fadeIn } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 function Skeleton({
@@ -49,20 +51,30 @@ function SkeletonList({ count = 3 }: { count?: number }) {
 
 function SkeletonPage() {
 	return (
-		<div className="space-y-5 animate-fade-in">
+		<motion.div
+			className="space-y-5"
+			variants={fadeIn}
+			initial="initial"
+			animate="animate"
+		>
 			<div className="flex items-center justify-between">
 				<Skeleton className="h-7 w-32" />
 				<Skeleton className="h-9 w-20 rounded-lg" />
 			</div>
 			<SkeletonCard />
 			<SkeletonList count={4} />
-		</div>
+		</motion.div>
 	);
 }
 
 function SkeletonDashboard() {
 	return (
-		<div className="space-y-5 animate-fade-in">
+		<motion.div
+			className="space-y-5"
+			variants={fadeIn}
+			initial="initial"
+			animate="animate"
+		>
 			<Skeleton className="h-7 w-48" />
 			{/* Stats row */}
 			<div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -84,7 +96,7 @@ function SkeletonDashboard() {
 				<Skeleton className="h-5 w-36" />
 				<SkeletonList count={3} />
 			</div>
-		</div>
+		</motion.div>
 	);
 }
 

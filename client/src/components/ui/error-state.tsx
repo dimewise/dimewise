@@ -1,7 +1,9 @@
+import { motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { fadeIn } from "@/lib/motion";
 
 type Props = {
 	title?: string;
@@ -15,7 +17,12 @@ export const ErrorState = ({ title, description, onRetry }: Props) => {
 	const resolvedDescription = description ?? t("error.description");
 
 	return (
-		<div className="flex items-center justify-center min-h-[50vh] animate-fade-in">
+		<motion.div
+			className="flex items-center justify-center min-h-[50vh]"
+			variants={fadeIn}
+			initial="initial"
+			animate="animate"
+		>
 			<Card className="max-w-md w-full">
 				<CardContent className="py-10 text-center space-y-4">
 					<img
@@ -37,6 +44,6 @@ export const ErrorState = ({ title, description, onRetry }: Props) => {
 					)}
 				</CardContent>
 			</Card>
-		</div>
+		</motion.div>
 	);
 };

@@ -3,7 +3,7 @@ import { RoutesEnum } from "@/routes/Routes";
 
 export const TermsOfServicePage = () => {
 	return (
-		<div className="mx-auto max-w-3xl px-4 py-12 md:py-16 animate-fade-in">
+		<div className="mx-auto max-w-3xl px-4 py-12 md:py-16">
 			<h1 className="text-3xl font-bold tracking-tight mb-2">
 				Terms of Service
 			</h1>
