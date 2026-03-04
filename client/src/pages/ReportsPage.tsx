@@ -1,5 +1,12 @@
 import { useUser } from "@clerk/clerk-react";
-import { Calendar, CheckCircle, Clock, FileBarChart, Plus } from "lucide-react";
+import {
+	AlertTriangle,
+	Calendar,
+	CheckCircle,
+	Clock,
+	FileBarChart,
+	Plus,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
@@ -17,8 +24,14 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { SkeletonList, SkeletonPage } from "@/components/ui/skeleton";
 import { RoutesEnum } from "@/routes/Routes";
 import {
@@ -27,7 +40,14 @@ import {
 	useListReportsQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
-import { formatDate } from "@/utils/date";
+import { formatDate, formatMonthYear } from "@/utils/date";
+
+function getPreviousMonth() {
+	const now = new Date();
+	const month = now.getMonth(); // 0-indexed
+	if (month === 0) return { month: 12, year: now.getFullYear() - 1 };
+	return { month, year: now.getFullYear() };
+}
 
 export const ReportsPage = () => {
 	const { t } = useTranslation();
@@ -46,9 +66,13 @@ export const ReportsPage = () => {
 		useGenerateReportMutation();
 
 	const now = new Date();
+	const currentMonth = now.getMonth() + 1;
+	const currentYear = now.getFullYear();
+	const prev = getPreviousMonth();
+
 	const [generateOpen, setGenerateOpen] = useState(false);
-	const [genMonth, setGenMonth] = useState(now.getMonth() + 1);
-	const [genYear, setGenYear] = useState(now.getFullYear());
+	const [genMonth, setGenMonth] = useState(prev.month);
+	const [genYear, setGenYear] = useState(prev.year);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
 	if (isHouseholdLoading) {
@@ -94,6 +118,23 @@ export const ReportsPage = () => {
 		}
 	};
 
+	const handleYearChange = (year: number) => {
+		setGenYear(year);
+		// Clamp month if switching to current year and month is in the future
+		if (year === currentYear && genMonth > currentMonth) {
+			setGenMonth(currentMonth);
+		}
+	};
+
+	const reportExists = reports?.some(
+		(r) => r.month === genMonth && r.year === genYear,
+	);
+
+	const years: number[] = [];
+	for (let y = currentYear; y >= 2020; y--) {
+		years.push(y);
+	}
+
 	return (
 		<div className="space-y-5">
 			{/* Header */}
@@ -117,10 +158,7 @@ export const ReportsPage = () => {
 			) : reports && reports.length > 0 ? (
 				<div className="space-y-2">
 					{reports.map((r) => {
-						const monthName = new Date(r.year, r.month - 1).toLocaleString(
-							"default",
-							{ month: "long", year: "numeric" },
-						);
+						const monthName = formatMonthYear(r.month, r.year);
 						const allSettled =
 							r.transfers_total > 0 &&
 							r.transfers_settled === r.transfers_total;
@@ -217,25 +255,53 @@ export const ReportsPage = () => {
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-2">
 							<Label>{t("reports.month")}</Label>
-							<Input
-								type="number"
-								min={1}
-								max={12}
-								value={genMonth}
-								onChange={(e) => setGenMonth(Number(e.target.value))}
-							/>
+							<Select
+								value={String(genMonth)}
+								onValueChange={(v) => setGenMonth(Number(v))}
+							>
+								<SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+										<SelectItem
+											key={m}
+											value={String(m)}
+											disabled={genYear === currentYear && m > currentMonth}
+										>
+											{t(`months.${m}`)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 						<div className="space-y-2">
 							<Label>{t("reports.year")}</Label>
-							<Input
-								type="number"
-								min={2020}
-								max={2099}
-								value={genYear}
-								onChange={(e) => setGenYear(Number(e.target.value))}
-							/>
+							<Select
+								value={String(genYear)}
+								onValueChange={(v) => handleYearChange(Number(v))}
+							>
+								<SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{years.map((y) => (
+										<SelectItem key={y} value={String(y)}>
+											{y}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
+					{reportExists && (
+						<div className="flex items-start gap-2 rounded-lg bg-warning-light p-3">
+							<AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+							<p className="text-sm text-warning">
+								{t("reports.reportExists")}
+							</p>
+						</div>
+					)}
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setGenerateOpen(false)}>
 							{t("common.cancel")}

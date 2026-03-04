@@ -27,7 +27,7 @@ import {
 	useUnmarkReportTransferPaidMutation,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
-import { formatDate } from "@/utils/date";
+import { formatDate, formatMonthYear } from "@/utils/date";
 
 type Props = {
 	reportId: string;
@@ -70,10 +70,7 @@ export const ReportDetail = ({
 		return <SkeletonPage />;
 	}
 
-	const monthName = new Date(report.year, report.month - 1).toLocaleString(
-		"default",
-		{ month: "long", year: "numeric" },
-	);
+	const monthName = formatMonthYear(report.month, report.year);
 
 	const allSettled = report.transfers.every((t) => !!t.paid_at);
 

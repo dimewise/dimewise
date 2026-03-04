@@ -217,6 +217,7 @@
 		"generating": "生成中...",
 		"reportGenerated": "レポートを生成しました！",
 		"generateFailed": "レポートの生成に失敗しました。",
+		"reportExists": "この期間のレポートはすでに存在します。最新のデータで再生成されます。",
 		"expense_one": "{{count}}件の支出",
 		"expense_other": "{{count}}件の支出"
 	},
@@ -299,6 +300,11 @@
 	},
 	"accountSettings": {
 		"title": "アカウント設定",
+		"appearance": "外観",
+		"appearanceDescription": "お好みのカラーテーマを選択してください。",
+		"themeLight": "ライト",
+		"themeDark": "ダーク",
+		"themeSystem": "システム",
 		"language": "言語",
 		"languageDescription": "表示言語を選択してください。",
 		"languageSaved": "言語設定を保存しました！",
