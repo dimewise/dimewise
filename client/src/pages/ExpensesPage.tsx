@@ -39,7 +39,7 @@ import {
 	useListExpensesQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
-import { formatDate } from "@/utils/date";
+import { formatDate, formatMonthYear } from "@/utils/date";
 
 const PAGE_SIZE = 20;
 
@@ -296,42 +296,60 @@ export const ExpensesPage = () => {
 			) : expenseData && expenseData.expenses.length > 0 ? (
 				<>
 					<div className="space-y-2">
-						{expenseData.expenses.map((expense) => (
-							<Card key={expense.id}>
-								<button
-									type="button"
-									className="w-full p-4 text-left"
-									onClick={() => setViewingExpense(expense)}
-								>
-									<div className="flex items-center justify-between">
-										<div className="min-w-0 flex-1">
-											<div className="flex items-center gap-2 flex-wrap">
-												<h3 className="text-sm font-semibold truncate">
-													{expense.title}
-												</h3>
-												{expense.budget_category_id && (
-													<Badge variant="default" className="text-[10px]">
-														{categoryMap.get(expense.budget_category_id) ??
-															t("expenses.unknown")}
-													</Badge>
-												)}
-											</div>
-											<p className="text-xs text-muted-foreground mt-1">
-												{getMemberName(expense.paid_by)} &middot;{" "}
-												{formatDate(expense.incurred_at, "MMM d, yyyy")}{" "}
-												&middot;{" "}
-												{t("expenses.waySplit", {
-													count: expense.splits.length,
-												})}
-											</p>
-										</div>
-										<p className="text-lg font-bold shrink-0 ml-4">
-											{formatCurrency(expense.amount, currency)}
+						{expenseData.expenses.map((expense, index) => {
+							const monthKey = expense.incurred_at.slice(0, 7);
+							const prevMonthKey =
+								index > 0
+									? expenseData.expenses[index - 1].incurred_at.slice(0, 7)
+									: null;
+							const showHeader = monthKey !== prevMonthKey;
+							return (
+								<div key={expense.id}>
+									{showHeader && (
+										<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-3 first:pt-0 pb-1">
+											{formatMonthYear(
+												Number(monthKey.slice(5)),
+												Number(monthKey.slice(0, 4)),
+											)}
 										</p>
-									</div>
-								</button>
-							</Card>
-						))}
+									)}
+									<Card>
+										<button
+											type="button"
+											className="w-full p-4 text-left"
+											onClick={() => setViewingExpense(expense)}
+										>
+											<div className="flex items-center justify-between">
+												<div className="min-w-0 flex-1">
+													<div className="flex items-center gap-2 flex-wrap">
+														<h3 className="text-sm font-semibold truncate">
+															{expense.title}
+														</h3>
+														{expense.budget_category_id && (
+															<Badge variant="default" className="text-[10px]">
+																{categoryMap.get(expense.budget_category_id) ??
+																	t("expenses.unknown")}
+															</Badge>
+														)}
+													</div>
+													<p className="text-xs text-muted-foreground mt-1">
+														{getMemberName(expense.paid_by)} &middot;{" "}
+														{formatDate(expense.incurred_at, "MMM d, yyyy")}{" "}
+														&middot;{" "}
+														{t("expenses.waySplit", {
+															count: expense.splits.length,
+														})}
+													</p>
+												</div>
+												<p className="text-lg font-bold shrink-0 ml-4">
+													{formatCurrency(expense.amount, currency)}
+												</p>
+											</div>
+										</button>
+									</Card>
+								</div>
+							);
+						})}
 					</div>
 
 					{/* Pagination */}
