@@ -243,7 +243,8 @@
 		"transferPaid": "送金を支払済みにしました！",
 		"transferPaidFailed": "支払済みマークに失敗しました。",
 		"transferUnpaid": "送金を未払いに戻しました。",
-		"transferUnpaidFailed": "支払状態の取り消しに失敗しました。"
+		"transferUnpaidFailed": "支払状態の取り消しに失敗しました。",
+		"viewFullReport": "レポート全体を表示"
 	},
 	"householdSetup": {
 		"welcome": "Dimewiseへようこそ！",
