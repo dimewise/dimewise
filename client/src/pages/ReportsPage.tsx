@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
 import { ReportDetail } from "@/components/Report/ReportDetail";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -157,8 +158,8 @@ export const ReportsPage = () => {
 				{isReportsLoading || isReportsUninitialized ? (
 					<SkeletonList count={3} />
 				) : reports && reports.length > 0 ? (
-					<div className="space-y-2">
-						{reports.map((r) => {
+					<AnimatedList className="space-y-2">
+						{reports.map((r, i) => {
 							const monthName = formatMonthYear(r.month, r.year);
 							const allSettled =
 								r.transfers_total > 0 &&
@@ -167,58 +168,68 @@ export const ReportsPage = () => {
 								r.transfers_total > 0 &&
 								r.transfers_settled < r.transfers_total;
 							return (
-								<Card key={r.id}>
-									<CardContent className="p-0">
-										<Touchable
-											className="w-full p-4 flex items-center justify-between text-left rounded-xl"
-											onClick={() => setSelectedId(r.id)}
-										>
-											<div className="min-w-0 flex-1">
-												<div className="flex items-center gap-2">
-													<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-													<h3 className="text-sm font-semibold">{monthName}</h3>
-													{allSettled && (
-														<Badge variant="success" className="gap-1">
-															<CheckCircle className="h-3 w-3" />
-															{t("reports.settled")}
-														</Badge>
-													)}
-													{hasPending && (
-														<Badge variant="warning" className="gap-1">
-															<Clock className="h-3 w-3" />
-															{t("reports.pendingCount", {
-																count: r.transfers_total - r.transfers_settled,
+								<AnimatedListItem
+									key={r.id}
+									itemKey={r.id}
+									index={i}
+									enableLayout
+								>
+									<Card>
+										<CardContent className="p-0">
+											<Touchable
+												className="w-full p-4 flex items-center justify-between text-left rounded-xl"
+												onClick={() => setSelectedId(r.id)}
+											>
+												<div className="min-w-0 flex-1">
+													<div className="flex items-center gap-2">
+														<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+														<h3 className="text-sm font-semibold">
+															{monthName}
+														</h3>
+														{allSettled && (
+															<Badge variant="success" className="gap-1">
+																<CheckCircle className="h-3 w-3" />
+																{t("reports.settled")}
+															</Badge>
+														)}
+														{hasPending && (
+															<Badge variant="warning" className="gap-1">
+																<Clock className="h-3 w-3" />
+																{t("reports.pendingCount", {
+																	count:
+																		r.transfers_total - r.transfers_settled,
+																})}
+															</Badge>
+														)}
+													</div>
+													<div className="flex items-center gap-3 mt-1 ml-6">
+														<p className="text-xs text-muted-foreground">
+															{t("reports.expense", {
+																count: r.total_expenses,
 															})}
-														</Badge>
-													)}
+														</p>
+														<span className="text-xs text-muted-foreground">
+															&middot;
+														</span>
+														<p className="text-xs font-medium">
+															{formatCurrency(r.total_amount, currency)}
+														</p>
+														<span className="text-xs text-muted-foreground">
+															&middot;
+														</span>
+														<p className="text-xs text-muted-foreground">
+															{formatDate(r.generated_at, "MMM d, yyyy")}
+														</p>
+													</div>
 												</div>
-												<div className="flex items-center gap-3 mt-1 ml-6">
-													<p className="text-xs text-muted-foreground">
-														{t("reports.expense", {
-															count: r.total_expenses,
-														})}
-													</p>
-													<span className="text-xs text-muted-foreground">
-														&middot;
-													</span>
-													<p className="text-xs font-medium">
-														{formatCurrency(r.total_amount, currency)}
-													</p>
-													<span className="text-xs text-muted-foreground">
-														&middot;
-													</span>
-													<p className="text-xs text-muted-foreground">
-														{formatDate(r.generated_at, "MMM d, yyyy")}
-													</p>
-												</div>
-											</div>
-											<FileBarChart className="h-4 w-4 text-muted-foreground shrink-0" />
-										</Touchable>
-									</CardContent>
-								</Card>
+												<FileBarChart className="h-4 w-4 text-muted-foreground shrink-0" />
+											</Touchable>
+										</CardContent>
+									</Card>
+								</AnimatedListItem>
 							);
 						})}
-					</div>
+					</AnimatedList>
 				) : (
 					<Card>
 						<CardContent>

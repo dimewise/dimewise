@@ -5,6 +5,7 @@ import { Navigate } from "react-router";
 import { toast } from "sonner";
 import { BudgetCategoryModal } from "@/components/Budget/BudgetCategoryModal";
 import { BudgetOverviewCard } from "@/components/Budget/BudgetOverviewCard";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -134,8 +135,8 @@ export const BudgetsPage = () => {
 				{isCategoriesLoading || isCategoriesUninitialized ? (
 					<SkeletonList count={3} />
 				) : categories && categories.length > 0 ? (
-					<div className="space-y-3">
-						{categories.map((cat) => {
+					<AnimatedList className="space-y-3">
+						{categories.map((cat, i) => {
 							const spent = spentByCategory.get(cat.id) ?? 0;
 							const pct =
 								cat.amount > 0 ? Math.round((spent / cat.amount) * 100) : 0;
@@ -147,65 +148,72 @@ export const BudgetsPage = () => {
 										: "bg-brand";
 
 							return (
-								<Card key={cat.id}>
-									<CardContent className="p-4">
-										<div className="flex items-start justify-between mb-3">
-											<div className="min-w-0 flex-1">
-												<div className="flex items-center gap-2">
-													<h3 className="text-sm font-semibold truncate">
-														{cat.name}
-													</h3>
-													{pct >= 100 && (
-														<Badge variant="danger" className="shrink-0">
-															Over budget
-														</Badge>
-													)}
-													{pct >= 80 && pct < 100 && (
-														<Badge variant="warning" className="shrink-0">
-															Almost there
-														</Badge>
-													)}
+								<AnimatedListItem
+									key={cat.id}
+									itemKey={cat.id}
+									index={i}
+									enableLayout
+								>
+									<Card>
+										<CardContent className="p-4">
+											<div className="flex items-start justify-between mb-3">
+												<div className="min-w-0 flex-1">
+													<div className="flex items-center gap-2">
+														<h3 className="text-sm font-semibold truncate">
+															{cat.name}
+														</h3>
+														{pct >= 100 && (
+															<Badge variant="danger" className="shrink-0">
+																Over budget
+															</Badge>
+														)}
+														{pct >= 80 && pct < 100 && (
+															<Badge variant="warning" className="shrink-0">
+																Almost there
+															</Badge>
+														)}
+													</div>
+													<p className="text-xs text-muted-foreground mt-0.5">
+														{formatCurrency(spent, currency)} {t("common.of")}{" "}
+														{formatCurrency(cat.amount, currency)}
+													</p>
 												</div>
-												<p className="text-xs text-muted-foreground mt-0.5">
-													{formatCurrency(spent, currency)} {t("common.of")}{" "}
-													{formatCurrency(cat.amount, currency)}
+												<div className="flex items-center gap-1 shrink-0 ml-2">
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-8 w-8"
+														onClick={() => handleEdit(cat)}
+													>
+														<Edit2 className="h-3.5 w-3.5" />
+													</Button>
+													<Button
+														variant="ghost"
+														size="icon"
+														className={cn(
+															"h-8 w-8 text-danger hover:text-danger",
+														)}
+														onClick={() => setDeletingCategory(cat)}
+													>
+														<Trash2 className="h-3.5 w-3.5" />
+													</Button>
+												</div>
+											</div>
+											<div className="space-y-1">
+												<Progress
+													value={pct}
+													indicatorClassName={progressColor}
+												/>
+												<p className="text-xs text-muted-foreground text-right">
+													{pct}%
 												</p>
 											</div>
-											<div className="flex items-center gap-1 shrink-0 ml-2">
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-8 w-8"
-													onClick={() => handleEdit(cat)}
-												>
-													<Edit2 className="h-3.5 w-3.5" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="icon"
-													className={cn(
-														"h-8 w-8 text-danger hover:text-danger",
-													)}
-													onClick={() => setDeletingCategory(cat)}
-												>
-													<Trash2 className="h-3.5 w-3.5" />
-												</Button>
-											</div>
-										</div>
-										<div className="space-y-1">
-											<Progress
-												value={pct}
-												indicatorClassName={progressColor}
-											/>
-											<p className="text-xs text-muted-foreground text-right">
-												{pct}%
-											</p>
-										</div>
-									</CardContent>
-								</Card>
+										</CardContent>
+									</Card>
+								</AnimatedListItem>
 							);
 						})}
-					</div>
+					</AnimatedList>
 				) : (
 					<Card>
 						<CardContent>

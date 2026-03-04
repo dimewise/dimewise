@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/clerk-react";
+import { motion, useReducedMotion } from "framer-motion";
 import {
 	ArrowRight,
 	CheckCircle2,
@@ -29,33 +30,89 @@ const benefitKeys = [
 	"anyDevice",
 ];
 
+const VIEWPORT_OPTS = { once: true, amount: 0.3 } as const;
+
 export const LandingPage = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { isSignedIn, isLoaded } = useAuth();
+	const shouldReduceMotion = useReducedMotion();
 
 	if (isLoaded && isSignedIn) {
 		return <Navigate to={RoutesEnum.dashboard} replace />;
 	}
 
+	const noMotion = shouldReduceMotion;
+
 	return (
 		<div className="flex flex-col">
 			{/* Hero */}
 			<section className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-16 pb-20 text-center md:pt-24 md:pb-28">
-				<img
+				<motion.img
 					src="/dimewise-wave.png"
 					alt="Dimewise mascot waving"
 					className="mb-6 h-32 w-32 drop-shadow-lg md:h-40 md:w-40"
+					initial={noMotion ? false : { opacity: 0, scale: 0.8 }}
+					animate={
+						noMotion
+							? undefined
+							: {
+									opacity: 1,
+									scale: 1,
+									y: [0, -8, 0],
+								}
+					}
+					transition={
+						noMotion
+							? undefined
+							: {
+									opacity: { duration: 0.5, ease: "easeOut" },
+									scale: { duration: 0.5, ease: "easeOut" },
+									y: {
+										repeat: Number.POSITIVE_INFINITY,
+										duration: 3,
+										ease: "easeInOut",
+										delay: 0.5,
+									},
+								}
+					}
 				/>
-				<h1 className="text-4xl font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl">
+				<motion.h1
+					className="text-4xl font-extrabold tracking-tight text-foreground md:text-5xl lg:text-6xl"
+					initial={noMotion ? false : { opacity: 0, y: 16 }}
+					animate={noMotion ? undefined : { opacity: 1, y: 0 }}
+					transition={
+						noMotion
+							? undefined
+							: { duration: 0.5, ease: "easeOut", delay: 0.1 }
+					}
+				>
 					{t("landing.heroTitle1")}
 					<br />
 					<span className="text-brand">{t("landing.heroTitle2")}</span>
-				</h1>
-				<p className="mt-5 max-w-lg text-lg text-muted-foreground">
+				</motion.h1>
+				<motion.p
+					className="mt-5 max-w-lg text-lg text-muted-foreground"
+					initial={noMotion ? false : { opacity: 0, y: 12 }}
+					animate={noMotion ? undefined : { opacity: 1, y: 0 }}
+					transition={
+						noMotion
+							? undefined
+							: { duration: 0.4, ease: "easeOut", delay: 0.2 }
+					}
+				>
 					{t("landing.heroDescription")}
-				</p>
-				<div className="mt-8 flex flex-col gap-3 sm:flex-row">
+				</motion.p>
+				<motion.div
+					className="mt-8 flex flex-col gap-3 sm:flex-row"
+					initial={noMotion ? false : { opacity: 0, y: 12 }}
+					animate={noMotion ? undefined : { opacity: 1, y: 0 }}
+					transition={
+						noMotion
+							? undefined
+							: { duration: 0.4, ease: "easeOut", delay: 0.35 }
+					}
+				>
 					<Button
 						size="lg"
 						onClick={() => navigate(RoutesEnum.register)}
@@ -71,19 +128,30 @@ export const LandingPage = () => {
 					>
 						{t("landing.signIn")}
 					</Button>
-				</div>
+				</motion.div>
 			</section>
 
 			{/* Trust bar */}
 			<section className="border-t border-border bg-muted/40 px-4 py-10">
 				<div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-					{benefitKeys.map((key) => (
-						<div key={key} className="flex items-center gap-2.5">
+					{benefitKeys.map((key, i) => (
+						<motion.div
+							key={key}
+							className="flex items-center gap-2.5"
+							initial={noMotion ? false : { opacity: 0, y: 8 }}
+							whileInView={noMotion ? undefined : { opacity: 1, y: 0 }}
+							viewport={VIEWPORT_OPTS}
+							transition={
+								noMotion
+									? undefined
+									: { duration: 0.3, ease: "easeOut", delay: i * 0.08 }
+							}
+						>
 							<CheckCircle2 className="h-5 w-5 shrink-0 text-success" />
 							<span className="text-sm font-medium text-foreground">
 								{t(`landing.benefits.${key}`)}
 							</span>
-						</div>
+						</motion.div>
 					))}
 				</div>
 			</section>
@@ -91,17 +159,43 @@ export const LandingPage = () => {
 			{/* Features */}
 			<section className="border-t border-border px-4 py-16 md:py-20">
 				<div className="mx-auto max-w-5xl">
-					<h2 className="mb-4 text-center text-2xl font-bold tracking-tight md:text-3xl">
+					<motion.h2
+						className="mb-4 text-center text-2xl font-bold tracking-tight md:text-3xl"
+						initial={noMotion ? false : { opacity: 0, y: 12 }}
+						whileInView={noMotion ? undefined : { opacity: 1, y: 0 }}
+						viewport={VIEWPORT_OPTS}
+						transition={
+							noMotion ? undefined : { duration: 0.4, ease: "easeOut" }
+						}
+					>
 						{t("landing.features.title")}
-					</h2>
-					<p className="mx-auto mb-12 max-w-xl text-center text-muted-foreground">
+					</motion.h2>
+					<motion.p
+						className="mx-auto mb-12 max-w-xl text-center text-muted-foreground"
+						initial={noMotion ? false : { opacity: 0, y: 8 }}
+						whileInView={noMotion ? undefined : { opacity: 1, y: 0 }}
+						viewport={VIEWPORT_OPTS}
+						transition={
+							noMotion
+								? undefined
+								: { duration: 0.4, ease: "easeOut", delay: 0.1 }
+						}
+					>
 						{t("landing.features.description")}
-					</p>
+					</motion.p>
 					<div className="grid gap-6 sm:grid-cols-2">
-						{featureKeys.map((feature) => (
-							<div
+						{featureKeys.map((feature, i) => (
+							<motion.div
 								key={feature.key}
 								className="rounded-xl border border-border bg-surface p-6 transition-shadow hover:shadow-md"
+								initial={noMotion ? false : { opacity: 0, scale: 0.95 }}
+								whileInView={noMotion ? undefined : { opacity: 1, scale: 1 }}
+								viewport={VIEWPORT_OPTS}
+								transition={
+									noMotion
+										? undefined
+										: { duration: 0.3, ease: "easeOut", delay: i * 0.1 }
+								}
 							>
 								<div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-light text-brand">
 									<feature.icon className="h-5 w-5" />
@@ -112,7 +206,7 @@ export const LandingPage = () => {
 								<p className="mt-1.5 text-sm text-muted-foreground">
 									{t(`landing.features.${feature.key}.description`)}
 								</p>
-							</div>
+							</motion.div>
 						))}
 					</div>
 				</div>
@@ -121,12 +215,35 @@ export const LandingPage = () => {
 			{/* How it works */}
 			<section className="border-t border-border bg-muted/50 px-4 py-16 md:py-20">
 				<div className="mx-auto max-w-3xl">
-					<h2 className="mb-12 text-center text-2xl font-bold tracking-tight md:text-3xl">
+					<motion.h2
+						className="mb-12 text-center text-2xl font-bold tracking-tight md:text-3xl"
+						initial={noMotion ? false : { opacity: 0, y: 12 }}
+						whileInView={noMotion ? undefined : { opacity: 1, y: 0 }}
+						viewport={VIEWPORT_OPTS}
+						transition={
+							noMotion ? undefined : { duration: 0.4, ease: "easeOut" }
+						}
+					>
 						{t("landing.howItWorks.title")}
-					</h2>
+					</motion.h2>
 					<div className="grid gap-8 sm:grid-cols-3">
 						{["step1", "step2", "step3"].map((step, index) => (
-							<div key={step} className="text-center">
+							<motion.div
+								key={step}
+								className="text-center"
+								initial={noMotion ? false : { opacity: 0, y: 16 }}
+								whileInView={noMotion ? undefined : { opacity: 1, y: 0 }}
+								viewport={VIEWPORT_OPTS}
+								transition={
+									noMotion
+										? undefined
+										: {
+												duration: 0.4,
+												ease: "easeOut",
+												delay: index * 0.15,
+											}
+								}
+							>
 								<div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-brand-foreground">
 									{index + 1}
 								</div>
@@ -136,7 +253,7 @@ export const LandingPage = () => {
 								<p className="mt-1.5 text-sm text-muted-foreground">
 									{t(`landing.howItWorks.${step}.description`)}
 								</p>
-							</div>
+							</motion.div>
 						))}
 					</div>
 				</div>
@@ -144,11 +261,29 @@ export const LandingPage = () => {
 
 			{/* CTA */}
 			<section className="border-t border-border px-4 py-16 md:py-20">
-				<div className="mx-auto flex max-w-xl flex-col items-center text-center">
-					<img
+				<motion.div
+					className="mx-auto flex max-w-xl flex-col items-center text-center"
+					initial={noMotion ? false : { opacity: 0, y: 16 }}
+					whileInView={noMotion ? undefined : { opacity: 1, y: 0 }}
+					viewport={VIEWPORT_OPTS}
+					transition={noMotion ? undefined : { duration: 0.5, ease: "easeOut" }}
+				>
+					<motion.img
 						src="/dimewise-celebrate.png"
 						alt="Dimewise mascot celebrating"
 						className="mb-4 h-28 w-28 object-contain"
+						animate={noMotion ? undefined : { y: [0, -8, 0] }}
+						transition={
+							noMotion
+								? undefined
+								: {
+										y: {
+											repeat: Number.POSITIVE_INFINITY,
+											duration: 3,
+											ease: "easeInOut",
+										},
+									}
+						}
 					/>
 					<h2 className="text-2xl font-bold tracking-tight md:text-3xl">
 						{t("landing.cta.title")}
@@ -168,11 +303,17 @@ export const LandingPage = () => {
 						{t("landing.cta.button")}
 						<ArrowRight className="h-4 w-4" />
 					</Button>
-				</div>
+				</motion.div>
 			</section>
 
 			{/* Footer */}
-			<footer className="border-t border-border px-4 py-8">
+			<motion.footer
+				className="border-t border-border px-4 py-8"
+				initial={noMotion ? false : { opacity: 0 }}
+				whileInView={noMotion ? undefined : { opacity: 1 }}
+				viewport={VIEWPORT_OPTS}
+				transition={noMotion ? undefined : { duration: 0.4, ease: "easeOut" }}
+			>
 				<div className="mx-auto max-w-5xl flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
 					<p className="text-sm text-muted-foreground">
 						{t("landing.footer.copyright", { year: new Date().getFullYear() })}
@@ -200,7 +341,7 @@ export const LandingPage = () => {
 						</a>
 					</div>
 				</div>
-			</footer>
+			</motion.footer>
 		</div>
 	);
 };

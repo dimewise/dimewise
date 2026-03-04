@@ -8,6 +8,7 @@ import { BalanceWidget } from "@/components/Dashboard/BalanceWidget";
 import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
 import { ExpenseModal } from "@/components/Expense/ExpenseModal";
 import { ReportSummaryModal } from "@/components/Report/ReportSummaryModal";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -185,28 +186,34 @@ export const DashboardPage = () => {
 								))}
 							</div>
 						) : expenseData && expenseData.expenses.length > 0 ? (
-							<div className="divide-y divide-border">
-								{expenseData.expenses.map((expense) => (
-									<Touchable
+							<AnimatedList className="divide-y divide-border">
+								{expenseData.expenses.map((expense, i) => (
+									<AnimatedListItem
 										key={expense.id}
-										className="flex items-center justify-between py-3 first:pt-0 last:pb-0 w-full text-left"
-										onClick={() => setViewingExpense(expense)}
+										itemKey={expense.id}
+										index={i}
+										className="py-3 first:pt-0 last:pb-0"
 									>
-										<div className="min-w-0 flex-1">
-											<p className="text-sm font-medium truncate">
-												{expense.title}
+										<Touchable
+											className="flex items-center justify-between w-full text-left"
+											onClick={() => setViewingExpense(expense)}
+										>
+											<div className="min-w-0 flex-1">
+												<p className="text-sm font-medium truncate">
+													{expense.title}
+												</p>
+												<p className="text-xs text-muted-foreground">
+													{getMemberName(expense.paid_by)} &middot;{" "}
+													{formatDate(expense.incurred_at, "MMM d")}
+												</p>
+											</div>
+											<p className="text-sm font-semibold ml-3 shrink-0">
+												{formatCurrency(expense.amount, currency)}
 											</p>
-											<p className="text-xs text-muted-foreground">
-												{getMemberName(expense.paid_by)} &middot;{" "}
-												{formatDate(expense.incurred_at, "MMM d")}
-											</p>
-										</div>
-										<p className="text-sm font-semibold ml-3 shrink-0">
-											{formatCurrency(expense.amount, currency)}
-										</p>
-									</Touchable>
+										</Touchable>
+									</AnimatedListItem>
 								))}
-							</div>
+							</AnimatedList>
 						) : (
 							<EmptyState
 								image="/dimewise-empty.png"
@@ -252,30 +259,36 @@ export const DashboardPage = () => {
 								))}
 							</div>
 						) : reports && reports.length > 0 ? (
-							<div className="divide-y divide-border">
-								{reports.slice(0, 3).map((r) => (
-									<Touchable
+							<AnimatedList className="divide-y divide-border">
+								{reports.slice(0, 3).map((r, i) => (
+									<AnimatedListItem
 										key={r.id}
-										className="flex items-center gap-3 py-3 first:pt-0 last:pb-0 w-full text-left"
-										onClick={() => setSelectedReportId(r.id)}
+										itemKey={r.id}
+										index={i}
+										className="py-3 first:pt-0 last:pb-0"
 									>
-										<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
-											<Calendar className="h-4 w-4 text-muted-foreground" />
-										</div>
-										<div className="min-w-0 flex-1">
-											<p className="text-sm font-medium">
-												{formatMonthYear(r.month, r.year)}
-											</p>
-											<p className="text-xs text-muted-foreground">
-												{t("dashboard.expense", {
-													count: r.total_expenses,
-												})}{" "}
-												&middot; {formatCurrency(r.total_amount, currency)}
-											</p>
-										</div>
-									</Touchable>
+										<Touchable
+											className="flex items-center gap-3 w-full text-left"
+											onClick={() => setSelectedReportId(r.id)}
+										>
+											<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+												<Calendar className="h-4 w-4 text-muted-foreground" />
+											</div>
+											<div className="min-w-0 flex-1">
+												<p className="text-sm font-medium">
+													{formatMonthYear(r.month, r.year)}
+												</p>
+												<p className="text-xs text-muted-foreground">
+													{t("dashboard.expense", {
+														count: r.total_expenses,
+													})}{" "}
+													&middot; {formatCurrency(r.total_amount, currency)}
+												</p>
+											</div>
+										</Touchable>
+									</AnimatedListItem>
 								))}
-							</div>
+							</AnimatedList>
 						) : (
 							<EmptyState
 								image="/dimewise-empty-report.png"

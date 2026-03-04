@@ -6,6 +6,7 @@ import { Navigate } from "react-router";
 import { toast } from "sonner";
 import { ExpenseDetailModal } from "@/components/Expense/ExpenseDetailModal";
 import { ExpenseModal } from "@/components/Expense/ExpenseModal";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -306,7 +307,7 @@ export const ExpensesPage = () => {
 					<SkeletonList count={5} />
 				) : expenseData && expenseData.expenses.length > 0 ? (
 					<>
-						<div className="space-y-2">
+						<AnimatedList className="space-y-2" pageKey={page}>
 							{expenseData.expenses.map((expense, index) => {
 								const monthKey = expense.incurred_at.slice(0, 7);
 								const prevMonthKey =
@@ -315,7 +316,11 @@ export const ExpensesPage = () => {
 										: null;
 								const showHeader = monthKey !== prevMonthKey;
 								return (
-									<div key={expense.id}>
+									<AnimatedListItem
+										key={expense.id}
+										itemKey={expense.id}
+										index={index}
+									>
 										{showHeader && (
 											<p className="text-xs font-medium text-muted-foreground uppercase tracking-wide pt-3 first:pt-0 pb-1">
 												{formatMonthYear(
@@ -361,10 +366,10 @@ export const ExpensesPage = () => {
 												</div>
 											</Touchable>
 										</Card>
-									</div>
+									</AnimatedListItem>
 								);
 							})}
-						</div>
+						</AnimatedList>
 
 						{/* Pagination */}
 						{totalPages > 1 && (

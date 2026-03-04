@@ -16,6 +16,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -225,63 +226,71 @@ export const HouseholdSettingsPage = () => {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="divide-y">
-						{household.members.map((member) => {
+					<AnimatedList className="divide-y">
+						{household.members.map((member, i) => {
 							const isSelf = member.user_id === user?.id;
 							const isMemberOwner = member.user_id === household.owner_id;
 							return (
-								<div
+								<AnimatedListItem
 									key={member.id}
-									className="flex items-center gap-3 py-3 first:pt-0 last:pb-0"
+									itemKey={member.id}
+									index={i}
+									className="py-3 first:pt-0 last:pb-0"
+									enableLayout
 								>
-									<Avatar className="h-9 w-9">
-										{member.avatar_url && (
-											<AvatarImage src={member.avatar_url} />
-										)}
-										<AvatarFallback className="text-xs">
-											{getInitials(member)}
-										</AvatarFallback>
-									</Avatar>
-									<div className="flex-1 min-w-0">
-										<div className="flex items-center gap-2">
-											<p className="text-sm font-medium truncate">
-												{getMemberName(member)}
-												{isSelf && (
-													<span className="text-muted-foreground ml-1">
-														{t("householdSettings.you")}
-													</span>
-												)}
-											</p>
-											{isMemberOwner && (
-												<Badge variant="default" className="text-[10px] gap-1">
-													<Shield className="h-2.5 w-2.5" />
-													{t("householdSettings.owner")}
-												</Badge>
+									<div className="flex items-center gap-3">
+										<Avatar className="h-9 w-9">
+											{member.avatar_url && (
+												<AvatarImage src={member.avatar_url} />
 											)}
+											<AvatarFallback className="text-xs">
+												{getInitials(member)}
+											</AvatarFallback>
+										</Avatar>
+										<div className="flex-1 min-w-0">
+											<div className="flex items-center gap-2">
+												<p className="text-sm font-medium truncate">
+													{getMemberName(member)}
+													{isSelf && (
+														<span className="text-muted-foreground ml-1">
+															{t("householdSettings.you")}
+														</span>
+													)}
+												</p>
+												{isMemberOwner && (
+													<Badge
+														variant="default"
+														className="text-[10px] gap-1"
+													>
+														<Shield className="h-2.5 w-2.5" />
+														{t("householdSettings.owner")}
+													</Badge>
+												)}
+											</div>
+											<p className="text-xs text-muted-foreground truncate">
+												{member.email}
+											</p>
 										</div>
-										<p className="text-xs text-muted-foreground truncate">
-											{member.email}
-										</p>
+										{isOwner && !isSelf && (
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8 text-danger hover:text-danger shrink-0"
+												onClick={() =>
+													setConfirmAction({
+														type: "remove",
+														member,
+													})
+												}
+											>
+												<UserMinus className="h-4 w-4" />
+											</Button>
+										)}
 									</div>
-									{isOwner && !isSelf && (
-										<Button
-											variant="ghost"
-											size="icon"
-											className="h-8 w-8 text-danger hover:text-danger shrink-0"
-											onClick={() =>
-												setConfirmAction({
-													type: "remove",
-													member,
-												})
-											}
-										>
-											<UserMinus className="h-4 w-4" />
-										</Button>
-									)}
-								</div>
+								</AnimatedListItem>
 							);
 						})}
-					</div>
+					</AnimatedList>
 				</CardContent>
 			</Card>
 
