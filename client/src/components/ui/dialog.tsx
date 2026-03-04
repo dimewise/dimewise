@@ -27,7 +27,6 @@ const DialogPortal = DialogPrimitive.Portal;
 
 function DialogOverlay({
 	className,
-	...props
 }: ComponentProps<typeof DialogPrimitive.Overlay>) {
 	return (
 		<DialogPrimitive.Overlay forceMount asChild>
@@ -40,7 +39,6 @@ function DialogOverlay({
 				initial="initial"
 				animate="animate"
 				exit="exit"
-				{...props}
 			/>
 		</DialogPrimitive.Overlay>
 	);
@@ -49,6 +47,10 @@ function DialogOverlay({
 function DialogContent({
 	className,
 	children,
+	onDrag: _onDrag,
+	onDragEnd: _onDragEnd,
+	onDragStart: _onDragStart,
+	onAnimationStart: _onAnimationStart,
 	...props
 }: ComponentProps<typeof DialogPrimitive.Content>) {
 	const open = useContext(DialogOpenContext);
