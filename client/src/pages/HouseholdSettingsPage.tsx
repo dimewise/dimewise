@@ -1,4 +1,5 @@
 import { useUser } from "@clerk/clerk-react";
+import { motion } from "framer-motion";
 import {
 	AlertTriangle,
 	ChevronRight,
@@ -285,25 +286,27 @@ export const HouseholdSettingsPage = () => {
 			</Card>
 
 			{/* Account Settings link */}
-			<Card
-				className="cursor-pointer transition-colors hover:bg-muted/50"
-				onClick={() => navigate(RoutesEnum.accountSettings)}
-			>
-				<CardContent className="flex items-center justify-between p-4">
-					<div className="flex items-center gap-3">
-						<Globe className="h-4 w-4 text-muted-foreground" />
-						<div>
-							<p className="text-sm font-medium">
-								{t("accountSettings.title")}
-							</p>
-							<p className="text-xs text-muted-foreground">
-								{t("accountSettings.languageDescription")}
-							</p>
+			<motion.div whileTap={{ scale: 0.98 }} transition={{ duration: 0.15 }}>
+				<Card
+					className="cursor-pointer touch-manipulation transition-colors hover:bg-muted/50"
+					onClick={() => navigate(RoutesEnum.accountSettings)}
+				>
+					<CardContent className="flex items-center justify-between p-4">
+						<div className="flex items-center gap-3">
+							<Globe className="h-4 w-4 text-muted-foreground" />
+							<div>
+								<p className="text-sm font-medium">
+									{t("accountSettings.title")}
+								</p>
+								<p className="text-xs text-muted-foreground">
+									{t("accountSettings.languageDescription")}
+								</p>
+							</div>
 						</div>
-					</div>
-					<ChevronRight className="h-4 w-4 text-muted-foreground" />
-				</CardContent>
-			</Card>
+						<ChevronRight className="h-4 w-4 text-muted-foreground" />
+					</CardContent>
+				</Card>
+			</motion.div>
 
 			{/* Danger Zone */}
 			<Card className="border-danger/30">
