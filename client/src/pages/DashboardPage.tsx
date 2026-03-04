@@ -27,7 +27,7 @@ import {
 	useListReportsQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
-import { formatDate } from "@/utils/date";
+import { formatDate, formatMonthYear } from "@/utils/date";
 
 export const DashboardPage = () => {
 	const { t } = useTranslation();
@@ -251,7 +251,7 @@ export const DashboardPage = () => {
 									</div>
 									<div className="min-w-0 flex-1">
 										<p className="text-sm font-medium">
-											{t(`months.${r.month}`)} {r.year}
+											{formatMonthYear(r.month, r.year)}
 										</p>
 										<p className="text-xs text-muted-foreground">
 											{t("dashboard.expense", {

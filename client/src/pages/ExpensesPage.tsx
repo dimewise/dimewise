@@ -153,7 +153,7 @@ export const ExpensesPage = () => {
 						<Filter className="h-3.5 w-3.5" />
 						{t("expenses.filters")}
 						{hasActiveFilters && (
-							<span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[10px] text-white">
+							<span className="flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[10px] text-brand-foreground">
 								!
 							</span>
 						)}

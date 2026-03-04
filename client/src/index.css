@@ -79,6 +79,37 @@
 	--sidebar-active: oklch(0.585 0.233 277.117);
 }
 
+/* Dark theme */
+.dark {
+	color-scheme: dark;
+
+	--brand: oklch(0.7 0.2 277.117);
+	--brand-light: oklch(0.3 0.1 277.117);
+	--brand-dark: oklch(0.85 0.15 277.117);
+	--brand-foreground: oklch(1 0 0);
+
+	--background: oklch(0.145 0.005 285.823);
+	--foreground: oklch(0.94 0.005 285.823);
+	--surface: oklch(0.195 0.008 285.823);
+	--surface-elevated: oklch(0.23 0.01 285.823);
+	--muted: oklch(0.22 0.008 285.823);
+	--muted-foreground: oklch(0.6 0.015 285.938);
+	--border-color: oklch(0.3 0.01 285.823);
+	--input: oklch(0.3 0.01 285.823);
+	--ring: oklch(0.7 0.2 277.117);
+
+	--success: oklch(0.65 0.17 149.214);
+	--success-light: oklch(0.25 0.06 149.214);
+	--warning: oklch(0.75 0.16 70.08);
+	--warning-light: oklch(0.28 0.06 70.08);
+	--danger: oklch(0.6 0.2 27.325);
+	--danger-light: oklch(0.25 0.06 27.325);
+
+	--sidebar: oklch(0.17 0.008 285.823);
+	--sidebar-foreground: oklch(0.8 0.02 277.117);
+	--sidebar-active: oklch(0.7 0.2 277.117);
+}
+
 /* Base styles */
 html,
 body,
@@ -124,4 +155,12 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
 	background: oklch(0.65 0.02 277);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+	background: oklch(0.35 0.01 277);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+	background: oklch(0.45 0.02 277);
 }

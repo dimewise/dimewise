@@ -127,7 +127,7 @@ export const LandingPage = () => {
 					<div className="grid gap-8 sm:grid-cols-3">
 						{["step1", "step2", "step3"].map((step, index) => (
 							<div key={step} className="text-center">
-								<div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
+								<div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-bold text-brand-foreground">
 									{index + 1}
 								</div>
 								<h3 className="text-sm font-semibold">
