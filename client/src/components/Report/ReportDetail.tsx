@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import {
 	ArrowRight,
 	Check,
@@ -18,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { SkeletonPage } from "@/components/ui/skeleton";
+import { fadeIn } from "@/lib/motion";
 import type { ReportLineItem } from "@/store/api/api";
 import {
 	useGetReportQuery,
@@ -76,7 +78,7 @@ export const ReportDetail = ({
 	const allSettled = report.transfers.every((t) => !!t.paid_at);
 
 	return (
-		<div className="space-y-5 animate-fade-in">
+		<div className="space-y-5">
 			{/* Header */}
 			<div>
 				<button
@@ -362,37 +364,45 @@ function LineItemRow({
 				</div>
 			</button>
 
-			{expanded && (
-				<div className="mt-2 ml-1 space-y-2 animate-fade-in">
-					{/* Notes */}
-					{item.notes && (
-						<div className="flex items-start gap-2 bg-muted rounded-lg p-2.5">
-							<FileText className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-							<p className="text-xs text-muted-foreground">{item.notes}</p>
-						</div>
-					)}
-
-					{/* Splits */}
-					<div className="space-y-1">
-						<p className="text-xs font-medium text-muted-foreground">
-							{t("reportDetail.splitBreakdown")}
-						</p>
-						{item.splits.map((split) => (
-							<div
-								key={split.id}
-								className="flex items-center justify-between text-xs"
-							>
-								<span className="text-muted-foreground">
-									{split.member_name}
-								</span>
-								<span className="font-medium">
-									{formatCurrency(split.amount, currency)}
-								</span>
+			<AnimatePresence>
+				{expanded && (
+					<motion.div
+						className="mt-2 ml-1 space-y-2"
+						variants={fadeIn}
+						initial="initial"
+						animate="animate"
+						exit="exit"
+					>
+						{/* Notes */}
+						{item.notes && (
+							<div className="flex items-start gap-2 bg-muted rounded-lg p-2.5">
+								<FileText className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+								<p className="text-xs text-muted-foreground">{item.notes}</p>
 							</div>
-						))}
-					</div>
-				</div>
-			)}
+						)}
+
+						{/* Splits */}
+						<div className="space-y-1">
+							<p className="text-xs font-medium text-muted-foreground">
+								{t("reportDetail.splitBreakdown")}
+							</p>
+							{item.splits.map((split) => (
+								<div
+									key={split.id}
+									className="flex items-center justify-between text-xs"
+								>
+									<span className="text-muted-foreground">
+										{split.member_name}
+									</span>
+									<span className="font-medium">
+										{formatCurrency(split.amount, currency)}
+									</span>
+								</div>
+							))}
+						</div>
+					</motion.div>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 }

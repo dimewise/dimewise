@@ -1,7 +1,8 @@
 import { Globe } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Outlet, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { Toaster } from "sonner";
+import { AnimatedOutlet } from "@/components/ui/animated-outlet";
 import { Button } from "@/components/ui/button";
 import { SUPPORTED_LANGUAGES } from "@/i18n/languages";
 import { RoutesEnum } from "@/routes/Routes";
@@ -72,7 +73,7 @@ export const PublicLayout = () => {
 
 			{/* Content */}
 			<main className="pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-				<Outlet />
+				<AnimatedOutlet />
 			</main>
 		</div>
 	);

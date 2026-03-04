@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Filter, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,6 +29,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { SkeletonList, SkeletonPage } from "@/components/ui/skeleton";
+import { slideDown } from "@/lib/motion";
 import { RoutesEnum } from "@/routes/Routes";
 import type { ExpenseWithSplits, HouseholdMember } from "@/store/api/api";
 import {
@@ -135,7 +137,7 @@ export const ExpensesPage = () => {
 	const hasActiveFilters = Object.values(filters).some(Boolean);
 
 	return (
-		<div className="space-y-5 animate-fade-in">
+		<div className="space-y-5">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-bold tracking-tight">
@@ -168,114 +170,125 @@ export const ExpensesPage = () => {
 			</div>
 
 			{/* Filters */}
-			{showFilters && (
-				<Card className="animate-slide-down">
-					<CardContent className="p-4 space-y-3">
-						<div className="grid grid-cols-2 gap-3">
-							<div className="space-y-1.5">
-								<Label className="text-xs">{t("expenses.category")}</Label>
-								<Select
-									value={filters.categoryId ?? "all"}
-									onValueChange={(v) =>
-										setFilters((f) => ({
-											...f,
-											categoryId: v === "all" ? undefined : v,
-										}))
-									}
-								>
-									<SelectTrigger className="h-9 text-sm">
-										<SelectValue placeholder={t("expenses.allCategories")} />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">
-											{t("expenses.allCategories")}
-										</SelectItem>
-										{categories?.map((c) => (
-											<SelectItem key={c.id} value={c.id}>
-												{c.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-1.5">
-								<Label className="text-xs">{t("expenses.paidBy")}</Label>
-								<Select
-									value={filters.paidBy ?? "all"}
-									onValueChange={(v) =>
-										setFilters((f) => ({
-											...f,
-											paidBy: v === "all" ? undefined : v,
-										}))
-									}
-								>
-									<SelectTrigger className="h-9 text-sm">
-										<SelectValue placeholder={t("expenses.everyone")} />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="all">
-											{t("expenses.everyone")}
-										</SelectItem>
-										{household.members.map((m) => (
-											<SelectItem key={m.user_id} value={m.user_id}>
-												{getMemberName(m.user_id)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-						<div className="grid grid-cols-2 gap-3">
-							<div className="space-y-1.5">
-								<Label className="text-xs">{t("expenses.from")}</Label>
-								<Input
-									type="date"
-									className="h-9 text-sm"
-									value={filters.from?.split("T")[0] ?? ""}
-									onChange={(e) =>
-										setFilters((f) => ({
-											...f,
-											from: e.target.value
-												? new Date(e.target.value).toISOString()
-												: undefined,
-										}))
-									}
-								/>
-							</div>
-							<div className="space-y-1.5">
-								<Label className="text-xs">{t("expenses.to")}</Label>
-								<Input
-									type="date"
-									className="h-9 text-sm"
-									value={filters.to?.split("T")[0] ?? ""}
-									onChange={(e) =>
-										setFilters((f) => ({
-											...f,
-											to: e.target.value
-												? new Date(e.target.value).toISOString()
-												: undefined,
-										}))
-									}
-								/>
-							</div>
-						</div>
-						{hasActiveFilters && (
-							<Button
-								variant="ghost"
-								size="sm"
-								className="gap-1.5 text-muted-foreground"
-								onClick={() => {
-									setFilters({});
-									setPage(1);
-								}}
-							>
-								<X className="h-3.5 w-3.5" />
-								{t("expenses.clearFilters")}
-							</Button>
-						)}
-					</CardContent>
-				</Card>
-			)}
+			<AnimatePresence>
+				{showFilters && (
+					<motion.div
+						variants={slideDown}
+						initial="initial"
+						animate="animate"
+						exit="exit"
+					>
+						<Card>
+							<CardContent className="p-4 space-y-3">
+								<div className="grid grid-cols-2 gap-3">
+									<div className="space-y-1.5">
+										<Label className="text-xs">{t("expenses.category")}</Label>
+										<Select
+											value={filters.categoryId ?? "all"}
+											onValueChange={(v) =>
+												setFilters((f) => ({
+													...f,
+													categoryId: v === "all" ? undefined : v,
+												}))
+											}
+										>
+											<SelectTrigger className="h-9 text-sm">
+												<SelectValue
+													placeholder={t("expenses.allCategories")}
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="all">
+													{t("expenses.allCategories")}
+												</SelectItem>
+												{categories?.map((c) => (
+													<SelectItem key={c.id} value={c.id}>
+														{c.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+									<div className="space-y-1.5">
+										<Label className="text-xs">{t("expenses.paidBy")}</Label>
+										<Select
+											value={filters.paidBy ?? "all"}
+											onValueChange={(v) =>
+												setFilters((f) => ({
+													...f,
+													paidBy: v === "all" ? undefined : v,
+												}))
+											}
+										>
+											<SelectTrigger className="h-9 text-sm">
+												<SelectValue placeholder={t("expenses.everyone")} />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="all">
+													{t("expenses.everyone")}
+												</SelectItem>
+												{household.members.map((m) => (
+													<SelectItem key={m.user_id} value={m.user_id}>
+														{getMemberName(m.user_id)}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
+								<div className="grid grid-cols-2 gap-3">
+									<div className="space-y-1.5">
+										<Label className="text-xs">{t("expenses.from")}</Label>
+										<Input
+											type="date"
+											className="h-9 text-sm"
+											value={filters.from?.split("T")[0] ?? ""}
+											onChange={(e) =>
+												setFilters((f) => ({
+													...f,
+													from: e.target.value
+														? new Date(e.target.value).toISOString()
+														: undefined,
+												}))
+											}
+										/>
+									</div>
+									<div className="space-y-1.5">
+										<Label className="text-xs">{t("expenses.to")}</Label>
+										<Input
+											type="date"
+											className="h-9 text-sm"
+											value={filters.to?.split("T")[0] ?? ""}
+											onChange={(e) =>
+												setFilters((f) => ({
+													...f,
+													to: e.target.value
+														? new Date(e.target.value).toISOString()
+														: undefined,
+												}))
+											}
+										/>
+									</div>
+								</div>
+								{hasActiveFilters && (
+									<Button
+										variant="ghost"
+										size="sm"
+										className="gap-1.5 text-muted-foreground"
+										onClick={() => {
+											setFilters({});
+											setPage(1);
+										}}
+									>
+										<X className="h-3.5 w-3.5" />
+										{t("expenses.clearFilters")}
+									</Button>
+								)}
+							</CardContent>
+						</Card>
+					</motion.div>
+				)}
+			</AnimatePresence>
 
 			{/* Expense list */}
 			{isExpensesLoading || isExpensesUninitialized ? (

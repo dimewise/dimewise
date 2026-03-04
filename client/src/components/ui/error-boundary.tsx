@@ -1,6 +1,8 @@
+import { motion } from "framer-motion";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { fadeIn } from "@/lib/motion";
 
 type FallbackProps = {
 	error: Error;
@@ -43,7 +45,12 @@ export class ErrorBoundary extends Component<Props, State> {
 		}
 
 		return (
-			<div className="flex flex-col items-center justify-center gap-3 py-10 text-center">
+			<motion.div
+				className="flex flex-col items-center justify-center gap-3 py-10 text-center"
+				variants={fadeIn}
+				initial="initial"
+				animate="animate"
+			>
 				<AlertCircle className="h-8 w-8 text-danger" />
 				<p className="text-sm text-muted-foreground">
 					Something went wrong rendering this section.
@@ -57,7 +64,7 @@ export class ErrorBoundary extends Component<Props, State> {
 					<RefreshCw className="h-3.5 w-3.5" />
 					Try Again
 				</Button>
-			</div>
+			</motion.div>
 		);
 	}
 }

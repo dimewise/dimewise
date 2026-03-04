@@ -147,7 +147,7 @@ export const HouseholdSettingsPage = () => {
 	};
 
 	return (
-		<div className="space-y-5 animate-fade-in">
+		<div className="space-y-5">
 			<h1 className="text-2xl font-bold tracking-tight">
 				{t("householdSettings.title")}
 			</h1>

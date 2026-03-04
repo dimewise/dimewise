@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, KeyRound, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +21,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { fadeIn, slideUp } from "@/lib/motion";
 import { RoutesEnum } from "@/routes/Routes";
 import {
 	useCreateHouseholdMutation,
@@ -85,154 +87,179 @@ export const HouseholdSetupPage = () => {
 		}
 	};
 
-	if (mode === "choose") {
-		return (
-			<div className="flex min-h-[60vh] items-center justify-center px-4">
-				<Card className="w-full max-w-md animate-fade-in">
-					<CardHeader className="items-center text-center pb-2">
-						<img
-							src="/dimewise-household-setup.png"
-							alt="Set up your household"
-							className="mb-2 h-28 w-28 object-contain"
-						/>
-						<CardTitle className="text-xl">
-							{t("householdSetup.welcome")}
-						</CardTitle>
-						<CardDescription>{t("householdSetup.description")}</CardDescription>
-					</CardHeader>
-					<CardContent className="flex flex-col gap-3">
-						<Button
-							size="lg"
-							className="w-full gap-2"
-							onClick={() => setMode("create")}
-						>
-							<Plus className="h-4 w-4" />
-							{t("householdSetup.createHousehold")}
-						</Button>
-						<Button
-							variant="outline"
-							size="lg"
-							className="w-full gap-2"
-							onClick={() => setMode("join")}
-						>
-							<KeyRound className="h-4 w-4" />
-							{t("householdSetup.joinWithCode")}
-						</Button>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
-
-	if (mode === "create") {
-		return (
-			<div className="flex min-h-[60vh] items-center justify-center px-4">
-				<Card className="w-full max-w-md animate-slide-up">
-					<CardHeader>
-						<div className="flex items-center gap-2">
-							<button
-								type="button"
-								onClick={() => setMode("choose")}
-								className="rounded-lg p-1.5 hover:bg-muted transition-colors"
-							>
-								<ArrowLeft className="h-4 w-4" />
-							</button>
-							<CardTitle>{t("householdSetup.createHousehold")}</CardTitle>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<form onSubmit={handleCreate} className="flex flex-col gap-4">
-							<div className="space-y-2">
-								<Label htmlFor="name">
-									{t("householdSetup.householdName")}
-								</Label>
-								<Input
-									id="name"
-									placeholder={t("householdSetup.householdNamePlaceholder")}
-									value={name}
-									onChange={(e) => setName(e.target.value)}
-									required
-									maxLength={100}
-								/>
-							</div>
-							<div className="space-y-2">
-								<Label>{t("householdSetup.currency")}</Label>
-								<Select value={currency} onValueChange={setCurrency}>
-									<SelectTrigger>
-										<SelectValue
-											placeholder={t("householdSetup.selectCurrency")}
-										/>
-									</SelectTrigger>
-									<SelectContent>
-										{currencyOptions.map((code) => (
-											<SelectItem key={code} value={code}>
-												{t(`currencies.${code}`)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<Button
-								type="submit"
-								size="lg"
-								className="w-full mt-2"
-								disabled={isCreating || !name.trim() || !currency}
-							>
-								{isCreating ? t("householdSetup.creating") : t("common.create")}
-							</Button>
-						</form>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
-
 	return (
-		<div className="flex min-h-[60vh] items-center justify-center px-4">
-			<Card className="w-full max-w-md animate-slide-up">
-				<CardHeader>
-					<div className="flex items-center gap-2">
-						<button
-							type="button"
-							onClick={() => setMode("choose")}
-							className="rounded-lg p-1.5 hover:bg-muted transition-colors"
-						>
-							<ArrowLeft className="h-4 w-4" />
-						</button>
-						<CardTitle>{t("householdSetup.joinHousehold")}</CardTitle>
-					</div>
-				</CardHeader>
-				<CardContent>
-					<form onSubmit={handleJoin} className="flex flex-col gap-4">
-						<div className="space-y-2">
-							<Label htmlFor="invite-code">
-								{t("householdSetup.inviteCode")}
-							</Label>
-							<Input
-								id="invite-code"
-								placeholder={t("householdSetup.inviteCodePlaceholder")}
-								value={inviteCode}
-								onChange={(e) => setInviteCode(e.target.value)}
-								required
-								className="font-mono tracking-wider text-center text-lg"
+		<AnimatePresence mode="wait">
+			{mode === "choose" && (
+				<motion.div
+					key="choose"
+					className="flex min-h-[60vh] items-center justify-center px-4"
+					variants={fadeIn}
+					initial="initial"
+					animate="animate"
+					exit="exit"
+				>
+					<Card className="w-full max-w-md">
+						<CardHeader className="items-center text-center pb-2">
+							<img
+								src="/dimewise-household-setup.png"
+								alt="Set up your household"
+								className="mb-2 h-28 w-28 object-contain"
 							/>
-							<p className="text-xs text-muted-foreground">
-								{t("householdSetup.inviteCodeHelp")}
-							</p>
-						</div>
-						<Button
-							type="submit"
-							size="lg"
-							className="w-full mt-2"
-							disabled={isJoining || !inviteCode.trim()}
-						>
-							{isJoining
-								? t("householdSetup.joining")
-								: t("householdSetup.join")}
-						</Button>
-					</form>
-				</CardContent>
-			</Card>
-		</div>
+							<CardTitle className="text-xl">
+								{t("householdSetup.welcome")}
+							</CardTitle>
+							<CardDescription>
+								{t("householdSetup.description")}
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="flex flex-col gap-3">
+							<Button
+								size="lg"
+								className="w-full gap-2"
+								onClick={() => setMode("create")}
+							>
+								<Plus className="h-4 w-4" />
+								{t("householdSetup.createHousehold")}
+							</Button>
+							<Button
+								variant="outline"
+								size="lg"
+								className="w-full gap-2"
+								onClick={() => setMode("join")}
+							>
+								<KeyRound className="h-4 w-4" />
+								{t("householdSetup.joinWithCode")}
+							</Button>
+						</CardContent>
+					</Card>
+				</motion.div>
+			)}
+
+			{mode === "create" && (
+				<motion.div
+					key="create"
+					className="flex min-h-[60vh] items-center justify-center px-4"
+					variants={slideUp}
+					initial="initial"
+					animate="animate"
+					exit="exit"
+				>
+					<Card className="w-full max-w-md">
+						<CardHeader>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={() => setMode("choose")}
+									className="rounded-lg p-1.5 hover:bg-muted transition-colors"
+								>
+									<ArrowLeft className="h-4 w-4" />
+								</button>
+								<CardTitle>{t("householdSetup.createHousehold")}</CardTitle>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<form onSubmit={handleCreate} className="flex flex-col gap-4">
+								<div className="space-y-2">
+									<Label htmlFor="name">
+										{t("householdSetup.householdName")}
+									</Label>
+									<Input
+										id="name"
+										placeholder={t("householdSetup.householdNamePlaceholder")}
+										value={name}
+										onChange={(e) => setName(e.target.value)}
+										required
+										maxLength={100}
+									/>
+								</div>
+								<div className="space-y-2">
+									<Label>{t("householdSetup.currency")}</Label>
+									<Select value={currency} onValueChange={setCurrency}>
+										<SelectTrigger>
+											<SelectValue
+												placeholder={t("householdSetup.selectCurrency")}
+											/>
+										</SelectTrigger>
+										<SelectContent>
+											{currencyOptions.map((code) => (
+												<SelectItem key={code} value={code}>
+													{t(`currencies.${code}`)}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+								<Button
+									type="submit"
+									size="lg"
+									className="w-full mt-2"
+									disabled={isCreating || !name.trim() || !currency}
+								>
+									{isCreating
+										? t("householdSetup.creating")
+										: t("common.create")}
+								</Button>
+							</form>
+						</CardContent>
+					</Card>
+				</motion.div>
+			)}
+
+			{mode === "join" && (
+				<motion.div
+					key="join"
+					className="flex min-h-[60vh] items-center justify-center px-4"
+					variants={slideUp}
+					initial="initial"
+					animate="animate"
+					exit="exit"
+				>
+					<Card className="w-full max-w-md">
+						<CardHeader>
+							<div className="flex items-center gap-2">
+								<button
+									type="button"
+									onClick={() => setMode("choose")}
+									className="rounded-lg p-1.5 hover:bg-muted transition-colors"
+								>
+									<ArrowLeft className="h-4 w-4" />
+								</button>
+								<CardTitle>{t("householdSetup.joinHousehold")}</CardTitle>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<form onSubmit={handleJoin} className="flex flex-col gap-4">
+								<div className="space-y-2">
+									<Label htmlFor="invite-code">
+										{t("householdSetup.inviteCode")}
+									</Label>
+									<Input
+										id="invite-code"
+										placeholder={t("householdSetup.inviteCodePlaceholder")}
+										value={inviteCode}
+										onChange={(e) => setInviteCode(e.target.value)}
+										required
+										className="font-mono tracking-wider text-center text-lg"
+									/>
+									<p className="text-xs text-muted-foreground">
+										{t("householdSetup.inviteCodeHelp")}
+									</p>
+								</div>
+								<Button
+									type="submit"
+									size="lg"
+									className="w-full mt-2"
+									disabled={isJoining || !inviteCode.trim()}
+								>
+									{isJoining
+										? t("householdSetup.joining")
+										: t("householdSetup.join")}
+								</Button>
+							</form>
+						</CardContent>
+					</Card>
+				</motion.div>
+			)}
+		</AnimatePresence>
 	);
 };

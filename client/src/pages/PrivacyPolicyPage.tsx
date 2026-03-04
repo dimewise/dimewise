@@ -3,7 +3,7 @@ import { RoutesEnum } from "@/routes/Routes";
 
 export const PrivacyPolicyPage = () => {
 	return (
-		<div className="mx-auto max-w-3xl px-4 py-12 md:py-16 animate-fade-in">
+		<div className="mx-auto max-w-3xl px-4 py-12 md:py-16">
 			<h1 className="text-3xl font-bold tracking-tight mb-2">Privacy Policy</h1>
 			<p className="text-sm text-muted-foreground mb-8">
 				Last updated:{" "}
