@@ -1,11 +1,4 @@
-import {
-	ArrowRight,
-	Calendar,
-	DollarSign,
-	FileBarChart,
-	Receipt,
-	Users,
-} from "lucide-react";
+import { ArrowRight, Calendar, FileBarChart, Receipt } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate, useNavigate } from "react-router";
@@ -101,37 +94,6 @@ export const DashboardPage = () => {
 					{t("dashboard.title")}
 				</h1>
 				<p className="text-sm text-muted-foreground mt-0.5">{household.name}</p>
-			</div>
-
-			{/* Quick stats */}
-			<div className="grid grid-cols-3 gap-3">
-				<Card>
-					<CardContent className="p-3 flex flex-col items-center text-center">
-						<Users className="h-5 w-5 text-brand mb-1.5" />
-						<p className="text-lg font-bold">{household.members.length}</p>
-						<p className="text-xs text-muted-foreground">
-							{t("dashboard.members")}
-						</p>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardContent className="p-3 flex flex-col items-center text-center">
-						<DollarSign className="h-5 w-5 text-success mb-1.5" />
-						<p className="text-lg font-bold">{household.currency}</p>
-						<p className="text-xs text-muted-foreground">
-							{t("dashboard.currency")}
-						</p>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardContent className="p-3 flex flex-col items-center text-center">
-						<FileBarChart className="h-5 w-5 text-warning mb-1.5" />
-						<p className="text-lg font-bold">{reports?.length ?? 0}</p>
-						<p className="text-xs text-muted-foreground">
-							{t("dashboard.reports")}
-						</p>
-					</CardContent>
-				</Card>
 			</div>
 
 			{/* Balance widget */}
