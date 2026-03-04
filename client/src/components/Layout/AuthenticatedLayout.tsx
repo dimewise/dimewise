@@ -1,6 +1,8 @@
 import { UserButton } from "@clerk/clerk-react";
 import { Outlet } from "react-router";
 import { Toaster } from "sonner";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { ErrorState } from "@/components/ui/error-state";
 import { useLanguageSync } from "@/i18n/useLanguageSync";
 import { BottomNav } from "./BottomNav";
 import { Sidebar } from "./Sidebar";
@@ -45,7 +47,13 @@ export const AuthenticatedLayout = () => {
 
 				{/* Page content */}
 				<main className="pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] py-5 pb-24 md:px-6 md:py-6 md:pb-6 max-w-6xl mx-auto">
-					<Outlet />
+					<ErrorBoundary
+						fallback={({ resetErrorBoundary }) => (
+							<ErrorState onRetry={resetErrorBoundary} />
+						)}
+					>
+						<Outlet />
+					</ErrorBoundary>
 				</main>
 			</div>
 

@@ -1,4 +1,4 @@
-import { type Locale, format as dateFnsFormat } from "date-fns";
+import { format as dateFnsFormat, type Locale } from "date-fns";
 import { enUS } from "date-fns/locale/en-US";
 import { ja } from "date-fns/locale/ja";
 import i18n from "@/i18n/i18n";

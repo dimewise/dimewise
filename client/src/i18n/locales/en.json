@@ -10,7 +10,8 @@
 		"loading": "Loading...",
 		"tryAgain": "Try Again",
 		"of": "of",
-		"backToHome": "← Back to home"
+		"backToHome": "← Back to home",
+		"close": "Close"
 	},
 	"nav": {
 		"home": "Home",
