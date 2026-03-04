@@ -18,6 +18,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -313,308 +314,327 @@ export const ExpenseModal = ({
 	return (
 		<Dialog open={open} onOpenChange={(v) => !v && onClose()}>
 			<DialogContent className="max-h-[90vh] overflow-y-auto">
-				<DialogHeader>
-					<DialogTitle>
-						{isEditing
-							? t("expenseModal.editTitle")
-							: t("expenseModal.newTitle")}
-					</DialogTitle>
-				</DialogHeader>
-
-				<form onSubmit={handleSubmit} className="space-y-4" noValidate>
-					{/* Title */}
-					<div className="space-y-2">
-						<Label htmlFor="exp-title">
-							{t("expenseModal.titleLabel")}{" "}
-							<span className="text-danger">*</span>
-						</Label>
-						<Input
-							id="exp-title"
-							placeholder={t("expenseModal.titlePlaceholder")}
-							value={title}
-							onChange={(e) => setTitle(e.target.value)}
-							className={cn(errors.title && errCls)}
-						/>
-						{errors.title && (
-							<p className="text-xs text-danger flex items-center gap-1">
-								<AlertCircle className="h-3 w-3" />
-								{errors.title}
+				<ErrorBoundary
+					fallback={({ resetErrorBoundary }) => (
+						<div className="flex flex-col items-center gap-3 py-6 text-center">
+							<p className="text-sm text-muted-foreground">
+								{t("error.title")}
 							</p>
-						)}
-					</div>
+							<div className="flex gap-2">
+								<Button variant="outline" size="sm" onClick={onClose}>
+									{t("common.close")}
+								</Button>
+								<Button size="sm" onClick={resetErrorBoundary}>
+									{t("common.tryAgain")}
+								</Button>
+							</div>
+						</div>
+					)}
+				>
+					<DialogHeader>
+						<DialogTitle>
+							{isEditing
+								? t("expenseModal.editTitle")
+								: t("expenseModal.newTitle")}
+						</DialogTitle>
+					</DialogHeader>
 
-					{/* Amount & Date row */}
-					<div className="grid grid-cols-2 gap-3">
+					<form onSubmit={handleSubmit} className="space-y-4" noValidate>
+						{/* Title */}
 						<div className="space-y-2">
-							<Label htmlFor="exp-amount">
-								{t("expenseModal.amount", { currency })}{" "}
+							<Label htmlFor="exp-title">
+								{t("expenseModal.titleLabel")}{" "}
 								<span className="text-danger">*</span>
 							</Label>
 							<Input
-								id="exp-amount"
-								type="number"
-								min="0"
-								step={isZeroDecimal ? "1" : "0.01"}
-								placeholder={isZeroDecimal ? "0" : "0.00"}
-								value={amount}
-								onChange={(e) => setAmount(e.target.value)}
-								className={cn(errors.amount && errCls)}
+								id="exp-title"
+								placeholder={t("expenseModal.titlePlaceholder")}
+								value={title}
+								onChange={(e) => setTitle(e.target.value)}
+								className={cn(errors.title && errCls)}
 							/>
-							{errors.amount && (
+							{errors.title && (
 								<p className="text-xs text-danger flex items-center gap-1">
 									<AlertCircle className="h-3 w-3" />
-									{errors.amount}
+									{errors.title}
 								</p>
 							)}
 						</div>
-						<div className="space-y-2">
-							<Label htmlFor="exp-date">
-								{t("expenseModal.date")} <span className="text-danger">*</span>
-							</Label>
-							<Input
-								id="exp-date"
-								type="date"
-								value={date}
-								onChange={(e) => setDate(e.target.value)}
-								className={cn(errors.date && errCls)}
-							/>
-							{errors.date && (
-								<p className="text-xs text-danger flex items-center gap-1">
-									<AlertCircle className="h-3 w-3" />
-									{errors.date}
-								</p>
-							)}
-						</div>
-					</div>
 
-					{/* Paid By & Category */}
-					<div className="grid grid-cols-2 gap-3">
-						<div className="space-y-2">
-							<Label>
-								{t("expenseModal.paidBy")}{" "}
-								<span className="text-danger">*</span>
-							</Label>
-							<Select value={paidBy} onValueChange={setPaidBy}>
-								<SelectTrigger className={cn(errors.paidBy && errCls)}>
-									<SelectValue placeholder={t("expenseModal.selectMember")} />
-								</SelectTrigger>
-								<SelectContent>
-									{members.map((m) => (
-										<SelectItem key={m.user_id} value={m.user_id}>
-											{getMemberName(m.user_id)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							{errors.paidBy && (
-								<p className="text-xs text-danger flex items-center gap-1">
-									<AlertCircle className="h-3 w-3" />
-									{errors.paidBy}
-								</p>
-							)}
-						</div>
-						<div className="space-y-2">
-							<Label>
-								{t("expenseModal.category")}{" "}
-								<span className="text-danger">*</span>
-							</Label>
-							{hasCategories ? (
-								<>
-									<Select value={categoryId} onValueChange={setCategoryId}>
-										<SelectTrigger className={cn(errors.category && errCls)}>
-											<SelectValue
-												placeholder={t("expenseModal.selectCategory")}
-											/>
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="none" disabled>
-												{t("expenseModal.selectACategory")}
-											</SelectItem>
-											{categories.map((c) => (
-												<SelectItem key={c.id} value={c.id}>
-													{c.name}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									{errors.category && (
-										<p className="text-xs text-danger flex items-center gap-1">
-											<AlertCircle className="h-3 w-3" />
-											{errors.category}
-										</p>
-									)}
-								</>
-							) : (
-								<div className="rounded-lg border border-warning/50 bg-warning-light p-2.5 space-y-2">
-									<p className="text-xs text-warning font-medium">
-										{t("expenseModal.noCategoriesWarning")}
+						{/* Amount & Date row */}
+						<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-2">
+								<Label htmlFor="exp-amount">
+									{t("expenseModal.amount", { currency })}{" "}
+									<span className="text-danger">*</span>
+								</Label>
+								<Input
+									id="exp-amount"
+									type="number"
+									min="0"
+									step={isZeroDecimal ? "1" : "0.01"}
+									placeholder={isZeroDecimal ? "0" : "0.00"}
+									value={amount}
+									onChange={(e) => setAmount(e.target.value)}
+									className={cn(errors.amount && errCls)}
+								/>
+								{errors.amount && (
+									<p className="text-xs text-danger flex items-center gap-1">
+										<AlertCircle className="h-3 w-3" />
+										{errors.amount}
 									</p>
-									<button
-										type="button"
-										className="flex items-center gap-1 text-xs font-medium text-brand hover:text-brand-dark transition-colors"
-										onClick={() => {
-											onClose();
-											navigate(RoutesEnum.budgets);
-										}}
-									>
-										{t("expenseModal.goToBudgets")}
-										<ArrowRight className="h-3 w-3" />
-									</button>
-								</div>
-							)}
-						</div>
-					</div>
-
-					{/* Notes */}
-					<div className="space-y-2">
-						<Label htmlFor="exp-notes">{t("expenseModal.notesLabel")}</Label>
-						<Textarea
-							id="exp-notes"
-							placeholder={t("expenseModal.notesPlaceholder")}
-							value={notes}
-							onChange={(e) => setNotes(e.target.value)}
-							rows={2}
-						/>
-					</div>
-
-					{/* Splits */}
-					<div className="space-y-3">
-						<div className="flex items-center justify-between">
-							<Label className="flex items-center gap-1.5">
-								<Split className="h-3.5 w-3.5" />
-								{t("expenseModal.splits")}{" "}
-								<span className="text-danger">*</span>
-							</Label>
-							<Button
-								type="button"
-								variant="secondary"
-								size="sm"
-								onClick={splitEvenly}
-							>
-								{t("expenseModal.splitEvenly")}
-							</Button>
-						</div>
-
-						{/* Live split total indicator */}
-						{totalSmallest > 0 && (
-							<div
-								className={cn(
-									"flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium",
-									isSplitBalanced
-										? "bg-success-light text-success"
-										: "bg-muted text-muted-foreground",
 								)}
-							>
-								{isSplitBalanced ? (
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="exp-date">
+									{t("expenseModal.date")}{" "}
+									<span className="text-danger">*</span>
+								</Label>
+								<Input
+									id="exp-date"
+									type="date"
+									value={date}
+									onChange={(e) => setDate(e.target.value)}
+									className={cn(errors.date && errCls)}
+								/>
+								{errors.date && (
+									<p className="text-xs text-danger flex items-center gap-1">
+										<AlertCircle className="h-3 w-3" />
+										{errors.date}
+									</p>
+								)}
+							</div>
+						</div>
+
+						{/* Paid By & Category */}
+						<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-2">
+								<Label>
+									{t("expenseModal.paidBy")}{" "}
+									<span className="text-danger">*</span>
+								</Label>
+								<Select value={paidBy} onValueChange={setPaidBy}>
+									<SelectTrigger className={cn(errors.paidBy && errCls)}>
+										<SelectValue placeholder={t("expenseModal.selectMember")} />
+									</SelectTrigger>
+									<SelectContent>
+										{members.map((m) => (
+											<SelectItem key={m.user_id} value={m.user_id}>
+												{getMemberName(m.user_id)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								{errors.paidBy && (
+									<p className="text-xs text-danger flex items-center gap-1">
+										<AlertCircle className="h-3 w-3" />
+										{errors.paidBy}
+									</p>
+								)}
+							</div>
+							<div className="space-y-2">
+								<Label>
+									{t("expenseModal.category")}{" "}
+									<span className="text-danger">*</span>
+								</Label>
+								{hasCategories ? (
 									<>
-										<CheckCircle className="h-3.5 w-3.5 shrink-0" />
-										{t("expenseModal.splitsBalanced")}
+										<Select value={categoryId} onValueChange={setCategoryId}>
+											<SelectTrigger className={cn(errors.category && errCls)}>
+												<SelectValue
+													placeholder={t("expenseModal.selectCategory")}
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none" disabled>
+													{t("expenseModal.selectACategory")}
+												</SelectItem>
+												{categories.map((c) => (
+													<SelectItem key={c.id} value={c.id}>
+														{c.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										{errors.category && (
+											<p className="text-xs text-danger flex items-center gap-1">
+												<AlertCircle className="h-3 w-3" />
+												{errors.category}
+											</p>
+										)}
 									</>
 								) : (
-									<>
-										<Split className="h-3.5 w-3.5 shrink-0" />
-										{t("expenseModal.splitTotal", {
-											splitTotal: formatCurrency(splitSum, currency),
-											expenseTotal: formatCurrency(totalSmallest, currency),
-											remaining: formatCurrency(
-												Math.abs(splitRemaining),
-												currency,
-											),
-										})}
-									</>
+									<div className="rounded-lg border border-warning/50 bg-warning-light p-2.5 space-y-2">
+										<p className="text-xs text-warning font-medium">
+											{t("expenseModal.noCategoriesWarning")}
+										</p>
+										<button
+											type="button"
+											className="flex items-center gap-1 text-xs font-medium text-brand hover:text-brand-dark transition-colors"
+											onClick={() => {
+												onClose();
+												navigate(RoutesEnum.budgets);
+											}}
+										>
+											{t("expenseModal.goToBudgets")}
+											<ArrowRight className="h-3 w-3" />
+										</button>
+									</div>
 								)}
 							</div>
-						)}
-
-						{errors.splits && (
-							<div className="rounded-lg border border-danger/30 bg-danger-light p-2.5">
-								<p className="text-xs text-danger font-medium flex items-center gap-1">
-									<AlertCircle className="h-3 w-3 shrink-0" />
-									{errors.splits}
-								</p>
-							</div>
-						)}
-
-						<div className="space-y-2">
-							{splits.map((split, index) => (
-								<div
-									key={split.user_id}
-									className={cn(
-										"flex items-center gap-2 rounded-lg bg-muted p-2.5",
-										errors.splits && "ring-1 ring-danger/30",
-									)}
-								>
-									<Select
-										value={split.user_id}
-										onValueChange={(v) => updateSplit(index, "user_id", v)}
-									>
-										<SelectTrigger className="min-w-0 flex-1 bg-surface h-9 [&>span]:truncate">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											{members.map((m) => (
-												<SelectItem key={m.user_id} value={m.user_id}>
-													{getMemberName(m.user_id)}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<Input
-										type="number"
-										min="0"
-										step={isZeroDecimal ? "1" : "0.01"}
-										placeholder="0"
-										value={split.amount}
-										onChange={(e) =>
-											updateSplit(index, "amount", e.target.value)
-										}
-										className="w-24 h-9 text-right bg-surface"
-									/>
-									{splits.length > 1 && (
-										<Button
-											type="button"
-											variant="ghost"
-											size="icon"
-											className="h-8 w-8 text-danger hover:text-danger shrink-0"
-											onClick={() => removeSplit(index)}
-										>
-											<Minus className="h-3.5 w-3.5" />
-										</Button>
-									)}
-								</div>
-							))}
 						</div>
 
-						{splits.length < members.length && (
-							<Button
-								type="button"
-								variant="outline"
-								size="sm"
-								className="w-full gap-1.5"
-								onClick={addSplit}
-							>
-								<Plus className="h-3.5 w-3.5" />
-								{t("expenseModal.addSplit")}
-							</Button>
-						)}
-					</div>
+						{/* Notes */}
+						<div className="space-y-2">
+							<Label htmlFor="exp-notes">{t("expenseModal.notesLabel")}</Label>
+							<Textarea
+								id="exp-notes"
+								placeholder={t("expenseModal.notesPlaceholder")}
+								value={notes}
+								onChange={(e) => setNotes(e.target.value)}
+								rows={2}
+							/>
+						</div>
 
-					<DialogFooter>
-						<Button type="button" variant="outline" onClick={onClose}>
-							{t("common.cancel")}
-						</Button>
-						<Button
-							type="submit"
-							disabled={isCreating || isUpdating || !hasCategories}
-						>
-							{isCreating || isUpdating
-								? t("common.saving")
-								: isEditing
-									? t("common.save")
-									: t("common.create")}
-						</Button>
-					</DialogFooter>
-				</form>
+						{/* Splits */}
+						<div className="space-y-3">
+							<div className="flex items-center justify-between">
+								<Label className="flex items-center gap-1.5">
+									<Split className="h-3.5 w-3.5" />
+									{t("expenseModal.splits")}{" "}
+									<span className="text-danger">*</span>
+								</Label>
+								<Button
+									type="button"
+									variant="secondary"
+									size="sm"
+									onClick={splitEvenly}
+								>
+									{t("expenseModal.splitEvenly")}
+								</Button>
+							</div>
+
+							{/* Live split total indicator */}
+							{totalSmallest > 0 && (
+								<div
+									className={cn(
+										"flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium",
+										isSplitBalanced
+											? "bg-success-light text-success"
+											: "bg-muted text-muted-foreground",
+									)}
+								>
+									{isSplitBalanced ? (
+										<>
+											<CheckCircle className="h-3.5 w-3.5 shrink-0" />
+											{t("expenseModal.splitsBalanced")}
+										</>
+									) : (
+										<>
+											<Split className="h-3.5 w-3.5 shrink-0" />
+											{t("expenseModal.splitTotal", {
+												splitTotal: formatCurrency(splitSum, currency),
+												expenseTotal: formatCurrency(totalSmallest, currency),
+												remaining: formatCurrency(
+													Math.abs(splitRemaining),
+													currency,
+												),
+											})}
+										</>
+									)}
+								</div>
+							)}
+
+							{errors.splits && (
+								<div className="rounded-lg border border-danger/30 bg-danger-light p-2.5">
+									<p className="text-xs text-danger font-medium flex items-center gap-1">
+										<AlertCircle className="h-3 w-3 shrink-0" />
+										{errors.splits}
+									</p>
+								</div>
+							)}
+
+							<div className="space-y-2">
+								{splits.map((split, index) => (
+									<div
+										key={split.user_id}
+										className={cn(
+											"flex items-center gap-2 rounded-lg bg-muted p-2.5",
+											errors.splits && "ring-1 ring-danger/30",
+										)}
+									>
+										<Select
+											value={split.user_id}
+											onValueChange={(v) => updateSplit(index, "user_id", v)}
+										>
+											<SelectTrigger className="min-w-0 flex-1 bg-surface h-9 [&>span]:truncate">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{members.map((m) => (
+													<SelectItem key={m.user_id} value={m.user_id}>
+														{getMemberName(m.user_id)}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<Input
+											type="number"
+											min="0"
+											step={isZeroDecimal ? "1" : "0.01"}
+											placeholder="0"
+											value={split.amount}
+											onChange={(e) =>
+												updateSplit(index, "amount", e.target.value)
+											}
+											className="w-24 h-9 text-right bg-surface"
+										/>
+										{splits.length > 1 && (
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												className="h-8 w-8 text-danger hover:text-danger shrink-0"
+												onClick={() => removeSplit(index)}
+											>
+												<Minus className="h-3.5 w-3.5" />
+											</Button>
+										)}
+									</div>
+								))}
+							</div>
+
+							{splits.length < members.length && (
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									className="w-full gap-1.5"
+									onClick={addSplit}
+								>
+									<Plus className="h-3.5 w-3.5" />
+									{t("expenseModal.addSplit")}
+								</Button>
+							)}
+						</div>
+
+						<DialogFooter>
+							<Button type="button" variant="outline" onClick={onClose}>
+								{t("common.cancel")}
+							</Button>
+							<Button
+								type="submit"
+								disabled={isCreating || isUpdating || !hasCategories}
+							>
+								{isCreating || isUpdating
+									? t("common.saving")
+									: isEditing
+										? t("common.save")
+										: t("common.create")}
+							</Button>
+						</DialogFooter>
+					</form>
+				</ErrorBoundary>
 			</DialogContent>
 		</Dialog>
 	);

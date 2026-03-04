@@ -10,7 +10,8 @@
 		"loading": "読み込み中...",
 		"tryAgain": "再試行",
 		"of": "/",
-		"backToHome": "← ホームに戻る"
+		"backToHome": "← ホームに戻る",
+		"close": "閉じる"
 	},
 	"nav": {
 		"home": "ホーム",

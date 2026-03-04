@@ -9,6 +9,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { BudgetCategory } from "@/store/api/api";
@@ -93,50 +94,70 @@ export const BudgetCategoryModal = ({
 	return (
 		<Dialog open={open} onOpenChange={(v) => !v && onClose()}>
 			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>
-						{isEditing ? t("budgetModal.editTitle") : t("budgetModal.newTitle")}
-					</DialogTitle>
-				</DialogHeader>
-				<form onSubmit={handleSubmit} className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="cat-name">{t("budgetModal.categoryName")}</Label>
-						<Input
-							id="cat-name"
-							placeholder={t("budgetModal.categoryNamePlaceholder")}
-							value={name}
-							onChange={(e) => setName(e.target.value)}
-							required
-						/>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="cat-amount">
-							{t("budgetModal.monthlyBudget", { currency })}
-						</Label>
-						<Input
-							id="cat-amount"
-							type="number"
-							min="0"
-							step={isZeroDecimal ? "1" : "0.01"}
-							placeholder={isZeroDecimal ? "0" : "0.00"}
-							value={amount}
-							onChange={(e) => setAmount(e.target.value)}
-							required
-						/>
-					</div>
-					<DialogFooter>
-						<Button type="button" variant="outline" onClick={onClose}>
-							{t("common.cancel")}
-						</Button>
-						<Button type="submit" disabled={isCreating || isUpdating}>
-							{isCreating || isUpdating
-								? t("common.saving")
-								: isEditing
-									? t("common.save")
-									: t("common.create")}
-						</Button>
-					</DialogFooter>
-				</form>
+				<ErrorBoundary
+					fallback={({ resetErrorBoundary }) => (
+						<div className="flex flex-col items-center gap-3 py-6 text-center">
+							<p className="text-sm text-muted-foreground">
+								{t("error.title")}
+							</p>
+							<div className="flex gap-2">
+								<Button variant="outline" size="sm" onClick={onClose}>
+									{t("common.close")}
+								</Button>
+								<Button size="sm" onClick={resetErrorBoundary}>
+									{t("common.tryAgain")}
+								</Button>
+							</div>
+						</div>
+					)}
+				>
+					<DialogHeader>
+						<DialogTitle>
+							{isEditing
+								? t("budgetModal.editTitle")
+								: t("budgetModal.newTitle")}
+						</DialogTitle>
+					</DialogHeader>
+					<form onSubmit={handleSubmit} className="space-y-4">
+						<div className="space-y-2">
+							<Label htmlFor="cat-name">{t("budgetModal.categoryName")}</Label>
+							<Input
+								id="cat-name"
+								placeholder={t("budgetModal.categoryNamePlaceholder")}
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								required
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="cat-amount">
+								{t("budgetModal.monthlyBudget", { currency })}
+							</Label>
+							<Input
+								id="cat-amount"
+								type="number"
+								min="0"
+								step={isZeroDecimal ? "1" : "0.01"}
+								placeholder={isZeroDecimal ? "0" : "0.00"}
+								value={amount}
+								onChange={(e) => setAmount(e.target.value)}
+								required
+							/>
+						</div>
+						<DialogFooter>
+							<Button type="button" variant="outline" onClick={onClose}>
+								{t("common.cancel")}
+							</Button>
+							<Button type="submit" disabled={isCreating || isUpdating}>
+								{isCreating || isUpdating
+									? t("common.saving")
+									: isEditing
+										? t("common.save")
+										: t("common.create")}
+							</Button>
+						</DialogFooter>
+					</form>
+				</ErrorBoundary>
 			</DialogContent>
 		</Dialog>
 	);
