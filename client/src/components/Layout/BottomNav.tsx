@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import {
 	FileBarChart,
 	LayoutDashboard,
@@ -36,16 +37,18 @@ export function BottomNav() {
 						(item.path === RoutesEnum.householdSettings &&
 							location.pathname === RoutesEnum.accountSettings);
 					return (
-						<button
+						<motion.button
 							key={item.path}
 							type="button"
 							onClick={() => navigate(item.path)}
 							className={cn(
-								"flex flex-col items-center gap-0.5 py-2 px-3 text-xs font-medium transition-colors min-w-[56px] cursor-pointer",
+								"flex flex-col items-center gap-0.5 py-2 px-3 text-xs font-medium transition-colors min-w-[56px] cursor-pointer touch-manipulation",
 								isActive
 									? "text-brand"
 									: "text-muted-foreground hover:text-foreground",
 							)}
+							whileTap={{ scale: 0.9 }}
+							transition={{ duration: 0.1 }}
 						>
 							<item.icon
 								className={cn(
@@ -55,7 +58,7 @@ export function BottomNav() {
 								strokeWidth={isActive ? 2.5 : 2}
 							/>
 							<span>{t(item.labelKey)}</span>
-						</button>
+						</motion.button>
 					);
 				})}
 			</div>

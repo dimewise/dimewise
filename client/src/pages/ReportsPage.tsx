@@ -7,7 +7,7 @@ import {
 	FileBarChart,
 	Plus,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ import {
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Label } from "@/components/ui/label";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import {
 	Select,
 	SelectContent,
@@ -33,6 +34,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { SkeletonList, SkeletonPage } from "@/components/ui/skeleton";
+import { Touchable } from "@/components/ui/touchable";
 import { RoutesEnum } from "@/routes/Routes";
 import {
 	useGenerateReportMutation,
@@ -54,6 +56,7 @@ export const ReportsPage = () => {
 		data: reports,
 		isLoading: isReportsLoading,
 		isUninitialized: isReportsUninitialized,
+		refetch: refetchReports,
 	} = useListReportsQuery(undefined, { skip: !household });
 	const [generateReport, { isLoading: isGenerating }] =
 		useGenerateReportMutation();
@@ -66,6 +69,11 @@ export const ReportsPage = () => {
 	const [genMonth, setGenMonth] = useState(currentMonth);
 	const [genYear, setGenYear] = useState(currentYear);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+
+	const handleRefresh = useCallback(
+		() => Promise.all([refetchReports()]),
+		[refetchReports],
+	);
 
 	if (isHouseholdLoading) {
 		return <SkeletonPage />;
@@ -128,184 +136,186 @@ export const ReportsPage = () => {
 	}
 
 	return (
-		<div className="space-y-5">
-			{/* Header */}
-			<div className="flex items-center justify-between">
-				<h1 className="text-2xl font-bold tracking-tight">
-					{t("reports.title")}
-				</h1>
-				<Button
-					size="sm"
-					className="gap-1.5"
-					onClick={() => setGenerateOpen(true)}
-				>
-					<Plus className="h-4 w-4" />
-					{t("reports.generate")}
-				</Button>
-			</div>
-
-			{/* List */}
-			{isReportsLoading || isReportsUninitialized ? (
-				<SkeletonList count={3} />
-			) : reports && reports.length > 0 ? (
-				<div className="space-y-2">
-					{reports.map((r) => {
-						const monthName = formatMonthYear(r.month, r.year);
-						const allSettled =
-							r.transfers_total > 0 &&
-							r.transfers_settled === r.transfers_total;
-						const hasPending =
-							r.transfers_total > 0 && r.transfers_settled < r.transfers_total;
-						return (
-							<Card key={r.id}>
-								<CardContent className="p-0">
-									<button
-										type="button"
-										className="w-full p-4 flex items-center justify-between text-left hover:bg-muted/50 transition-colors rounded-xl"
-										onClick={() => setSelectedId(r.id)}
-									>
-										<div className="min-w-0 flex-1">
-											<div className="flex items-center gap-2">
-												<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-												<h3 className="text-sm font-semibold">{monthName}</h3>
-												{allSettled && (
-													<Badge variant="success" className="gap-1">
-														<CheckCircle className="h-3 w-3" />
-														{t("reports.settled")}
-													</Badge>
-												)}
-												{hasPending && (
-													<Badge variant="warning" className="gap-1">
-														<Clock className="h-3 w-3" />
-														{t("reports.pendingCount", {
-															count: r.transfers_total - r.transfers_settled,
-														})}
-													</Badge>
-												)}
-											</div>
-											<div className="flex items-center gap-3 mt-1 ml-6">
-												<p className="text-xs text-muted-foreground">
-													{t("reports.expense", {
-														count: r.total_expenses,
-													})}
-												</p>
-												<span className="text-xs text-muted-foreground">
-													&middot;
-												</span>
-												<p className="text-xs font-medium">
-													{formatCurrency(r.total_amount, currency)}
-												</p>
-												<span className="text-xs text-muted-foreground">
-													&middot;
-												</span>
-												<p className="text-xs text-muted-foreground">
-													{formatDate(r.generated_at, "MMM d, yyyy")}
-												</p>
-											</div>
-										</div>
-										<FileBarChart className="h-4 w-4 text-muted-foreground shrink-0" />
-									</button>
-								</CardContent>
-							</Card>
-						);
-					})}
+		<PullToRefresh onRefresh={handleRefresh}>
+			<div className="space-y-5">
+				{/* Header */}
+				<div className="flex items-center justify-between">
+					<h1 className="text-2xl font-bold tracking-tight">
+						{t("reports.title")}
+					</h1>
+					<Button
+						size="sm"
+						className="gap-1.5"
+						onClick={() => setGenerateOpen(true)}
+					>
+						<Plus className="h-4 w-4" />
+						{t("reports.generate")}
+					</Button>
 				</div>
-			) : (
-				<Card>
-					<CardContent>
-						<EmptyState
-							image="/dimewise-empty-report.png"
-							title={t("reports.noReports")}
-							description={t("reports.noReportsDescription")}
-							action={
-								<Button
-									size="sm"
-									className="gap-1.5"
-									onClick={() => setGenerateOpen(true)}
-								>
-									<Plus className="h-4 w-4" />
-									{t("reports.generateReport")}
-								</Button>
-							}
-						/>
-					</CardContent>
-				</Card>
-			)}
 
-			{/* Generate dialog */}
-			<Dialog
-				open={generateOpen}
-				onOpenChange={(v) => !v && setGenerateOpen(false)}
-			>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>{t("reports.generateReport")}</DialogTitle>
-					</DialogHeader>
-					<div className="space-y-4">
-						<p className="text-sm text-muted-foreground">
-							{t("reports.generateDescription")}
-						</p>
-						<div className="grid grid-cols-2 gap-3">
-							<div className="space-y-2">
-								<Label>{t("reports.month")}</Label>
-								<Select
-									value={String(genMonth)}
-									onValueChange={(v) => setGenMonth(Number(v))}
-								>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-											<SelectItem
-												key={m}
-												value={String(m)}
-												disabled={genYear === currentYear && m > currentMonth}
-											>
-												{t(`months.${m}`)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-							<div className="space-y-2">
-								<Label>{t("reports.year")}</Label>
-								<Select
-									value={String(genYear)}
-									onValueChange={(v) => handleYearChange(Number(v))}
-								>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{years.map((y) => (
-											<SelectItem key={y} value={String(y)}>
-												{y}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-						{reportExists && (
-							<div className="flex items-start gap-2 rounded-lg bg-warning-light p-3">
-								<AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-								<p className="text-sm text-warning">
-									{t("reports.reportExists")}
-								</p>
-							</div>
-						)}
+				{/* List */}
+				{isReportsLoading || isReportsUninitialized ? (
+					<SkeletonList count={3} />
+				) : reports && reports.length > 0 ? (
+					<div className="space-y-2">
+						{reports.map((r) => {
+							const monthName = formatMonthYear(r.month, r.year);
+							const allSettled =
+								r.transfers_total > 0 &&
+								r.transfers_settled === r.transfers_total;
+							const hasPending =
+								r.transfers_total > 0 &&
+								r.transfers_settled < r.transfers_total;
+							return (
+								<Card key={r.id}>
+									<CardContent className="p-0">
+										<Touchable
+											className="w-full p-4 flex items-center justify-between text-left rounded-xl"
+											onClick={() => setSelectedId(r.id)}
+										>
+											<div className="min-w-0 flex-1">
+												<div className="flex items-center gap-2">
+													<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+													<h3 className="text-sm font-semibold">{monthName}</h3>
+													{allSettled && (
+														<Badge variant="success" className="gap-1">
+															<CheckCircle className="h-3 w-3" />
+															{t("reports.settled")}
+														</Badge>
+													)}
+													{hasPending && (
+														<Badge variant="warning" className="gap-1">
+															<Clock className="h-3 w-3" />
+															{t("reports.pendingCount", {
+																count: r.transfers_total - r.transfers_settled,
+															})}
+														</Badge>
+													)}
+												</div>
+												<div className="flex items-center gap-3 mt-1 ml-6">
+													<p className="text-xs text-muted-foreground">
+														{t("reports.expense", {
+															count: r.total_expenses,
+														})}
+													</p>
+													<span className="text-xs text-muted-foreground">
+														&middot;
+													</span>
+													<p className="text-xs font-medium">
+														{formatCurrency(r.total_amount, currency)}
+													</p>
+													<span className="text-xs text-muted-foreground">
+														&middot;
+													</span>
+													<p className="text-xs text-muted-foreground">
+														{formatDate(r.generated_at, "MMM d, yyyy")}
+													</p>
+												</div>
+											</div>
+											<FileBarChart className="h-4 w-4 text-muted-foreground shrink-0" />
+										</Touchable>
+									</CardContent>
+								</Card>
+							);
+						})}
 					</div>
-					<DialogFooter>
-						<Button variant="outline" onClick={() => setGenerateOpen(false)}>
-							{t("common.cancel")}
-						</Button>
-						<Button onClick={handleGenerate} disabled={isGenerating}>
-							{isGenerating ? t("reports.generating") : t("reports.generate")}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-		</div>
+				) : (
+					<Card>
+						<CardContent>
+							<EmptyState
+								image="/dimewise-empty-report.png"
+								title={t("reports.noReports")}
+								description={t("reports.noReportsDescription")}
+								action={
+									<Button
+										size="sm"
+										className="gap-1.5"
+										onClick={() => setGenerateOpen(true)}
+									>
+										<Plus className="h-4 w-4" />
+										{t("reports.generateReport")}
+									</Button>
+								}
+							/>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Generate dialog */}
+				<Dialog
+					open={generateOpen}
+					onOpenChange={(v) => !v && setGenerateOpen(false)}
+				>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>{t("reports.generateReport")}</DialogTitle>
+						</DialogHeader>
+						<div className="space-y-4">
+							<p className="text-sm text-muted-foreground">
+								{t("reports.generateDescription")}
+							</p>
+							<div className="grid grid-cols-2 gap-3">
+								<div className="space-y-2">
+									<Label>{t("reports.month")}</Label>
+									<Select
+										value={String(genMonth)}
+										onValueChange={(v) => setGenMonth(Number(v))}
+									>
+										<SelectTrigger>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+												<SelectItem
+													key={m}
+													value={String(m)}
+													disabled={genYear === currentYear && m > currentMonth}
+												>
+													{t(`months.${m}`)}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+								<div className="space-y-2">
+									<Label>{t("reports.year")}</Label>
+									<Select
+										value={String(genYear)}
+										onValueChange={(v) => handleYearChange(Number(v))}
+									>
+										<SelectTrigger>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{years.map((y) => (
+												<SelectItem key={y} value={String(y)}>
+													{y}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+							</div>
+							{reportExists && (
+								<div className="flex items-start gap-2 rounded-lg bg-warning-light p-3">
+									<AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+									<p className="text-sm text-warning">
+										{t("reports.reportExists")}
+									</p>
+								</div>
+							)}
+						</div>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setGenerateOpen(false)}>
+								{t("common.cancel")}
+							</Button>
+							<Button onClick={handleGenerate} disabled={isGenerating}>
+								{isGenerating ? t("reports.generating") : t("reports.generate")}
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			</div>
+		</PullToRefresh>
 	);
 };
