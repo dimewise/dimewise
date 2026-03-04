@@ -42,13 +42,6 @@ import {
 import { formatCurrency } from "@/utils/currency";
 import { formatDate, formatMonthYear } from "@/utils/date";
 
-function getPreviousMonth() {
-	const now = new Date();
-	const month = now.getMonth(); // 0-indexed
-	if (month === 0) return { month: 12, year: now.getFullYear() - 1 };
-	return { month, year: now.getFullYear() };
-}
-
 export const ReportsPage = () => {
 	const { t } = useTranslation();
 	const { user } = useUser();
@@ -68,11 +61,10 @@ export const ReportsPage = () => {
 	const now = new Date();
 	const currentMonth = now.getMonth() + 1;
 	const currentYear = now.getFullYear();
-	const prev = getPreviousMonth();
 
 	const [generateOpen, setGenerateOpen] = useState(false);
-	const [genMonth, setGenMonth] = useState(prev.month);
-	const [genYear, setGenYear] = useState(prev.year);
+	const [genMonth, setGenMonth] = useState(currentMonth);
+	const [genYear, setGenYear] = useState(currentYear);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
 	if (isHouseholdLoading) {
@@ -249,59 +241,61 @@ export const ReportsPage = () => {
 					<DialogHeader>
 						<DialogTitle>{t("reports.generateReport")}</DialogTitle>
 					</DialogHeader>
-					<p className="text-sm text-muted-foreground">
-						{t("reports.generateDescription")}
-					</p>
-					<div className="grid grid-cols-2 gap-3">
-						<div className="space-y-2">
-							<Label>{t("reports.month")}</Label>
-							<Select
-								value={String(genMonth)}
-								onValueChange={(v) => setGenMonth(Number(v))}
-							>
-								<SelectTrigger>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-										<SelectItem
-											key={m}
-											value={String(m)}
-											disabled={genYear === currentYear && m > currentMonth}
-										>
-											{t(`months.${m}`)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+					<div className="space-y-4">
+						<p className="text-sm text-muted-foreground">
+							{t("reports.generateDescription")}
+						</p>
+						<div className="grid grid-cols-2 gap-3">
+							<div className="space-y-2">
+								<Label>{t("reports.month")}</Label>
+								<Select
+									value={String(genMonth)}
+									onValueChange={(v) => setGenMonth(Number(v))}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+											<SelectItem
+												key={m}
+												value={String(m)}
+												disabled={genYear === currentYear && m > currentMonth}
+											>
+												{t(`months.${m}`)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+							<div className="space-y-2">
+								<Label>{t("reports.year")}</Label>
+								<Select
+									value={String(genYear)}
+									onValueChange={(v) => handleYearChange(Number(v))}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{years.map((y) => (
+											<SelectItem key={y} value={String(y)}>
+												{y}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
-						<div className="space-y-2">
-							<Label>{t("reports.year")}</Label>
-							<Select
-								value={String(genYear)}
-								onValueChange={(v) => handleYearChange(Number(v))}
-							>
-								<SelectTrigger>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{years.map((y) => (
-										<SelectItem key={y} value={String(y)}>
-											{y}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
+						{reportExists && (
+							<div className="flex items-start gap-2 rounded-lg bg-warning-light p-3">
+								<AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+								<p className="text-sm text-warning">
+									{t("reports.reportExists")}
+								</p>
+							</div>
+						)}
 					</div>
-					{reportExists && (
-						<div className="flex items-start gap-2 rounded-lg bg-warning-light p-3">
-							<AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-							<p className="text-sm text-warning">
-								{t("reports.reportExists")}
-							</p>
-						</div>
-					)}
 					<DialogFooter>
 						<Button variant="outline" onClick={() => setGenerateOpen(false)}>
 							{t("common.cancel")}
