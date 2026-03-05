@@ -3,109 +3,33 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
 
-	"dimewise/generated/dimewise/public/model"
 	"dimewise/generated/dimewise/public/table"
 )
 
-// ReportListItem is a report row with transfer settlement counts for list views.
+// ReportListItem holds a month/year with expense totals and optional closed_at.
 type ReportListItem struct {
-	model.Reports
-
-	TransfersTotal   int
-	TransfersSettled int
-}
-
-// ReportWithDetails is a fully joined result of a report with all child data.
-type ReportWithDetails struct {
-	model.Reports
-
-	MemberSummaries    []model.ReportMemberSummaries
-	CategoryBreakdowns []model.ReportCategoryBreakdowns
-	LineItems          []ReportLineItemWithSplits
-	Transfers          []model.ReportTransfers
-}
-
-// ReportLineItemWithSplits joins a line item with its splits.
-type ReportLineItemWithSplits struct {
-	model.ReportLineItems
-
-	Splits []model.ReportLineItemSplits
-}
-
-// MonthlySpendRow holds monthly spend totals for trend queries.
-type MonthlySpendRow struct {
 	Month         int32
 	Year          int32
-	TotalAmount   int64
 	TotalExpenses int32
-}
-
-// CategoryTrendRow holds per-category per-month spend for trend queries.
-type CategoryTrendRow struct {
-	CategoryName string
-	BudgetAmount int64
-	TotalSpent   int64
-	Month        int32
-	Year         int32
-}
-
-// MemberTrendRow holds per-member per-month spend for trend queries.
-type MemberTrendRow struct {
-	UserID     uuid.UUID
-	MemberName string
-	TotalPaid  int64
-	Month      int32
-	Year       int32
-}
-
-// TrendFilter holds parameters for trend queries.
-type TrendFilter struct {
-	HouseholdID uuid.UUID
-	Limit       int
-	Month       *int // upper bound month (inclusive)
-	Year        *int // upper bound year (inclusive)
+	TotalAmount   int64
+	ClosedAt      *time.Time
 }
 
 // ReportReader defines read operations for reports.
 type ReportReader interface {
-	ListByHousehold(ctx context.Context, householdID uuid.UUID) ([]ReportListItem, error)
-	GetByID(ctx context.Context, id uuid.UUID) (*ReportWithDetails, error)
-	GetByMonthYear(
-		ctx context.Context,
-		householdID uuid.UUID,
-		month, year int,
-	) (*model.Reports, error)
-	GetTransferByID(ctx context.Context, id uuid.UUID) (*model.ReportTransfers, error)
-	GetPaidTransfersForMonth(
-		ctx context.Context,
-		householdID uuid.UUID,
-		month, year int,
-	) ([]model.ReportTransfers, error)
-	GetMonthlySpends(ctx context.Context, filter TrendFilter) ([]MonthlySpendRow, error)
-	GetCategoryTrends(ctx context.Context, filter TrendFilter) ([]CategoryTrendRow, error)
-	GetMemberTrends(ctx context.Context, filter TrendFilter) ([]MemberTrendRow, error)
+	ListAvailableMonths(ctx context.Context, householdID uuid.UUID) ([]ReportListItem, error)
+	GetClosedAt(ctx context.Context, householdID uuid.UUID, month, year int) (*time.Time, error)
 }
 
 // ReportWriter defines write operations for reports.
 type ReportWriter interface {
-	Create(ctx context.Context, data *ReportCreateInput) (*ReportWithDetails, error)
-	DeleteByMonthYear(ctx context.Context, householdID uuid.UUID, month, year int) error
-	MarkTransferPaid(ctx context.Context, transferID uuid.UUID) (*model.ReportTransfers, error)
-	UnmarkTransferPaid(ctx context.Context, transferID uuid.UUID) (*model.ReportTransfers, error)
-}
-
-// ReportCreateInput holds all data needed to create a report.
-type ReportCreateInput struct {
-	Report             model.Reports
-	MemberSummaries    []model.ReportMemberSummaries
-	CategoryBreakdowns []model.ReportCategoryBreakdowns
-	LineItems          []model.ReportLineItems
-	LineItemSplits     map[int][]model.ReportLineItemSplits // keyed by line item index
-	Transfers          []model.ReportTransfers
+	Close(ctx context.Context, householdID uuid.UUID, month, year int) (*time.Time, error)
+	Reopen(ctx context.Context, householdID uuid.UUID, month, year int) error
 }
 
 // ReportRepository implements ReportReader and ReportWriter.
@@ -117,178 +41,58 @@ func NewReportRepository(db *sql.DB) *ReportRepository {
 	return &ReportRepository{db: db}
 }
 
-func (r *ReportRepository) ListByHousehold(
+func (r *ReportRepository) ListAvailableMonths(
 	ctx context.Context,
 	householdID uuid.UUID,
 ) ([]ReportListItem, error) {
-	rt := table.ReportTransfers
+	// Use raw SQL since go-jet's EXTRACT support is limited.
+	stmt := postgres.RawStatement(`
+		SELECT
+			EXTRACT(MONTH FROM e.incurred_at)::int AS "report_list_item.month",
+			EXTRACT(YEAR FROM e.incurred_at)::int  AS "report_list_item.year",
+			COUNT(*)::int                           AS "report_list_item.total_expenses",
+			COALESCE(SUM(e.amount), 0)              AS "report_list_item.total_amount",
+			r.closed_at                             AS "report_list_item.closed_at"
+		FROM expenses e
+		LEFT JOIN reports r
+			ON r.household_id = e.household_id
+			AND r.month = EXTRACT(MONTH FROM e.incurred_at)::int
+			AND r.year = EXTRACT(YEAR FROM e.incurred_at)::int
+		WHERE e.household_id = #householdID::uuid
+		GROUP BY
+			EXTRACT(MONTH FROM e.incurred_at),
+			EXTRACT(YEAR FROM e.incurred_at),
+			r.closed_at
+		ORDER BY
+			EXTRACT(YEAR FROM e.incurred_at) DESC,
+			EXTRACT(MONTH FROM e.incurred_at) DESC
+	`, postgres.RawArgs{
+		"#householdID": householdID,
+	})
 
-	transfersTotal := postgres.SELECT(
-		postgres.COUNT(postgres.STAR),
-	).FROM(rt).WHERE(
-		rt.ReportID.EQ(table.Reports.ID),
-	)
+	var rows []ReportListItem
 
-	transfersSettled := postgres.SELECT(
-		postgres.COUNT(postgres.STAR),
-	).FROM(rt).WHERE(
-		rt.ReportID.EQ(table.Reports.ID).AND(rt.PaidAt.IS_NOT_NULL()),
-	)
-
-	stmt := postgres.SELECT(
-		table.Reports.AllColumns,
-		transfersTotal.AS("report_list_item.transfers_total"),
-		transfersSettled.AS("report_list_item.transfers_settled"),
-	).FROM(table.Reports).
-		WHERE(table.Reports.HouseholdID.EQ(postgres.UUID(householdID))).
-		ORDER_BY(table.Reports.Year.DESC(), table.Reports.Month.DESC())
-
-	var reports []ReportListItem
-
-	err := stmt.QueryContext(ctx, r.db, &reports)
+	err := stmt.QueryContext(ctx, r.db, &rows)
 	if err != nil {
 		return nil, err
 	}
 
-	return reports, nil
+	return rows, nil
 }
 
-//nolint:funlen // sequential DB operations that are clearer as a single function
-func (r *ReportRepository) GetByID(
-	ctx context.Context,
-	id uuid.UUID,
-) (*ReportWithDetails, error) {
-	// Fetch report
-	var report model.Reports
-
-	stmt := postgres.SELECT(table.Reports.AllColumns).
-		FROM(table.Reports).
-		WHERE(table.Reports.ID.EQ(postgres.UUID(id)))
-
-	err := stmt.QueryContext(ctx, r.db, &report)
-	if err != nil {
-		return nil, err
-	}
-
-	reportUUID := postgres.UUID(id)
-
-	// Fetch member summaries
-	var members []model.ReportMemberSummaries
-
-	memberStmt := postgres.SELECT(table.ReportMemberSummaries.AllColumns).
-		FROM(table.ReportMemberSummaries).
-		WHERE(table.ReportMemberSummaries.ReportID.EQ(reportUUID)).
-		ORDER_BY(table.ReportMemberSummaries.NetBalance.ASC())
-
-	err = memberStmt.QueryContext(ctx, r.db, &members)
-	if err != nil {
-		return nil, err
-	}
-
-	if members == nil {
-		members = []model.ReportMemberSummaries{}
-	}
-
-	// Fetch category breakdowns
-	var categories []model.ReportCategoryBreakdowns
-
-	catStmt := postgres.SELECT(table.ReportCategoryBreakdowns.AllColumns).
-		FROM(table.ReportCategoryBreakdowns).
-		WHERE(table.ReportCategoryBreakdowns.ReportID.EQ(reportUUID)).
-		ORDER_BY(table.ReportCategoryBreakdowns.TotalSpent.DESC())
-
-	err = catStmt.QueryContext(ctx, r.db, &categories)
-	if err != nil {
-		return nil, err
-	}
-
-	if categories == nil {
-		categories = []model.ReportCategoryBreakdowns{}
-	}
-
-	// Fetch line items
-	var lineItems []model.ReportLineItems
-
-	liStmt := postgres.SELECT(table.ReportLineItems.AllColumns).
-		FROM(table.ReportLineItems).
-		WHERE(table.ReportLineItems.ReportID.EQ(reportUUID)).
-		ORDER_BY(table.ReportLineItems.IncurredAt.DESC())
-
-	err = liStmt.QueryContext(ctx, r.db, &lineItems)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fetch all splits for the line items
-	lineItemsWithSplits := make([]ReportLineItemWithSplits, len(lineItems))
-	lineItemMap := make(map[uuid.UUID]*ReportLineItemWithSplits, len(lineItems))
-
-	if len(lineItems) > 0 {
-		liIDs := make([]postgres.Expression, len(lineItems))
-		for i, li := range lineItems {
-			liIDs[i] = postgres.UUID(li.ID)
-			lineItemsWithSplits[i] = ReportLineItemWithSplits{
-				ReportLineItems: li,
-				Splits:          []model.ReportLineItemSplits{},
-			}
-			lineItemMap[li.ID] = &lineItemsWithSplits[i]
-		}
-
-		var splits []model.ReportLineItemSplits
-
-		splitStmt := postgres.SELECT(table.ReportLineItemSplits.AllColumns).
-			FROM(table.ReportLineItemSplits).
-			WHERE(table.ReportLineItemSplits.LineItemID.IN(liIDs...))
-
-		err = splitStmt.QueryContext(ctx, r.db, &splits)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, split := range splits {
-			if li, ok := lineItemMap[split.LineItemID]; ok {
-				li.Splits = append(li.Splits, split)
-			}
-		}
-	}
-
-	// Fetch transfers
-	var transfers []model.ReportTransfers
-
-	transferStmt := postgres.SELECT(table.ReportTransfers.AllColumns).
-		FROM(table.ReportTransfers).
-		WHERE(table.ReportTransfers.ReportID.EQ(reportUUID)).
-		ORDER_BY(table.ReportTransfers.Amount.DESC())
-
-	err = transferStmt.QueryContext(ctx, r.db, &transfers)
-	if err != nil {
-		return nil, err
-	}
-
-	if transfers == nil {
-		transfers = []model.ReportTransfers{}
-	}
-
-	return &ReportWithDetails{
-		Reports:            report,
-		MemberSummaries:    members,
-		CategoryBreakdowns: categories,
-		LineItems:          lineItemsWithSplits,
-		Transfers:          transfers,
-	}, nil
-}
-
-func (r *ReportRepository) GetByMonthYear(
+func (r *ReportRepository) GetClosedAt(
 	ctx context.Context,
 	householdID uuid.UUID,
 	month, year int,
-) (*model.Reports, error) {
-	var report model.Reports
-
+) (*time.Time, error) {
 	monthInt := int32(month) //nolint:gosec // month is 1-12
 	yearInt := int32(year)   //nolint:gosec // year is validated >= 2020
 
-	stmt := postgres.SELECT(table.Reports.AllColumns).
+	var result struct {
+		ClosedAt *time.Time `alias:"reports.closed_at"`
+	}
+
+	stmt := postgres.SELECT(table.Reports.ClosedAt).
 		FROM(table.Reports).
 		WHERE(
 			table.Reports.HouseholdID.EQ(postgres.UUID(householdID)).
@@ -296,33 +100,48 @@ func (r *ReportRepository) GetByMonthYear(
 				AND(table.Reports.Year.EQ(postgres.Int32(yearInt))),
 		)
 
-	err := stmt.QueryContext(ctx, r.db, &report)
+	err := stmt.QueryContext(ctx, r.db, &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return &report, nil
+	return result.ClosedAt, nil
 }
 
-func (r *ReportRepository) GetTransferByID(
+func (r *ReportRepository) Close(
 	ctx context.Context,
-	id uuid.UUID,
-) (*model.ReportTransfers, error) {
-	var transfer model.ReportTransfers
+	householdID uuid.UUID,
+	month, year int,
+) (*time.Time, error) {
+	monthInt := int32(month) //nolint:gosec // month is 1-12
+	yearInt := int32(year)   //nolint:gosec // year is validated >= 2020
 
-	stmt := postgres.SELECT(table.ReportTransfers.AllColumns).
-		FROM(table.ReportTransfers).
-		WHERE(table.ReportTransfers.ID.EQ(postgres.UUID(id)))
+	var result struct {
+		ClosedAt *time.Time
+	}
 
-	err := stmt.QueryContext(ctx, r.db, &transfer)
+	// UPSERT: insert or update closed_at to NOW()
+	stmt := postgres.RawStatement(`
+		INSERT INTO reports (household_id, month, year, closed_at)
+		VALUES (#householdID::uuid, #month, #year, NOW())
+		ON CONFLICT (household_id, month, year)
+		DO UPDATE SET closed_at = NOW(), updated_at = NOW()
+		RETURNING closed_at
+	`, postgres.RawArgs{
+		"#householdID": householdID,
+		"#month":       monthInt,
+		"#year":        yearInt,
+	})
+
+	err := stmt.QueryContext(ctx, r.db, &result)
 	if err != nil {
 		return nil, err
 	}
 
-	return &transfer, nil
+	return result.ClosedAt, nil
 }
 
-func (r *ReportRepository) DeleteByMonthYear(
+func (r *ReportRepository) Reopen(
 	ctx context.Context,
 	householdID uuid.UUID,
 	month, year int,
@@ -331,7 +150,8 @@ func (r *ReportRepository) DeleteByMonthYear(
 	yearInt := int32(year)   //nolint:gosec // year is validated >= 2020
 
 	stmt := table.Reports.
-		DELETE().
+		UPDATE(table.Reports.ClosedAt, table.Reports.UpdatedAt).
+		SET(postgres.NULL, postgres.NOW()).
 		WHERE(
 			table.Reports.HouseholdID.EQ(postgres.UUID(householdID)).
 				AND(table.Reports.Month.EQ(postgres.Int32(monthInt))).
@@ -341,396 +161,4 @@ func (r *ReportRepository) DeleteByMonthYear(
 	_, err := stmt.ExecContext(ctx, r.db)
 
 	return err
-}
-
-//nolint:funlen // sequential DB operations that are clearer as a single function
-func (r *ReportRepository) Create(
-	ctx context.Context,
-	data *ReportCreateInput,
-) (*ReportWithDetails, error) {
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() { _ = tx.Rollback() }()
-
-	// Insert report
-	var created model.Reports
-
-	insertReport := table.Reports.
-		INSERT(
-			table.Reports.HouseholdID,
-			table.Reports.Month,
-			table.Reports.Year,
-			table.Reports.TotalExpenses,
-			table.Reports.TotalAmount,
-		).
-		VALUES(
-			data.Report.HouseholdID,
-			data.Report.Month,
-			data.Report.Year,
-			data.Report.TotalExpenses,
-			data.Report.TotalAmount,
-		).
-		RETURNING(table.Reports.AllColumns)
-
-	err = insertReport.QueryContext(ctx, tx, &created)
-	if err != nil {
-		return nil, err
-	}
-
-	// Insert member summaries
-	createdMembers := make([]model.ReportMemberSummaries, 0, len(data.MemberSummaries))
-
-	for _, ms := range data.MemberSummaries {
-		var cm model.ReportMemberSummaries
-
-		insertMS := table.ReportMemberSummaries.
-			INSERT(
-				table.ReportMemberSummaries.ReportID,
-				table.ReportMemberSummaries.UserID,
-				table.ReportMemberSummaries.MemberName,
-				table.ReportMemberSummaries.TotalPaid,
-				table.ReportMemberSummaries.TotalOwed,
-				table.ReportMemberSummaries.NetBalance,
-			).
-			VALUES(created.ID, ms.UserID, ms.MemberName, ms.TotalPaid, ms.TotalOwed, ms.NetBalance).
-			RETURNING(table.ReportMemberSummaries.AllColumns)
-
-		err = insertMS.QueryContext(ctx, tx, &cm)
-		if err != nil {
-			return nil, err
-		}
-
-		createdMembers = append(createdMembers, cm)
-	}
-
-	// Insert category breakdowns
-	createdCats := make([]model.ReportCategoryBreakdowns, 0, len(data.CategoryBreakdowns))
-
-	for _, cb := range data.CategoryBreakdowns {
-		var cc model.ReportCategoryBreakdowns
-
-		insertCB := table.ReportCategoryBreakdowns.
-			INSERT(
-				table.ReportCategoryBreakdowns.ReportID,
-				table.ReportCategoryBreakdowns.CategoryName,
-				table.ReportCategoryBreakdowns.BudgetAmount,
-				table.ReportCategoryBreakdowns.TotalSpent,
-			).
-			VALUES(created.ID, cb.CategoryName, cb.BudgetAmount, cb.TotalSpent).
-			RETURNING(table.ReportCategoryBreakdowns.AllColumns)
-
-		err = insertCB.QueryContext(ctx, tx, &cc)
-		if err != nil {
-			return nil, err
-		}
-
-		createdCats = append(createdCats, cc)
-	}
-
-	// Insert line items and their splits
-	createdLineItems := make([]ReportLineItemWithSplits, 0, len(data.LineItems))
-
-	for i, li := range data.LineItems {
-		var cli model.ReportLineItems
-
-		insertLI := table.ReportLineItems.
-			INSERT(
-				table.ReportLineItems.ReportID,
-				table.ReportLineItems.ExpenseID,
-				table.ReportLineItems.ExpenseTitle,
-				table.ReportLineItems.CategoryName,
-				table.ReportLineItems.PaidByUserID,
-				table.ReportLineItems.PaidByName,
-				table.ReportLineItems.Amount,
-				table.ReportLineItems.IncurredAt,
-				table.ReportLineItems.Notes,
-			).
-			VALUES(
-				created.ID,
-				li.ExpenseID,
-				li.ExpenseTitle,
-				li.CategoryName,
-				li.PaidByUserID,
-				li.PaidByName,
-				li.Amount,
-				li.IncurredAt,
-				li.Notes,
-			).
-			RETURNING(table.ReportLineItems.AllColumns)
-
-		err = insertLI.QueryContext(ctx, tx, &cli)
-		if err != nil {
-			return nil, err
-		}
-
-		liWithSplits := ReportLineItemWithSplits{
-			ReportLineItems: cli,
-			Splits:          []model.ReportLineItemSplits{},
-		}
-
-		// Insert splits for this line item
-		if splits, ok := data.LineItemSplits[i]; ok {
-			for _, s := range splits {
-				var cs model.ReportLineItemSplits
-
-				insertSplit := table.ReportLineItemSplits.
-					INSERT(
-						table.ReportLineItemSplits.LineItemID,
-						table.ReportLineItemSplits.UserID,
-						table.ReportLineItemSplits.MemberName,
-						table.ReportLineItemSplits.Amount,
-					).
-					VALUES(cli.ID, s.UserID, s.MemberName, s.Amount).
-					RETURNING(table.ReportLineItemSplits.AllColumns)
-
-				err = insertSplit.QueryContext(ctx, tx, &cs)
-				if err != nil {
-					return nil, err
-				}
-
-				liWithSplits.Splits = append(liWithSplits.Splits, cs)
-			}
-		}
-
-		createdLineItems = append(createdLineItems, liWithSplits)
-	}
-
-	// Insert transfers
-	createdTransfers := make([]model.ReportTransfers, 0, len(data.Transfers))
-
-	for _, t := range data.Transfers {
-		var ct model.ReportTransfers
-
-		insertTransfer := table.ReportTransfers.
-			INSERT(
-				table.ReportTransfers.ReportID,
-				table.ReportTransfers.FromUserID,
-				table.ReportTransfers.ToUserID,
-				table.ReportTransfers.FromName,
-				table.ReportTransfers.ToName,
-				table.ReportTransfers.Amount,
-			).
-			VALUES(created.ID, t.FromUserID, t.ToUserID, t.FromName, t.ToName, t.Amount).
-			RETURNING(table.ReportTransfers.AllColumns)
-
-		err = insertTransfer.QueryContext(ctx, tx, &ct)
-		if err != nil {
-			return nil, err
-		}
-
-		createdTransfers = append(createdTransfers, ct)
-	}
-
-	if err = tx.Commit(); err != nil {
-		return nil, err
-	}
-
-	return &ReportWithDetails{
-		Reports:            created,
-		MemberSummaries:    createdMembers,
-		CategoryBreakdowns: createdCats,
-		LineItems:          createdLineItems,
-		Transfers:          createdTransfers,
-	}, nil
-}
-
-func (r *ReportRepository) MarkTransferPaid(
-	ctx context.Context,
-	transferID uuid.UUID,
-) (*model.ReportTransfers, error) {
-	var updated model.ReportTransfers
-
-	stmt := table.ReportTransfers.
-		UPDATE(
-			table.ReportTransfers.PaidAt,
-			table.ReportTransfers.UpdatedAt,
-		).
-		SET(
-			postgres.NOW(),
-			postgres.NOW(),
-		).
-		WHERE(table.ReportTransfers.ID.EQ(postgres.UUID(transferID))).
-		RETURNING(table.ReportTransfers.AllColumns)
-
-	err := stmt.QueryContext(ctx, r.db, &updated)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updated, nil
-}
-
-func (r *ReportRepository) UnmarkTransferPaid(
-	ctx context.Context,
-	transferID uuid.UUID,
-) (*model.ReportTransfers, error) {
-	var updated model.ReportTransfers
-
-	stmt := table.ReportTransfers.
-		UPDATE(
-			table.ReportTransfers.PaidAt,
-			table.ReportTransfers.UpdatedAt,
-		).
-		SET(
-			postgres.NULL,
-			postgres.NOW(),
-		).
-		WHERE(table.ReportTransfers.ID.EQ(postgres.UUID(transferID))).
-		RETURNING(table.ReportTransfers.AllColumns)
-
-	err := stmt.QueryContext(ctx, r.db, &updated)
-	if err != nil {
-		return nil, err
-	}
-
-	return &updated, nil
-}
-
-func (r *ReportRepository) GetPaidTransfersForMonth(
-	ctx context.Context,
-	householdID uuid.UUID,
-	month, year int,
-) ([]model.ReportTransfers, error) {
-	monthInt := int32(month) //nolint:gosec // month is 1-12
-	yearInt := int32(year)   //nolint:gosec // year is validated >= 2020
-
-	var transfers []model.ReportTransfers
-
-	stmt := postgres.SELECT(table.ReportTransfers.AllColumns).
-		FROM(
-			table.ReportTransfers.
-				INNER_JOIN(table.Reports, table.Reports.ID.EQ(table.ReportTransfers.ReportID)),
-		).
-		WHERE(
-			table.Reports.HouseholdID.EQ(postgres.UUID(householdID)).
-				AND(table.Reports.Month.EQ(postgres.Int32(monthInt))).
-				AND(table.Reports.Year.EQ(postgres.Int32(yearInt))).
-				AND(table.ReportTransfers.PaidAt.IS_NOT_NULL()),
-		)
-
-	err := stmt.QueryContext(ctx, r.db, &transfers)
-	if err != nil {
-		return nil, err
-	}
-
-	if transfers == nil {
-		transfers = []model.ReportTransfers{}
-	}
-
-	return transfers, nil
-}
-
-// recentReportIDs builds a subquery for the N most recent report IDs,
-// optionally bounded by an upper month/year.
-func recentReportIDs(filter TrendFilter) postgres.SelectStatement {
-	rpt := table.Reports
-	limitInt := int64(filter.Limit)
-
-	condition := rpt.HouseholdID.EQ(postgres.UUID(filter.HouseholdID))
-
-	if filter.Month != nil && filter.Year != nil {
-		monthInt := int32(*filter.Month) //nolint:gosec // month is 1-12
-		yearInt := int32(*filter.Year)   //nolint:gosec // year is validated >= 2020
-
-		// year < bound OR (year = bound AND month <= bound)
-		condition = condition.AND(
-			rpt.Year.LT(postgres.Int32(yearInt)).OR(
-				rpt.Year.EQ(postgres.Int32(yearInt)).AND(
-					rpt.Month.LT_EQ(postgres.Int32(monthInt)),
-				),
-			),
-		)
-	}
-
-	return postgres.SELECT(rpt.ID).
-		FROM(rpt).
-		WHERE(condition).
-		ORDER_BY(rpt.Year.DESC(), rpt.Month.DESC()).
-		LIMIT(limitInt)
-}
-
-func (r *ReportRepository) GetMonthlySpends(
-	ctx context.Context,
-	filter TrendFilter,
-) ([]MonthlySpendRow, error) {
-	rpt := table.Reports
-
-	stmt := postgres.SELECT(
-		rpt.Month.AS("monthly_spend_row.month"),
-		rpt.Year.AS("monthly_spend_row.year"),
-		rpt.TotalAmount.AS("monthly_spend_row.total_amount"),
-		rpt.TotalExpenses.AS("monthly_spend_row.total_expenses"),
-	).FROM(rpt).
-		WHERE(rpt.ID.IN(recentReportIDs(filter))).
-		ORDER_BY(rpt.Year.DESC(), rpt.Month.DESC())
-
-	var rows []MonthlySpendRow
-
-	err := stmt.QueryContext(ctx, r.db, &rows)
-	if err != nil {
-		return nil, err
-	}
-
-	return rows, nil
-}
-
-func (r *ReportRepository) GetCategoryTrends(
-	ctx context.Context,
-	filter TrendFilter,
-) ([]CategoryTrendRow, error) {
-	rpt := table.Reports
-	cb := table.ReportCategoryBreakdowns
-
-	stmt := postgres.SELECT(
-		cb.CategoryName.AS("category_trend_row.category_name"),
-		cb.BudgetAmount.AS("category_trend_row.budget_amount"),
-		cb.TotalSpent.AS("category_trend_row.total_spent"),
-		rpt.Month.AS("category_trend_row.month"),
-		rpt.Year.AS("category_trend_row.year"),
-	).FROM(
-		cb.INNER_JOIN(rpt, rpt.ID.EQ(cb.ReportID)),
-	).WHERE(
-		rpt.ID.IN(recentReportIDs(filter)),
-	).ORDER_BY(rpt.Year.ASC(), rpt.Month.ASC(), cb.CategoryName.ASC())
-
-	var rows []CategoryTrendRow
-
-	err := stmt.QueryContext(ctx, r.db, &rows)
-	if err != nil {
-		return nil, err
-	}
-
-	return rows, nil
-}
-
-func (r *ReportRepository) GetMemberTrends(
-	ctx context.Context,
-	filter TrendFilter,
-) ([]MemberTrendRow, error) {
-	rpt := table.Reports
-	ms := table.ReportMemberSummaries
-
-	stmt := postgres.SELECT(
-		ms.UserID.AS("member_trend_row.user_id"),
-		ms.MemberName.AS("member_trend_row.member_name"),
-		ms.TotalPaid.AS("member_trend_row.total_paid"),
-		rpt.Month.AS("member_trend_row.month"),
-		rpt.Year.AS("member_trend_row.year"),
-	).FROM(
-		ms.INNER_JOIN(rpt, rpt.ID.EQ(ms.ReportID)),
-	).WHERE(
-		rpt.ID.IN(recentReportIDs(filter)),
-	).ORDER_BY(rpt.Year.ASC(), rpt.Month.ASC(), ms.MemberName.ASC())
-
-	var rows []MemberTrendRow
-
-	err := stmt.QueryContext(ctx, r.db, &rows)
-	if err != nil {
-		return nil, err
-	}
-
-	return rows, nil
 }

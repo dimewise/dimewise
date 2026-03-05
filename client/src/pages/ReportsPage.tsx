@@ -1,53 +1,30 @@
-import { useUser } from "@clerk/clerk-react";
-import {
-	AlertTriangle,
-	Calendar,
-	CheckCircle,
-	Clock,
-	FileBarChart,
-	Plus,
-} from "lucide-react";
-import { useCallback, useState } from "react";
+import { Calendar, ChevronRight, Lock } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Navigate } from "react-router";
-import { toast } from "sonner";
+import { Navigate, useLocation } from "react-router";
 import { ReportDetail } from "@/components/Report/ReportDetail";
 import { AnimatedList, AnimatedListItem } from "@/components/ui/animated-list";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
-import { Label } from "@/components/ui/label";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { SkeletonList, SkeletonPage } from "@/components/ui/skeleton";
 import { Touchable } from "@/components/ui/touchable";
 import { RoutesEnum } from "@/routes/Routes";
 import {
-	useGenerateReportMutation,
 	useGetMyHouseholdQuery,
+	useGetUsersMeQuery,
 	useListReportsQuery,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
-import { formatDate, formatMonthYear } from "@/utils/date";
+import { formatMonthYear } from "@/utils/date";
+
+type SelectedReport = { month: number; year: number };
 
 export const ReportsPage = () => {
 	const { t } = useTranslation();
-	const { user } = useUser();
+	const { data: currentUser } = useGetUsersMeQuery();
 	const {
 		data: household,
 		isLoading: isHouseholdLoading,
@@ -59,17 +36,20 @@ export const ReportsPage = () => {
 		isUninitialized: isReportsUninitialized,
 		refetch: refetchReports,
 	} = useListReportsQuery(undefined, { skip: !household });
-	const [generateReport, { isLoading: isGenerating }] =
-		useGenerateReportMutation();
 
-	const now = new Date();
-	const currentMonth = now.getMonth() + 1;
-	const currentYear = now.getFullYear();
+	const location = useLocation();
+	const navState = location.state as { month?: number; year?: number } | null;
+	const [selected, setSelected] = useState<SelectedReport | null>(
+		navState?.month && navState?.year
+			? { month: navState.month, year: navState.year }
+			: null,
+	);
 
-	const [generateOpen, setGenerateOpen] = useState(false);
-	const [genMonth, setGenMonth] = useState(currentMonth);
-	const [genYear, setGenYear] = useState(currentYear);
-	const [selectedId, setSelectedId] = useState<string | null>(null);
+	useEffect(() => {
+		if (selected) {
+			window.scrollTo(0, 0);
+		}
+	}, [selected]);
 
 	const handleRefresh = useCallback(
 		() => Promise.all([refetchReports()]),
@@ -89,51 +69,19 @@ export const ReportsPage = () => {
 	}
 
 	const currency = household.currency;
-	const isOwner = user?.id === household.owner_id;
+	const isOwner = currentUser?.id === household.owner_id;
 
 	// If viewing a specific report
-	if (selectedId) {
+	if (selected) {
 		return (
 			<ReportDetail
-				reportId={selectedId}
+				month={selected.month}
+				year={selected.year}
 				currency={currency}
 				isOwner={isOwner}
-				onBack={() => setSelectedId(null)}
+				onBack={() => setSelected(null)}
 			/>
 		);
-	}
-
-	const handleGenerate = async () => {
-		try {
-			const result = await generateReport({
-				generateReportRequest: {
-					month: genMonth,
-					year: genYear,
-				},
-			}).unwrap();
-			toast.success(t("reports.reportGenerated"));
-			setGenerateOpen(false);
-			setSelectedId(result.id);
-		} catch {
-			toast.error(t("reports.generateFailed"));
-		}
-	};
-
-	const handleYearChange = (year: number) => {
-		setGenYear(year);
-		// Clamp month if switching to current year and month is in the future
-		if (year === currentYear && genMonth > currentMonth) {
-			setGenMonth(currentMonth);
-		}
-	};
-
-	const reportExists = reports?.some(
-		(r) => r.month === genMonth && r.year === genYear,
-	);
-
-	const years: number[] = [];
-	for (let y = currentYear; y >= 2020; y--) {
-		years.push(y);
 	}
 
 	return (
@@ -144,14 +92,6 @@ export const ReportsPage = () => {
 					<h1 className="text-2xl font-bold tracking-tight">
 						{t("reports.title")}
 					</h1>
-					<Button
-						size="sm"
-						className="gap-1.5"
-						onClick={() => setGenerateOpen(true)}
-					>
-						<Plus className="h-4 w-4" />
-						{t("reports.generate")}
-					</Button>
 				</div>
 
 				{/* List */}
@@ -161,68 +101,46 @@ export const ReportsPage = () => {
 					<AnimatedList className="space-y-2">
 						{reports.map((r, i) => {
 							const monthName = formatMonthYear(r.month, r.year);
-							const allSettled =
-								r.transfers_total > 0 &&
-								r.transfers_settled === r.transfers_total;
-							const hasPending =
-								r.transfers_total > 0 &&
-								r.transfers_settled < r.transfers_total;
+							const isClosed = !!r.closed_at;
+							const key = `${r.month}-${r.year}`;
 							return (
 								<AnimatedListItem
-									key={r.id}
-									itemKey={r.id}
+									key={key}
+									itemKey={key}
 									index={i}
 									enableLayout
 								>
 									<Card>
 										<CardContent className="p-0">
 											<Touchable
-												className="w-full p-4 flex items-center justify-between text-left rounded-xl"
-												onClick={() => setSelectedId(r.id)}
+												className="w-full p-4 flex items-center gap-3 text-left rounded-xl"
+												onClick={() =>
+													setSelected({ month: r.month, year: r.year })
+												}
 											>
+												<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+													<Calendar className="h-4 w-4 text-muted-foreground" />
+												</div>
 												<div className="min-w-0 flex-1">
 													<div className="flex items-center gap-2">
-														<Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
 														<h3 className="text-sm font-semibold">
 															{monthName}
 														</h3>
-														{allSettled && (
+														{isClosed && (
 															<Badge variant="success" className="gap-1">
-																<CheckCircle className="h-3 w-3" />
-																{t("reports.settled")}
-															</Badge>
-														)}
-														{hasPending && (
-															<Badge variant="warning" className="gap-1">
-																<Clock className="h-3 w-3" />
-																{t("reports.pendingCount", {
-																	count:
-																		r.transfers_total - r.transfers_settled,
-																})}
+																<Lock className="h-3 w-3" />
+																{t("reports.closed")}
 															</Badge>
 														)}
 													</div>
-													<div className="flex items-center gap-3 mt-1 ml-6">
-														<p className="text-xs text-muted-foreground">
-															{t("reports.expense", {
-																count: r.total_expenses,
-															})}
-														</p>
-														<span className="text-xs text-muted-foreground">
-															&middot;
-														</span>
-														<p className="text-xs font-medium">
-															{formatCurrency(r.total_amount, currency)}
-														</p>
-														<span className="text-xs text-muted-foreground">
-															&middot;
-														</span>
-														<p className="text-xs text-muted-foreground">
-															{formatDate(r.generated_at, "MMM d, yyyy")}
-														</p>
-													</div>
+													<p className="text-xs text-muted-foreground mt-0.5">
+														{t("reports.expense", {
+															count: r.total_expenses,
+														})}{" "}
+														&middot; {formatCurrency(r.total_amount, currency)}
+													</p>
 												</div>
-												<FileBarChart className="h-4 w-4 text-muted-foreground shrink-0" />
+												<ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
 											</Touchable>
 										</CardContent>
 									</Card>
@@ -237,95 +155,10 @@ export const ReportsPage = () => {
 								image="/dimewise-empty-report.png"
 								title={t("reports.noReports")}
 								description={t("reports.noReportsDescription")}
-								action={
-									<Button
-										size="sm"
-										className="gap-1.5"
-										onClick={() => setGenerateOpen(true)}
-									>
-										<Plus className="h-4 w-4" />
-										{t("reports.generateReport")}
-									</Button>
-								}
 							/>
 						</CardContent>
 					</Card>
 				)}
-
-				{/* Generate dialog */}
-				<Dialog
-					open={generateOpen}
-					onOpenChange={(v) => !v && setGenerateOpen(false)}
-				>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>{t("reports.generateReport")}</DialogTitle>
-						</DialogHeader>
-						<div className="space-y-4">
-							<p className="text-sm text-muted-foreground">
-								{t("reports.generateDescription")}
-							</p>
-							<div className="grid grid-cols-2 gap-3">
-								<div className="space-y-2">
-									<Label>{t("reports.month")}</Label>
-									<Select
-										value={String(genMonth)}
-										onValueChange={(v) => setGenMonth(Number(v))}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											{Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-												<SelectItem
-													key={m}
-													value={String(m)}
-													disabled={genYear === currentYear && m > currentMonth}
-												>
-													{t(`months.${m}`)}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
-								<div className="space-y-2">
-									<Label>{t("reports.year")}</Label>
-									<Select
-										value={String(genYear)}
-										onValueChange={(v) => handleYearChange(Number(v))}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											{years.map((y) => (
-												<SelectItem key={y} value={String(y)}>
-													{y}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
-							</div>
-							{reportExists && (
-								<div className="flex items-start gap-2 rounded-lg bg-warning-light p-3">
-									<AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
-									<p className="text-sm text-warning">
-										{t("reports.reportExists")}
-									</p>
-								</div>
-							)}
-						</div>
-						<DialogFooter>
-							<Button variant="outline" onClick={() => setGenerateOpen(false)}>
-								{t("common.cancel")}
-							</Button>
-							<Button onClick={handleGenerate} disabled={isGenerating}>
-								{isGenerating ? t("reports.generating") : t("reports.generate")}
-							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
 			</div>
 		</PullToRefresh>
 	);

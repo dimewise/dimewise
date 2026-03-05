@@ -1,4 +1,5 @@
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Badge } from "@/components/ui/badge";
@@ -21,27 +22,31 @@ import { formatMonthYear } from "@/utils/date";
 type Props = {
 	open: boolean;
 	onClose: () => void;
-	reportId: string;
+	month: number;
+	year: number;
 	currency: string;
 };
 
 export const ReportSummaryModal = ({
 	open,
 	onClose,
-	reportId,
+	month,
+	year,
 	currency,
 }: Props) => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { data: report, isLoading } = useGetReportQuery(
-		{ reportId },
+		{ month, year },
 		{ skip: !open },
 	);
 
+	const [settlementMode, setSettlementMode] = useState<"greedy" | "direct">(
+		"greedy",
+	);
+
 	const monthName = report ? formatMonthYear(report.month, report.year) : "";
-	const allSettled = report
-		? report.transfers.every((tr) => !!tr.paid_at)
-		: false;
+	const isClosed = report ? !!report.closed_at : false;
 
 	return (
 		<Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -76,14 +81,12 @@ export const ReportSummaryModal = ({
 						<DialogHeader>
 							<DialogTitle className="flex items-center gap-2">
 								{monthName}
-								{report.transfers.length > 0 &&
-									(allSettled ? (
-										<Badge variant="success">
-											{t("reportDetail.allSettled")}
-										</Badge>
-									) : (
-										<Badge variant="warning">{t("reportDetail.pending")}</Badge>
-									))}
+								{isClosed && (
+									<Badge variant="success" className="gap-1">
+										<Lock className="h-3 w-3" />
+										{t("reportDetail.closed")}
+									</Badge>
+								)}
 							</DialogTitle>
 						</DialogHeader>
 
@@ -100,38 +103,61 @@ export const ReportSummaryModal = ({
 								</p>
 							</div>
 
-							{/* Member breakdown */}
-							{report.member_summaries.length > 0 && (
+							{/* Settlements */}
+							{report.settlements && (
 								<>
 									<Separator />
 									<div className="space-y-2">
-										<p className="text-xs font-medium text-muted-foreground">
-											{t("reportDetail.memberBreakdown")}
-										</p>
-										{report.member_summaries.map((ms) => {
-											const isPositive = ms.net_balance > 0;
-											const isZero = ms.net_balance === 0;
-											return (
-												<div
-													key={ms.id}
-													className="flex items-center justify-between text-sm"
+										<div className="flex items-center justify-between">
+											<p className="text-xs font-medium text-muted-foreground">
+												{t("reportDetail.settlements")}
+											</p>
+											<div className="flex gap-1">
+												<Button
+													size="sm"
+													variant={
+														settlementMode === "greedy" ? "default" : "outline"
+													}
+													className="h-6 text-[10px] px-2"
+													onClick={() => setSettlementMode("greedy")}
 												>
-													<span>{ms.member_name}</span>
-													<span
-														className={`font-semibold ${
-															isZero
-																? "text-muted-foreground"
-																: isPositive
-																	? "text-success"
-																	: "text-destructive"
-														}`}
+													{t("reportDetail.settlementsOptimal")}
+												</Button>
+												<Button
+													size="sm"
+													variant={
+														settlementMode === "direct" ? "default" : "outline"
+													}
+													className="h-6 text-[10px] px-2"
+													onClick={() => setSettlementMode("direct")}
+												>
+													{t("reportDetail.settlementsDirect")}
+												</Button>
+											</div>
+										</div>
+										{report.settlements[settlementMode].length === 0 ? (
+											<p className="text-sm text-muted-foreground">
+												{t("reportDetail.settledUp")}
+											</p>
+										) : (
+											<div className="space-y-1.5">
+												{report.settlements[settlementMode].map((tr) => (
+													<div
+														key={`${tr.from_user_id}-${tr.to_user_id}`}
+														className="flex items-center justify-between text-sm"
 													>
-														{isPositive ? "+" : ""}
-														{formatCurrency(ms.net_balance, currency)}
-													</span>
-												</div>
-											);
-										})}
+														<div className="flex items-center gap-1.5 min-w-0">
+															<span className="truncate">{tr.from_name}</span>
+															<ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+															<span className="truncate">{tr.to_name}</span>
+														</div>
+														<span className="font-semibold shrink-0 ml-2 text-destructive">
+															{formatCurrency(tr.amount, currency)}
+														</span>
+													</div>
+												))}
+											</div>
+										)}
 									</div>
 								</>
 							)}
@@ -158,7 +184,7 @@ export const ReportSummaryModal = ({
 														: 0;
 											const isOver = cb.total_spent > cb.budget_amount;
 											return (
-												<div key={cb.id} className="space-y-1.5">
+												<div key={cb.category_name} className="space-y-1.5">
 													<div className="flex items-center justify-between">
 														<p className="text-sm font-medium">
 															{cb.category_name}
@@ -185,43 +211,6 @@ export const ReportSummaryModal = ({
 									</div>
 								</>
 							)}
-
-							{/* Transfers */}
-							{report.transfers.length > 0 && (
-								<>
-									<Separator />
-									<div className="space-y-2">
-										<p className="text-xs font-medium text-muted-foreground">
-											{t("reportDetail.transfers")}
-										</p>
-										{report.transfers.map((transfer) => {
-											const isPaid = !!transfer.paid_at;
-											return (
-												<div
-													key={transfer.id}
-													className={`flex items-center justify-between text-sm rounded-lg bg-muted px-3 py-2 ${isPaid ? "opacity-60" : ""}`}
-												>
-													<div className="flex items-center gap-2 min-w-0">
-														<span className="truncate">
-															{transfer.from_name}
-														</span>
-														<ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
-														<span className="truncate">{transfer.to_name}</span>
-													</div>
-													<div className="flex items-center gap-1.5 shrink-0 ml-2">
-														<span className="font-semibold">
-															{formatCurrency(transfer.amount, currency)}
-														</span>
-														{isPaid && (
-															<Check className="h-3.5 w-3.5 text-success" />
-														)}
-													</div>
-												</div>
-											);
-										})}
-									</div>
-								</>
-							)}
 						</div>
 
 						<DialogFooter>
@@ -230,7 +219,9 @@ export const ReportSummaryModal = ({
 								className="gap-1.5"
 								onClick={() => {
 									onClose();
-									navigate(RoutesEnum.reports);
+									navigate(RoutesEnum.reports, {
+										state: { month, year },
+									});
 								}}
 							>
 								{t("reportDetail.viewFullReport")}

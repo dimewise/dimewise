@@ -202,55 +202,28 @@ const injectedRtkApi = api
         query: () => ({ url: `/reports` }),
         providesTags: ["Reports"],
       }),
-      generateReport: build.mutation<
-        GenerateReportApiResponse,
-        GenerateReportApiArg
-      >({
+      getReport: build.query<GetReportApiResponse, GetReportApiArg>({
         query: (queryArg) => ({
-          url: `/reports/generate`,
+          url: `/reports/${queryArg.month}/${queryArg.year}`,
+        }),
+        providesTags: ["Reports"],
+      }),
+      closeReport: build.mutation<CloseReportApiResponse, CloseReportApiArg>({
+        query: (queryArg) => ({
+          url: `/reports/${queryArg.month}/${queryArg.year}/close`,
           method: "POST",
-          body: queryArg.generateReportRequest,
         }),
         invalidatesTags: ["Reports"],
       }),
-      getReport: build.query<GetReportApiResponse, GetReportApiArg>({
-        query: (queryArg) => ({ url: `/reports/${queryArg.reportId}` }),
-        providesTags: ["Reports"],
-      }),
-      getReportTrends: build.query<
-        GetReportTrendsApiResponse,
-        GetReportTrendsApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/reports/trends`,
-          params: {
-            months: queryArg.months,
-            month: queryArg.month,
-            year: queryArg.year,
-          },
-        }),
-        providesTags: ["Reports"],
-      }),
-      markReportTransferPaid: build.mutation<
-        MarkReportTransferPaidApiResponse,
-        MarkReportTransferPaidApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/reports/transfers/${queryArg.transferId}/pay`,
-          method: "PATCH",
-        }),
-        invalidatesTags: ["Reports", "Balances"],
-      }),
-      unmarkReportTransferPaid: build.mutation<
-        UnmarkReportTransferPaidApiResponse,
-        UnmarkReportTransferPaidApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/reports/transfers/${queryArg.transferId}/unpay`,
-          method: "PATCH",
-        }),
-        invalidatesTags: ["Reports", "Balances"],
-      }),
+      reopenReport: build.mutation<ReopenReportApiResponse, ReopenReportApiArg>(
+        {
+          query: (queryArg) => ({
+            url: `/reports/${queryArg.month}/${queryArg.year}/reopen`,
+            method: "POST",
+          }),
+          invalidatesTags: ["Reports"],
+        },
+      ),
     }),
     overrideExisting: false,
   });
@@ -341,35 +314,24 @@ export type GetMyBalancesApiArg = {
   /** Year. Defaults to current year. */
   year?: number;
 };
-export type ListReportsApiResponse = /** status 200 OK */ Report[];
+export type ListReportsApiResponse = /** status 200 OK */ ReportListItem[];
 export type ListReportsApiArg = void;
-export type GenerateReportApiResponse =
-  /** status 201 Report generated */ ReportWithDetails;
-export type GenerateReportApiArg = {
-  generateReportRequest: GenerateReportRequest;
-};
 export type GetReportApiResponse = /** status 200 OK */ ReportWithDetails;
 export type GetReportApiArg = {
-  reportId: string;
+  month: number;
+  year: number;
 };
-export type GetReportTrendsApiResponse = /** status 200 OK */ ReportTrends;
-export type GetReportTrendsApiArg = {
-  /** Number of most recent months to include (default 12) */
-  months?: number;
-  /** Upper bound month (1-12). Only reports up to this month/year are included. */
-  month?: number;
-  /** Upper bound year. Only reports up to this month/year are included. */
-  year?: number;
+export type CloseReportApiResponse =
+  /** status 200 Report closed */ ReportListItem;
+export type CloseReportApiArg = {
+  month: number;
+  year: number;
 };
-export type MarkReportTransferPaidApiResponse =
-  /** status 200 Transfer marked as paid */ ReportTransfer;
-export type MarkReportTransferPaidApiArg = {
-  transferId: string;
-};
-export type UnmarkReportTransferPaidApiResponse =
-  /** status 200 Transfer unmarked as paid */ ReportTransfer;
-export type UnmarkReportTransferPaidApiArg = {
-  transferId: string;
+export type ReopenReportApiResponse =
+  /** status 200 Report reopened */ ReportListItem;
+export type ReopenReportApiArg = {
+  month: number;
+  year: number;
 };
 export type BaseEntity = {
   id: string;
@@ -543,22 +505,16 @@ export type BalanceSummary = {
   net_balance: number;
   balances: MemberBalance[];
 };
-export type Report = BaseEntity & {
-  household_id: string;
+export type ReportListItem = {
   month: number;
   year: number;
   /** Number of expenses in the month */
   total_expenses: number;
   /** Total expenditure in smallest currency unit */
   total_amount: number;
-  /** Total number of transfers in this report */
-  transfers_total: number;
-  /** Number of transfers that have been marked as paid */
-  transfers_settled: number;
-  generated_at: string;
+  closed_at?: string;
 };
 export type ReportMemberSummary = {
-  id: string;
   user_id: string;
   member_name: string;
   /** Total amount this member paid for expenses */
@@ -569,7 +525,6 @@ export type ReportMemberSummary = {
   net_balance: number;
 };
 export type ReportCategoryBreakdown = {
-  id: string;
   category_name: string;
   /** Monthly budget for this category */
   budget_amount: number;
@@ -577,14 +532,12 @@ export type ReportCategoryBreakdown = {
   total_spent: number;
 };
 export type ReportLineItemSplit = {
-  id: string;
   user_id: string;
   member_name: string;
   amount: number;
 };
 export type ReportLineItem = {
-  id: string;
-  expense_id?: string;
+  expense_id: string;
   expense_title: string;
   category_name?: string;
   paid_by_user_id: string;
@@ -593,27 +546,6 @@ export type ReportLineItem = {
   incurred_at: string;
   notes?: string;
   splits: ReportLineItemSplit[];
-};
-export type ReportTransfer = {
-  id: string;
-  report_id?: string;
-  from_user_id: string;
-  to_user_id: string;
-  from_name: string;
-  to_name: string;
-  /** Transfer amount in smallest currency unit */
-  amount: number;
-  paid_at?: string;
-};
-export type ReportWithDetails = Report & {
-  member_summaries: ReportMemberSummary[];
-  category_breakdowns: ReportCategoryBreakdown[];
-  line_items: ReportLineItem[];
-  transfers: ReportTransfer[];
-};
-export type GenerateReportRequest = {
-  month: number;
-  year: number;
 };
 export type MonthlySpend = {
   month: number;
@@ -649,6 +581,34 @@ export type ReportTrends = {
   category_trends: CategoryTrend[];
   member_trends: MemberTrend[];
 };
+export type ReportSettlementTransfer = {
+  from_user_id: string;
+  from_name: string;
+  to_user_id: string;
+  to_name: string;
+  /** Transfer amount in smallest currency unit */
+  amount: number;
+};
+export type ReportSettlements = {
+  /** Minimum number of transfers to settle all debts */
+  greedy: ReportSettlementTransfer[];
+  /** Direct bilateral settlements between each pair */
+  direct: ReportSettlementTransfer[];
+};
+export type ReportWithDetails = {
+  month: number;
+  year: number;
+  /** Number of expenses in the month */
+  total_expenses: number;
+  /** Total expenditure in smallest currency unit */
+  total_amount: number;
+  closed_at?: string;
+  member_summaries: ReportMemberSummary[];
+  category_breakdowns: ReportCategoryBreakdown[];
+  line_items: ReportLineItem[];
+  trends: ReportTrends;
+  settlements?: ReportSettlements;
+};
 export const {
   useGetUsersMeQuery,
   useLazyGetUsersMeQuery,
@@ -679,11 +639,8 @@ export const {
   useLazyGetMyBalancesQuery,
   useListReportsQuery,
   useLazyListReportsQuery,
-  useGenerateReportMutation,
   useGetReportQuery,
   useLazyGetReportQuery,
-  useGetReportTrendsQuery,
-  useLazyGetReportTrendsQuery,
-  useMarkReportTransferPaidMutation,
-  useUnmarkReportTransferPaidMutation,
+  useCloseReportMutation,
+  useReopenReportMutation,
 } = injectedRtkApi;

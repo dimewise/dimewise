@@ -1,4 +1,3 @@
-import { useUser } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
 import {
 	AlertTriangle,
@@ -36,6 +35,7 @@ import type { HouseholdMember } from "@/store/api/api";
 import {
 	useDeleteHouseholdMutation,
 	useGetMyHouseholdQuery,
+	useGetUsersMeQuery,
 	useLeaveHouseholdMutation,
 	useRegenerateInviteCodeMutation,
 	useRemoveHouseholdMemberMutation,
@@ -43,7 +43,7 @@ import {
 
 export const HouseholdSettingsPage = () => {
 	const { t } = useTranslation();
-	const { user } = useUser();
+	const { data: currentUser } = useGetUsersMeQuery();
 	const navigate = useNavigate();
 	const { data: household, isLoading } = useGetMyHouseholdQuery(undefined);
 
@@ -67,7 +67,7 @@ export const HouseholdSettingsPage = () => {
 		return <Navigate to={RoutesEnum.householdSetup} replace />;
 	}
 
-	const isOwner = household.owner_id === user?.id;
+	const isOwner = household.owner_id === currentUser?.id;
 	const currency = household.currency;
 
 	const getMemberName = (m: HouseholdMember) => {
@@ -228,7 +228,7 @@ export const HouseholdSettingsPage = () => {
 				<CardContent>
 					<AnimatedList className="divide-y">
 						{household.members.map((member, i) => {
-							const isSelf = member.user_id === user?.id;
+							const isSelf = member.user_id === currentUser?.id;
 							const isMemberOwner = member.user_id === household.owner_id;
 							return (
 								<AnimatedListItem

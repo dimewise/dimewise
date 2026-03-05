@@ -14,13 +14,11 @@ import (
 )
 
 type Reports struct {
-	ID            uuid.UUID `sql:"primary_key"`
-	HouseholdID   uuid.UUID
-	Month         int32
-	Year          int32
-	TotalExpenses int32
-	TotalAmount   int64
-	GeneratedAt   time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID          uuid.UUID `sql:"primary_key"`
+	HouseholdID uuid.UUID
+	Month       int32
+	Year        int32
+	ClosedAt    *time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

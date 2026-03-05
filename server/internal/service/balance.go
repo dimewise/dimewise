@@ -14,18 +14,15 @@ import (
 type BalanceService struct {
 	expenses   ExpenseRepository
 	households HouseholdRepository
-	reports    ReportRepository
 }
 
 func NewBalanceService(
 	expenses ExpenseRepository,
 	households HouseholdRepository,
-	reports ReportRepository,
 ) *BalanceService {
 	return &BalanceService{
 		expenses:   expenses,
 		households: households,
-		reports:    reports,
 	}
 }
 
@@ -95,22 +92,6 @@ func (s *BalanceService) GetMyBalances(
 		} else if ps.UserID == userID {
 			// They paid, I owe them my split
 			perMember[ps.PaidBy] -= ps.Total
-		}
-	}
-
-	// Adjust for paid report transfers
-	paidTransfers, err := s.reports.GetPaidTransfersForMonth(ctx, household.ID, month, year)
-	if err != nil {
-		return nil, WrapError(ErrInternal, "failed to get paid transfers", err)
-	}
-
-	for _, t := range paidTransfers {
-		if t.FromUserID == userID {
-			// I paid them → my debt decreases (balance goes up)
-			perMember[t.ToUserID] += t.Amount
-		} else if t.ToUserID == userID {
-			// They paid me → their debt decreases (balance goes down)
-			perMember[t.FromUserID] -= t.Amount
 		}
 	}
 

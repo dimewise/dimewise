@@ -49,7 +49,7 @@ func NewServer(config *config.Config) *Server {
 	budgetService := service.NewBudgetService(budgetRepo, householdRepo)
 	expenseService := service.NewExpenseService(expenseRepo, householdRepo)
 	reportService := service.NewReportService(reportRepo, expenseRepo, householdRepo, budgetRepo)
-	balanceService := service.NewBalanceService(expenseRepo, householdRepo, reportRepo)
+	balanceService := service.NewBalanceService(expenseRepo, householdRepo)
 
 	// Handler
 	h := web.NewHandler(
