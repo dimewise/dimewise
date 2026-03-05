@@ -93,6 +93,20 @@ type BudgetOverview struct {
 	TotalSpent int64 `json:"total_spent"`
 }
 
+// CategoryTrend defines model for CategoryTrend.
+type CategoryTrend struct {
+	CategoryName string               `json:"category_name"`
+	Data         []CategoryTrendPoint `json:"data"`
+}
+
+// CategoryTrendPoint defines model for CategoryTrendPoint.
+type CategoryTrendPoint struct {
+	BudgetAmount int64 `json:"budget_amount"`
+	Month        int   `json:"month"`
+	TotalSpent   int64 `json:"total_spent"`
+	Year         int   `json:"year"`
+}
+
 // CreateBudgetCategoryRequest defines model for CreateBudgetCategoryRequest.
 type CreateBudgetCategoryRequest struct {
 	// Amount Monthly budget in smallest currency unit
@@ -236,6 +250,32 @@ type MemberBalance struct {
 	UserId     openapi_types.UUID `json:"user_id"`
 }
 
+// MemberTrend defines model for MemberTrend.
+type MemberTrend struct {
+	Data       []MemberTrendPoint `json:"data"`
+	MemberName string             `json:"member_name"`
+	UserId     openapi_types.UUID `json:"user_id"`
+}
+
+// MemberTrendPoint defines model for MemberTrendPoint.
+type MemberTrendPoint struct {
+	Month     int   `json:"month"`
+	TotalPaid int64 `json:"total_paid"`
+	Year      int   `json:"year"`
+}
+
+// MonthlySpend defines model for MonthlySpend.
+type MonthlySpend struct {
+	Month int `json:"month"`
+
+	// TotalAmount Total expenditure in smallest currency unit
+	TotalAmount int64 `json:"total_amount"`
+
+	// TotalExpenses Number of expenses in the month
+	TotalExpenses int `json:"total_expenses"`
+	Year          int `json:"year"`
+}
+
 // ProblemDetails defines model for ProblemDetails.
 type ProblemDetails struct {
 	// Detail A human-readable explanation specific to this occurrence.
@@ -340,6 +380,15 @@ type ReportTransfer struct {
 	ReportId   *openapi_types.UUID `json:"report_id,omitempty"`
 	ToName     string              `json:"to_name"`
 	ToUserId   openapi_types.UUID  `json:"to_user_id"`
+}
+
+// ReportTrends defines model for ReportTrends.
+type ReportTrends struct {
+	CategoryTrends []CategoryTrend `json:"category_trends"`
+	MemberTrends   []MemberTrend   `json:"member_trends"`
+
+	// Months Monthly spend totals, oldest-first
+	Months []MonthlySpend `json:"months"`
 }
 
 // ReportWithDetails defines model for ReportWithDetails.
@@ -452,6 +501,18 @@ type ListExpensesParams struct {
 	To         *openapi_types.Date `form:"to,omitempty" json:"to,omitempty"`
 	Limit      *int                `form:"limit,omitempty" json:"limit,omitempty"`
 	Offset     *int                `form:"offset,omitempty" json:"offset,omitempty"`
+}
+
+// GetReportTrendsParams defines parameters for GetReportTrends.
+type GetReportTrendsParams struct {
+	// Months Number of most recent months to include (default 12)
+	Months *int `form:"months,omitempty" json:"months,omitempty"`
+
+	// Month Upper bound month (1-12). Only reports up to this month/year are included.
+	Month *int `form:"month,omitempty" json:"month,omitempty"`
+
+	// Year Upper bound year. Only reports up to this month/year are included.
+	Year *int `form:"year,omitempty" json:"year,omitempty"`
 }
 
 // CreateBudgetCategoryJSONRequestBody defines body for CreateBudgetCategory for application/json ContentType.
@@ -630,6 +691,9 @@ type ClientInterface interface {
 
 	// UnmarkReportTransferPaid request
 	UnmarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetReportTrends request
+	GetReportTrends(ctx context.Context, params *GetReportTrendsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetReport request
 	GetReport(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -981,6 +1045,18 @@ func (c *Client) MarkReportTransferPaid(ctx context.Context, transferId openapi_
 
 func (c *Client) UnmarkReportTransferPaid(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUnmarkReportTransferPaidRequest(c.Server, transferId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetReportTrends(ctx context.Context, params *GetReportTrendsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetReportTrendsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1920,6 +1996,87 @@ func NewUnmarkReportTransferPaidRequest(server string, transferId openapi_types.
 	return req, nil
 }
 
+// NewGetReportTrendsRequest generates requests for GetReportTrends
+func NewGetReportTrendsRequest(server string, params *GetReportTrendsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/reports/trends")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Months != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "months", runtime.ParamLocationQuery, *params.Months); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Month != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "month", runtime.ParamLocationQuery, *params.Month); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Year != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "year", runtime.ParamLocationQuery, *params.Year); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetReportRequest generates requests for GetReport
 func NewGetReportRequest(server string, reportId openapi_types.UUID) (*http.Request, error) {
 	var err error
@@ -2143,6 +2300,9 @@ type ClientWithResponsesInterface interface {
 
 	// UnmarkReportTransferPaidWithResponse request
 	UnmarkReportTransferPaidWithResponse(ctx context.Context, transferId openapi_types.UUID, reqEditors ...RequestEditorFn) (*UnmarkReportTransferPaidResponse, error)
+
+	// GetReportTrendsWithResponse request
+	GetReportTrendsWithResponse(ctx context.Context, params *GetReportTrendsParams, reqEditors ...RequestEditorFn) (*GetReportTrendsResponse, error)
 
 	// GetReportWithResponse request
 	GetReportWithResponse(ctx context.Context, reportId openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetReportResponse, error)
@@ -2698,6 +2858,30 @@ func (r UnmarkReportTransferPaidResponse) StatusCode() int {
 	return 0
 }
 
+type GetReportTrendsResponse struct {
+	Body                      []byte
+	HTTPResponse              *http.Response
+	JSON200                   *ReportTrends
+	ApplicationproblemJSON401 *Unauthorized
+	ApplicationproblemJSON404 *NotFound
+}
+
+// Status returns HTTPResponse.Status
+func (r GetReportTrendsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetReportTrendsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type GetReportResponse struct {
 	Body                      []byte
 	HTTPResponse              *http.Response
@@ -3022,6 +3206,15 @@ func (c *ClientWithResponses) UnmarkReportTransferPaidWithResponse(ctx context.C
 		return nil, err
 	}
 	return ParseUnmarkReportTransferPaidResponse(rsp)
+}
+
+// GetReportTrendsWithResponse request returning *GetReportTrendsResponse
+func (c *ClientWithResponses) GetReportTrendsWithResponse(ctx context.Context, params *GetReportTrendsParams, reqEditors ...RequestEditorFn) (*GetReportTrendsResponse, error) {
+	rsp, err := c.GetReportTrends(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetReportTrendsResponse(rsp)
 }
 
 // GetReportWithResponse request returning *GetReportResponse
@@ -4037,6 +4230,46 @@ func ParseUnmarkReportTransferPaidResponse(rsp *http.Response) (*UnmarkReportTra
 	return response, nil
 }
 
+// ParseGetReportTrendsResponse parses an HTTP response from a GetReportTrendsWithResponse call
+func ParseGetReportTrendsResponse(rsp *http.Response) (*GetReportTrendsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetReportTrendsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ReportTrends
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest Unauthorized
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest NotFound
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.ApplicationproblemJSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetReportResponse parses an HTTP response from a GetReportWithResponse call
 func ParseGetReportResponse(rsp *http.Response) (*GetReportResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -4225,6 +4458,9 @@ type ServerInterface interface {
 	// Unmark a report transfer as paid (undo)
 	// (PATCH /reports/transfers/{transferId}/unpay)
 	UnmarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID)
+	// Get historical spending trends for the current household
+	// (GET /reports/trends)
+	GetReportTrends(w http.ResponseWriter, r *http.Request, params GetReportTrendsParams)
 	// Get full report with all details
 	// (GET /reports/{reportId})
 	GetReport(w http.ResponseWriter, r *http.Request, reportId openapi_types.UUID)
@@ -4369,6 +4605,12 @@ func (_ Unimplemented) MarkReportTransferPaid(w http.ResponseWriter, r *http.Req
 // Unmark a report transfer as paid (undo)
 // (PATCH /reports/transfers/{transferId}/unpay)
 func (_ Unimplemented) UnmarkReportTransferPaid(w http.ResponseWriter, r *http.Request, transferId openapi_types.UUID) {
+	w.WriteHeader(http.StatusNotImplemented)
+}
+
+// Get historical spending trends for the current household
+// (GET /reports/trends)
+func (_ Unimplemented) GetReportTrends(w http.ResponseWriter, r *http.Request, params GetReportTrendsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
@@ -4869,6 +5111,49 @@ func (siw *ServerInterfaceWrapper) UnmarkReportTransferPaid(w http.ResponseWrite
 	handler.ServeHTTP(w, r)
 }
 
+// GetReportTrends operation middleware
+func (siw *ServerInterfaceWrapper) GetReportTrends(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetReportTrendsParams
+
+	// ------------- Optional query parameter "months" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "months", r.URL.Query(), &params.Months)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "months", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "month" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "month", r.URL.Query(), &params.Month)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "month", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "year" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "year", r.URL.Query(), &params.Year)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "year", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetReportTrends(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetReport operation middleware
 func (siw *ServerInterfaceWrapper) GetReport(w http.ResponseWriter, r *http.Request) {
 
@@ -5100,6 +5385,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Patch(options.BaseURL+"/reports/transfers/{transferId}/unpay", wrapper.UnmarkReportTransferPaid)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/reports/trends", wrapper.GetReportTrends)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/reports/{reportId}", wrapper.GetReport)
@@ -6181,6 +6469,45 @@ func (response UnmarkReportTransferPaid404ApplicationProblemPlusJSONResponse) Vi
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetReportTrendsRequestObject struct {
+	Params GetReportTrendsParams
+}
+
+type GetReportTrendsResponseObject interface {
+	VisitGetReportTrendsResponse(w http.ResponseWriter) error
+}
+
+type GetReportTrends200JSONResponse ReportTrends
+
+func (response GetReportTrends200JSONResponse) VisitGetReportTrendsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetReportTrends401ApplicationProblemPlusJSONResponse struct {
+	UnauthorizedApplicationProblemPlusJSONResponse
+}
+
+func (response GetReportTrends401ApplicationProblemPlusJSONResponse) VisitGetReportTrendsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetReportTrends404ApplicationProblemPlusJSONResponse struct {
+	NotFoundApplicationProblemPlusJSONResponse
+}
+
+func (response GetReportTrends404ApplicationProblemPlusJSONResponse) VisitGetReportTrendsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetReportRequestObject struct {
 	ReportId openapi_types.UUID `json:"reportId"`
 }
@@ -6365,6 +6692,9 @@ type StrictServerInterface interface {
 	// Unmark a report transfer as paid (undo)
 	// (PATCH /reports/transfers/{transferId}/unpay)
 	UnmarkReportTransferPaid(ctx context.Context, request UnmarkReportTransferPaidRequestObject) (UnmarkReportTransferPaidResponseObject, error)
+	// Get historical spending trends for the current household
+	// (GET /reports/trends)
+	GetReportTrends(ctx context.Context, request GetReportTrendsRequestObject) (GetReportTrendsResponseObject, error)
 	// Get full report with all details
 	// (GET /reports/{reportId})
 	GetReport(ctx context.Context, request GetReportRequestObject) (GetReportResponseObject, error)
@@ -6995,6 +7325,32 @@ func (sh *strictHandler) UnmarkReportTransferPaid(w http.ResponseWriter, r *http
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(UnmarkReportTransferPaidResponseObject); ok {
 		if err := validResponse.VisitUnmarkReportTransferPaidResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetReportTrends operation middleware
+func (sh *strictHandler) GetReportTrends(w http.ResponseWriter, r *http.Request, params GetReportTrendsParams) {
+	var request GetReportTrendsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetReportTrends(ctx, request.(GetReportTrendsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetReportTrends")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetReportTrendsResponseObject); ok {
+		if err := validResponse.VisitGetReportTrendsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

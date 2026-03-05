@@ -17,17 +17,19 @@ export function toSmallestUnit(amount: number, currency: string): number {
 	return Math.round(amount * 100);
 }
 
-/** Format an amount (in smallest unit) for display with currency symbol */
-export function formatCurrency(amount: number, currency: string): string {
-	const displayAmount = fromSmallestUnit(amount, currency);
+/** Format a display-unit amount with currency symbol (no unit conversion) */
+export function formatDisplayAmount(amount: number, currency: string): string {
+	const upper = currency.toUpperCase();
+	const isZeroDecimal = ZERO_DECIMAL_CURRENCIES.has(upper);
 	return new Intl.NumberFormat(undefined, {
 		style: "currency",
-		currency: currency.toUpperCase(),
-		minimumFractionDigits: ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase())
-			? 0
-			: 2,
-		maximumFractionDigits: ZERO_DECIMAL_CURRENCIES.has(currency.toUpperCase())
-			? 0
-			: 2,
-	}).format(displayAmount);
+		currency: upper,
+		minimumFractionDigits: isZeroDecimal ? 0 : 2,
+		maximumFractionDigits: isZeroDecimal ? 0 : 2,
+	}).format(amount);
+}
+
+/** Format an amount (in smallest unit) for display with currency symbol */
+export function formatCurrency(amount: number, currency: string): string {
+	return formatDisplayAmount(fromSmallestUnit(amount, currency), currency);
 }

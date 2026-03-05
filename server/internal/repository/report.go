@@ -36,6 +36,40 @@ type ReportLineItemWithSplits struct {
 	Splits []model.ReportLineItemSplits
 }
 
+// MonthlySpendRow holds monthly spend totals for trend queries.
+type MonthlySpendRow struct {
+	Month         int32
+	Year          int32
+	TotalAmount   int64
+	TotalExpenses int32
+}
+
+// CategoryTrendRow holds per-category per-month spend for trend queries.
+type CategoryTrendRow struct {
+	CategoryName string
+	BudgetAmount int64
+	TotalSpent   int64
+	Month        int32
+	Year         int32
+}
+
+// MemberTrendRow holds per-member per-month spend for trend queries.
+type MemberTrendRow struct {
+	UserID     uuid.UUID
+	MemberName string
+	TotalPaid  int64
+	Month      int32
+	Year       int32
+}
+
+// TrendFilter holds parameters for trend queries.
+type TrendFilter struct {
+	HouseholdID uuid.UUID
+	Limit       int
+	Month       *int // upper bound month (inclusive)
+	Year        *int // upper bound year (inclusive)
+}
+
 // ReportReader defines read operations for reports.
 type ReportReader interface {
 	ListByHousehold(ctx context.Context, householdID uuid.UUID) ([]ReportListItem, error)
@@ -51,6 +85,9 @@ type ReportReader interface {
 		householdID uuid.UUID,
 		month, year int,
 	) ([]model.ReportTransfers, error)
+	GetMonthlySpends(ctx context.Context, filter TrendFilter) ([]MonthlySpendRow, error)
+	GetCategoryTrends(ctx context.Context, filter TrendFilter) ([]CategoryTrendRow, error)
+	GetMemberTrends(ctx context.Context, filter TrendFilter) ([]MemberTrendRow, error)
 }
 
 // ReportWriter defines write operations for reports.
@@ -584,4 +621,116 @@ func (r *ReportRepository) GetPaidTransfersForMonth(
 	}
 
 	return transfers, nil
+}
+
+// recentReportIDs builds a subquery for the N most recent report IDs,
+// optionally bounded by an upper month/year.
+func recentReportIDs(filter TrendFilter) postgres.SelectStatement {
+	rpt := table.Reports
+	limitInt := int64(filter.Limit)
+
+	condition := rpt.HouseholdID.EQ(postgres.UUID(filter.HouseholdID))
+
+	if filter.Month != nil && filter.Year != nil {
+		monthInt := int32(*filter.Month) //nolint:gosec // month is 1-12
+		yearInt := int32(*filter.Year)   //nolint:gosec // year is validated >= 2020
+
+		// year < bound OR (year = bound AND month <= bound)
+		condition = condition.AND(
+			rpt.Year.LT(postgres.Int32(yearInt)).OR(
+				rpt.Year.EQ(postgres.Int32(yearInt)).AND(
+					rpt.Month.LT_EQ(postgres.Int32(monthInt)),
+				),
+			),
+		)
+	}
+
+	return postgres.SELECT(rpt.ID).
+		FROM(rpt).
+		WHERE(condition).
+		ORDER_BY(rpt.Year.DESC(), rpt.Month.DESC()).
+		LIMIT(limitInt)
+}
+
+func (r *ReportRepository) GetMonthlySpends(
+	ctx context.Context,
+	filter TrendFilter,
+) ([]MonthlySpendRow, error) {
+	rpt := table.Reports
+
+	stmt := postgres.SELECT(
+		rpt.Month.AS("monthly_spend_row.month"),
+		rpt.Year.AS("monthly_spend_row.year"),
+		rpt.TotalAmount.AS("monthly_spend_row.total_amount"),
+		rpt.TotalExpenses.AS("monthly_spend_row.total_expenses"),
+	).FROM(rpt).
+		WHERE(rpt.ID.IN(recentReportIDs(filter))).
+		ORDER_BY(rpt.Year.DESC(), rpt.Month.DESC())
+
+	var rows []MonthlySpendRow
+
+	err := stmt.QueryContext(ctx, r.db, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func (r *ReportRepository) GetCategoryTrends(
+	ctx context.Context,
+	filter TrendFilter,
+) ([]CategoryTrendRow, error) {
+	rpt := table.Reports
+	cb := table.ReportCategoryBreakdowns
+
+	stmt := postgres.SELECT(
+		cb.CategoryName.AS("category_trend_row.category_name"),
+		cb.BudgetAmount.AS("category_trend_row.budget_amount"),
+		cb.TotalSpent.AS("category_trend_row.total_spent"),
+		rpt.Month.AS("category_trend_row.month"),
+		rpt.Year.AS("category_trend_row.year"),
+	).FROM(
+		cb.INNER_JOIN(rpt, rpt.ID.EQ(cb.ReportID)),
+	).WHERE(
+		rpt.ID.IN(recentReportIDs(filter)),
+	).ORDER_BY(rpt.Year.ASC(), rpt.Month.ASC(), cb.CategoryName.ASC())
+
+	var rows []CategoryTrendRow
+
+	err := stmt.QueryContext(ctx, r.db, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func (r *ReportRepository) GetMemberTrends(
+	ctx context.Context,
+	filter TrendFilter,
+) ([]MemberTrendRow, error) {
+	rpt := table.Reports
+	ms := table.ReportMemberSummaries
+
+	stmt := postgres.SELECT(
+		ms.UserID.AS("member_trend_row.user_id"),
+		ms.MemberName.AS("member_trend_row.member_name"),
+		ms.TotalPaid.AS("member_trend_row.total_paid"),
+		rpt.Month.AS("member_trend_row.month"),
+		rpt.Year.AS("member_trend_row.year"),
+	).FROM(
+		ms.INNER_JOIN(rpt, rpt.ID.EQ(ms.ReportID)),
+	).WHERE(
+		rpt.ID.IN(recentReportIDs(filter)),
+	).ORDER_BY(rpt.Year.ASC(), rpt.Month.ASC(), ms.MemberName.ASC())
+
+	var rows []MemberTrendRow
+
+	err := stmt.QueryContext(ctx, r.db, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
 }

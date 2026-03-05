@@ -3,11 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"slices"
 	"sort"
 	"time"
 
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
 
 	"dimewise/generated/dimewise/public/model"
 	"dimewise/internal/repository"
@@ -16,6 +18,9 @@ import (
 const (
 	minReportYear     = 2020
 	maxReportExpenses = 10000 // TODO: implement proper pagination for large households.
+	minTrendMonths    = 2
+	maxTrendMonths    = 24
+	defaultTrendMonth = 12
 )
 
 // ReportRepository is the interface the service depends on.
@@ -65,6 +70,113 @@ func (s *ReportService) List(
 	}
 
 	return reports, nil
+}
+
+// TrendsResult holds the aggregated trend data.
+type TrendsResult struct {
+	Months         []repository.MonthlySpendRow
+	CategoryTrends map[string][]repository.CategoryTrendRow // keyed by category name
+	MemberTrends   map[uuid.UUID]TrendsMember               // keyed by user ID
+}
+
+// TrendsMember holds member info and their trend data points.
+type TrendsMember struct {
+	MemberName string
+	Data       []repository.MemberTrendRow
+}
+
+func (s *ReportService) GetTrends(
+	ctx context.Context,
+	userID uuid.UUID,
+	months *int,
+	month *int,
+	year *int,
+) (*TrendsResult, error) {
+	household, err := s.households.GetByUserID(ctx, userID)
+	if err != nil {
+		if errors.Is(err, qrm.ErrNoRows) {
+			return nil, NewError(ErrNotFound, "user does not belong to any household")
+		}
+
+		return nil, WrapError(ErrInternal, "failed to get household", err)
+	}
+
+	limit := defaultTrendMonth
+	if months != nil {
+		limit = *months
+	}
+
+	if limit < minTrendMonths {
+		limit = minTrendMonths
+	}
+
+	if limit > maxTrendMonths {
+		limit = maxTrendMonths
+	}
+
+	filter := repository.TrendFilter{
+		HouseholdID: household.ID,
+		Limit:       limit,
+		Month:       month,
+		Year:        year,
+	}
+
+	var (
+		monthlySpends []repository.MonthlySpendRow
+		catRows       []repository.CategoryTrendRow
+		memberRows    []repository.MemberTrendRow
+	)
+
+	g, gCtx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		var gErr error
+		monthlySpends, gErr = s.reports.GetMonthlySpends(gCtx, filter)
+
+		return gErr
+	})
+
+	g.Go(func() error {
+		var gErr error
+		catRows, gErr = s.reports.GetCategoryTrends(gCtx, filter)
+
+		return gErr
+	})
+
+	g.Go(func() error {
+		var gErr error
+		memberRows, gErr = s.reports.GetMemberTrends(gCtx, filter)
+
+		return gErr
+	})
+
+	if gErr := g.Wait(); gErr != nil {
+		return nil, WrapError(ErrInternal, "failed to get trend data", gErr)
+	}
+
+	// Reverse monthly spends to oldest-first
+	slices.Reverse(monthlySpends)
+
+	// Group category rows by name
+	catTrends := make(map[string][]repository.CategoryTrendRow)
+	for _, row := range catRows {
+		catTrends[row.CategoryName] = append(catTrends[row.CategoryName], row)
+	}
+
+	// Group member rows by user ID
+	memTrends := make(map[uuid.UUID]TrendsMember)
+	for _, row := range memberRows {
+		tm := memTrends[row.UserID]
+		tm.MemberName = row.MemberName
+		tm.Data = append(tm.Data, row)
+		memTrends[row.UserID] = tm
+	}
+
+	return &TrendsResult{
+		Months:         monthlySpends,
+		CategoryTrends: catTrends,
+		MemberTrends:   memTrends,
+	}, nil
 }
 
 func (s *ReportService) GetByID(

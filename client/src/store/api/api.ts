@@ -217,6 +217,20 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/reports/${queryArg.reportId}` }),
         providesTags: ["Reports"],
       }),
+      getReportTrends: build.query<
+        GetReportTrendsApiResponse,
+        GetReportTrendsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/reports/trends`,
+          params: {
+            months: queryArg.months,
+            month: queryArg.month,
+            year: queryArg.year,
+          },
+        }),
+        providesTags: ["Reports"],
+      }),
       markReportTransferPaid: build.mutation<
         MarkReportTransferPaidApiResponse,
         MarkReportTransferPaidApiArg
@@ -337,6 +351,15 @@ export type GenerateReportApiArg = {
 export type GetReportApiResponse = /** status 200 OK */ ReportWithDetails;
 export type GetReportApiArg = {
   reportId: string;
+};
+export type GetReportTrendsApiResponse = /** status 200 OK */ ReportTrends;
+export type GetReportTrendsApiArg = {
+  /** Number of most recent months to include (default 12) */
+  months?: number;
+  /** Upper bound month (1-12). Only reports up to this month/year are included. */
+  month?: number;
+  /** Upper bound year. Only reports up to this month/year are included. */
+  year?: number;
 };
 export type MarkReportTransferPaidApiResponse =
   /** status 200 Transfer marked as paid */ ReportTransfer;
@@ -592,6 +615,40 @@ export type GenerateReportRequest = {
   month: number;
   year: number;
 };
+export type MonthlySpend = {
+  month: number;
+  year: number;
+  /** Total expenditure in smallest currency unit */
+  total_amount: number;
+  /** Number of expenses in the month */
+  total_expenses: number;
+};
+export type CategoryTrendPoint = {
+  month: number;
+  year: number;
+  total_spent: number;
+  budget_amount: number;
+};
+export type CategoryTrend = {
+  category_name: string;
+  data: CategoryTrendPoint[];
+};
+export type MemberTrendPoint = {
+  month: number;
+  year: number;
+  total_paid: number;
+};
+export type MemberTrend = {
+  user_id: string;
+  member_name: string;
+  data: MemberTrendPoint[];
+};
+export type ReportTrends = {
+  /** Monthly spend totals, oldest-first */
+  months: MonthlySpend[];
+  category_trends: CategoryTrend[];
+  member_trends: MemberTrend[];
+};
 export const {
   useGetUsersMeQuery,
   useLazyGetUsersMeQuery,
@@ -625,6 +682,8 @@ export const {
   useGenerateReportMutation,
   useGetReportQuery,
   useLazyGetReportQuery,
+  useGetReportTrendsQuery,
+  useLazyGetReportTrendsQuery,
   useMarkReportTransferPaidMutation,
   useUnmarkReportTransferPaidMutation,
 } = injectedRtkApi;
