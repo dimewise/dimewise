@@ -132,6 +132,30 @@ func (h *Handler) UnmarkReportTransferPaid(
 	return oapi.UnmarkReportTransferPaid200JSONResponse(reportTransferToAPI(transfer)), nil
 }
 
+// GetReportTrends handles GET /reports/trends.
+func (h *Handler) GetReportTrends(
+	ctx context.Context,
+	request oapi.GetReportTrendsRequestObject,
+) (oapi.GetReportTrendsResponseObject, error) {
+	user, ok := middleware.GetAppUserFromContext(ctx)
+	if !ok {
+		return oapi.GetReportTrends401ApplicationProblemPlusJSONResponse{
+			UnauthorizedApplicationProblemPlusJSONResponse: oapi.UnauthorizedApplicationProblemPlusJSONResponse(
+				newProblem(http.StatusUnauthorized, "Unauthorized", "user not found in context"),
+			),
+		}, nil
+	}
+
+	result, err := h.reportService.GetTrends(
+		ctx, user.ID, request.Params.Months, request.Params.Month, request.Params.Year,
+	)
+	if err != nil {
+		return mapReportTrendsError(err)
+	}
+
+	return oapi.GetReportTrends200JSONResponse(trendsResultToAPI(result)), nil
+}
+
 // --- Type mappers ---
 
 func reportListItemToAPI(r *repository.ReportListItem) oapi.Report {
@@ -257,6 +281,60 @@ func reportWithDetailsToAPI(r *repository.ReportWithDetails) oapi.ReportWithDeta
 	}
 }
 
+func trendsResultToAPI(r *service.TrendsResult) oapi.ReportTrends {
+	months := make([]oapi.MonthlySpend, 0, len(r.Months))
+	for _, m := range r.Months {
+		months = append(months, oapi.MonthlySpend{
+			Month:         int(m.Month),
+			Year:          int(m.Year),
+			TotalAmount:   m.TotalAmount,
+			TotalExpenses: int(m.TotalExpenses),
+		})
+	}
+
+	catTrends := make([]oapi.CategoryTrend, 0, len(r.CategoryTrends))
+	for name, rows := range r.CategoryTrends {
+		points := make([]oapi.CategoryTrendPoint, 0, len(rows))
+		for _, row := range rows {
+			points = append(points, oapi.CategoryTrendPoint{
+				Month:        int(row.Month),
+				Year:         int(row.Year),
+				TotalSpent:   row.TotalSpent,
+				BudgetAmount: row.BudgetAmount,
+			})
+		}
+
+		catTrends = append(catTrends, oapi.CategoryTrend{
+			CategoryName: name,
+			Data:         points,
+		})
+	}
+
+	memberTrends := make([]oapi.MemberTrend, 0, len(r.MemberTrends))
+	for uid, tm := range r.MemberTrends {
+		points := make([]oapi.MemberTrendPoint, 0, len(tm.Data))
+		for _, row := range tm.Data {
+			points = append(points, oapi.MemberTrendPoint{
+				Month:     int(row.Month),
+				Year:      int(row.Year),
+				TotalPaid: row.TotalPaid,
+			})
+		}
+
+		memberTrends = append(memberTrends, oapi.MemberTrend{
+			UserId:     uid,
+			MemberName: tm.MemberName,
+			Data:       points,
+		})
+	}
+
+	return oapi.ReportTrends{
+		Months:         months,
+		CategoryTrends: catTrends,
+		MemberTrends:   memberTrends,
+	}
+}
+
 // --- Error mappers ---
 
 func mapReportListError(
@@ -357,6 +435,26 @@ func mapReportTransferPaidError(
 		return oapi.MarkReportTransferPaid403ApplicationProblemPlusJSONResponse{
 			ForbiddenApplicationProblemPlusJSONResponse: oapi.ForbiddenApplicationProblemPlusJSONResponse(
 				newProblem(http.StatusForbidden, "Forbidden", svcErr.Message),
+			),
+		}, nil
+	default:
+		return nil, err
+	}
+}
+
+func mapReportTrendsError(
+	err error,
+) (oapi.GetReportTrendsResponseObject, error) {
+	var svcErr *service.Error
+	if !errors.As(err, &svcErr) {
+		return nil, err
+	}
+
+	switch svcErr.Code {
+	case service.ErrNotFound:
+		return oapi.GetReportTrends404ApplicationProblemPlusJSONResponse{
+			NotFoundApplicationProblemPlusJSONResponse: oapi.NotFoundApplicationProblemPlusJSONResponse(
+				newProblem(http.StatusNotFound, "Not Found", svcErr.Message),
 			),
 		}, nil
 	default:

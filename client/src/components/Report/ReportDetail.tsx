@@ -1,16 +1,12 @@
-import { AnimatePresence, motion } from "framer-motion";
 import {
 	ArrowRight,
 	Check,
-	ChevronDown,
-	ChevronUp,
 	FileText,
 	PiggyBank,
 	Receipt,
 	Undo2,
 	Users,
 } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { SkeletonPage } from "@/components/ui/skeleton";
-import { fadeIn } from "@/lib/motion";
 import type { ReportLineItem } from "@/store/api/api";
 import {
 	useGetReportQuery,
@@ -28,6 +23,7 @@ import {
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
 import { formatDate, formatMonthYear } from "@/utils/date";
+import { AnalyticsSection } from "./AnalyticsSection";
 
 type Props = {
 	reportId: string;
@@ -46,7 +42,6 @@ export const ReportDetail = ({
 	const { data: report, isLoading } = useGetReportQuery({ reportId });
 	const [markPaid] = useMarkReportTransferPaidMutation();
 	const [unmarkPaid] = useUnmarkReportTransferPaidMutation();
-	const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
 	const handleMarkPaid = async (transferId: string) => {
 		try {
@@ -103,61 +98,20 @@ export const ReportDetail = ({
 				</p>
 			</div>
 
-			{/* Member Summaries */}
-			{report.member_summaries.length > 0 && (
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="flex items-center gap-2 text-base">
-							<Users className="h-4 w-4 text-muted-foreground" />
-							{t("reportDetail.memberBreakdown")}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-3">
-						{report.member_summaries.map((ms) => {
-							const isPositive = ms.net_balance > 0;
-							const isZero = ms.net_balance === 0;
-							return (
-								<div key={ms.id} className="space-y-1.5">
-									<div className="flex items-center justify-between">
-										<p className="text-sm font-medium">{ms.member_name}</p>
-										<span
-											className={`text-sm font-bold ${
-												isZero
-													? "text-muted-foreground"
-													: isPositive
-														? "text-success"
-														: "text-destructive"
-											}`}
-										>
-											{isPositive ? "+" : ""}
-											{formatCurrency(ms.net_balance, currency)}
-										</span>
-									</div>
-									<div className="flex items-center gap-4 text-xs text-muted-foreground">
-										<span>
-											{t("reportDetail.paid")}{" "}
-											{formatCurrency(ms.total_paid, currency)}
-										</span>
-										<span>
-											{t("reportDetail.owed")}{" "}
-											{formatCurrency(ms.total_owed, currency)}
-										</span>
-									</div>
-									<Separator />
-								</div>
-							);
-						})}
-					</CardContent>
-				</Card>
-			)}
+			{/* 1. Analytics */}
+			<AnalyticsSection
+				currency={currency}
+				month={report.month}
+				year={report.year}
+			/>
 
-			{/* Category Breakdown */}
+			{/* 2. Category Subtotals */}
 			{report.category_breakdowns.length > 0 && (
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 text-base">
 							<PiggyBank className="h-4 w-4 text-muted-foreground" />
-							{t("reportDetail.categoryBreakdown")}
+							{t("reportDetail.categorySubtotals")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
@@ -199,40 +153,56 @@ export const ReportDetail = ({
 				</Card>
 			)}
 
-			{/* Expense Log */}
-			{report.line_items.length > 0 && (
+			{/* 3. Account Summary */}
+			{report.member_summaries.length > 0 && (
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 text-base">
-							<Receipt className="h-4 w-4 text-muted-foreground" />
-							{t("reportDetail.expenseLog", {
-								count: report.line_items.length,
-							})}
+							<Users className="h-4 w-4 text-muted-foreground" />
+							{t("reportDetail.accountSummary")}
 						</CardTitle>
 					</CardHeader>
-					<CardContent className="space-y-0 divide-y divide-border">
-						{report.line_items.map((li) => (
-							<LineItemRow
-								key={li.id}
-								item={li}
-								currency={currency}
-								expanded={expandedItem === li.id}
-								onToggle={() =>
-									setExpandedItem(expandedItem === li.id ? null : li.id)
-								}
-							/>
+					<CardContent className="space-y-3">
+						{report.member_summaries.map((ms) => (
+							<div key={ms.id} className="space-y-1.5">
+								<div className="flex items-center justify-between">
+									<p className="text-sm font-medium">{ms.member_name}</p>
+								</div>
+								<div className="flex items-center gap-4 text-xs">
+									<span className="text-muted-foreground">
+										{t("reportDetail.totalPaid")}{" "}
+										<span className="font-medium text-foreground">
+											{formatCurrency(ms.total_paid, currency)}
+										</span>
+									</span>
+									<span className="text-muted-foreground">
+										{t("reportDetail.fairShare")}{" "}
+										<span className="font-medium text-foreground">
+											{formatCurrency(ms.total_owed, currency)}
+										</span>
+									</span>
+								</div>
+								{ms.net_balance !== 0 && (
+									<p className="text-[11px] text-muted-foreground">
+										{t("reportDetail.netPosition")}{" "}
+										{ms.net_balance > 0 ? "+" : ""}
+										{formatCurrency(ms.net_balance, currency)}
+									</p>
+								)}
+								<Separator />
+							</div>
 						))}
 					</CardContent>
 				</Card>
 			)}
 
-			{/* Transfers */}
+			{/* 4. Suggested Settlements */}
 			{report.transfers.length > 0 && (
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="flex items-center gap-2 text-base">
 							<ArrowRight className="h-4 w-4 text-muted-foreground" />
-							{t("reportDetail.transfers")}
+							{t("reportDetail.suggestedSettlements")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
@@ -311,30 +281,51 @@ export const ReportDetail = ({
 					</CardContent>
 				</Card>
 			)}
+
+			{/* 5. Ledger */}
+			{report.line_items.length > 0 && (
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="flex items-center gap-2 text-base">
+							<Receipt className="h-4 w-4 text-muted-foreground" />
+							{t("reportDetail.ledger", {
+								count: report.line_items.length,
+							})}
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="divide-y divide-border">
+							{report.line_items.map((li) => (
+								<LineItemRow key={li.id} item={li} currency={currency} />
+							))}
+						</div>
+						<Separator className="my-3" />
+						<div className="flex items-center justify-between">
+							<p className="text-sm font-semibold">
+								{t("reportDetail.ledgerTotal")}
+							</p>
+							<p className="text-sm font-bold">
+								{formatCurrency(report.total_amount, currency)}
+							</p>
+						</div>
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	);
 };
 
-// Sub-component for expandable line items
+// Sub-component for always-visible line items with inline splits
 function LineItemRow({
 	item,
 	currency,
-	expanded,
-	onToggle,
 }: {
 	item: ReportLineItem;
 	currency: string;
-	expanded: boolean;
-	onToggle: () => void;
 }) {
-	const { t } = useTranslation();
 	return (
 		<div className="py-3 first:pt-0 last:pb-0">
-			<button
-				type="button"
-				className="w-full flex items-center justify-between text-left"
-				onClick={onToggle}
-			>
+			<div className="flex items-start justify-between">
 				<div className="min-w-0 flex-1">
 					<div className="flex items-center gap-2 flex-wrap">
 						<p className="text-sm font-medium truncate">{item.expense_title}</p>
@@ -349,57 +340,35 @@ function LineItemRow({
 						{formatDate(item.incurred_at, "MMM d, yyyy")}
 					</p>
 				</div>
-				<div className="flex items-center gap-2 shrink-0 ml-3">
-					<p className="text-sm font-bold">
-						{formatCurrency(item.amount, currency)}
-					</p>
-					{expanded ? (
-						<ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-					) : (
-						<ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-					)}
+				<p className="text-sm font-bold shrink-0 ml-3">
+					{formatCurrency(item.amount, currency)}
+				</p>
+			</div>
+
+			{/* Notes */}
+			{item.notes && (
+				<div className="flex items-start gap-2 bg-muted rounded-lg p-2 mt-2">
+					<FileText className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+					<p className="text-xs text-muted-foreground">{item.notes}</p>
 				</div>
-			</button>
+			)}
 
-			<AnimatePresence>
-				{expanded && (
-					<motion.div
-						className="mt-2 ml-1 space-y-2"
-						variants={fadeIn}
-						initial="initial"
-						animate="animate"
-						exit="exit"
-					>
-						{/* Notes */}
-						{item.notes && (
-							<div className="flex items-start gap-2 bg-muted rounded-lg p-2.5">
-								<FileText className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
-								<p className="text-xs text-muted-foreground">{item.notes}</p>
-							</div>
-						)}
-
-						{/* Splits */}
-						<div className="space-y-1">
-							<p className="text-xs font-medium text-muted-foreground">
-								{t("reportDetail.splitBreakdown")}
-							</p>
-							{item.splits.map((split) => (
-								<div
-									key={split.id}
-									className="flex items-center justify-between text-xs"
-								>
-									<span className="text-muted-foreground">
-										{split.member_name}
-									</span>
-									<span className="font-medium">
-										{formatCurrency(split.amount, currency)}
-									</span>
-								</div>
-							))}
+			{/* Splits — always visible */}
+			{item.splits.length > 1 && (
+				<div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
+					{item.splits.map((split) => (
+						<div
+							key={split.id}
+							className="flex items-center justify-between text-[11px] text-muted-foreground"
+						>
+							<span className="truncate">{split.member_name}</span>
+							<span className="font-medium ml-1">
+								{formatCurrency(split.amount, currency)}
+							</span>
 						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+					))}
+				</div>
+			)}
 		</div>
 	);
 }
