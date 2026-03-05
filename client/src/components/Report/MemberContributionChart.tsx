@@ -98,7 +98,7 @@ export const MemberContributionChart = ({
 					axisLine={false}
 					width={50}
 				/>
-				<Tooltip formatter={(value: number) => formatValue(value)} />
+				<Tooltip formatter={(value) => formatValue(Number(value))} />
 				<Legend wrapperStyle={{ fontSize: 12 }} />
 
 				{data.map((member, i) => (
