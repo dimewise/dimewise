@@ -2,26 +2,20 @@ import { BarChart3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useGetReportTrendsQuery } from "@/store/api/api";
+import type { ReportTrends } from "@/store/api/api";
 import { CategoryDeltaList } from "./CategoryDeltaList";
 import { MemberContributionChart } from "./MemberContributionChart";
 import { SpendTrendChart } from "./SpendTrendChart";
 
 type Props = {
 	currency: string;
+	trends: ReportTrends;
 	month: number;
 	year: number;
 };
 
-export const AnalyticsSection = ({ currency, month, year }: Props) => {
+export const AnalyticsSection = ({ currency, trends, month, year }: Props) => {
 	const { t } = useTranslation();
-	const { data: trends, isLoading } = useGetReportTrendsQuery({
-		months: 24,
-		month,
-		year,
-	});
-
-	if (isLoading) return null;
 
 	if (!trends || trends.months.length < 2) {
 		return (

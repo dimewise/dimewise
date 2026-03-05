@@ -19,6 +19,40 @@ type ExpenseWithSplits struct {
 	Splits []model.ExpenseSplits
 }
 
+// MonthlySpendRow holds monthly spend totals for trend queries.
+type MonthlySpendRow struct {
+	Month         int32
+	Year          int32
+	TotalAmount   int64
+	TotalExpenses int32
+}
+
+// CategoryTrendRow holds per-category per-month spend for trend queries.
+type CategoryTrendRow struct {
+	CategoryName string
+	BudgetAmount int64
+	TotalSpent   int64
+	Month        int32
+	Year         int32
+}
+
+// MemberTrendRow holds per-member per-month spend for trend queries.
+type MemberTrendRow struct {
+	UserID     uuid.UUID
+	MemberName string
+	TotalPaid  int64
+	Month      int32
+	Year       int32
+}
+
+// TrendFilter holds parameters for trend queries.
+type TrendFilter struct {
+	HouseholdID uuid.UUID
+	Limit       int
+	Month       *int // upper bound month (inclusive)
+	Year        *int // upper bound year (inclusive)
+}
+
 // ExpenseFilter holds optional filter criteria for listing expenses.
 type ExpenseFilter struct {
 	CategoryID *uuid.UUID
@@ -68,6 +102,9 @@ type ExpenseReader interface {
 		from time.Time,
 		to time.Time,
 	) ([]PairwiseSplit, error)
+	GetMonthlySpends(ctx context.Context, filter TrendFilter) ([]MonthlySpendRow, error)
+	GetCategoryTrends(ctx context.Context, filter TrendFilter) ([]CategoryTrendRow, error)
+	GetMemberTrends(ctx context.Context, filter TrendFilter) ([]MemberTrendRow, error)
 }
 
 // ExpenseWriter defines write operations for expenses.
@@ -547,4 +584,173 @@ func (r *ExpenseRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := stmt.ExecContext(ctx, r.db)
 
 	return err
+}
+
+func (r *ExpenseRepository) GetMonthlySpends(
+	ctx context.Context,
+	filter TrendFilter,
+) ([]MonthlySpendRow, error) {
+	limitInt := int64(filter.Limit)
+
+	stmt := postgres.RawStatement(`
+		SELECT
+			EXTRACT(MONTH FROM e.incurred_at)::int AS "monthly_spend_row.month",
+			EXTRACT(YEAR FROM e.incurred_at)::int  AS "monthly_spend_row.year",
+			COALESCE(SUM(e.amount), 0)             AS "monthly_spend_row.total_amount",
+			COUNT(*)::int                           AS "monthly_spend_row.total_expenses"
+		FROM expenses e
+		WHERE e.household_id = #householdID::uuid
+			AND (#upperBound::timestamptz IS NULL OR e.incurred_at < #upperBound::timestamptz)
+		GROUP BY
+			EXTRACT(MONTH FROM e.incurred_at),
+			EXTRACT(YEAR FROM e.incurred_at)
+		ORDER BY
+			EXTRACT(YEAR FROM e.incurred_at) DESC,
+			EXTRACT(MONTH FROM e.incurred_at) DESC
+		LIMIT #lim
+	`, postgres.RawArgs{
+		"#householdID": filter.HouseholdID,
+		"#upperBound":  trendUpperBound(filter),
+		"#lim":         limitInt,
+	})
+
+	var rows []MonthlySpendRow
+
+	err := stmt.QueryContext(ctx, r.db, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func (r *ExpenseRepository) GetCategoryTrends(
+	ctx context.Context,
+	filter TrendFilter,
+) ([]CategoryTrendRow, error) {
+	limitInt := int64(filter.Limit)
+
+	stmt := postgres.RawStatement(`
+		WITH recent_months AS (
+			SELECT DISTINCT
+				EXTRACT(MONTH FROM e.incurred_at)::int AS month,
+				EXTRACT(YEAR FROM e.incurred_at)::int  AS year
+			FROM expenses e
+			WHERE e.household_id = #householdID::uuid
+				AND (#upperBound::timestamptz IS NULL OR e.incurred_at < #upperBound::timestamptz)
+			ORDER BY year DESC, month DESC
+			LIMIT #lim
+		)
+		SELECT
+			bc.name                                    AS "category_trend_row.category_name",
+			bc.amount                                  AS "category_trend_row.budget_amount",
+			COALESCE(SUM(e.amount), 0)                 AS "category_trend_row.total_spent",
+			EXTRACT(MONTH FROM e.incurred_at)::int     AS "category_trend_row.month",
+			EXTRACT(YEAR FROM e.incurred_at)::int      AS "category_trend_row.year"
+		FROM expenses e
+		INNER JOIN budget_categories bc ON bc.id = e.budget_category_id
+		WHERE e.household_id = #householdID::uuid
+			AND e.budget_category_id IS NOT NULL
+			AND EXISTS (
+				SELECT 1 FROM recent_months rm
+				WHERE rm.month = EXTRACT(MONTH FROM e.incurred_at)::int
+				  AND rm.year = EXTRACT(YEAR FROM e.incurred_at)::int
+			)
+		GROUP BY bc.name, bc.amount,
+			EXTRACT(MONTH FROM e.incurred_at),
+			EXTRACT(YEAR FROM e.incurred_at)
+		ORDER BY
+			EXTRACT(YEAR FROM e.incurred_at) ASC,
+			EXTRACT(MONTH FROM e.incurred_at) ASC,
+			bc.name ASC
+	`, postgres.RawArgs{
+		"#householdID": filter.HouseholdID,
+		"#upperBound":  trendUpperBound(filter),
+		"#lim":         limitInt,
+	})
+
+	var rows []CategoryTrendRow
+
+	err := stmt.QueryContext(ctx, r.db, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+func (r *ExpenseRepository) GetMemberTrends(
+	ctx context.Context,
+	filter TrendFilter,
+) ([]MemberTrendRow, error) {
+	limitInt := int64(filter.Limit)
+
+	stmt := postgres.RawStatement(`
+		WITH recent_months AS (
+			SELECT DISTINCT
+				EXTRACT(MONTH FROM e.incurred_at)::int AS month,
+				EXTRACT(YEAR FROM e.incurred_at)::int  AS year
+			FROM expenses e
+			WHERE e.household_id = #householdID::uuid
+				AND (#upperBound::timestamptz IS NULL OR e.incurred_at < #upperBound::timestamptz)
+			ORDER BY year DESC, month DESC
+			LIMIT #lim
+		)
+		SELECT
+			e.paid_by                                  AS "member_trend_row.user_id",
+			COALESCE(u.first_name || ' ' || u.last_name, u.email)
+			                                           AS "member_trend_row.member_name",
+			COALESCE(SUM(e.amount), 0)                 AS "member_trend_row.total_paid",
+			EXTRACT(MONTH FROM e.incurred_at)::int     AS "member_trend_row.month",
+			EXTRACT(YEAR FROM e.incurred_at)::int      AS "member_trend_row.year"
+		FROM expenses e
+		INNER JOIN users u ON u.id = e.paid_by
+		WHERE e.household_id = #householdID::uuid
+			AND EXISTS (
+				SELECT 1 FROM recent_months rm
+				WHERE rm.month = EXTRACT(MONTH FROM e.incurred_at)::int
+				  AND rm.year = EXTRACT(YEAR FROM e.incurred_at)::int
+			)
+		GROUP BY e.paid_by, u.first_name, u.last_name, u.email,
+			EXTRACT(MONTH FROM e.incurred_at),
+			EXTRACT(YEAR FROM e.incurred_at)
+		ORDER BY
+			EXTRACT(YEAR FROM e.incurred_at) ASC,
+			EXTRACT(MONTH FROM e.incurred_at) ASC,
+			"member_trend_row.member_name" ASC
+	`, postgres.RawArgs{
+		"#householdID": filter.HouseholdID,
+		"#upperBound":  trendUpperBound(filter),
+		"#lim":         limitInt,
+	})
+
+	var rows []MemberTrendRow
+
+	err := stmt.QueryContext(ctx, r.db, &rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
+
+// trendUpperBound computes the exclusive upper bound timestamp for trend filtering.
+// Returns nil if no bound is set.
+func trendUpperBound(filter TrendFilter) *time.Time {
+	if filter.Month == nil || filter.Year == nil {
+		return nil
+	}
+
+	boundYear := *filter.Year
+	boundMonth := *filter.Month + 1
+
+	const monthsInYear = 12
+	if boundMonth > monthsInYear {
+		boundMonth = 1
+		boundYear++
+	}
+
+	t := time.Date(boundYear, time.Month(boundMonth), 1, 0, 0, 0, 0, time.UTC)
+
+	return &t
 }

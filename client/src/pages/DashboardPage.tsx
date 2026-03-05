@@ -72,7 +72,10 @@ export const DashboardPage = () => {
 	const [modalOpen, setModalOpen] = useState(false);
 	const [deletingExpense, setDeletingExpense] =
 		useState<ExpenseWithSplits | null>(null);
-	const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+	const [selectedReport, setSelectedReport] = useState<{
+		month: number;
+		year: number;
+	} | null>(null);
 
 	const handleRefresh = useCallback(
 		() => Promise.all([refetchExpenses(), refetchReports()]),
@@ -260,34 +263,39 @@ export const DashboardPage = () => {
 							</div>
 						) : reports && reports.length > 0 ? (
 							<AnimatedList className="divide-y divide-border">
-								{reports.slice(0, 3).map((r, i) => (
-									<AnimatedListItem
-										key={r.id}
-										itemKey={r.id}
-										index={i}
-										className="py-3 first:pt-0 last:pb-0"
-									>
-										<Touchable
-											className="flex items-center gap-3 w-full text-left"
-											onClick={() => setSelectedReportId(r.id)}
+								{reports.slice(0, 3).map((r, i) => {
+									const key = `${r.month}-${r.year}`;
+									return (
+										<AnimatedListItem
+											key={key}
+											itemKey={key}
+											index={i}
+											className="py-3 first:pt-0 last:pb-0"
 										>
-											<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
-												<Calendar className="h-4 w-4 text-muted-foreground" />
-											</div>
-											<div className="min-w-0 flex-1">
-												<p className="text-sm font-medium">
-													{formatMonthYear(r.month, r.year)}
-												</p>
-												<p className="text-xs text-muted-foreground">
-													{t("dashboard.expense", {
-														count: r.total_expenses,
-													})}{" "}
-													&middot; {formatCurrency(r.total_amount, currency)}
-												</p>
-											</div>
-										</Touchable>
-									</AnimatedListItem>
-								))}
+											<Touchable
+												className="flex items-center gap-3 w-full text-left"
+												onClick={() =>
+													setSelectedReport({ month: r.month, year: r.year })
+												}
+											>
+												<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+													<Calendar className="h-4 w-4 text-muted-foreground" />
+												</div>
+												<div className="min-w-0 flex-1">
+													<p className="text-sm font-medium">
+														{formatMonthYear(r.month, r.year)}
+													</p>
+													<p className="text-xs text-muted-foreground">
+														{t("dashboard.expense", {
+															count: r.total_expenses,
+														})}{" "}
+														&middot; {formatCurrency(r.total_amount, currency)}
+													</p>
+												</div>
+											</Touchable>
+										</AnimatedListItem>
+									);
+								})}
 							</AnimatedList>
 						) : (
 							<EmptyState
@@ -362,11 +370,12 @@ export const DashboardPage = () => {
 				</Dialog>
 
 				{/* Report summary modal */}
-				{selectedReportId && (
+				{selectedReport && (
 					<ReportSummaryModal
-						open={!!selectedReportId}
-						onClose={() => setSelectedReportId(null)}
-						reportId={selectedReportId}
+						open
+						onClose={() => setSelectedReport(null)}
+						month={selectedReport.month}
+						year={selectedReport.year}
 						currency={currency}
 					/>
 				)}

@@ -17,11 +17,6 @@ func UseSchema(schema string) {
 	GooseDbVersion = GooseDbVersion.FromSchema(schema)
 	HouseholdMembers = HouseholdMembers.FromSchema(schema)
 	Households = Households.FromSchema(schema)
-	ReportCategoryBreakdowns = ReportCategoryBreakdowns.FromSchema(schema)
-	ReportLineItemSplits = ReportLineItemSplits.FromSchema(schema)
-	ReportLineItems = ReportLineItems.FromSchema(schema)
-	ReportMemberSummaries = ReportMemberSummaries.FromSchema(schema)
-	ReportTransfers = ReportTransfers.FromSchema(schema)
 	Reports = Reports.FromSchema(schema)
 	Users = Users.FromSchema(schema)
 }

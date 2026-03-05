@@ -17,15 +17,13 @@ type reportsTable struct {
 	postgres.Table
 
 	// Columns
-	ID            postgres.ColumnString
-	HouseholdID   postgres.ColumnString
-	Month         postgres.ColumnInteger
-	Year          postgres.ColumnInteger
-	TotalExpenses postgres.ColumnInteger
-	TotalAmount   postgres.ColumnInteger
-	GeneratedAt   postgres.ColumnTimestampz
-	CreatedAt     postgres.ColumnTimestampz
-	UpdatedAt     postgres.ColumnTimestampz
+	ID          postgres.ColumnString
+	HouseholdID postgres.ColumnString
+	Month       postgres.ColumnInteger
+	Year        postgres.ColumnInteger
+	ClosedAt    postgres.ColumnTimestampz
+	CreatedAt   postgres.ColumnTimestampz
+	UpdatedAt   postgres.ColumnTimestampz
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -67,33 +65,29 @@ func newReportsTable(schemaName, tableName, alias string) *ReportsTable {
 
 func newReportsTableImpl(schemaName, tableName, alias string) reportsTable {
 	var (
-		IDColumn            = postgres.StringColumn("id")
-		HouseholdIDColumn   = postgres.StringColumn("household_id")
-		MonthColumn         = postgres.IntegerColumn("month")
-		YearColumn          = postgres.IntegerColumn("year")
-		TotalExpensesColumn = postgres.IntegerColumn("total_expenses")
-		TotalAmountColumn   = postgres.IntegerColumn("total_amount")
-		GeneratedAtColumn   = postgres.TimestampzColumn("generated_at")
-		CreatedAtColumn     = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn     = postgres.TimestampzColumn("updated_at")
-		allColumns          = postgres.ColumnList{IDColumn, HouseholdIDColumn, MonthColumn, YearColumn, TotalExpensesColumn, TotalAmountColumn, GeneratedAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns      = postgres.ColumnList{HouseholdIDColumn, MonthColumn, YearColumn, TotalExpensesColumn, TotalAmountColumn, GeneratedAtColumn, CreatedAtColumn, UpdatedAtColumn}
-		defaultColumns      = postgres.ColumnList{IDColumn, TotalExpensesColumn, TotalAmountColumn, GeneratedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		IDColumn          = postgres.StringColumn("id")
+		HouseholdIDColumn = postgres.StringColumn("household_id")
+		MonthColumn       = postgres.IntegerColumn("month")
+		YearColumn        = postgres.IntegerColumn("year")
+		ClosedAtColumn    = postgres.TimestampzColumn("closed_at")
+		CreatedAtColumn   = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn   = postgres.TimestampzColumn("updated_at")
+		allColumns        = postgres.ColumnList{IDColumn, HouseholdIDColumn, MonthColumn, YearColumn, ClosedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns    = postgres.ColumnList{HouseholdIDColumn, MonthColumn, YearColumn, ClosedAtColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns    = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return reportsTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:            IDColumn,
-		HouseholdID:   HouseholdIDColumn,
-		Month:         MonthColumn,
-		Year:          YearColumn,
-		TotalExpenses: TotalExpensesColumn,
-		TotalAmount:   TotalAmountColumn,
-		GeneratedAt:   GeneratedAtColumn,
-		CreatedAt:     CreatedAtColumn,
-		UpdatedAt:     UpdatedAtColumn,
+		ID:          IDColumn,
+		HouseholdID: HouseholdIDColumn,
+		Month:       MonthColumn,
+		Year:        YearColumn,
+		ClosedAt:    ClosedAtColumn,
+		CreatedAt:   CreatedAtColumn,
+		UpdatedAt:   UpdatedAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

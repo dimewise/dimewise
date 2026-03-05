@@ -1,12 +1,13 @@
 import {
 	ArrowRight,
-	Check,
 	FileText,
+	Lock,
+	LockOpen,
 	PiggyBank,
 	Receipt,
-	Undo2,
 	Users,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,49 +16,51 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { SkeletonPage } from "@/components/ui/skeleton";
-import type { ReportLineItem } from "@/store/api/api";
+import type { ReportLineItem, ReportSettlements } from "@/store/api/api";
 import {
+	useCloseReportMutation,
 	useGetReportQuery,
-	useMarkReportTransferPaidMutation,
-	useUnmarkReportTransferPaidMutation,
+	useReopenReportMutation,
 } from "@/store/api/api";
 import { formatCurrency } from "@/utils/currency";
 import { formatDate, formatMonthYear } from "@/utils/date";
 import { AnalyticsSection } from "./AnalyticsSection";
 
 type Props = {
-	reportId: string;
+	month: number;
+	year: number;
 	currency: string;
 	isOwner: boolean;
 	onBack: () => void;
 };
 
 export const ReportDetail = ({
-	reportId,
+	month,
+	year,
 	currency,
 	isOwner,
 	onBack,
 }: Props) => {
 	const { t } = useTranslation();
-	const { data: report, isLoading } = useGetReportQuery({ reportId });
-	const [markPaid] = useMarkReportTransferPaidMutation();
-	const [unmarkPaid] = useUnmarkReportTransferPaidMutation();
+	const { data: report, isLoading } = useGetReportQuery({ month, year });
+	const [closeReport, { isLoading: isClosing }] = useCloseReportMutation();
+	const [reopenReport, { isLoading: isReopening }] = useReopenReportMutation();
 
-	const handleMarkPaid = async (transferId: string) => {
+	const handleClose = async () => {
 		try {
-			await markPaid({ transferId }).unwrap();
-			toast.success(t("reportDetail.transferPaid"));
+			await closeReport({ month, year }).unwrap();
+			toast.success(t("reportDetail.reportClosed"));
 		} catch {
-			toast.error(t("reportDetail.transferPaidFailed"));
+			toast.error(t("reportDetail.closeFailed"));
 		}
 	};
 
-	const handleUnmarkPaid = async (transferId: string) => {
+	const handleReopen = async () => {
 		try {
-			await unmarkPaid({ transferId }).unwrap();
-			toast.success(t("reportDetail.transferUnpaid"));
+			await reopenReport({ month, year }).unwrap();
+			toast.success(t("reportDetail.reportReopened"));
 		} catch {
-			toast.error(t("reportDetail.transferUnpaidFailed"));
+			toast.error(t("reportDetail.reopenFailed"));
 		}
 	};
 
@@ -66,8 +69,7 @@ export const ReportDetail = ({
 	}
 
 	const monthName = formatMonthYear(report.month, report.year);
-
-	const allSettled = report.transfers.every((t) => !!t.paid_at);
+	const isClosed = !!report.closed_at;
 
 	return (
 		<div className="space-y-5">
@@ -81,28 +83,53 @@ export const ReportDetail = ({
 					{t("reportDetail.backToReports")}
 				</button>
 				<div className="flex items-center justify-between">
-					<h2 className="text-xl font-bold">{monthName}</h2>
-					{report.transfers.length > 0 &&
-						(allSettled ? (
-							<Badge variant="success">{t("reportDetail.allSettled")}</Badge>
+					<div className="flex items-center gap-2">
+						<h2 className="text-xl font-bold">{monthName}</h2>
+						{isClosed && (
+							<Badge variant="success" className="gap-1">
+								<Lock className="h-3 w-3" />
+								{t("reportDetail.closed")}
+							</Badge>
+						)}
+					</div>
+					{isOwner &&
+						(isClosed ? (
+							<Button
+								size="sm"
+								variant="outline"
+								className="gap-1.5"
+								onClick={handleReopen}
+								disabled={isReopening}
+							>
+								<LockOpen className="h-3.5 w-3.5" />
+								{t("reportDetail.reopen")}
+							</Button>
 						) : (
-							<Badge variant="warning">{t("reportDetail.pending")}</Badge>
+							<Button
+								size="sm"
+								variant="outline"
+								className="gap-1.5"
+								onClick={handleClose}
+								disabled={isClosing}
+							>
+								<Lock className="h-3.5 w-3.5" />
+								{t("reportDetail.closeMonth")}
+							</Button>
 						))}
 				</div>
 				<p className="text-sm text-muted-foreground mt-1">
 					{t("reportDetail.expense", { count: report.total_expenses })} &middot;{" "}
 					{t("reportDetail.total")}{" "}
-					{formatCurrency(report.total_amount, currency)} &middot;{" "}
-					{t("reportDetail.generated")}{" "}
-					{formatDate(report.generated_at, "MMM d, yyyy")}
+					{formatCurrency(report.total_amount, currency)}
 				</p>
 			</div>
 
 			{/* 1. Analytics */}
 			<AnalyticsSection
 				currency={currency}
-				month={report.month}
-				year={report.year}
+				trends={report.trends}
+				month={month}
+				year={year}
 			/>
 
 			{/* 2. Category Subtotals */}
@@ -127,7 +154,7 @@ export const ReportDetail = ({
 										: 0;
 							const isOver = cb.total_spent > cb.budget_amount;
 							return (
-								<div key={cb.id} className="space-y-1.5">
+								<div key={cb.category_name} className="space-y-1.5">
 									<div className="flex items-center justify-between">
 										<p className="text-sm font-medium">{cb.category_name}</p>
 										<p className="text-xs text-muted-foreground">
@@ -164,7 +191,7 @@ export const ReportDetail = ({
 					</CardHeader>
 					<CardContent className="space-y-3">
 						{report.member_summaries.map((ms) => (
-							<div key={ms.id} className="space-y-1.5">
+							<div key={ms.user_id} className="space-y-1.5">
 								<div className="flex items-center justify-between">
 									<p className="text-sm font-medium">{ms.member_name}</p>
 								</div>
@@ -196,90 +223,12 @@ export const ReportDetail = ({
 				</Card>
 			)}
 
-			{/* 4. Suggested Settlements */}
-			{report.transfers.length > 0 && (
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="flex items-center gap-2 text-base">
-							<ArrowRight className="h-4 w-4 text-muted-foreground" />
-							{t("reportDetail.suggestedSettlements")}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-3">
-						{report.transfers.map((transfer) => {
-							const isPaid = !!transfer.paid_at;
-							return (
-								<div
-									key={transfer.id}
-									className={`space-y-2 ${isPaid ? "opacity-60" : ""}`}
-								>
-									<div className="flex items-center gap-3">
-										<div className="flex-1 min-w-0">
-											<div className="flex items-center gap-2 text-sm flex-wrap">
-												<span className="font-semibold truncate">
-													{transfer.from_name}
-												</span>
-												<ArrowRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-												<span className="font-semibold truncate">
-													{transfer.to_name}
-												</span>
-											</div>
-											<p className="text-lg font-bold mt-0.5">
-												{formatCurrency(transfer.amount, currency)}
-											</p>
-											{isPaid && transfer.paid_at && (
-												<p className="text-xs text-success mt-0.5 flex items-center gap-1">
-													<Check className="h-3 w-3" />
-													{t("reportDetail.paidOn", {
-														date: formatDate(transfer.paid_at, "MMM d, yyyy"),
-													})}
-												</p>
-											)}
-										</div>
-
-										{isOwner && !isPaid && (
-											<Button
-												size="sm"
-												variant="outline"
-												className="shrink-0 gap-1.5"
-												onClick={() => handleMarkPaid(transfer.id)}
-											>
-												<Check className="h-3.5 w-3.5" />
-												{t("reportDetail.markPaid")}
-											</Button>
-										)}
-										{isOwner && isPaid && (
-											<Button
-												size="sm"
-												variant="ghost"
-												className="shrink-0 gap-1.5 text-muted-foreground"
-												onClick={() => handleUnmarkPaid(transfer.id)}
-											>
-												<Undo2 className="h-3.5 w-3.5" />
-												{t("reportDetail.undo")}
-											</Button>
-										)}
-										{!isOwner && isPaid && (
-											<div className="flex items-center gap-1 text-success shrink-0">
-												<Check className="h-4 w-4" />
-											</div>
-										)}
-									</div>
-									<Separator />
-								</div>
-							);
-						})}
-					</CardContent>
-				</Card>
-			)}
-
-			{/* No transfers needed */}
-			{report.transfers.length === 0 && (
-				<Card>
-					<CardContent className="py-8 text-center text-muted-foreground">
-						{t("reportDetail.noTransfers")}
-					</CardContent>
-				</Card>
+			{/* 4. Settlements */}
+			{report.settlements && (
+				<SettlementsSection
+					settlements={report.settlements}
+					currency={currency}
+				/>
 			)}
 
 			{/* 5. Ledger */}
@@ -296,7 +245,11 @@ export const ReportDetail = ({
 					<CardContent>
 						<div className="divide-y divide-border">
 							{report.line_items.map((li) => (
-								<LineItemRow key={li.id} item={li} currency={currency} />
+								<LineItemRow
+									key={li.expense_id}
+									item={li}
+									currency={currency}
+								/>
 							))}
 						</div>
 						<Separator className="my-3" />
@@ -314,6 +267,73 @@ export const ReportDetail = ({
 		</div>
 	);
 };
+
+function SettlementsSection({
+	settlements,
+	currency,
+}: {
+	settlements: ReportSettlements;
+	currency: string;
+}) {
+	const { t } = useTranslation();
+	const [mode, setMode] = useState<"greedy" | "direct">("greedy");
+
+	const transfers = settlements[mode];
+
+	return (
+		<Card>
+			<CardHeader className="pb-2">
+				<CardTitle className="flex items-center gap-2 text-base">
+					<ArrowRight className="h-4 w-4 text-muted-foreground" />
+					{t("reportDetail.settlements")}
+				</CardTitle>
+				<div className="flex gap-1 mt-2">
+					<Button
+						size="sm"
+						variant={mode === "greedy" ? "default" : "outline"}
+						className="h-7 text-xs"
+						onClick={() => setMode("greedy")}
+					>
+						{t("reportDetail.settlementsOptimal")}
+					</Button>
+					<Button
+						size="sm"
+						variant={mode === "direct" ? "default" : "outline"}
+						className="h-7 text-xs"
+						onClick={() => setMode("direct")}
+					>
+						{t("reportDetail.settlementsDirect")}
+					</Button>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{transfers.length === 0 ? (
+					<p className="text-sm text-muted-foreground">
+						{t("reportDetail.settledUp")}
+					</p>
+				) : (
+					<div className="space-y-2">
+						{transfers.map((tr) => (
+							<div
+								key={`${tr.from_user_id}-${tr.to_user_id}`}
+								className="flex items-center justify-between text-sm"
+							>
+								<div className="flex items-center gap-1.5 min-w-0">
+									<span className="truncate font-medium">{tr.from_name}</span>
+									<ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
+									<span className="truncate font-medium">{tr.to_name}</span>
+								</div>
+								<span className="font-bold shrink-0 ml-3 text-destructive">
+									{formatCurrency(tr.amount, currency)}
+								</span>
+							</div>
+						))}
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
 
 // Sub-component for always-visible line items with inline splits
 function LineItemRow({
@@ -358,7 +378,7 @@ function LineItemRow({
 				<div className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
 					{item.splits.map((split) => (
 						<div
-							key={split.id}
+							key={split.user_id}
 							className="flex items-center justify-between text-[11px] text-muted-foreground"
 						>
 							<span className="truncate">{split.member_name}</span>
