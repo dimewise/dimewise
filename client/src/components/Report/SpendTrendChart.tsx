@@ -129,7 +129,7 @@ export const SpendTrendChart = ({ data, currency, month, year }: Props) => {
 					axisLine={false}
 					width={50}
 				/>
-				<Tooltip formatter={(value: number) => formatValue(value)} />
+				<Tooltip formatter={(value) => formatValue(Number(value))} />
 				<Legend wrapperStyle={{ fontSize: 12 }} />
 
 				{/* Current year actual spend */}
